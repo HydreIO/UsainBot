@@ -4,13 +4,13 @@ import fr.aresrpg.eratz.domain.proxy.DofusProxy;
 
 import java.net.InetAddress;
 
-public class DofusProxiedClient {
+public class DofusAccount {
     private DofusProxy proxy;
     private String username;
     private InetAddress address;
-    private DofusProxiedPlayer player;
+    private Perso player;
 
-    public DofusProxiedClient(DofusProxy proxy, String username, InetAddress address) {
+    public DofusAccount(DofusProxy proxy, String username, InetAddress address) {
         this.proxy = proxy;
         this.username = username;
         this.address = address;
@@ -49,7 +49,7 @@ public class DofusProxiedClient {
     /**
      * @return Player
      */
-    public DofusProxiedPlayer getPlayer() {
+    public Perso getPlayer() {
         return player;
     }
 
@@ -58,7 +58,7 @@ public class DofusProxiedClient {
      *
      * @param player Player
      */
-    public void setPlayer(DofusProxiedPlayer player) {
+    public void setPlayer(Perso player) {
         this.player = player;
     }
 
