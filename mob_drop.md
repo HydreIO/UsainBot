@@ -3,7 +3,7 @@
 
 ### Zone DV
 
-**__Oni :__**
+**Oni :**
 * Ra vi (1%)
 * Ra sa (0.5%)
 * Ga pme (0.001%)
@@ -11,45 +11,45 @@
 
 ### Zone Braj
 
-**__Ouginak :__**
+**Ouginak :**
 *Diamant (0.05%)
 
 
 ### Zone foret
 
-**__Abra :__**
+**Abra :**
 * Ambre d'abra (1% à 5%) // ark abra pour rune pa
 
-**__Abra ancestrale :__**
+**Abra ancestrale :**
 * Ambre abra (10% à 50%)
 
 ### Zone plaine
 
-**__Crack et crack plaine :__**
+**Crack et crack plaine :**
 * Pierre diams (1% à 5% et 3% à 5%)
 
-**__Trooll__**
+**Trooll**
 * Diamant (1%)
 
 ### Zone ?
 
-**__Forgeron Sombre :__**
+**Forgeron Sombre :**
 * beaucoup d'aliage (5%)
 * Parcho bucheron (1%)
 
 ### Zone champ
 
-**__Maitre bolet :__**
+**Maitre bolet :**
 * Luidegit (0.1%)
 * Champignon (100%) // parcho sasa
 
-**__Pissenlit :_**
+**Pissenlit :**
 * Flamiche (0.1%)
 
-**__Tournesol__**
+**Tournesol**
 * Petit parcho inttel (0.2%)
 
 ### Zone moon
 
-**__Tortue verte :__**
+**Tortue verte :**
 * caracoiffe (0.1% à 0.01%)
