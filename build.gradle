@@ -42,7 +42,6 @@ repositories {
 	}
 }
 
-dependencies {
-}
+dependencies {  }
 
 
