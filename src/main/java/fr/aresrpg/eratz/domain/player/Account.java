@@ -3,13 +3,18 @@ package fr.aresrpg.eratz.domain.player;
 import fr.aresrpg.eratz.domain.proxy.Proxy;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Account {
 	private Proxy proxy;
 	private InetSocketAddress adress;
 	private String username;
 	private String pass;
-	private Perso player;
+	private List<Perso> persos = new ArrayList<>();
+	private Perso currentPlayed;
+	private boolean clientOnline; // dofus client online
+	private boolean online; // bot online
 
 	public Account(String username, String pass) {
 		this.username = username;
@@ -38,6 +43,75 @@ public class Account {
 	}
 
 	/**
+	 * @return the clientOnline
+	 */
+	public boolean isClientOnline() {
+		return clientOnline;
+	}
+
+	/**
+	 * @param currentPlayed
+	 *            the currentPlayed to set
+	 */
+	public void setCurrentPlayed(Perso currentPlayed) {
+		this.currentPlayed = currentPlayed;
+	}
+
+	/**
+	 * @return the currentPlayed
+	 */
+	public Perso getCurrentPlayed() {
+		return currentPlayed;
+	}
+
+	/**
+	 * @return the online
+	 */
+	public boolean isOnline() {
+		return online;
+	}
+
+	/**
+	 * @param online
+	 *            the online to set
+	 */
+	public void setOnline(boolean online) {
+		this.online = online;
+	}
+
+	/**
+	 * @param clientOnline
+	 *            the clientOnline to set
+	 */
+	public void setClientOnline(boolean clientOnline) {
+		this.clientOnline = clientOnline;
+	}
+
+	/**
+	 * @param adress
+	 *            the adress to set
+	 */
+	public void setAdress(InetSocketAddress adress) {
+		this.adress = adress;
+	}
+
+	/**
+	 * @param pass
+	 *            the pass to set
+	 */
+	public void setPass(String pass) {
+		this.pass = pass;
+	}
+
+	/**
+	 * @param username
+	 *            the username to set
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	/**
 	 * Set the dofus proxy
 	 *
 	 * @param proxy
@@ -55,27 +129,18 @@ public class Account {
 	}
 
 	/**
-	 * @return Player
+	 * @return the persos
 	 */
-	public Perso getPlayer() {
-		return player;
+	public List<Perso> getPersos() {
+		return persos;
 	}
 
 	/**
-	 * Set the player
-	 *
-	 * @param player
-	 *            Player
+	 * @param persos
+	 *            the persos to set
 	 */
-	public void setPlayer(Perso player) {
-		this.player = player;
-	}
-
-	/**
-	 * @return If the player is online
-	 */
-	public boolean isOnline() {
-		return player != null;
+	public void setPersos(List<Perso> persos) {
+		this.persos = persos;
 	}
 
 	@Override
