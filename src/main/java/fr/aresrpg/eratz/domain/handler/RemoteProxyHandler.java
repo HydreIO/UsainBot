@@ -9,10 +9,10 @@ import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
+import fr.aresrpg.eratz.domain.dofus.Constants;
 import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.proxy.Proxy;
 import fr.aresrpg.eratz.domain.proxy.Proxy.ProxyConnectionType;
-import fr.aresrpg.eratz.domain.util.Constants;
 import fr.aresrpg.eratz.domain.util.encryption.CryptHelper;
 
 import java.io.IOException;
