@@ -6,7 +6,7 @@
  *  
  * Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.dofus;
+package fr.aresrpg.eratz.domain.dofus.player;
 
 /**
  * 
