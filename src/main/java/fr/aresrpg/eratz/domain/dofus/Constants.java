@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.util;
+package fr.aresrpg.eratz.domain.dofus;
 
 public class Constants {
 	public static final int PORT = 443;

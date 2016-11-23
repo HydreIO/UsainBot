@@ -1,9 +1,9 @@
 package fr.aresrpg.eratz.domain;
 
+import fr.aresrpg.eratz.domain.dofus.Constants;
 import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
 import fr.aresrpg.eratz.domain.proxy.DofusProxy;
-import fr.aresrpg.eratz.domain.util.Constants;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
