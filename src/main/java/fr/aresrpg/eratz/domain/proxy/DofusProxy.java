@@ -3,8 +3,8 @@
  * This class is part of an AresRPG Project.
  *
  * @author Sceat {@literal <sceat@aresrpg.fr>}
- *  
- * Created 2016
+ * 
+ *         Created 2016
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.proxy;
 
@@ -25,8 +25,8 @@ public class DofusProxy implements Proxy {
 
 	public DofusProxy(Account account, SocketChannel localChannel, SocketChannel remoteChannel) throws IOException {
 		account.setProxy(this);
-		changeConnection(new DofusConnection(localChannel, new LocalProxyHandler(account), Bound.CLIENT), ProxyConnectionType.LOCAL);
-		changeConnection(new DofusConnection(remoteChannel, new RemoteProxyHandler(account), Bound.SERVER), ProxyConnectionType.REMOTE);
+		changeConnection(new DofusConnection("Local", localChannel, new LocalProxyHandler(account), Bound.CLIENT), ProxyConnectionType.LOCAL);
+		changeConnection(new DofusConnection("Remote", remoteChannel, new RemoteProxyHandler(account), Bound.SERVER), ProxyConnectionType.REMOTE);
 	}
 
 	public void close() {
@@ -54,6 +54,7 @@ public class DofusProxy implements Proxy {
 		else this.remoteConnection = connection;
 		Executors.FIXED.execute(() -> {
 			try {
+
 				System.out.println("Start connection.");
 				connection.read();
 			} catch (Exception e) {

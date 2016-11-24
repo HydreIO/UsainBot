@@ -21,6 +21,8 @@ public class Player {
 	private int life;
 	private int cellid;
 	private Classe classe;
+	private int pa;
+	private int pm;
 
 	public Player(int id, String pseudo) {
 		this.id = id;

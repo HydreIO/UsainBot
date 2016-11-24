@@ -8,5 +8,14 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.player;
 
-public class Perso {
+public class Perso extends Player {
+
+	/**
+	 * @param id
+	 * @param pseudo
+	 */
+	public Perso(int id, String pseudo) {
+		super(id, pseudo);
+		// TODO
+	}
 }
