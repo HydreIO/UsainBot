@@ -8,8 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.handler;
 
-import fr.aresrpg.dofus.protocol.DofusConnection;
-import fr.aresrpg.dofus.protocol.Packet;
+import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
@@ -28,6 +27,8 @@ import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.proxy.Proxy;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 /**
  * 
@@ -56,6 +57,21 @@ public class LocalProxyHandler extends BaseHandler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public boolean parse(ProtocolRegistry registry, String packet) {
+		if (registry == null || registry == ProtocolRegistry.ACCOUNT_REGION_VERSION) {
+			SocketChannel channel = (SocketChannel) getProxy().getRemoteConnection().getChannel();
+			try {
+				packet += "\0";
+				channel.write(ByteBuffer.wrap(packet.getBytes()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return true;
+		}
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

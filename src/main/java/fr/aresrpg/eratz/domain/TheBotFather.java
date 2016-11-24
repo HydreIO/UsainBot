@@ -34,7 +34,7 @@ public class TheBotFather {
 		InetSocketAddress addr = new InetSocketAddress(Constants.LOCALHOST, 2727);
 		botSocket.bind(addr);
 		botSocket.configureBlocking(false);
-		SelectionKey key = botSocket.register(selector, botSocket.validOps());
+		botSocket.register(selector, botSocket.validOps());
 		Executors.FIXED.execute(() -> startServer(botSocket));
 	}
 
@@ -47,6 +47,7 @@ public class TheBotFather {
 				Iterator<SelectionKey> it = keys.iterator();
 				while (it.hasNext()) {
 					SelectionKey key = it.next();
+					it.remove();
 					if (key.isAcceptable()) {
 						SocketChannel client = channel.accept();
 						client.configureBlocking(false);

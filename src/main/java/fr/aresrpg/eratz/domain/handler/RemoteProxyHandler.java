@@ -8,8 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.handler;
 
-import fr.aresrpg.dofus.protocol.DofusConnection;
-import fr.aresrpg.dofus.protocol.Packet;
+import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
@@ -29,10 +28,11 @@ import fr.aresrpg.eratz.domain.dofus.Constants;
 import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.proxy.Proxy;
 import fr.aresrpg.eratz.domain.proxy.Proxy.ProxyConnectionType;
-import fr.aresrpg.eratz.domain.util.encryption.CryptHelper;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 /**
@@ -62,6 +62,22 @@ public class RemoteProxyHandler extends BaseHandler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public boolean parse(ProtocolRegistry registry, String packet) {
+		System.out.println(registry);
+		if (registry == null || registry == ProtocolRegistry.ACCOUNT_SERVER_LIST) {
+			SocketChannel channel = (SocketChannel) getProxy().getLocalConnection().getChannel();
+			try {
+				packet += "\0";
+				channel.write(ByteBuffer.wrap(packet.getBytes()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return true;
+		}
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -131,11 +147,16 @@ public class RemoteProxyHandler extends BaseHandler {
 	@Override
 	public void handle(AccountServerEncryptedHostPacket pkt) {
 		try {
-			String ip = CryptHelper.decryptIp(pkt.getIp());
+			String ip = pkt.getIp();
 			Proxy proxy = getAccount().getProxy();
-			proxy.getLocalConnection().send(new AccountServerHostPacket().setIp(Constants.LOCALHOST).setPort(Constants.BOT_PORT).setTicketKey(pkt.getTicketKey()));
+			ServerSocketChannel srvchannel = ServerSocketChannel.open();
+			srvchannel.bind(new InetSocketAddress(0));
+			int localPort = srvchannel.socket().getLocalPort();
+			proxy.getLocalConnection().send(new AccountServerHostPacket().setIp(Constants.LOCALHOST).setPort(localPort).setTicketKey(pkt.getTicketKey()));
 			getAccount().getProxy().changeConnection(new DofusConnection("RemoteGame", SocketChannel.open(new InetSocketAddress(ip, 443)), new RemoteProxyHandler(getAccount()), Bound.SERVER),
 					ProxyConnectionType.REMOTE);
+			getAccount().getProxy().changeConnection(new DofusConnection("LocalGame", srvchannel.accept(), new LocalProxyHandler(getAccount()), Bound.CLIENT), ProxyConnectionType.LOCAL);
+			System.out.println("blblbl============================================");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

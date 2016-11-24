@@ -30,8 +30,12 @@ public class DofusProxy implements Proxy {
 	}
 
 	public void close() {
-		getLocalConnection().close();
-		getRemoteConnection().close();
+		try {
+			getLocalConnection().close();
+			getRemoteConnection().close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -50,17 +54,27 @@ public class DofusProxy implements Proxy {
 
 	@Override
 	public void changeConnection(DofusConnection connection, ProxyConnectionType type) {
-		if (type == ProxyConnectionType.LOCAL) this.localConnection = connection;
-		else this.remoteConnection = connection;
-		Executors.FIXED.execute(() -> {
-			try {
-
-				System.out.println("Start connection.");
-				connection.read();
-			} catch (Exception e) {
-				e.printStackTrace();
+		try {
+			if (type == ProxyConnectionType.LOCAL) {
+				// if (this.localConnection != null) this.localConnection.close();
+				this.localConnection = connection;
+			} else {
+				// if (this.remoteConnection != null) this.remoteConnection.close();
+				this.remoteConnection = connection;
 			}
-		});
+			Executors.FIXED.execute(() -> {
+				System.out.println("Start connection.");
+				while (connection.getChannel().isOpen())
+					try {
+							connection.read();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+			});
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+
 	}
 
 }
