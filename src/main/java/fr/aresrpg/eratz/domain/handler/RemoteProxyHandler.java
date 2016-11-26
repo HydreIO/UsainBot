@@ -91,6 +91,7 @@ public class RemoteProxyHandler extends BaseHandler {
 
 	@Override
 	public void handle(HelloConnectionPacket pkt) {
+		getAccount().setCurrentHc(pkt.getHashKey());
 		transmit(pkt);
 	}
 
@@ -106,6 +107,7 @@ public class RemoteProxyHandler extends BaseHandler {
 
 	@Override
 	public void handle(AccountLoginOkPacket pkt) {
+		pkt.setAdmin(true);
 		transmit(pkt);
 	}
 

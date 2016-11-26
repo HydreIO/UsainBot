@@ -24,7 +24,9 @@ import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.eratz.domain.player.Account;
+import fr.aresrpg.eratz.domain.player.AccountsManager;
 import fr.aresrpg.eratz.domain.proxy.Proxy;
+import fr.aresrpg.eratz.domain.util.encryption.CryptHelper;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -90,6 +92,7 @@ public class LocalProxyHandler extends BaseHandler {
 
 	@Override
 	public void handle(AccountAuthPacket pkt) {
+		AccountsManager.getInstance().registerAccount(new Account(pkt.getPseudo(), CryptHelper.decryptpass(pkt.getHashedPassword(), getAccount().getCurrentHc())));
 		transmit(pkt);
 	}
 
