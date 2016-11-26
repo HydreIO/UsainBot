@@ -13,22 +13,30 @@ import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
 import fr.aresrpg.eratz.domain.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.eratz.domain.util.config.Configurations;
+import fr.aresrpg.eratz.domain.util.config.Configurations.Config;
+import fr.aresrpg.eratz.domain.util.config.Variables;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 public class TheBotFather {
 
 	private static TheBotFather instance;
+	public static final InetSocketAddress SERVER_ADRESS = new InetSocketAddress(Constants.IP, Constants.PORT);
 	private Selector selector;
 	private boolean running;
+	private Config config;
 
 	public TheBotFather() throws IOException {
 		instance = this;
 		this.running = true;
+		this.config = Configurations.generate("botfather.yml", Variables.class, Optional.of(() -> {
+			System.out.println("CONFIGURATION JUST CREATED PLEASE RESTART !");
+			System.exit(0);
+		}));
 		this.selector = Selector.open();
 		ServerSocketChannel botSocket = ServerSocketChannel.open();
 		InetSocketAddress addr = new InetSocketAddress(Constants.LOCALHOST, 2727);
@@ -36,6 +44,13 @@ public class TheBotFather {
 		botSocket.configureBlocking(false);
 		botSocket.register(selector, botSocket.validOps());
 		Executors.FIXED.execute(() -> startServer(botSocket));
+	}
+
+	/**
+	 * @return the config
+	 */
+	public Config getConfig() {
+		return config;
 	}
 
 	private void startServer(ServerSocketChannel channel) {
@@ -54,7 +69,7 @@ public class TheBotFather {
 						System.out.println("Client Accepted");
 						Account account = new Account("blablablabla", "");
 						AccountsManager.getInstance().registerAccount(account);
-						new DofusProxy(account, client, SocketChannel.open(new InetSocketAddress(Constants.IP, 443)));
+						new DofusProxy(account, client, SocketChannel.open(SERVER_ADRESS));
 					}
 				}
 			} catch (Exception e) {

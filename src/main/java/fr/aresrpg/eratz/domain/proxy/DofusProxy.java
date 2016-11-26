@@ -56,20 +56,21 @@ public class DofusProxy implements Proxy {
 	public void changeConnection(DofusConnection connection, ProxyConnectionType type) {
 		try {
 			if (type == ProxyConnectionType.LOCAL) {
-				// if (this.localConnection != null) this.localConnection.close();
+				if (this.localConnection != null) this.localConnection.close();
 				this.localConnection = connection;
 			} else {
-				// if (this.remoteConnection != null) this.remoteConnection.close();
+				if (this.remoteConnection != null) this.remoteConnection.close();
 				this.remoteConnection = connection;
 			}
 			Executors.FIXED.execute(() -> {
 				System.out.println("Start connection.");
-				while (connection.getChannel().isOpen())
+				while (connection.getChannel().isOpen()) {
 					try {
-							connection.read();
+						connection.read();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+				}
 			});
 		} catch (Exception e2) {
 			e2.printStackTrace();
