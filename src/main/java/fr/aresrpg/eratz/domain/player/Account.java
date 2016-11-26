@@ -3,30 +3,69 @@
  * This class is part of an AresRPG Project.
  *
  * @author Sceat {@literal <sceat@aresrpg.fr>}
- *  
- * Created 2016
+ * 
+ *         Created 2016
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.player;
 
+import fr.aresrpg.dofus.protocol.DofusConnection;
+import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
+import fr.aresrpg.eratz.domain.TheBotFather;
+import fr.aresrpg.eratz.domain.handler.BotHandler;
+import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.proxy.Proxy;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
-import java.net.InetSocketAddress;
+import java.nio.channels.SocketChannel;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Account {
 	private Proxy proxy;
-	private InetSocketAddress adress;
 	private String username;
 	private String pass;
 	private List<Perso> persos = new ArrayList<>();
 	private Perso currentPlayed;
-	private boolean clientOnline; // dofus client online
-	private boolean online; // bot online
+	private String currentHc;
+	private AccountState state = AccountState.OFFLINE;
 
 	public Account(String username, String pass) {
 		this.username = username;
 		this.pass = pass;
+	}
+
+	public void connect(Perso perso) {
+		this.state = AccountState.BOT_ONLINE;
+		Executors.FIXED.execute(() -> {
+			try {
+				System.out.println("[" + Instant.now().toString() + "] Connection de " + perso.getPseudo());
+				SocketChannel channel = SocketChannel.open(TheBotFather.SERVER_ADRESS);
+				setCurrentPlayed(perso);
+				DofusConnection connection = new DofusConnection(perso.getPseudo(), channel, new BotHandler(this), Bound.SERVER);
+				while (getState() == AccountState.BOT_ONLINE)
+					connection.read();
+			} catch (Exception e) {
+				this.state = AccountState.OFFLINE;
+				System.out.println("Bot déconnecté."); // test debug
+				e.printStackTrace(); // test debug
+			}
+		});
+	}
+
+	/**
+	 * @param currentHc
+	 *            the currentHc to set
+	 */
+	public void setCurrentHc(String currentHc) {
+		this.currentHc = currentHc;
+	}
+
+	/**
+	 * @return the currentHc
+	 */
+	public String getCurrentHc() {
+		return currentHc;
 	}
 
 	/**
@@ -37,13 +76,6 @@ public class Account {
 	}
 
 	/**
-	 * @return the adress
-	 */
-	public InetSocketAddress getAdress() {
-		return adress;
-	}
-
-	/**
 	 * @return Dofus proxy
 	 */
 	public Proxy getProxy() {
@@ -51,10 +83,17 @@ public class Account {
 	}
 
 	/**
+	 * @return the state
+	 */
+	public AccountState getState() {
+		return state;
+	}
+
+	/**
 	 * @return the clientOnline
 	 */
 	public boolean isClientOnline() {
-		return clientOnline;
+		return getState() == AccountState.CLIENT_IN_GAME || getState() == AccountState.CLIENT_IN_REALM;
 	}
 
 	/**
@@ -70,37 +109,6 @@ public class Account {
 	 */
 	public Perso getCurrentPlayed() {
 		return currentPlayed;
-	}
-
-	/**
-	 * @return the online
-	 */
-	public boolean isOnline() {
-		return online;
-	}
-
-	/**
-	 * @param online
-	 *            the online to set
-	 */
-	public void setOnline(boolean online) {
-		this.online = online;
-	}
-
-	/**
-	 * @param clientOnline
-	 *            the clientOnline to set
-	 */
-	public void setClientOnline(boolean clientOnline) {
-		this.clientOnline = clientOnline;
-	}
-
-	/**
-	 * @param adress
-	 *            the adress to set
-	 */
-	public void setAdress(InetSocketAddress adress) {
-		this.adress = adress;
 	}
 
 	/**

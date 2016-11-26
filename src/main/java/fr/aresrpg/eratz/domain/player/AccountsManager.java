@@ -3,10 +3,12 @@
  * This class is part of an AresRPG Project.
  *
  * @author Sceat {@literal <sceat@aresrpg.fr>}
- *  
- * Created 2016
+ * 
+ *         Created 2016
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.player;
+
+import fr.aresrpg.eratz.domain.util.config.Variables;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +23,7 @@ public class AccountsManager {
 	private Map<String, Account> accounts = new HashMap<>();
 
 	private AccountsManager() {
-
+		Variables.ACCOUNTS.forEach(b -> accounts.put(b.getAccountName(), new Account(b.getAccountName(), b.getPassword())));
 	}
 
 	/**
@@ -32,8 +34,13 @@ public class AccountsManager {
 	}
 
 	public void registerAccount(Account account) {
+		if (accounts.containsKey(account.getUsername())) return;
 		System.out.println("New account registered ! | " + account);
-		getAccounts().putIfAbsent(account.getUsername(), account);
+		getAccounts().put(account.getUsername(), account);
+	}
+
+	public boolean exist(String accountname) {
+		return getAccounts().containsKey(accountname);
 	}
 
 	/**
