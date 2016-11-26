@@ -16,6 +16,7 @@ import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.eratz.domain.behavior.fight.FightHandler;
+import fr.aresrpg.eratz.domain.behavior.harvest.HarvestHandler;
 import fr.aresrpg.eratz.domain.player.Account;
 
 /**
@@ -23,9 +24,10 @@ import fr.aresrpg.eratz.domain.player.Account;
  * @since
  */
 public class BotHandler extends BaseHandler {
-	
+
 	private FightHandler fightHandler;
-	
+	private HarvestHandler harvestHandler;
+
 	/**
 	 * @param account
 	 */
