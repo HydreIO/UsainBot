@@ -6,13 +6,13 @@ import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
 import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
-import fr.aresrpg.dofus.protocol.game.client.GameCreatePacket;
-import fr.aresrpg.dofus.protocol.game.client.GameExtraInformationPacket;
-import fr.aresrpg.dofus.protocol.game.server.GameMapDataPacket;
+import fr.aresrpg.dofus.protocol.game.client.*;
+import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.protocol.info.client.InfoMapPacket;
 import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
+import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.eratz.domain.behavior.fight.FightHandler;
@@ -235,6 +235,72 @@ public class BotHandler extends BaseHandler {
 
 	@Override
 	public void handle(GameMapDataPacket gameMapDataPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(PlayerMountPacket playerMountPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameJoinPacket gameJoinPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameEndTurnPacket gameEndTurnPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameTurnOkPacket gameTurnOkPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(FreeMySoulPacket freeMySoulPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(LeaveGamePacket leaveGamePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameSetPlayerPositionPacket gameSetPlayerPositionPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GamePositionStartPacket gamePositionStartPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameOnReadyPacket gameOnReadyPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameStartPacket gameStartPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameEndPacket gameEndPacket) {
 		// TODO
 
 	}

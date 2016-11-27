@@ -14,13 +14,13 @@ import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
 import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
-import fr.aresrpg.dofus.protocol.game.client.GameCreatePacket;
-import fr.aresrpg.dofus.protocol.game.client.GameExtraInformationPacket;
-import fr.aresrpg.dofus.protocol.game.server.GameMapDataPacket;
+import fr.aresrpg.dofus.protocol.game.client.*;
+import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.protocol.info.client.InfoMapPacket;
 import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
+import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.eratz.domain.player.Account;
@@ -244,6 +244,63 @@ public class LocalProxyHandler extends BaseHandler {
 	@Override
 	public void handle(GameMapDataPacket pkt) {
 		transmit(pkt);
+	}
+
+	@Override
+	public void handle(PlayerMountPacket playerMountPacket) {
+		transmit(playerMountPacket);
+	}
+
+	@Override
+	public void handle(GameJoinPacket gameJoinPacket) {
+		transmit(gameJoinPacket);
+	}
+
+	@Override
+	public void handle(GameEndTurnPacket gameEndTurnPacket) {
+		transmit(gameEndTurnPacket);
+	}
+
+	@Override
+	public void handle(GameTurnOkPacket gameTurnOkPacket) {
+		transmit(gameTurnOkPacket);
+	}
+
+	@Override
+	public void handle(FreeMySoulPacket freeMySoulPacket) {
+		transmit(freeMySoulPacket);
+	}
+
+	@Override
+	public void handle(LeaveGamePacket leaveGamePacket) {
+		transmit(leaveGamePacket);
+	}
+
+	@Override
+	public void handle(GameSetPlayerPositionPacket gameSetPlayerPositionPacket) {
+		transmit(gameSetPlayerPositionPacket);
+	}
+
+	@Override
+	public void handle(GamePositionStartPacket gamePositionStartPacket) {
+		transmit(gamePositionStartPacket);
+	}
+
+	@Override
+	public void handle(GameOnReadyPacket gameOnReadyPacket) {
+		transmit(gameOnReadyPacket);
+	}
+
+	@Override
+	public void handle(GameStartPacket gameStartPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameEndPacket gameEndPacket) {
+		// TODO
+
 	}
 
 }

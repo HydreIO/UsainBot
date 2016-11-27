@@ -13,6 +13,7 @@ import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.eratz.domain.handler.LocalProxyHandler;
 import fr.aresrpg.eratz.domain.handler.RemoteProxyHandler;
 import fr.aresrpg.eratz.domain.player.Account;
+import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
@@ -22,11 +23,14 @@ public class DofusProxy implements Proxy {
 
 	private DofusConnection localConnection;
 	private DofusConnection remoteConnection;
+	private Account account;
 
 	public DofusProxy(Account account, SocketChannel localChannel, SocketChannel remoteChannel) throws IOException {
 		account.setProxy(this);
+		this.account = account;
 		changeConnection(new DofusConnection("Local", localChannel, new LocalProxyHandler(account), Bound.CLIENT), ProxyConnectionType.LOCAL);
 		changeConnection(new DofusConnection("Remote", remoteChannel, new RemoteProxyHandler(account), Bound.SERVER), ProxyConnectionType.REMOTE);
+		account.setState(AccountState.CLIENT_IN_REALM);
 	}
 
 	public void close() {
@@ -61,6 +65,7 @@ public class DofusProxy implements Proxy {
 			} else {
 				if (this.remoteConnection != null) this.remoteConnection.close();
 				this.remoteConnection = connection;
+				account.setRemoteConnection(remoteConnection);
 			}
 			Executors.FIXED.execute(() -> {
 				System.out.println("Start connection.");

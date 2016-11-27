@@ -29,6 +29,7 @@ public class Account {
 	private Perso currentPlayed;
 	private String currentHc;
 	private AccountState state = AccountState.OFFLINE;
+	private DofusConnection remoteConnection;
 
 	public Account(String username, String pass) {
 		this.username = username;
@@ -43,6 +44,7 @@ public class Account {
 				SocketChannel channel = SocketChannel.open(TheBotFather.SERVER_ADRESS);
 				setCurrentPlayed(perso);
 				DofusConnection connection = new DofusConnection(perso.getPseudo(), channel, new BotHandler(this), Bound.SERVER);
+				setRemoteConnection(connection);
 				while (getState() == AccountState.BOT_ONLINE)
 					connection.read();
 			} catch (Exception e) {
@@ -51,6 +53,29 @@ public class Account {
 				e.printStackTrace(); // test debug
 			}
 		});
+	}
+
+	/**
+	 * @param state
+	 *            the state to set
+	 */
+	public void setState(AccountState state) {
+		this.state = state;
+	}
+
+	/**
+	 * @return the remoteConnection
+	 */
+	public DofusConnection getRemoteConnection() {
+		return remoteConnection;
+	}
+
+	/**
+	 * @param remoteConnection
+	 *            the remoteConnection to set
+	 */
+	public void setRemoteConnection(DofusConnection remoteConnection) {
+		this.remoteConnection = remoteConnection;
 	}
 
 	/**
