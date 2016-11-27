@@ -36,6 +36,13 @@ public class Account {
 		this.pass = pass;
 	}
 
+	/**
+	 * @return the remoteConnection
+	 */
+	public DofusConnection getRemoteConnection() {
+		return remoteConnection;
+	}
+
 	public void connect(Perso perso) {
 		this.state = AccountState.BOT_ONLINE;
 		Executors.FIXED.execute(() -> {
@@ -61,13 +68,6 @@ public class Account {
 	 */
 	public void setState(AccountState state) {
 		this.state = state;
-	}
-
-	/**
-	 * @return the remoteConnection
-	 */
-	public DofusConnection getRemoteConnection() {
-		return remoteConnection;
 	}
 
 	/**
