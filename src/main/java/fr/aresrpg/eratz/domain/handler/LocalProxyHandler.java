@@ -14,6 +14,7 @@ import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
 import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
+import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
@@ -74,6 +75,16 @@ public class LocalProxyHandler extends BaseHandler {
 			return true;
 		}
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void handle(AccountSelectCharacterOkPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(ChatSubscribeChannelPacket pkt) {
+		transmit(pkt);
 	}
 
 	@Override

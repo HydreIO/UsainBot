@@ -15,6 +15,7 @@ import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
 import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
+import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
@@ -24,6 +25,7 @@ import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
+import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.dofus.Constants;
 import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
@@ -35,6 +37,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 
 /**
  * 
@@ -79,6 +82,20 @@ public class RemoteProxyHandler extends BaseHandler {
 			return true;
 		}
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void handle(AccountSelectCharacterOkPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(ChatSubscribeChannelPacket chatSubscribeChannelPacket) {
+		Chat[] channels = chatSubscribeChannelPacket.getChannels();
+		channels = Arrays.copyOf(channels , channels.length +1);
+		channels[channels.length -1] = Chat.ADMIN;
+		chatSubscribeChannelPacket.setChannels(channels);
+		transmit(chatSubscribeChannelPacket);
 	}
 
 	@Override
@@ -156,9 +173,9 @@ public class RemoteProxyHandler extends BaseHandler {
 			srvchannel.bind(new InetSocketAddress(0));
 			int localPort = srvchannel.socket().getLocalPort();
 			proxy.getLocalConnection().send(new AccountServerHostPacket().setIp(Constants.LOCALHOST).setPort(localPort).setTicketKey(pkt.getTicketKey()));
-			getAccount().getProxy().changeConnection(new DofusConnection("RemoteGame", SocketChannel.open(new InetSocketAddress(ip, 443)), new RemoteProxyHandler(getAccount()), Bound.SERVER),
+			getAccount().getProxy().changeConnection(new DofusConnection<>("RemoteGame", SocketChannel.open(new InetSocketAddress(ip, 443)), new RemoteProxyHandler(getAccount()), Bound.SERVER),
 					ProxyConnectionType.REMOTE);
-			getAccount().getProxy().changeConnection(new DofusConnection("LocalGame", srvchannel.accept(), new LocalProxyHandler(getAccount()), Bound.CLIENT), ProxyConnectionType.LOCAL);
+			getAccount().getProxy().changeConnection(new DofusConnection<>("LocalGame", srvchannel.accept(), new LocalProxyHandler(getAccount()), Bound.CLIENT), ProxyConnectionType.LOCAL);
 			getAccount().setState(AccountState.CLIENT_IN_GAME);
 		} catch (Exception e) {
 			e.printStackTrace();
