@@ -6,7 +6,7 @@
  *  
  * Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain;
+package fr.aresrpg.eratz.domain.behavior;
 
 import fr.aresrpg.eratz.domain.player.Player;
 
