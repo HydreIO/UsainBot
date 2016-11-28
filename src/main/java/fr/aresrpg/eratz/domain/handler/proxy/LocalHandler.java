@@ -39,11 +39,21 @@ import java.nio.channels.SocketChannel;
  */
 public class LocalHandler extends BaseHandler {
 
+	private boolean state_machine = false;
+
 	/**
 	 * @param account
 	 */
 	public LocalHandler(DofusProxy proxy) {
 		super(proxy);
+	}
+
+	/**
+	 * @param state_machine
+	 *            the state_machine to set
+	 */
+	public void setStateMachine(boolean state_machine) {
+		this.state_machine = state_machine;
 	}
 
 	private void transmit(Packet pkt) {
@@ -57,7 +67,7 @@ public class LocalHandler extends BaseHandler {
 
 	@Override
 	public boolean parse(ProtocolRegistry registry, String packet) {
-		if (registry == null || registry == ProtocolRegistry.ACCOUNT_REGION_VERSION) {
+		if (state_machine && registry == null) {
 			SocketChannel channel = (SocketChannel) getProxy().getRemoteConnection().getChannel();
 			try {
 				packet += "\0";
@@ -96,8 +106,10 @@ public class LocalHandler extends BaseHandler {
 
 	@Override
 	public void handle(AccountAuthPacket pkt) {
-		setAccount(AccountsManager.getInstance().getOrRegister(pkt.getPseudo(), CryptHelper.decryptpass(pkt.getHashedPassword(), getProxy().getHc())));
+		setAccount(AccountsManager.getInstance().getOrRegister(pkt.getPseudo(), CryptHelper.decryptpass(pkt.getHashedPassword().substring(2), getProxy().getHc())));
+		((DofusProxy) getProxy()).initAccount(getAccount());
 		transmit(pkt);
+		state_machine = true;
 	}
 
 	@Override

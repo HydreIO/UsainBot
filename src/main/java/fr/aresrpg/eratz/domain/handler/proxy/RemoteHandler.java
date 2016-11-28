@@ -63,7 +63,7 @@ public class RemoteHandler extends BaseHandler {
 
 	@Override
 	public boolean parse(ProtocolRegistry registry, String packet) {
-		if (registry == null || registry == ProtocolRegistry.ACCOUNT_SERVER_LIST) {
+		if (registry == null) {
 			SocketChannel channel = (SocketChannel) getProxy().getLocalConnection().getChannel();
 			try {
 				packet += "\0";
@@ -178,6 +178,7 @@ public class RemoteHandler extends BaseHandler {
 			getProxy().changeConnection(
 					new DofusConnection("RemoteGame", SocketChannel.open(new InetSocketAddress(ip, 443)), getProxy().getRemoteHandler(), Bound.SERVER).handleClosing(closeServerChannel),
 					ProxyConnectionType.REMOTE);
+			((LocalHandler) getProxy().getLocalHandler()).setStateMachine(false);
 			getProxy().changeConnection(new DofusConnection("LocalGame", srvchannel.accept(), getProxy().getLocalHandler(), Bound.CLIENT).handleClosing(closeServerChannel),
 					ProxyConnectionType.LOCAL);
 			getAccount().setState(AccountState.CLIENT_IN_GAME);
