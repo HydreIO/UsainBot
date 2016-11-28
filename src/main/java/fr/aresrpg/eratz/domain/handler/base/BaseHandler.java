@@ -6,10 +6,11 @@
  * 
  *         Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.handler;
+package fr.aresrpg.eratz.domain.handler.base;
 
 import fr.aresrpg.dofus.protocol.PacketHandler;
 import fr.aresrpg.eratz.domain.player.Account;
+import fr.aresrpg.eratz.domain.proxy.Proxy;
 
 /**
  * 
@@ -18,9 +19,25 @@ import fr.aresrpg.eratz.domain.player.Account;
 public abstract class BaseHandler implements PacketHandler {
 
 	private Account account;
+	private Proxy proxy;
 
-	public BaseHandler(Account account) {
+	public BaseHandler(Proxy proxy) {
+		this.proxy = proxy;
+	}
+
+	/**
+	 * @param account
+	 *            the account to set
+	 */
+	public void setAccount(Account account) {
 		this.account = account;
+	}
+
+	/**
+	 * @return the proxy
+	 */
+	public Proxy getProxy() {
+		return proxy;
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.handler;
+package fr.aresrpg.eratz.domain.handler.proxy;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.PacketHandler;
@@ -7,6 +7,7 @@ import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
 import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
+import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
@@ -36,6 +37,22 @@ public class ProxyHandler implements PacketHandler {
 	 */
 	public Set<PacketHandler> getHandlers() {
 		return handlers;
+	}
+
+	public void removeHandlers(PacketHandler... handlers) {
+		Arrays.stream(handlers).forEach(this::removeHandler);
+	}
+
+	public void removeHandlers() {
+		this.handlers = new HashSet<>();
+	}
+
+	public void addHandler(PacketHandler handler) {
+		getHandlers().add(handler);
+	}
+
+	public void removeHandler(PacketHandler handler) {
+		getHandlers().remove(handler);
 	}
 
 	@Override
@@ -260,6 +277,16 @@ public class ProxyHandler implements PacketHandler {
 
 	@Override
 	public void handle(GameEndPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(AccountSelectCharacterOkPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(ChatSubscribeChannelPacket pkt) {
 		handlers.forEach(h -> h.handle(pkt));
 	}
 

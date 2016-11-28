@@ -6,7 +6,7 @@
  * 
  *         Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.handler;
+package fr.aresrpg.eratz.domain.handler.proxy;
 
 import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
@@ -27,9 +27,9 @@ import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.dofus.Constants;
-import fr.aresrpg.eratz.domain.player.Account;
+import fr.aresrpg.eratz.domain.handler.base.BaseHandler;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
-import fr.aresrpg.eratz.domain.proxy.Proxy;
+import fr.aresrpg.eratz.domain.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.proxy.Proxy.ProxyConnectionType;
 
 import java.io.IOException;
@@ -43,20 +43,13 @@ import java.util.Arrays;
  * 
  * @since
  */
-public class RemoteProxyHandler extends BaseHandler {
+public class RemoteHandler extends BaseHandler {
 
 	/**
 	 * @param account
 	 */
-	public RemoteProxyHandler(Account account) {
-		super(account);
-	}
-
-	private Proxy getProxy() {
-		if (getAccount() == null) throw new NullPointerException("The account is null");
-		Proxy proxy = getAccount().getProxy();
-		if (proxy == null) throw new NullPointerException("The proxy for this account is null !");
-		return proxy;
+	public RemoteHandler(DofusProxy proxy) {
+		super(proxy);
 	}
 
 	private void transmit(Packet pkt) {
@@ -92,8 +85,8 @@ public class RemoteProxyHandler extends BaseHandler {
 	@Override
 	public void handle(ChatSubscribeChannelPacket chatSubscribeChannelPacket) {
 		Chat[] channels = chatSubscribeChannelPacket.getChannels();
-		channels = Arrays.copyOf(channels , channels.length +1);
-		channels[channels.length -1] = Chat.ADMIN;
+		channels = Arrays.copyOf(channels, channels.length + 1);
+		channels[channels.length - 1] = Chat.ADMIN;
 		chatSubscribeChannelPacket.setChannels(channels);
 		transmit(chatSubscribeChannelPacket);
 	}
@@ -109,7 +102,7 @@ public class RemoteProxyHandler extends BaseHandler {
 
 	@Override
 	public void handle(HelloConnectionPacket pkt) {
-		getAccount().setCurrentHc(pkt.getHashKey());
+		getProxy().setHc(pkt.getHashKey());
 		transmit(pkt);
 	}
 
@@ -166,16 +159,28 @@ public class RemoteProxyHandler extends BaseHandler {
 
 	@Override
 	public void handle(AccountServerEncryptedHostPacket pkt) {
+		if (getAccount().isBotOnline())
+			getAccount().getCurrentPlayed().disconnect();
 		try {
 			String ip = pkt.getIp();
-			Proxy proxy = getAccount().getProxy();
 			ServerSocketChannel srvchannel = ServerSocketChannel.open();
 			srvchannel.bind(new InetSocketAddress(0));
 			int localPort = srvchannel.socket().getLocalPort();
-			proxy.getLocalConnection().send(new AccountServerHostPacket().setIp(Constants.LOCALHOST).setPort(localPort).setTicketKey(pkt.getTicketKey()));
-			getAccount().getProxy().changeConnection(new DofusConnection<>("RemoteGame", SocketChannel.open(new InetSocketAddress(ip, 443)), new RemoteProxyHandler(getAccount()), Bound.SERVER),
+			getProxy().getLocalConnection().send(new AccountServerHostPacket().setIp(Constants.LOCALHOST).setPort(localPort).setTicketKey(pkt.getTicketKey()));
+			Runnable closeServerChannel = () -> { // si la connection entre le client et dofus est interrompue
+				try {
+					srvchannel.close(); // on close le server socket
+					getProxy().getRemoteHandler().removeHandlers(); // on vire les handlers remotre (dofus -> app)
+					getAccount().notifyDisconnect(); // on notify que le client n'est plus la pour possiblement connecter le bot
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			};
+			getProxy().changeConnection(
+					new DofusConnection("RemoteGame", SocketChannel.open(new InetSocketAddress(ip, 443)), getProxy().getRemoteHandler(), Bound.SERVER).handleClosing(closeServerChannel),
 					ProxyConnectionType.REMOTE);
-			getAccount().getProxy().changeConnection(new DofusConnection<>("LocalGame", srvchannel.accept(), new LocalProxyHandler(getAccount()), Bound.CLIENT), ProxyConnectionType.LOCAL);
+			getProxy().changeConnection(new DofusConnection("LocalGame", srvchannel.accept(), getProxy().getLocalHandler(), Bound.CLIENT).handleClosing(closeServerChannel),
+					ProxyConnectionType.LOCAL);
 			getAccount().setState(AccountState.CLIENT_IN_GAME);
 		} catch (Exception e) {
 			e.printStackTrace();

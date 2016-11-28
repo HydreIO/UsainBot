@@ -6,7 +6,7 @@
  * 
  *         Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.handler;
+package fr.aresrpg.eratz.domain.handler.proxy;
 
 import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
@@ -24,9 +24,9 @@ import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
-import fr.aresrpg.eratz.domain.player.Account;
+import fr.aresrpg.eratz.domain.handler.base.BaseHandler;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
-import fr.aresrpg.eratz.domain.proxy.Proxy;
+import fr.aresrpg.eratz.domain.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.util.encryption.CryptHelper;
 
 import java.io.IOException;
@@ -37,20 +37,13 @@ import java.nio.channels.SocketChannel;
  * 
  * @since
  */
-public class LocalProxyHandler extends BaseHandler {
+public class LocalHandler extends BaseHandler {
 
 	/**
 	 * @param account
 	 */
-	public LocalProxyHandler(Account account) {
-		super(account);
-	}
-
-	private Proxy getProxy() {
-		if (getAccount() == null) throw new NullPointerException("The account is null");
-		Proxy proxy = getAccount().getProxy();
-		if (proxy == null) throw new NullPointerException("The proxy for this account is null !");
-		return proxy;
+	public LocalHandler(DofusProxy proxy) {
+		super(proxy);
 	}
 
 	private void transmit(Packet pkt) {
@@ -103,7 +96,7 @@ public class LocalProxyHandler extends BaseHandler {
 
 	@Override
 	public void handle(AccountAuthPacket pkt) {
-		AccountsManager.getInstance().registerAccount(new Account(pkt.getPseudo(), CryptHelper.decryptpass(pkt.getHashedPassword(), getAccount().getCurrentHc())));
+		setAccount(AccountsManager.getInstance().getOrRegister(pkt.getPseudo(), CryptHelper.decryptpass(pkt.getHashedPassword(), getProxy().getHc())));
 		transmit(pkt);
 	}
 
