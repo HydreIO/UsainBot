@@ -95,8 +95,7 @@ public class BotHandler implements PacketHandler {
 
 	@Override
 	public void handle(AccountHostPacket accountHostPacket) {
-		// TODO
-
+		// IF SERVER IN SAVE DONT CONNECT (ban 6h)
 	}
 
 	@Override

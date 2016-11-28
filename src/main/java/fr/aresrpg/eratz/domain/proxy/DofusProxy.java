@@ -11,6 +11,7 @@ package fr.aresrpg.eratz.domain.proxy;
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.PacketHandler;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
+import fr.aresrpg.eratz.domain.handler.base.BaseHandler;
 import fr.aresrpg.eratz.domain.handler.proxy.*;
 import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
@@ -24,8 +25,9 @@ public class DofusProxy implements Proxy {
 	private DofusConnection localConnection;
 	private DofusConnection remoteConnection;
 
-	private ProxyHandler remoteHandler = new ProxyHandler(new RemoteHandler(this));
 	private PacketHandler localHandler = new LocalHandler(this);
+	private PacketHandler remoteHandler = new RemoteHandler(this);
+	private ProxyHandler proxyHandler = new ProxyHandler(remoteHandler);
 
 	private Account account;
 	private String hc;
@@ -39,6 +41,8 @@ public class DofusProxy implements Proxy {
 		this.account = account;
 		account.setState(AccountState.CLIENT_IN_REALM);
 		account.setLastConnection(System.currentTimeMillis());
+		((BaseHandler) localHandler).setAccount(account);
+		((BaseHandler) remoteHandler).setAccount(account);
 	}
 
 	@Override
@@ -84,7 +88,7 @@ public class DofusProxy implements Proxy {
 			} else {
 				if (this.remoteConnection != null) this.remoteConnection.close();
 				this.remoteConnection = connection;
-				account.setRemoteConnection(remoteConnection);
+				if (account != null) account.setRemoteConnection(remoteConnection);
 			}
 			Executors.FIXED.execute(() -> {
 				System.out.println("Start connection.");
@@ -104,7 +108,7 @@ public class DofusProxy implements Proxy {
 
 	@Override
 	public ProxyHandler getRemoteHandler() {
-		return this.remoteHandler;
+		return this.proxyHandler;
 	}
 
 	@Override

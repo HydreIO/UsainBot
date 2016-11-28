@@ -63,7 +63,6 @@ public class RemoteHandler extends BaseHandler {
 
 	@Override
 	public boolean parse(ProtocolRegistry registry, String packet) {
-		System.out.println(registry);
 		if (registry == null || registry == ProtocolRegistry.ACCOUNT_SERVER_LIST) {
 			SocketChannel channel = (SocketChannel) getProxy().getLocalConnection().getChannel();
 			try {

@@ -15,6 +15,7 @@ import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Configurations;
 import fr.aresrpg.eratz.domain.util.config.Configurations.Config;
 import fr.aresrpg.eratz.domain.util.config.Variables;
+import fr.aresrpg.eratz.domain.util.config.dao.PlayerBean;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -36,6 +37,9 @@ public class TheBotFather {
 		this.config = Configurations.generate("botfather.yml", Variables.class, Optional.of(() -> {
 			System.out.println("CONFIGURATION JUST CREATED PLEASE RESTART !");
 			System.exit(0);
+		}), Optional.of(() -> {
+			Variables.ACCOUNTS.add(new PlayerBean("Exemple1", "password"));
+			Variables.ACCOUNTS.add(new PlayerBean("Exemple2", "password"));
 		}));
 		this.selector = Selector.open();
 		ServerSocketChannel botSocket = ServerSocketChannel.open();

@@ -19,8 +19,8 @@ public class Configurations {
 	 *            actions to exec if the config file doesn't exist
 	 * @return
 	 */
-	public static Config generate(File file, Class<?> bundle, Optional<Runnable> ifnewconfig) {
-		return new Config(file, bundle, ifnewconfig);
+	public static Config generate(File file, Class<?> bundle, Optional<Runnable> ifnewconfig, Optional<Runnable> beforeApply) {
+		return new Config(file, bundle, ifnewconfig, beforeApply);
 	}
 
 	/**
@@ -31,8 +31,8 @@ public class Configurations {
 	 *            actions to exec if the config file doesn't exist
 	 * @return
 	 */
-	public static Config generate(String file, Class<?> bundle, Optional<Runnable> ifnewconfig) {
-		return generate(new File(file), bundle, ifnewconfig);
+	public static Config generate(String file, Class<?> bundle, Optional<Runnable> ifnewconfig, Optional<Runnable> beforeApply) {
+		return generate(new File(file), bundle, ifnewconfig, beforeApply);
 	}
 
 	public static class Config {
@@ -40,7 +40,7 @@ public class Configurations {
 		private File file;
 		private Class<?> bundle;
 
-		private Config(File file, Class<?> configBundle, Optional<Runnable> r) {
+		private Config(File file, Class<?> configBundle, Optional<Runnable> r, Optional<Runnable> before) {
 			this.file = file;
 			this.bundle = configBundle;
 			System.out.println("Loading configuration...");
@@ -52,6 +52,7 @@ public class Configurations {
 				e3.printStackTrace();
 			}
 			if (mkdir) {
+				before.ifPresent(Runnable::run);
 				apply();
 				r.ifPresent(Runnable::run);
 			}
