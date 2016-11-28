@@ -33,8 +33,23 @@ public class AccountsManager {
 		return instance;
 	}
 
-	public void registerAccount(Account account) {
-		if (accounts.containsKey(account.getUsername())) return;
+	/**
+	 * Retrieve a registered account or create and register it
+	 * 
+	 * @param accountName
+	 *            the pseudo
+	 * @param pass
+	 *            the password
+	 * @return the retrieved account or the new created one
+	 */
+	public Account getOrRegister(String accountName, String pass) {
+		if (exist(accountName)) return getAccounts().get(accountName);
+		Account account = new Account(accountName, pass);
+		registerAccount(account);
+		return account;
+	}
+
+	private void registerAccount(Account account) {
 		System.out.println("New account registered ! | " + account);
 		getAccounts().put(account.getUsername(), account);
 	}

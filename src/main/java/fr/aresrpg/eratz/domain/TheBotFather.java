@@ -9,7 +9,6 @@
 package fr.aresrpg.eratz.domain;
 
 import fr.aresrpg.eratz.domain.dofus.Constants;
-import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
 import fr.aresrpg.eratz.domain.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -69,9 +68,7 @@ public class TheBotFather {
 						SocketChannel client = channel.accept();
 						client.configureBlocking(false);
 						System.out.println("Client Accepted");
-						Account account = new Account("blablablabla", "");
-						AccountsManager.getInstance().registerAccount(account);
-						new DofusProxy(account, client, SocketChannel.open(SERVER_ADRESS));
+						new DofusProxy(client, SocketChannel.open(SERVER_ADRESS));
 					}
 				}
 			} catch (Exception e) {
@@ -93,7 +90,8 @@ public class TheBotFather {
 
 	public void startScanner() {
 		Scanner sc = new Scanner(System.in);
-		while (sc.hasNext()) {
+		while (isRunning()) {
+			if (!sc.hasNext()) continue;
 			String nextLine = sc.nextLine();
 			AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
 				if (a.isClientOnline()) {
