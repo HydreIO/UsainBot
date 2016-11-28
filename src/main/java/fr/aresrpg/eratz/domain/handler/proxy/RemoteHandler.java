@@ -166,20 +166,11 @@ public class RemoteHandler extends BaseHandler {
 			srvchannel.bind(new InetSocketAddress(0));
 			int localPort = srvchannel.socket().getLocalPort();
 			getProxy().getLocalConnection().send(new AccountServerHostPacket().setIp(Constants.LOCALHOST).setPort(localPort).setTicketKey(pkt.getTicketKey()));
-			Runnable closeServerChannel = () -> { // si la connection entre le client et dofus est interrompue
-				try {
-					srvchannel.close(); // on close le server socket
-					getProxy().getRemoteHandler().removeHandlers(); // on vire les handlers remotre (dofus -> app)
-					getAccount().notifyDisconnect(); // on notify que le client n'est plus la pour possiblement connecter le bot
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			};
 			getProxy().changeConnection(
-					new DofusConnection("RemoteGame", SocketChannel.open(new InetSocketAddress(ip, 443)), getProxy().getRemoteHandler(), Bound.SERVER).handleClosing(closeServerChannel),
+					new DofusConnection<>("RemoteGame", SocketChannel.open(new InetSocketAddress(ip, 443)), getProxy().getRemoteHandler(), Bound.SERVER),
 					ProxyConnectionType.REMOTE);
 			((LocalHandler) getProxy().getLocalHandler()).setStateMachine(false);
-			getProxy().changeConnection(new DofusConnection("LocalGame", srvchannel.accept(), getProxy().getLocalHandler(), Bound.CLIENT).handleClosing(closeServerChannel),
+			getProxy().changeConnection(new DofusConnection<>("LocalGame", srvchannel.accept(), getProxy().getLocalHandler(), Bound.CLIENT),
 					ProxyConnectionType.LOCAL);
 			getAccount().setState(AccountState.CLIENT_IN_GAME);
 		} catch (Exception e) {

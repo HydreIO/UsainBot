@@ -33,8 +33,8 @@ public class DofusProxy implements Proxy {
 	private String hc;
 
 	public DofusProxy(SocketChannel localChannel, SocketChannel remoteChannel) throws IOException {
-		changeConnection(new DofusConnection("Local", localChannel, localHandler, Bound.CLIENT), ProxyConnectionType.LOCAL);
-		changeConnection(new DofusConnection("Remote", remoteChannel, remoteHandler, Bound.SERVER), ProxyConnectionType.REMOTE);
+		changeConnection(new DofusConnection<>("Local", localChannel, localHandler, Bound.CLIENT), ProxyConnectionType.LOCAL);
+		changeConnection(new DofusConnection<>("Remote", remoteChannel, remoteHandler, Bound.SERVER), ProxyConnectionType.REMOTE);
 	}
 
 	public void initAccount(Account account) {
@@ -92,10 +92,15 @@ public class DofusProxy implements Proxy {
 			}
 			Executors.FIXED.execute(() -> {
 				System.out.println("Start connection.");
-				while (connection.getChannel().isOpen()) {
-					try {
+				try {
+					while (connection.getChannel().isOpen())
 						connection.read();
-					} catch (Exception e) {
+				} catch (Exception e) {
+					try {
+						connection.close(); // on close le server socket
+						getRemoteHandler().removeHandlers(); // on vire les handlers remotre (dofus -> app)
+						//TODO getAccount().notifyDisconnect(); // on notify que le client n'est plus la pour possiblement connecter le bot
+					} catch (IOException e1) {
 						e.printStackTrace();
 					}
 				}
