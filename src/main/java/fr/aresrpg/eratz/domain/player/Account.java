@@ -9,27 +9,28 @@
 package fr.aresrpg.eratz.domain.player;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
-import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
-import fr.aresrpg.eratz.domain.TheBotFather;
-import fr.aresrpg.eratz.domain.handler.BotHandler;
+import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
-import fr.aresrpg.eratz.domain.proxy.Proxy;
+import fr.aresrpg.eratz.domain.util.Threads;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.eratz.domain.util.config.Variables;
 
-import java.nio.channels.SocketChannel;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Account {
-	private Proxy proxy;
 	private String username;
 	private String pass;
 	private List<Perso> persos = new ArrayList<>();
 	private Perso currentPlayed;
-	private String currentHc;
+	private Perso defaultBot;
 	private AccountState state = AccountState.OFFLINE;
 	private DofusConnection remoteConnection;
+	private BotHandler botHandler = new BotHandler(this);
+	private long lastConnection;
 
 	public Account(String username, String pass) {
 		this.username = username;
@@ -44,22 +45,113 @@ public class Account {
 	}
 
 	public void connect(Perso perso) {
-		this.state = AccountState.BOT_ONLINE;
+		perso.connect();
+	}
+
+	public void disconnect(Perso perso) {
+		perso.disconnect();
+	}
+
+	/**
+	 * Called when the client close the connection or crash
+	 */
+	public void notifyDisconnect() {
+		System.out.println("Client disconnected !");
+		setState(AccountState.OFFLINE);
+		if (!Variables.CONNECT_BOT_ON_CLIENT_DECONNECTION || getDefaultBot() == null) return;
 		Executors.FIXED.execute(() -> {
-			try {
-				System.out.println("[" + Instant.now().toString() + "] Connection de " + perso.getPseudo());
-				SocketChannel channel = SocketChannel.open(TheBotFather.SERVER_ADRESS);
-				setCurrentPlayed(perso);
-				DofusConnection connection = new DofusConnection(perso.getPseudo(), channel, new BotHandler(this), Bound.SERVER);
-				setRemoteConnection(connection);
-				while (getState() == AccountState.BOT_ONLINE)
-					connection.read();
-			} catch (Exception e) {
-				this.state = AccountState.OFFLINE;
-				System.out.println("Bot déconnecté."); // test debug
-				e.printStackTrace(); // test debug
-			}
+			System.out.println("Connecting bot on " + getDefaultBot().getPseudo() + " in " + Variables.SEC_AFTER_CRASH + "s !");
+			Threads.sleep(Variables.SEC_AFTER_CRASH, TimeUnit.SECONDS);
+			getDefaultBot().connect();
 		});
+	}
+
+	/**
+	 * Disconnect the current perso if there is one and connect the new<br>
+	 * If there is a connected perso then the method wait the minimum configured time before connection to avoid auto ban
+	 * 
+	 * @param perso
+	 *            the new perso to connect
+	 */
+	public void switchPerso(Perso perso) {
+		if (getCurrentPlayed() != null) disconnect(getCurrentPlayed());
+		long timeleft = (getLastConnection() + (Variables.SEC_AFTER_CRASH * 1000)) - System.currentTimeMillis();
+		if (timeleft < 0)
+			try {
+			System.out.println("[ANTI-BAN] Reconnecting in " + Instant.ofEpochMilli(timeleft + 2000).getEpochSecond() + "s...");
+			Thread.sleep(timeleft + 2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		perso.connect();
+	}
+
+	// ============= UTIL ===================
+
+	/**
+	 * Listen for packet from dofus while the bot is online and the client is offline
+	 * 
+	 * @throws IOException
+	 *             if some I/O error occur
+	 */
+	public void readRemote() {
+		while (isActive())
+			try {
+				getRemoteConnection().read();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	}
+
+	/**
+	 * @return true if the bot or the client is online
+	 */
+	public boolean isActive() {
+		return isBotOnline() || isClientOnline();
+	}
+
+	/**
+	 * @return true if the client is online
+	 */
+	public boolean isClientOnline() {
+		return getState() == AccountState.CLIENT_IN_GAME || getState() == AccountState.CLIENT_IN_REALM;
+	}
+
+	/**
+	 * @return true if the bot is online
+	 */
+	public boolean isBotOnline() {
+		return getState() == AccountState.BOT_ONLINE;
+	}
+
+	// =========== GET / SET =================
+	/**
+	 * @return the lastConnection
+	 */
+	public long getLastConnection() {
+		return lastConnection;
+	}
+
+	/**
+	 * @param lastConnection
+	 *            the lastConnection to set
+	 */
+	public void setLastConnection(long lastConnection) {
+		this.lastConnection = lastConnection;
+	}
+
+	/**
+	 * @return the botHandler
+	 */
+	public BotHandler getBotHandler() {
+		return botHandler;
+	}
+
+	/**
+	 * @return the defaultBot
+	 */
+	public Perso getDefaultBot() {
+		return defaultBot;
 	}
 
 	/**
@@ -79,21 +171,6 @@ public class Account {
 	}
 
 	/**
-	 * @param currentHc
-	 *            the currentHc to set
-	 */
-	public void setCurrentHc(String currentHc) {
-		this.currentHc = currentHc;
-	}
-
-	/**
-	 * @return the currentHc
-	 */
-	public String getCurrentHc() {
-		return currentHc;
-	}
-
-	/**
 	 * @return the pass
 	 */
 	public String getPass() {
@@ -101,24 +178,10 @@ public class Account {
 	}
 
 	/**
-	 * @return Dofus proxy
-	 */
-	public Proxy getProxy() {
-		return proxy;
-	}
-
-	/**
 	 * @return the state
 	 */
 	public AccountState getState() {
 		return state;
-	}
-
-	/**
-	 * @return the clientOnline
-	 */
-	public boolean isClientOnline() {
-		return getState() == AccountState.CLIENT_IN_GAME || getState() == AccountState.CLIENT_IN_REALM;
 	}
 
 	/**
@@ -153,13 +216,11 @@ public class Account {
 	}
 
 	/**
-	 * Set the dofus proxy
-	 *
-	 * @param proxy
-	 *            Dofus proxy
+	 * @param defaultBot
+	 *            the defaultBot to set
 	 */
-	public void setProxy(Proxy proxy) {
-		this.proxy = proxy;
+	public void setDefaultBot(Perso defaultBot) {
+		this.defaultBot = defaultBot;
 	}
 
 	/**
@@ -186,7 +247,7 @@ public class Account {
 
 	@Override
 	public String toString() {
-		return "Account[user:***" + username.substring(4) + "|pass:***]";
+		return "Account[user:*****" + username.substring(5) + "|pass:***]";
 	}
 
 }
