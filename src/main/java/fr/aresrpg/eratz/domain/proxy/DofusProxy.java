@@ -9,8 +9,9 @@
 package fr.aresrpg.eratz.domain.proxy;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
+import fr.aresrpg.dofus.protocol.PacketHandler;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
-import fr.aresrpg.eratz.domain.handler.*;
+import fr.aresrpg.eratz.domain.handler.proxy.*;
 import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -22,17 +23,36 @@ public class DofusProxy implements Proxy {
 
 	private DofusConnection localConnection;
 	private DofusConnection remoteConnection;
-	private Account account;
 
-	public DofusProxy(Account account, SocketChannel localChannel, SocketChannel remoteChannel) throws IOException {
-		account.setProxy(this);
-		this.account = account;
-		changeConnection(new DofusConnection("Local", localChannel, new LocalProxyHandler(account), Bound.CLIENT), ProxyConnectionType.LOCAL);
-		changeConnection(new DofusConnection("Remote", remoteChannel, new ProxyHandler(new RemoteProxyHandler(account)), Bound.SERVER), ProxyConnectionType.REMOTE);
-		account.setState(AccountState.CLIENT_IN_REALM);
+	private ProxyHandler remoteHandler = new ProxyHandler(new RemoteHandler(this));
+	private PacketHandler localHandler = new LocalHandler(this);
+
+	private Account account;
+	private String hc;
+
+	public DofusProxy(SocketChannel localChannel, SocketChannel remoteChannel) throws IOException {
+		changeConnection(new DofusConnection("Local", localChannel, localHandler, Bound.CLIENT), ProxyConnectionType.LOCAL);
+		changeConnection(new DofusConnection("Remote", remoteChannel, remoteHandler, Bound.SERVER), ProxyConnectionType.REMOTE);
 	}
 
-	public void close() {
+	public void initAccount(Account account) {
+		this.account = account;
+		account.setState(AccountState.CLIENT_IN_REALM);
+		account.setLastConnection(System.currentTimeMillis());
+	}
+
+	@Override
+	public String getHc() {
+		return this.hc;
+	}
+
+	@Override
+	public void setHc(String hc) {
+		this.hc = hc;
+	}
+
+	@Override
+	public void shutdown() {
 		try {
 			getLocalConnection().close();
 			getRemoteConnection().close();
@@ -80,6 +100,16 @@ public class DofusProxy implements Proxy {
 			e2.printStackTrace();
 		}
 
+	}
+
+	@Override
+	public ProxyHandler getRemoteHandler() {
+		return this.remoteHandler;
+	}
+
+	@Override
+	public PacketHandler getLocalHandler() {
+		return this.localHandler;
 	}
 
 }
