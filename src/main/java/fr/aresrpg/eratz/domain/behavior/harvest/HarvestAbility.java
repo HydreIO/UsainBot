@@ -6,18 +6,16 @@
  * 
  *         Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.behavior;
+package fr.aresrpg.eratz.domain.behavior.harvest;
+
+import fr.aresrpg.eratz.domain.dofus.ressource.Ressource;
 
 /**
  * 
  * @since
  */
-public interface Behavior extends Comparable<Behavior> {
+public interface HarvestAbility {
 
-	int getPriority();
-
-	boolean isActive();
-
-	void setActive(boolean active);
+	void harvest(Ressource r);
 
 }
