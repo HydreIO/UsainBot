@@ -19,10 +19,13 @@ import fr.aresrpg.eratz.domain.util.config.Variables;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Perso extends Player {
 
 	private Account account;
+	private Set<Player> group = new HashSet<>();
 
 	public Perso(int id, String pseudo, Account account) {
 		super(id, pseudo);
@@ -63,6 +66,17 @@ public class Perso extends Player {
 			System.out.println(getPseudo() + " disconnected.");
 		}
 
+	}
+
+	/**
+	 * @return the group
+	 */
+	public Set<Player> getGroup() {
+		return group;
+	}
+
+	public boolean hasGroup() {
+		return !getGroup().isEmpty();
 	}
 
 	/**
