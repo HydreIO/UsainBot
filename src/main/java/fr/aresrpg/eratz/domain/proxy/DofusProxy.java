@@ -18,6 +18,7 @@ import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
+import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SocketChannel;
 
 public class DofusProxy implements Proxy {
@@ -96,13 +97,15 @@ public class DofusProxy implements Proxy {
 					while (connection.getChannel().isOpen())
 						connection.read();
 				} catch (Exception e) {
-					try {
-						connection.close(); // on close le server socket
-						getRemoteHandler().removeHandlers(); // on vire les handlers remotre (dofus -> app)
-						//TODO getAccount().notifyDisconnect(); // on notify que le client n'est plus la pour possiblement connecter le bot
-					} catch (IOException e1) {
-						e.printStackTrace();
-					}
+					e.printStackTrace();
+					if(!(e instanceof AsynchronousCloseException))
+						try {
+							connection.close(); // on close le server socket
+							getRemoteHandler().removeHandlers(); // on vire les handlers remotre (dofus -> app)
+							//TODO getAccount().notifyDisconnect(); // on notify que le client n'est plus la pour possiblement connecter le bot
+						} catch (IOException e1) {
+							e.printStackTrace();
+						}
 				}
 			});
 		} catch (Exception e2) {

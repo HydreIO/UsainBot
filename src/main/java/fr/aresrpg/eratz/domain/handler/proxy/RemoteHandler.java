@@ -169,7 +169,6 @@ public class RemoteHandler extends BaseHandler {
 			getProxy().changeConnection(
 					new DofusConnection<>("RemoteGame", SocketChannel.open(new InetSocketAddress(ip, 443)), getProxy().getRemoteHandler(), Bound.SERVER),
 					ProxyConnectionType.REMOTE);
-			((LocalHandler) getProxy().getLocalHandler()).setStateMachine(false);
 			getProxy().changeConnection(new DofusConnection<>("LocalGame", srvchannel.accept(), getProxy().getLocalHandler(), Bound.CLIENT),
 					ProxyConnectionType.LOCAL);
 			getAccount().setState(AccountState.CLIENT_IN_GAME);
