@@ -23,6 +23,7 @@ public class Player {
 	private Classe classe;
 	private int pa;
 	private int pm;
+	// ajouter resi
 
 	public Player(int id, String pseudo) {
 		this.id = id;

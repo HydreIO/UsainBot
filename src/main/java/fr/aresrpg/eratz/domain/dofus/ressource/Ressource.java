@@ -3,8 +3,8 @@
  * This class is part of an AresRPG Project.
  *
  * @author Sceat {@literal <sceat@aresrpg.fr>}
- *  
- * Created 2016
+ * 
+ *         Created 2016
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.dofus.ressource;
 
@@ -55,6 +55,10 @@ public class Ressource {
 	 */
 	public void setSpawned(boolean spawned) {
 		this.spawned = spawned;
+	}
+
+	public void setSpawned() {
+		setSpawned(true);
 	}
 
 }

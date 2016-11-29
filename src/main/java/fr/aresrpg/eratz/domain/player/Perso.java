@@ -11,6 +11,10 @@ package fr.aresrpg.eratz.domain.player;
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.eratz.domain.TheBotFather;
+import fr.aresrpg.eratz.domain.behavior.Behavior;
+import fr.aresrpg.eratz.domain.behavior.harvest.HarvestAbility;
+import fr.aresrpg.eratz.domain.behavior.move.Navigation;
+import fr.aresrpg.eratz.domain.dofus.map.Map;
 import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -25,7 +29,13 @@ import java.util.Set;
 public class Perso extends Player {
 
 	private Account account;
+	private Map currentMap;
 	private Set<Player> group = new HashSet<>();
+	private Set<Behavior> behaviors = new HashSet<>();
+	private Navigation navigation;
+	private HarvestAbility harvestAbility;
+	private int maxPods;
+	private int usedPods;
 
 	public Perso(int id, String pseudo, Account account) {
 		super(id, pseudo);
@@ -66,6 +76,52 @@ public class Perso extends Player {
 			System.out.println(getPseudo() + " disconnected.");
 		}
 
+	}
+
+	/**
+	 * @return the maxPods
+	 */
+	public int getMaxPods() {
+		return maxPods;
+	}
+
+	/**
+	 * @return the usedPods
+	 */
+	public int getUsedPods() {
+		return usedPods;
+	}
+
+	public int getPodsPercent() {
+		return getUsedPods() * 100 / getMaxPods();
+	}
+
+	/**
+	 * @return the behaviors
+	 */
+	public Set<Behavior> getBehaviors() {
+		return behaviors;
+	}
+
+	/**
+	 * @return the currentMap
+	 */
+	public Map getCurrentMap() {
+		return currentMap;
+	}
+
+	/**
+	 * @return the harvestAbility
+	 */
+	public HarvestAbility getHarvestAbility() {
+		return harvestAbility;
+	}
+
+	/**
+	 * @return the navigation
+	 */
+	public Navigation getNavigation() {
+		return navigation;
 	}
 
 	/**
