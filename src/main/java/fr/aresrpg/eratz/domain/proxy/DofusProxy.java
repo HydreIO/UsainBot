@@ -98,14 +98,15 @@ public class DofusProxy implements Proxy {
 						connection.read();
 				} catch (Exception e) {
 					e.printStackTrace();
-					if(!(e instanceof AsynchronousCloseException))
+					if (!(e instanceof AsynchronousCloseException)) {
 						try {
 							connection.close(); // on close le server socket
 							getRemoteHandler().removeHandlers(); // on vire les handlers remotre (dofus -> app)
-							//TODO getAccount().notifyDisconnect(); // on notify que le client n'est plus la pour possiblement connecter le bot
+							if (account != null) account.notifyDisconnect(); // on notify que le client n'est plus la pour possiblement connecter le bot
 						} catch (IOException e1) {
 							e.printStackTrace();
 						}
+					}
 				}
 			});
 		} catch (Exception e2) {
