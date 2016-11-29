@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.handler.proxy;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.PacketHandler;
+import fr.aresrpg.dofus.protocol.ProtocolRegistry;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
@@ -290,4 +291,11 @@ public class ProxyHandler implements PacketHandler {
 		handlers.forEach(h -> h.handle(pkt));
 	}
 
+	@Override
+	public boolean parse(ProtocolRegistry registry, String packet) {
+		for(PacketHandler handler : handlers)
+			if(handler.parse(registry , packet))
+				return true;
+		return false;
+	}
 }
