@@ -1,0 +1,25 @@
+package fr.aresrpg.eratz.domain.dofus.item;
+
+/**
+ * 
+ * @since
+ */
+public enum Hdv {
+
+	BUCHERONS,
+	MINEURS,
+	POISSONIERS_PECHEURS,
+	BOUCHERS_CHASSEURS,
+	PAYSANS,
+	ALCHIMISTES,
+	RUNES,
+	ANIMAUX,
+	DOCUMENTS,
+	BIJOUTIERS,
+	CORDONNIERS,
+	TAILLEURS,
+	FORGERONS,
+	SCULPTEURS,
+	RESSOURCES
+
+}
