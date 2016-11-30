@@ -22,6 +22,7 @@ import fr.aresrpg.eratz.domain.behavior.fight.FightHandler;
 import fr.aresrpg.eratz.domain.behavior.harvest.HarvestHandler;
 import fr.aresrpg.eratz.domain.behavior.move.MapHandler;
 import fr.aresrpg.eratz.domain.player.Account;
+import fr.aresrpg.eratz.domain.player.handler.PlayerHarvestHandler;
 
 /**
  * 
@@ -31,7 +32,7 @@ public class BotHandler implements PacketHandler {
 
 	private Account account;
 	private FightHandler fightHandler;
-	private HarvestHandler harvestHandler;
+	private HarvestHandler harvestHandler = new PlayerHarvestHandler(getAccount().getCurrentPlayed());
 	private CraftHandler craftHandler;
 	private MapHandler mapHandler;
 
@@ -40,6 +41,11 @@ public class BotHandler implements PacketHandler {
 	 */
 	public BotHandler(Account account) {
 		this.account = account;
+	}
+
+	public void notifyPlayerChange() {
+		this.harvestHandler = new PlayerHarvestHandler(getAccount().getCurrentPlayed());
+		// TODO
 	}
 
 	/**
