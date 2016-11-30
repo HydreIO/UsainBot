@@ -24,6 +24,13 @@ public class Ressource {
 		this.spawned = spawned;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Ressource)) return false;
+		Ressource r = (Ressource) obj;
+		return cellId == r.getCellId() && type == r.getType();
+	}
+
 	public Ressource(int cellid, Ressources type) {
 		this(cellid, type, false);
 	}
