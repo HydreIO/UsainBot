@@ -9,7 +9,7 @@
 package fr.aresrpg.eratz.domain.behavior;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
-import fr.aresrpg.eratz.domain.util.CompletableRunnable;
+import fr.aresrpg.eratz.domain.player.Perso;
 
 import java.util.concurrent.TimeUnit;
 
@@ -17,7 +17,13 @@ import java.util.concurrent.TimeUnit;
  * 
  * @since
  */
-public interface Behavior extends CompletableRunnable {
+public interface Behavior extends Runnable {
+
+	Perso getPerso();
+
+	default void reset() {
+		getPerso().resetBehavior();
+	}
 
 	default <T extends Behavior> T botWait(int time, TimeUnit unit) {
 		try {
@@ -30,6 +36,14 @@ public interface Behavior extends CompletableRunnable {
 
 	default <T extends Behavior> T waitSec(int sec) {
 		return botWait(sec, TimeUnit.SECONDS);
+	}
+
+	void start();
+
+	@Override
+	default void run() {
+		start();
+		reset();
 	}
 
 }

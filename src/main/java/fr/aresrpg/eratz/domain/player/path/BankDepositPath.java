@@ -27,7 +27,6 @@ import java.util.Random;
 public class BankDepositPath implements PathBehavior {
 
 	private Perso perso;
-	private boolean finished = false;
 	private Random humanRandomizer = new Random();
 
 	public BankDepositPath(Perso perso) {
@@ -35,7 +34,7 @@ public class BankDepositPath implements PathBehavior {
 	}
 
 	@Override
-	public void run() {
+	public void startPath() {
 		BaseAbility ability = perso.getBaseAbility();
 		ability.goToZaap(Zaap.ASTRUB);
 		waitLitle();
@@ -47,7 +46,6 @@ public class BankDepositPath implements PathBehavior {
 		Item[] res = ability.depositInventoryInChest(InventoryType.RESSOURCES);
 		waitLitle();
 		ability.speak(Channel.ADMIN, "à déposé : " + Arrays.toString(ArrayUtils.concat(wep, div, res)) + " en banque !");
-		this.finished = true;
 	}
 
 	private void waitLitle() { // zone peuplé mieux vaut ne pas se déplacer trop vite
@@ -60,7 +58,7 @@ public class BankDepositPath implements PathBehavior {
 	}
 
 	@Override
-	public boolean isCompleted() {
-		return this.finished;
+	public Perso getPerso() {
+		return this.perso;
 	}
 }

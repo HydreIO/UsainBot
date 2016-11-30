@@ -10,4 +10,12 @@ public interface PathBehavior extends Behavior {
 
 	PathBehavior getPathToReachCurrentPath(); // dans le cas ou il faut un trajet pour atteindre la boucle de cet implementation de trajet
 
+	void startPath();
+
+	@Override
+	default void start() {
+		if (getPathToReachCurrentPath() != null) getPathToReachCurrentPath().start();
+		startPath();
+	}
+
 }
