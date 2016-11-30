@@ -6,11 +6,11 @@
  * 
  *         Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.player.path;
+package fr.aresrpg.eratz.domain.behavior.move.type;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.dofus.structures.character.Item;
-import fr.aresrpg.eratz.domain.behavior.BaseAbility;
+import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.behavior.move.PathBehavior;
 import fr.aresrpg.eratz.domain.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.dofus.player.Channel;

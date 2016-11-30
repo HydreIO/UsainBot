@@ -17,12 +17,12 @@ import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
-import fr.aresrpg.eratz.domain.behavior.craft.CraftHandler;
-import fr.aresrpg.eratz.domain.behavior.fight.FightHandler;
-import fr.aresrpg.eratz.domain.behavior.harvest.HarvestHandler;
-import fr.aresrpg.eratz.domain.behavior.move.MapHandler;
+import fr.aresrpg.eratz.domain.handler.bot.craft.CraftHandler;
+import fr.aresrpg.eratz.domain.handler.bot.fight.FightHandler;
+import fr.aresrpg.eratz.domain.handler.bot.harvest.HarvestHandler;
+import fr.aresrpg.eratz.domain.handler.bot.harvest.type.PlayerHarvestHandler;
+import fr.aresrpg.eratz.domain.handler.bot.move.MapHandler;
 import fr.aresrpg.eratz.domain.player.Account;
-import fr.aresrpg.eratz.domain.player.handler.PlayerHarvestHandler;
 
 /**
  * 

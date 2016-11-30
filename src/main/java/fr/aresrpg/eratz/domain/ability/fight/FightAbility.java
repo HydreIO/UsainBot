@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.behavior.fight;
+package fr.aresrpg.eratz.domain.ability.fight;
 
 import fr.aresrpg.eratz.domain.dofus.player.Spell;
 

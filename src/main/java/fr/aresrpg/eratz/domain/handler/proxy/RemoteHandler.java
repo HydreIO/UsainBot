@@ -27,7 +27,7 @@ import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.dofus.Constants;
-import fr.aresrpg.eratz.domain.handler.base.BaseHandler;
+import fr.aresrpg.eratz.domain.handler.BaseHandler;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.proxy.Proxy.ProxyConnectionType;

@@ -6,7 +6,7 @@
  * 
  *         Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.behavior.harvest;
+package fr.aresrpg.eratz.domain.ability.harvest;
 
 import fr.aresrpg.eratz.domain.dofus.ressource.Ressource;
 

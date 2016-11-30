@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.behavior.move;
+package fr.aresrpg.eratz.domain.handler.bot.move;
 
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.dofus.map.Map;

@@ -6,7 +6,7 @@
  * 
  *         Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.behavior.move;
+package fr.aresrpg.eratz.domain.ability.move;
 
 import fr.aresrpg.eratz.domain.behavior.Behavior;
 import fr.aresrpg.eratz.domain.dofus.map.Zaap;

@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.behavior.harvest;
+package fr.aresrpg.eratz.domain.handler.bot.harvest;
 
 import fr.aresrpg.eratz.domain.dofus.ressource.Ressource;
 import fr.aresrpg.eratz.domain.player.Player;

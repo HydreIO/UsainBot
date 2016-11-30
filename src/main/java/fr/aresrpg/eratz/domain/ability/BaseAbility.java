@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.behavior;
+package fr.aresrpg.eratz.domain.ability;
 
 import fr.aresrpg.dofus.structures.character.Item;
 import fr.aresrpg.eratz.domain.dofus.map.*;

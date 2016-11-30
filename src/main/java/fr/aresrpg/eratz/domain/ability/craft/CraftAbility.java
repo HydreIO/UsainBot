@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.behavior.craft;
+package fr.aresrpg.eratz.domain.ability.craft;
 
 /**
  * 

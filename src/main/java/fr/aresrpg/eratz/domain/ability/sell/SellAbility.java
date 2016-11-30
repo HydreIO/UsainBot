@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.behavior.sell;
+package fr.aresrpg.eratz.domain.ability.sell;
 
 /**
  * 

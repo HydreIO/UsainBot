@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.behavior.sell;
+package fr.aresrpg.eratz.domain.handler.bot.sell;
 
 import fr.aresrpg.dofus.structures.character.Item;
 import fr.aresrpg.eratz.domain.dofus.item.Hdv;
