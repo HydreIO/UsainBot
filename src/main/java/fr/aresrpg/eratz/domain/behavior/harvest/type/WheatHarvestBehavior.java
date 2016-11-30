@@ -138,20 +138,12 @@ public class WheatHarvestBehavior extends HarvestBehavior {
 		return true;
 	}
 
-	private boolean isWheat(Ressource r) {
-		return r.getType() == Ressources.BLE;
-	}
-
-	private boolean podMax() {
-		return getPerso().getPodsPercent() > 95;
-	}
-
 	/**
 	 * @return a spawned ressource on the map
 	 */
 	private Ressource nextRessource() {
 		for (Ressource r : getPerso().getCurrentMap().getRessources())
-			if (r.isSpawned() && isWheat(r)) return r;
+			if (r.isSpawned() && getTypesToHarvest().contains(r)) return r;
 		return null;
 	}
 

@@ -19,6 +19,10 @@ public abstract class HarvestBehavior extends Behavior {
 		super(perso);
 	}
 
+	protected boolean podMax() {
+		return getPerso().getPodsPercent() > 95;
+	}
+
 	public abstract Set<Ressources> getTypesToHarvest();
 
 }
