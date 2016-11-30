@@ -31,6 +31,8 @@ public interface BaseAbility {
 
 	BaseAbility depositToBank();
 
+	BaseAbility freePod(); // impl note: liberer les pod en detruisant les ressources en trop (faudra faire des predicates canDestroy(ressource) pour pas faire de connerie)
+
 	BaseAbility equip(int itemId);
 
 	BaseAbility dismantle(int slot); // déséquiper

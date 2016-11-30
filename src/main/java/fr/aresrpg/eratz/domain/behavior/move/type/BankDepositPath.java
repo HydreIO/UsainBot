@@ -24,21 +24,19 @@ import java.util.Random;
  * 
  * @since
  */
-public class BankDepositPath implements PathBehavior {
+public class BankDepositPath extends PathBehavior {
 
-	private Perso perso;
 	private Random humanRandomizer = new Random();
 
 	public BankDepositPath(Perso perso) {
-		this.perso = perso;
+		super(perso);
 	}
 
-	@Override
 	public void startPath() {
-		BaseAbility ability = perso.getBaseAbility();
+		BaseAbility ability = getPerso().getBaseAbility();
 		ability.goToZaap(Zaap.ASTRUB);
 		waitLitle();
-		perso.getNavigation().moveDown(3).moveToCell(142);
+		getPerso().getNavigation().moveDown(3).moveToCell(142);
 		waitLitle();
 		ability.speakToNpc("Al Etsop").npcTalkChoice(0);
 		Item[] wep = ability.depositInventoryInChest(InventoryType.EQUIPEMENT);
@@ -57,8 +55,4 @@ public class BankDepositPath implements PathBehavior {
 		return null;
 	}
 
-	@Override
-	public Perso getPerso() {
-		return this.perso;
-	}
 }

@@ -17,15 +17,26 @@ import java.util.concurrent.TimeUnit;
  * 
  * @since
  */
-public interface Behavior extends Runnable {
+public abstract class Behavior implements Runnable {
 
-	Perso getPerso();
+	private Perso perso;
 
-	default void reset() {
+	public Behavior(Perso perso) {
+		this.perso = perso;
+	}
+
+	/**
+	 * @return the perso
+	 */
+	public Perso getPerso() {
+		return perso;
+	}
+
+	public void reset() {
 		getPerso().resetBehavior();
 	}
 
-	default <T extends Behavior> T botWait(int time, TimeUnit unit) {
+	public <T extends Behavior> T botWait(int time, TimeUnit unit) {
 		try {
 			Threads.sleep(time, unit);
 		} catch (InterruptedException e) {
@@ -34,14 +45,14 @@ public interface Behavior extends Runnable {
 		return (T) this;
 	}
 
-	default <T extends Behavior> T waitSec(int sec) {
+	public <T extends Behavior> T waitSec(int sec) {
 		return botWait(sec, TimeUnit.SECONDS);
 	}
 
-	void start();
+	public abstract void start();
 
 	@Override
-	default void run() {
+	public void run() {
 		start();
 		reset();
 	}

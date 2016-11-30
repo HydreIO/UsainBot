@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.behavior.harvest;
 
 import fr.aresrpg.eratz.domain.behavior.Behavior;
 import fr.aresrpg.eratz.domain.dofus.ressource.Ressources;
+import fr.aresrpg.eratz.domain.player.Perso;
 
 import java.util.Set;
 
@@ -9,8 +10,15 @@ import java.util.Set;
  * 
  * @since
  */
-public interface HarvestBehavior extends Behavior {
+public abstract class HarvestBehavior extends Behavior {
 
-	Set<Ressources> getTypesToHarvest();
+	/**
+	 * @param perso
+	 */
+	public HarvestBehavior(Perso perso) {
+		super(perso);
+	}
+
+	public abstract Set<Ressources> getTypesToHarvest();
 
 }

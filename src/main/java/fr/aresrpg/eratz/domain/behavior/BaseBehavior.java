@@ -8,26 +8,34 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.behavior;
 
+import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.player.Player;
 
 /**
  * 
  * @since
  */
-public interface BaseBehavior extends Behavior {
+public abstract class BaseBehavior extends Behavior {
 
-	boolean acceptDefi(Player pl);
+	/**
+	 * @param perso
+	 */
+	public BaseBehavior(Perso perso) {
+		super(perso);
+	}
 
-	boolean acceptEchange(Player pl);
+	public abstract boolean acceptDefi(Player pl);
 
-	boolean acceptGroup(Player pl);
+	public abstract boolean acceptEchange(Player pl);
 
-	boolean acceptCommand(Player pl);
+	public abstract boolean acceptGroup(Player pl);
 
-	boolean needToRegen();
+	public abstract boolean acceptCommand(Player pl);
 
-	boolean needToSit();
+	public abstract boolean needToRegen();
 
-	boolean needToDeco();
+	public abstract boolean needToSit();
+
+	public abstract boolean needToDeco();
 
 }

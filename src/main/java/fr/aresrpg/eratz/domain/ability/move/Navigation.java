@@ -8,17 +8,14 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.ability.move;
 
-import fr.aresrpg.eratz.domain.behavior.Behavior;
 import fr.aresrpg.eratz.domain.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.dofus.map.Zaapi;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * 
  * @since
  */
-public interface Navigation extends Behavior {
+public interface Navigation {
 
 	Navigation moveUp();
 
@@ -41,15 +38,5 @@ public interface Navigation extends Behavior {
 	Navigation takeZaap(Zaap destination);
 
 	Navigation takeZaapi(Zaapi destination);
-
-	@Override
-	default Navigation botWait(int time, TimeUnit unit) {
-		return Behavior.super.botWait(time, unit);
-	}
-
-	@Override
-	default Navigation waitSec(int sec) {
-		return Behavior.super.waitSec(sec);
-	}
 
 }

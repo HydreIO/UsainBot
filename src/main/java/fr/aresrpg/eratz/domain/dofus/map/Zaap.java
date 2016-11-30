@@ -8,7 +8,9 @@ public enum Zaap {
 
 	ASTRUB,
 	BONTA,
-	BRAKMAR
+	BRAKMAR,
+	SCARAFEUILLE,
+	PLAINE_CANIA
 	// TODO
 
 }
