@@ -55,6 +55,7 @@ public class Perso extends Player {
 		try {
 			SocketChannel channel = SocketChannel.open(TheBotFather.SERVER_ADRESS);
 			a.setCurrentPlayed(this);
+			a.getBotHandler().notifyPlayerChange();
 			a.setRemoteConnection(new DofusConnection(getPseudo(), channel, new BotHandler(a), Bound.SERVER));
 			Executors.FIXED.execute(a::readRemote);
 		} catch (IOException e) {
@@ -71,6 +72,7 @@ public class Perso extends Player {
 		Account a = getAccount();
 		try {
 			a.getRemoteConnection().close();
+			a.setCurrentPlayed(null);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
