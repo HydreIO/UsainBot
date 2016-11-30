@@ -32,7 +32,7 @@ public class BotHandler implements PacketHandler {
 
 	private Account account;
 	private FightHandler fightHandler;
-	private HarvestHandler harvestHandler = new PlayerHarvestHandler(getAccount().getCurrentPlayed());
+	private HarvestHandler harvestHandler;
 	private CraftHandler craftHandler;
 	private MapHandler mapHandler;
 
@@ -41,6 +41,7 @@ public class BotHandler implements PacketHandler {
 	 */
 	public BotHandler(Account account) {
 		this.account = account;
+		this.harvestHandler = new PlayerHarvestHandler(getAccount().getCurrentPlayed());
 	}
 
 	public void notifyPlayerChange() {

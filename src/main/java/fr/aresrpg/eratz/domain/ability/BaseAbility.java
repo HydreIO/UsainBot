@@ -64,10 +64,28 @@ public interface BaseAbility {
 
 	BaseAbility dismantle(int slot); // déséquiper
 
+	/**
+	 * Lance
+	 * 
+	 * @param p
+	 * @return
+	 */
 	BaseAbility echangeWith(Player p);
 
+	/**
+	 * Parle au npc portant ce nom
+	 * 
+	 * @param npcname
+	 * @return
+	 */
 	BaseAbility speakToNpc(String npcname);
 
+	/**
+	 * Choisit une reponse du npc auquel le bot parle
+	 * 
+	 * @param choice
+	 * @return
+	 */
 	BaseAbility npcTalkChoice(int choice);
 
 	Item[] depositInventoryInChest(InventoryType inv);

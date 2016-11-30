@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * BotFather (C) - Dofus 1.29
+ * This class is part of an AresRPG Project.
+ *
+ * @author Sceat {@literal <sceat@aresrpg.fr>}
+ * 
+ *         Created 2016
+ *******************************************************************************/
 package fr.aresrpg.eratz.domain.behavior.craft.type;
 
 import fr.aresrpg.eratz.domain.behavior.craft.CraftBehavior;
@@ -34,6 +42,6 @@ public class AmaknaBreadCraftBehavior extends CraftBehavior {
 
 	@Override
 	public void start() {
-		
+
 	}
 }
