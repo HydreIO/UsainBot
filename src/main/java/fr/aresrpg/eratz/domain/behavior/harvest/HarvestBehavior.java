@@ -13,6 +13,4 @@ public interface HarvestBehavior extends Behavior {
 
 	Set<Ressources> getTypesToHarvest();
 
-	boolean needToDepositAtBank();
-
 }
