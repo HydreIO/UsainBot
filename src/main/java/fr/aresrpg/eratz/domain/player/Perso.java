@@ -11,6 +11,7 @@ package fr.aresrpg.eratz.domain.player;
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.eratz.domain.TheBotFather;
+import fr.aresrpg.eratz.domain.behavior.BaseAbility;
 import fr.aresrpg.eratz.domain.behavior.Behavior;
 import fr.aresrpg.eratz.domain.behavior.harvest.HarvestAbility;
 import fr.aresrpg.eratz.domain.behavior.move.Navigation;
@@ -31,8 +32,9 @@ public class Perso extends Player {
 	private Account account;
 	private Map currentMap;
 	private Set<Player> group = new HashSet<>();
-	private Set<Behavior> behaviors = new HashSet<>();
+	private Behavior currentBehavior;
 	private Navigation navigation;
+	private BaseAbility baseAbility;
 	private HarvestAbility harvestAbility;
 	private int maxPods;
 	private int usedPods;
@@ -79,6 +81,13 @@ public class Perso extends Player {
 	}
 
 	/**
+	 * @return the baseAbility
+	 */
+	public BaseAbility getBaseAbility() {
+		return baseAbility;
+	}
+
+	/**
 	 * @return the maxPods
 	 */
 	public int getMaxPods() {
@@ -97,17 +106,35 @@ public class Perso extends Player {
 	}
 
 	/**
-	 * @return the behaviors
-	 */
-	public Set<Behavior> getBehaviors() {
-		return behaviors;
-	}
-
-	/**
 	 * @return the currentMap
 	 */
 	public Map getCurrentMap() {
 		return currentMap;
+	}
+
+	/**
+	 * Try to update the behavior and start it
+	 * 
+	 * @param b
+	 *            the behavior
+	 * @return true if the behavior was updated, false if there was already a behavior in execution
+	 */
+	public boolean changeBehavior(Behavior b) {
+		if (currentBehavior != null) return false;
+		this.currentBehavior = b;
+		Executors.FIXED.execute(b);
+		return true;
+	}
+
+	public void resetBehavior() {
+		this.currentBehavior = null;
+	}
+
+	/**
+	 * @return the currentBehavior
+	 */
+	public Behavior getCurrentBehavior() {
+		return currentBehavior;
 	}
 
 	/**
