@@ -1,8 +1,8 @@
 package fr.aresrpg.eratz.domain.behavior;
 
-import fr.aresrpg.eratz.domain.dofus.npc.Npc;
-import fr.aresrpg.eratz.domain.dofus.player.Channel;
-import fr.aresrpg.eratz.domain.dofus.player.Emot;
+import fr.aresrpg.dofus.structures.character.Item;
+import fr.aresrpg.eratz.domain.dofus.map.*;
+import fr.aresrpg.eratz.domain.dofus.player.*;
 import fr.aresrpg.eratz.domain.player.Player;
 
 /**
@@ -11,22 +11,36 @@ import fr.aresrpg.eratz.domain.player.Player;
  */
 public interface BaseAbility {
 
-	void regenLife(int percent);
+	BaseAbility useItem(int slot);
 
-	void sit(boolean sit);
+	BaseAbility setItemInHotBar(int itemId, int slot);
 
-	void speak(Channel canal, String msg);
+	BaseAbility sit(boolean sit);
 
-	void sendPm(String playername, String msg);
+	BaseAbility speak(Channel canal, String msg);
 
-	void sendEmot(Emot emot);
+	BaseAbility sendPm(String playername, String msg);
 
-	void echangeWith(Player p);
+	BaseAbility sendEmot(Emot emot);
 
-	void echangeWith(Npc npc);
+	BaseAbility goToZaap(Zaap zaap); // si astrub prendre popo, sinon prendre popo + prendre zaap
 
-	void openBank();
+	BaseAbility goToZaapi(Zaapi zaapi);
 
-	void speakToNpc(Npc npc);
+	BaseAbility goToCity(City city);
+
+	BaseAbility depositToBank();
+
+	BaseAbility equip(int itemId);
+
+	BaseAbility dismantle(int slot); // déséquiper
+
+	BaseAbility echangeWith(Player p);
+
+	BaseAbility speakToNpc(String npcname);
+
+	BaseAbility npcTalkChoice(int choice);
+
+	Item[] depositInventoryInChest(InventoryType inv);
 
 }
