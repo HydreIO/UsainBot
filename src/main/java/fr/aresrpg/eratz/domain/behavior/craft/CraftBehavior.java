@@ -1,14 +1,14 @@
 package fr.aresrpg.eratz.domain.behavior.craft;
 
-import fr.aresrpg.dofus.structures.character.Item;
-import fr.aresrpg.eratz.domain.behavior.BaseBehavior;
+import fr.aresrpg.eratz.domain.behavior.Behavior;
+import fr.aresrpg.eratz.domain.dofus.item.Items;
 import fr.aresrpg.eratz.domain.player.Perso;
 
 /**
  * 
  * @since
  */
-public abstract class CraftBehavior extends BaseBehavior {
+public abstract class CraftBehavior extends Behavior {
 
 	/**
 	 * @param perso
@@ -17,7 +17,6 @@ public abstract class CraftBehavior extends BaseBehavior {
 		super(perso);
 	}
 
-	public abstract Item getItemToCraft();
+	public abstract Items getItemToCraft();
 
-	public abstract int getQuantityToCraft();
 }

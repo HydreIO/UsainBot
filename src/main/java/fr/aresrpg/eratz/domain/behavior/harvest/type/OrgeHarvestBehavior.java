@@ -43,7 +43,7 @@ public class OrgeHarvestBehavior extends HarvestBehavior {
 	public void start() {
 		BaseAbility ab = getPerso().getBaseAbility();
 		Navigation na = getPerso().getNavigation();
-		ab.goToZaap(Zaap.PLAINE_CANIA);
+		ab.goToZaap(Zaap.PLAINE_ROCHEUSE);
 		na.moveLeft(6);
 		if (!harvestMap()) return;
 		na.moveDown(5);

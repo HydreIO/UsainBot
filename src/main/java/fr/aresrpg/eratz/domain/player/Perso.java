@@ -16,6 +16,7 @@ import fr.aresrpg.eratz.domain.ability.harvest.HarvestAbility;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.behavior.Behavior;
 import fr.aresrpg.eratz.domain.dofus.map.Map;
+import fr.aresrpg.eratz.domain.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -64,6 +65,11 @@ public class Perso extends Player {
 			e.printStackTrace(); // test debug
 		}
 		a.setLastConnection(System.currentTimeMillis());
+	}
+
+	public void crashReport(String msg) {
+		getBaseAbility().speak(Channel.ADMIN, msg);
+		disconnect();
 	}
 
 	public void disconnect() {

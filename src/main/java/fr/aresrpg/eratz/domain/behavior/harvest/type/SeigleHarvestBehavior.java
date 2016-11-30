@@ -23,14 +23,14 @@ import java.util.Set;
  * 
  * @since
  */
-public class WheatHarvestBehavior extends HarvestBehavior {
+public class SeigleHarvestBehavior extends HarvestBehavior {
 
-	private Set<Ressources> res = ArrayUtils.asSet(Ressources.BLE);
+	private Set<Ressources> res = ArrayUtils.asSet(Ressources.AVOINE);
 
 	/**
 	 * @param perso
 	 */
-	public WheatHarvestBehavior(Perso perso) {
+	public SeigleHarvestBehavior(Perso perso) {
 		super(perso);
 	}
 
@@ -44,33 +44,23 @@ public class WheatHarvestBehavior extends HarvestBehavior {
 		BaseAbility ab = getPerso().getBaseAbility();
 		Navigation na = getPerso().getNavigation();
 		ab.goToZaap(Zaap.PLAINE_ROCHEUSE);
+		na.moveLeft(6).moveDown();
+		if (!harvestMap()) return;
+		na.moveDown(4);
+		if (!harvestMap()) return;
+		na.moveRight();
+		if (!harvestMap()) return;
+		na.moveRight();
+		if (!harvestMap()) return;
+		na.moveLeft();
+		if (!harvestMap()) return;
+		na.moveDown();
+		if (!harvestMap()) return;
+		na.moveDown();
+		if (!harvestMap()) return;
 		na.moveLeft(5);
 		if (!harvestMap()) return;
-		na.moveUp();
-		if (!harvestMap()) return;
 		na.moveLeft();
-		if (!harvestMap()) return;
-		na.moveUp();
-		if (!harvestMap()) return;
-		na.moveUp();
-		if (!harvestMap()) return;
-		na.moveLeft();
-		if (!harvestMap()) return;
-		na.moveDown();
-		if (!harvestMap()) return;
-		na.moveLeft();
-		if (!harvestMap()) return;
-		na.moveLeft();
-		if (!harvestMap()) return;
-		na.moveDown();
-		if (!harvestMap()) return;
-		na.moveRight();
-		if (!harvestMap()) return;
-		na.moveRight();
-		if (!harvestMap()) return;
-		na.moveRight();
-		if (!harvestMap()) return;
-		na.moveDown();
 		if (!harvestMap()) return;
 		na.moveLeft();
 		if (!harvestMap()) return;
@@ -78,49 +68,37 @@ public class WheatHarvestBehavior extends HarvestBehavior {
 		if (!harvestMap()) return;
 		na.moveLeft();
 		if (!harvestMap()) return;
-		na.moveDown();
-		if (!harvestMap()) return;
-		na.moveRight();
-		if (!harvestMap()) return;
-		na.moveRight();
-		if (!harvestMap()) return;
-		na.moveRight();
-		if (!harvestMap()) return;
-		na.moveRight();
-		if (!harvestMap()) return;
-		na.moveDown().moveLeft();
-		if (!harvestMap()) return;
 		na.moveLeft();
-		if (!harvestMap()) return;
-		na.moveLeft();
-		if (!harvestMap()) return;
-		na.moveLeft();
-		if (!harvestMap()) return;
-		na.moveDown();
-		if (!harvestMap()) return;
-		na.moveRight();
-		if (!harvestMap()) return;
-		na.moveRight();
-		if (!harvestMap()) return;
-		na.moveDown();
-		if (!harvestMap()) return;
-		na.moveRight();
-		if (!harvestMap()) return;
-		na.moveDown();
-		if (!harvestMap()) return;
-		na.moveDown();
-		if (!harvestMap()) return;
-		na.moveDown();
-		if (!harvestMap()) return;
-		na.moveRight();
-		if (!harvestMap()) return;
-		na.moveUp();
 		if (!harvestMap()) return;
 		na.moveUp();
 		if (!harvestMap()) return;
 		na.moveRight();
 		if (!harvestMap()) return;
-		na.moveDown();
+		na.moveRight();
+		if (!harvestMap()) return;
+		na.moveRight();
+		if (!harvestMap()) return;
+		na.moveRight();
+		if (!harvestMap()) return;
+		na.moveUp();
+		if (!harvestMap()) return;
+		na.moveLeft();
+		if (!harvestMap()) return;
+		na.moveLeft();
+		if (!harvestMap()) return;
+		na.moveLeft();
+		if (!harvestMap()) return;
+		na.moveLeft();
+		if (!harvestMap()) return;
+		na.moveUp();
+		if (!harvestMap()) return;
+		na.moveRight();
+		if (!harvestMap()) return;
+		na.moveRight();
+		if (!harvestMap()) return;
+		na.moveRight();
+		if (!harvestMap()) return;
+		na.moveRight();
 		harvestMap();
 	}
 
