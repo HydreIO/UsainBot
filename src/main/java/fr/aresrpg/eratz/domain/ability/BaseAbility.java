@@ -1,8 +1,13 @@
 package fr.aresrpg.eratz.domain.ability;
 
 import fr.aresrpg.dofus.structures.character.Item;
-import fr.aresrpg.eratz.domain.dofus.map.*;
-import fr.aresrpg.eratz.domain.dofus.player.*;
+import fr.aresrpg.eratz.domain.dofus.map.City;
+import fr.aresrpg.eratz.domain.dofus.map.Zaap;
+import fr.aresrpg.eratz.domain.dofus.map.Zaapi;
+import fr.aresrpg.eratz.domain.dofus.player.BotPopo;
+import fr.aresrpg.eratz.domain.dofus.player.Channel;
+import fr.aresrpg.eratz.domain.dofus.player.Emot;
+import fr.aresrpg.eratz.domain.dofus.player.InventoryType;
 import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.player.Player;
 import fr.aresrpg.eratz.domain.util.exception.ZaapException;
@@ -20,7 +25,8 @@ public interface BaseAbility {
 	 * 
 	 * @param slot
 	 *            le slot
-	 * @return true si l'item à été utilisé, false si le bot est a court de cet item
+	 * @return true si l'item à été utilisé, false si le bot est a court de
+	 *         cet item
 	 */
 	boolean useItem(int slot);
 
@@ -42,7 +48,8 @@ public interface BaseAbility {
 	 * @param destination
 	 *            le zaap de destination
 	 * @throws ZaapException
-	 *             si le bot n'a pas assez de kamas ou si la destination est inconnue
+	 *             si le bot n'a pas assez de kamas ou si la destination est
+	 *             inconnue
 	 * @return l'ability
 	 */
 	BaseAbility useZaap(Zaap current, Zaap destination) throws ZaapException;
@@ -58,7 +65,9 @@ public interface BaseAbility {
 	 */
 	boolean useZaapi(Zaapi current, Zaapi destination);
 
-	BaseAbility freePod(); // impl note: liberer les pod en detruisant les ressources en trop (faudra faire des predicates canDestroy(ressource) pour pas faire de connerie)
+	BaseAbility freePod(); // impl note: liberer les pod en detruisant les
+							// ressources en trop (faudra faire des predicates
+							// canDestroy(ressource) pour pas faire de connerie)
 
 	BaseAbility equip(int itemId);
 
@@ -88,18 +97,22 @@ public interface BaseAbility {
 	 */
 	BaseAbility npcTalkChoice(int choice);
 
+	BaseAbility npcBuyChoice(int choice, int quantity);
+
 	Item[] depositInventoryInChest(InventoryType inv);
 
 	// DEFAULT UTIL
 
 	Perso getPerso();
 
-	default boolean goToZaap(Zaap zaap) { // si astrub prendre popo, sinon prendre popo + prendre zaap
+	default boolean goToZaap(Zaap zaap) { // si astrub prendre popo, sinon
+											// prendre popo + prendre zaap
 		if (!useItem(BotPopo.RAPPEL.getSlot())) {
 			getPerso().crashReport("n'a pas pu accéder au Zaap " + zaap.name() + " | Popo rappel épuisée.");
 			return false;
 		}
-		if (zaap == Zaap.ASTRUB) return true; // par default la popo rapel renvoi zaap astrub
+		if (zaap == Zaap.ASTRUB)
+			return true; // par default la popo rapel renvoi zaap astrub
 		try {
 			useZaap(Zaap.ASTRUB, zaap);
 		} catch (ZaapException e) {
@@ -111,10 +124,11 @@ public interface BaseAbility {
 
 	default boolean goToZaapi(Zaapi zaapi) { // go ville puis go zaapi
 		if (!goToCity(zaapi.getCity())) {
-			getPerso().crashReport("n'a pas pu accéder au Zaapi " + zaapi.name() + " | Impossible d'aller dans la ville");
+			getPerso().crashReport(
+					"n'a pas pu accéder au Zaapi " + zaapi.name() + " | Impossible d'aller dans la ville");
 			return false;
 		}
-		Zaapi current = zaapi.getCity() == City.BONTA ? Zaapi.BONTA_MILICE : zaapi.BRAKMAR_MILICE;
+		Zaapi current = zaapi.getCity() == City.BONTA ? Zaapi.BONTA_MILICE : Zaapi.BRAKMAR_MILICE;
 		if (!useZaapi(current, zaapi)) {
 			getPerso().crashReport("n'a pas pu accéder au Zaapi " + zaapi.name() + " | Kamas insufisant !");
 			return false;

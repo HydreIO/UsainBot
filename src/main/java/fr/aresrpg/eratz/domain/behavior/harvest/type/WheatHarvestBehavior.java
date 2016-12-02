@@ -143,7 +143,7 @@ public class WheatHarvestBehavior extends HarvestBehavior {
 	 */
 	private Ressource nextRessource() {
 		for (Ressource r : getPerso().getCurrentMap().getRessources())
-			if (r.isSpawned() && getTypesToHarvest().contains(r)) return r;
+			if (r.isSpawned() && getTypesToHarvest().contains(r.getType())) return r;
 		return null;
 	}
 

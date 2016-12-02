@@ -42,6 +42,6 @@ public class AmaknaBreadCraftBehavior extends CraftBehavior {
 
 	@Override
 	public void start() {
-
+		
 	}
 }

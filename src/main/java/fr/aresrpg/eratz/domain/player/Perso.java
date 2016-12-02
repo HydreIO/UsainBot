@@ -8,6 +8,12 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.player;
 
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.eratz.domain.TheBotFather;
@@ -22,16 +28,11 @@ import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Variables;
 
-import java.io.IOException;
-import java.nio.channels.SocketChannel;
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
-
 public class Perso extends Player {
 
 	private Account account;
 	private Map currentMap;
+	private BotJob botJob;
 	private Set<Player> group = new HashSet<>();
 	private Behavior currentBehavior;
 	private Navigation navigation;
@@ -40,24 +41,34 @@ public class Perso extends Player {
 	private int maxPods;
 	private int usedPods;
 
-	public Perso(int id, String pseudo, Account account) {
+	public Perso(int id, String pseudo, Account account, BotJob job) {
 		super(id, pseudo);
 		this.account = account;
+		this.botJob = job;
+	}
+
+	public Perso(int id, String pseudo, Account account) {
+		this(id, pseudo, account, null);
 	}
 
 	public void connect() {
 		Account a = getAccount();
 		if (a.getLastConnection() + (Variables.SEC_AFTER_CRASH * 1000) > System.currentTimeMillis())
-			throw new IllegalAccessError("[ANTI-BAN] Connection refused, please wait at least " + Variables.SEC_AFTER_CRASH + "s before every reconnection.");
+			throw new IllegalAccessError("[ANTI-BAN] Connection refused, please wait at least "
+					+ Variables.SEC_AFTER_CRASH + "s before every reconnection.");
 		System.out.println("[" + Instant.now().toString() + "] Connecting " + getPseudo());
-		if (a.isClientOnline()) throw new IllegalAccessError("The account of " + getPseudo() + " is already online | No need to connect the bot");
-		if (a.isBotOnline()) throw new IllegalAccessError("The bot " + a.getCurrentPlayed().getPseudo() + " is already online | you need to deconnect it first");
+		if (a.isClientOnline())
+			throw new IllegalAccessError(
+					"The account of " + getPseudo() + " is already online | No need to connect the bot");
+		if (a.isBotOnline())
+			throw new IllegalAccessError("The bot " + a.getCurrentPlayed().getPseudo()
+					+ " is already online | you need to deconnect it first");
 		a.setState(AccountState.BOT_ONLINE);
 		try {
 			SocketChannel channel = SocketChannel.open(TheBotFather.SERVER_ADRESS);
 			a.setCurrentPlayed(this);
 			a.getBotHandler().notifyPlayerChange();
-			a.setRemoteConnection(new DofusConnection(getPseudo(), channel, new BotHandler(a), Bound.SERVER));
+			a.setRemoteConnection(new DofusConnection<SocketChannel>(getPseudo(), channel, new BotHandler(a), Bound.SERVER));
 			Executors.FIXED.execute(a::readRemote);
 		} catch (IOException e) {
 			a.setState(AccountState.OFFLINE);
@@ -73,7 +84,8 @@ public class Perso extends Player {
 	}
 
 	public void disconnect() {
-		if (getAccount().isClientOnline()) throw new IllegalAccessError("Unable to disconnect " + getPseudo() + " ! | A client is online");
+		if (getAccount().isClientOnline())
+			throw new IllegalAccessError("Unable to disconnect " + getPseudo() + " ! | A client is online");
 		System.out.println("Disconnecting " + getPseudo());
 		Account a = getAccount();
 		try {
@@ -86,6 +98,14 @@ public class Perso extends Player {
 			System.out.println(getPseudo() + " disconnected.");
 		}
 
+	}
+
+	public BotJob getBotJob() {
+		return botJob;
+	}
+
+	public boolean hasBotJob() {
+		return getBotJob() != null;
 	}
 
 	/**
@@ -125,10 +145,12 @@ public class Perso extends Player {
 	 * 
 	 * @param b
 	 *            the behavior
-	 * @return true if the behavior was updated, false if there was already a behavior in execution
+	 * @return true if the behavior was updated, false if there was already a
+	 *         behavior in execution
 	 */
 	public boolean changeBehavior(Behavior b) {
-		if (currentBehavior != null) return false;
+		if (currentBehavior != null)
+			return false;
 		this.currentBehavior = b;
 		Executors.FIXED.execute(b);
 		return true;

@@ -8,6 +8,8 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.behavior.harvest.type;
 
+import java.util.Set;
+
 import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
@@ -16,8 +18,6 @@ import fr.aresrpg.eratz.domain.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.dofus.ressource.Ressource;
 import fr.aresrpg.eratz.domain.dofus.ressource.Ressources;
 import fr.aresrpg.eratz.domain.player.Perso;
-
-import java.util.Set;
 
 /**
  * 
@@ -45,41 +45,57 @@ public class OrgeHarvestBehavior extends HarvestBehavior {
 		Navigation na = getPerso().getNavigation();
 		ab.goToZaap(Zaap.PLAINE_ROCHEUSE);
 		na.moveLeft(6);
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveDown(5);
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveDown();
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveDown();
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveRight().moveUp();
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveRight();
 		ab.goToZaap(Zaap.ASTRUB);
 		na.moveUp(3).moveRight().moveUp(2);
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveRight();
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveUp();
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		ab.goToZaap(Zaap.MILIFUTAIE);
 		na.moveRight().moveUp().moveRight(2);
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveDown(2);
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveLeft();
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveRight();
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveRight();
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveDown();
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		ab.goToZaap(Zaap.SCARAFEUILLE);
 		na.moveRight(2);
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveRight();
-		if (!harvestMap()) return;
+		if (!harvestMap())
+			return;
 		na.moveRight().moveDown();
 		harvestMap();
 	}
@@ -93,7 +109,8 @@ public class OrgeHarvestBehavior extends HarvestBehavior {
 		Ressource next = null;
 		while ((next = nextRessource()) != null) {
 			getPerso().getHarvestAbility().harvest(next);
-			if (podMax()) return false;
+			if (podMax())
+				return false;
 		}
 		return true;
 	}
@@ -103,7 +120,8 @@ public class OrgeHarvestBehavior extends HarvestBehavior {
 	 */
 	private Ressource nextRessource() {
 		for (Ressource r : getPerso().getCurrentMap().getRessources())
-			if (r.isSpawned() && getTypesToHarvest().contains(r)) return r;
+			if (r.isSpawned() && getTypesToHarvest().contains(r.getType()))
+				return r;
 		return null;
 	}
 
