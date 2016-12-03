@@ -8,7 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.dofus.ressource;
 
-import fr.aresrpg.eratz.domain.dofus.player.Job;
+import fr.aresrpg.eratz.domain.dofus.job.Job;
 
 /**
  * 

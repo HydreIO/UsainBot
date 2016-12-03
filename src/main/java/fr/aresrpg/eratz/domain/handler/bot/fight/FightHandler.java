@@ -6,7 +6,7 @@
  * 
  *         Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.behavior.fight;
+package fr.aresrpg.eratz.domain.handler.bot.fight;
 
 import fr.aresrpg.eratz.domain.dofus.fight.*;
 import fr.aresrpg.eratz.domain.dofus.player.Spells;

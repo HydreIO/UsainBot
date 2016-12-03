@@ -1,22 +1,28 @@
-/*******************************************************************************
- * BotFather (C) - Dofus 1.29
- * This class is part of an AresRPG Project.
- *
- * @author Sceat {@literal <sceat@aresrpg.fr>}
- * 
- *         Created 2016
- *******************************************************************************/
 package fr.aresrpg.eratz.domain.behavior.harvest;
 
-import fr.aresrpg.eratz.domain.behavior.BaseBehavior;
-import fr.aresrpg.eratz.domain.dofus.ressource.Ressource;
+import fr.aresrpg.eratz.domain.behavior.Behavior;
+import fr.aresrpg.eratz.domain.dofus.ressource.Ressources;
+import fr.aresrpg.eratz.domain.player.Perso;
+
+import java.util.Set;
 
 /**
  * 
  * @since
  */
-public interface HarvestBehavior extends BaseBehavior {
+public abstract class HarvestBehavior extends Behavior {
 
-	void harvest(Ressource r);
+	/**
+	 * @param perso
+	 */
+	public HarvestBehavior(Perso perso) {
+		super(perso);
+	}
+
+	protected boolean podMax() {
+		return getPerso().getPodsPercent() > 95;
+	}
+
+	public abstract Set<Ressources> getTypesToHarvest();
 
 }

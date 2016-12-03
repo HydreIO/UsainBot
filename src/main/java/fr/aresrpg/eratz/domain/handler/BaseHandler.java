@@ -6,7 +6,7 @@
  * 
  *         Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.handler.base;
+package fr.aresrpg.eratz.domain.handler;
 
 import fr.aresrpg.dofus.protocol.PacketHandler;
 import fr.aresrpg.eratz.domain.player.Account;

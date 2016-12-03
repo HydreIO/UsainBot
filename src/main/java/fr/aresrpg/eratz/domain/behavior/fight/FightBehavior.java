@@ -4,6 +4,7 @@ import fr.aresrpg.eratz.domain.behavior.Behavior;
 import fr.aresrpg.eratz.domain.dofus.mob.Mob;
 import fr.aresrpg.eratz.domain.dofus.player.Spell;
 import fr.aresrpg.eratz.domain.dofus.player.Spells;
+import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.player.Player;
 
 import java.util.Set;
@@ -12,46 +13,53 @@ import java.util.Set;
  * 
  * @since
  */
-public interface FightBehavior extends Behavior {
+public abstract class FightBehavior extends Behavior {
 
-	boolean canLaunchSpell(Spell s);
+	/**
+	 * @param perso
+	 */
+	public FightBehavior(Perso perso) {
+		super(perso);
+	}
 
-	boolean canEndTurnHere(int cellid);
+	public abstract boolean canLaunchSpell(Spell s);
 
-	int getTryToReachCellId(); // dans le cas ou canEndTurnHere = false (par exemple pour le chall hardi ou il faut coller un mob)
+	public abstract boolean canEndTurnHere(int cellid);
 
-	Mob getTarget();
+	public abstract int getTryToReachCellId(); // dans le cas ou canEndTurnHere = false (par exemple pour le chall hardi ou il faut coller un mob)
 
-	Mob getNearestMob();
+	public abstract Mob getTarget();
 
-	Spell getSpellNeededForChallenge();
+	public abstract Mob getNearestMob();
 
-	Set<Spell> getBuffSpells();
+	public abstract Spell getSpellNeededForChallenge();
 
-	Set<Spell> getOffensiveSpells();
+	public abstract Set<Spell> getBuffSpells();
 
-	Set<Player> getAllies();
+	public abstract Set<Spell> getOffensiveSpells();
 
-	boolean canAttackTarget(Spell spell, Mob target);
+	public abstract Set<Player> getAllies();
 
-	boolean canUseMagicalSpell();
+	public abstract boolean canAttackTarget(Spell spell, Mob target);
 
-	boolean canUseWeapon();
+	public abstract boolean canUseMagicalSpell();
 
-	boolean canUseTrapAndGlyphes();
+	public abstract boolean canUseWeapon();
 
-	boolean needToKillAnEnnemiBeforeHisTurn();
+	public abstract boolean canUseTrapAndGlyphes();
 
-	boolean needToKillAtLeastOneMob();
+	public abstract boolean needToKillAnEnnemiBeforeHisTurn();
 
-	boolean canTakeDamage();
+	public abstract boolean needToKillAtLeastOneMob();
 
-	boolean needToKillAnAlly(Player p);
+	public abstract boolean canTakeDamage();
 
-	int getTotalMobKilled();
+	public abstract boolean needToKillAnAlly(Player p);
 
-	int getMobKilledInTurn();
+	public abstract int getTotalMobKilled();
 
-	boolean hasAlreadyLaunched(Spells s);
+	public abstract int getMobKilledInTurn();
+
+	public abstract boolean hasAlreadyLaunched(Spells s);
 
 }

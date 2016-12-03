@@ -3,8 +3,8 @@
  * This class is part of an AresRPG Project.
  *
  * @author Sceat {@literal <sceat@aresrpg.fr>}
- *  
- * Created 2016
+ * 
+ *         Created 2016
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.dofus.ressource;
 
@@ -22,6 +22,13 @@ public class Ressource {
 		this.cellId = cellid;
 		this.type = type;
 		this.spawned = spawned;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Ressource)) return false;
+		Ressource r = (Ressource) obj;
+		return cellId == r.getCellId() && type == r.getType();
 	}
 
 	public Ressource(int cellid, Ressources type) {
@@ -55,6 +62,10 @@ public class Ressource {
 	 */
 	public void setSpawned(boolean spawned) {
 		this.spawned = spawned;
+	}
+
+	public void setSpawned() {
+		setSpawned(true);
 	}
 
 }

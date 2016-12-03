@@ -3,21 +3,58 @@
  * This class is part of an AresRPG Project.
  *
  * @author Sceat {@literal <sceat@aresrpg.fr>}
- *  
- * Created 2016
+ * 
+ *         Created 2016
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.behavior;
+
+import fr.aresrpg.commons.domain.concurrent.Threads;
+import fr.aresrpg.eratz.domain.player.Perso;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
  * @since
  */
-public interface Behavior {
+public abstract class Behavior implements Runnable {
 
-	int getPriority();
+	private Perso perso;
 
-	boolean isActive();
+	public Behavior(Perso perso) {
+		this.perso = perso;
+	}
 
-	void setActive(boolean active);
+	/**
+	 * @return the perso
+	 */
+	public Perso getPerso() {
+		return perso;
+	}
+
+	public void reset() {
+		getPerso().resetBehavior();
+	}
+
+	public <T extends Behavior> T botWait(int time, TimeUnit unit) {
+		try {
+			Threads.sleep(time, unit);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return (T) this;
+	}
+
+	public <T extends Behavior> T waitSec(int sec) {
+		return botWait(sec, TimeUnit.SECONDS);
+	}
+
+	public abstract void start();
+
+	@Override
+	public void run() {
+		start();
+		reset();
+	}
 
 }
