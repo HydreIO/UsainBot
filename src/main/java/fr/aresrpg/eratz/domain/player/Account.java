@@ -247,7 +247,14 @@ public class Account {
 
 	@Override
 	public String toString() {
-		return "Account[user:*****" + username.substring(5) + "|pass:***]";
+		return "Account[user:" + hidePseudo() + "|pass:***]";
+	}
+
+	public String hidePseudo() {
+		if(username.length() > 5){
+			return "*****" + username.substring(5);
+		} else
+			return "*****";
 	}
 
 }
