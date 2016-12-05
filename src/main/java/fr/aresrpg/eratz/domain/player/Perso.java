@@ -8,25 +8,30 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.player;
 
-import java.io.IOException;
-import java.nio.channels.SocketChannel;
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
-
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
+import fr.aresrpg.eratz.domain.ability.craft.CraftAbility;
 import fr.aresrpg.eratz.domain.ability.harvest.HarvestAbility;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.behavior.Behavior;
+import fr.aresrpg.eratz.domain.behavior.harvest.type.WheatHarvestBehavior;
+import fr.aresrpg.eratz.domain.behavior.move.type.BankDepositPath;
+import fr.aresrpg.eratz.domain.dofus.item.Items;
+import fr.aresrpg.eratz.domain.dofus.item.Object;
 import fr.aresrpg.eratz.domain.dofus.map.Map;
 import fr.aresrpg.eratz.domain.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Variables;
+
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Perso extends Player {
 
@@ -38,6 +43,7 @@ public class Perso extends Player {
 	private Navigation navigation;
 	private BaseAbility baseAbility;
 	private HarvestAbility harvestAbility;
+	private CraftAbility craftAbility;
 	private int maxPods;
 	private int usedPods;
 
@@ -78,9 +84,60 @@ public class Perso extends Player {
 		a.setLastConnection(System.currentTimeMillis());
 	}
 
+	/**
+	 * @return the craftAbility
+	 */
+	public CraftAbility getCraftAbility() {
+		return craftAbility;
+	}
+
 	public void crashReport(String msg) {
 		getBaseAbility().speak(Channel.ADMIN, msg);
 		disconnect();
+	}
+
+	public void harvestWheat(int quantity) {
+		int harvested = 0;
+		goEmptyInvInBanque(492, 8540, 577);
+		while (harvested < quantity) {
+			WheatHarvestBehavior harvester = new WheatHarvestBehavior(this, quantity);
+			harvester.start();
+			if (harvester.isQuantityHarvested()) break;
+			if (harvester.isFullPod()) {
+				harvested += getQuantityInInventoryOf(Items.BLE.getId());
+				goEmptyInvInBanque(492, 8540, 577);
+			}
+		}
+	}
+
+	public boolean inventoryContainsItem(int id) {
+		for (Object o : getBaseAbility().getItemInInventory())
+			if (o.getTemplate().getID() == id) return true;
+		return false;
+	}
+
+	public int getQuantityInInventoryOf(int itemId) {
+		int item = 0;
+		for (Object o : getBaseAbility().getItemInInventory())
+			if (o.getTemplate().getID() == itemId) {
+				item = o.getQuantity();
+				break;
+			}
+		return item;
+	}
+
+	public void goEmptyInvInBanque(int... itemsToKeep) {
+		new BankDepositPath(this, itemsToKeep).startPath();
+	}
+
+	public int getQuantityInBanqueOf(int itemId) {
+		int item = 0;
+		for (Object o : getBaseAbility().getObjectsInBank())
+			if (o.getTemplate().getID() == itemId) {
+				item = o.getQuantity();
+				break;
+			}
+		return item;
 	}
 
 	public void disconnect() {

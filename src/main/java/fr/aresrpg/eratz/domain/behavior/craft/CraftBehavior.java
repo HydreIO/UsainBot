@@ -10,11 +10,21 @@ import fr.aresrpg.eratz.domain.player.Perso;
  */
 public abstract class CraftBehavior extends Behavior {
 
+	private int quantity;
+
 	/**
 	 * @param perso
 	 */
-	public CraftBehavior(Perso perso) {
+	public CraftBehavior(Perso perso, int quantity) {
 		super(perso);
+		this.quantity = quantity;
+	}
+
+	/**
+	 * @return the quantity
+	 */
+	public int getQuantity() {
+		return quantity;
 	}
 
 	public abstract Items getItemToCraft();

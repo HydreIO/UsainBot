@@ -298,4 +298,9 @@ public class ProxyHandler implements PacketHandler {
 				return true;
 		return false;
 	}
+
+	@Override
+	public void handle(GameActionPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
 }

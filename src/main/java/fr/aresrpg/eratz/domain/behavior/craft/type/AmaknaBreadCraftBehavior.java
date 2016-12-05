@@ -10,7 +10,9 @@ package fr.aresrpg.eratz.domain.behavior.craft.type;
 
 import fr.aresrpg.eratz.domain.behavior.craft.CraftBehavior;
 import fr.aresrpg.eratz.domain.dofus.item.Items;
+import fr.aresrpg.eratz.domain.dofus.item.Recipe;
 import fr.aresrpg.eratz.domain.player.Perso;
+import fr.aresrpg.eratz.domain.provider.type.WaterProvider;
 
 /**
  * 
@@ -18,21 +20,15 @@ import fr.aresrpg.eratz.domain.player.Perso;
  */
 public class AmaknaBreadCraftBehavior extends CraftBehavior {
 
-	private int craft;
+	private WaterProvider waterProvider;
 
 	/**
 	 * @param perso
 	 */
 	public AmaknaBreadCraftBehavior(Perso perso, int craft) {
-		super(perso);
-		this.craft = craft;
-	}
+		super(perso, craft);
+		this.waterProvider = new WaterProvider(perso, craft);
 
-	/**
-	 * @return the craft
-	 */
-	public int getNumberToCraft() {
-		return craft;
 	}
 
 	@Override
@@ -42,6 +38,7 @@ public class AmaknaBreadCraftBehavior extends CraftBehavior {
 
 	@Override
 	public void start() {
-		
+		Recipe recipe = getItemToCraft().getRecipe();
+
 	}
 }

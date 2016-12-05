@@ -9,12 +9,10 @@
 package fr.aresrpg.eratz.domain.behavior.move.type;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
-import fr.aresrpg.dofus.structures.character.Item;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.behavior.move.PathBehavior;
-import fr.aresrpg.eratz.domain.dofus.map.Zaap;
+import fr.aresrpg.eratz.domain.dofus.item.Object;
 import fr.aresrpg.eratz.domain.dofus.player.Channel;
-import fr.aresrpg.eratz.domain.dofus.player.InventoryType;
 import fr.aresrpg.eratz.domain.player.Perso;
 
 import java.util.Arrays;
@@ -27,23 +25,21 @@ import java.util.Random;
 public class BankDepositPath extends PathBehavior {
 
 	private Random humanRandomizer = new Random();
+	private int[] items;
 
-	public BankDepositPath(Perso perso) {
+	public BankDepositPath(Perso perso, int... itemsToKeep) {
 		super(perso);
+		this.items = itemsToKeep;
 	}
 
 	public void startPath() {
 		BaseAbility ability = getPerso().getBaseAbility();
-		ability.goToZaap(Zaap.ASTRUB);
+		ability.closeGui();
+		if (!ability.goAndOpenBank()) return;
+		Object[] inv = ability.getItemInInventory();
+		ability.depositItemInChest(Arrays.stream(inv).mapToInt(o -> o.getTemplate().getID()).filter(i -> !ArrayUtils.contains(i, items)).toArray());
 		waitLitle();
-		getPerso().getNavigation().moveDown(3).moveToCell(142);
-		waitLitle();
-		ability.speakToNpc("Al Etsop").npcTalkChoice(0);
-		Item[] wep = ability.depositInventoryInChest(InventoryType.EQUIPEMENT);
-		Item[] div = ability.depositInventoryInChest(InventoryType.DIVERS);
-		Item[] res = ability.depositInventoryInChest(InventoryType.RESSOURCES);
-		waitLitle();
-		ability.speak(Channel.ADMIN, "à déposé : " + Arrays.toString(ArrayUtils.concat(wep, div, res)) + " en banque !");
+		ability.speak(Channel.ADMIN, "à déposé : " + Arrays.toString(inv) + " en banque !");
 	}
 
 	private void waitLitle() { // zone peuplé mieux vaut ne pas se déplacer trop vite

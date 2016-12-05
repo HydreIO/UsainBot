@@ -31,10 +31,18 @@ public class Account {
 	private DofusConnection remoteConnection;
 	private BotHandler botHandler = new BotHandler(this);
 	private long lastConnection;
+	private Banque banque = new Banque();
 
 	public Account(String username, String pass) {
 		this.username = username;
 		this.pass = pass;
+	}
+
+	/**
+	 * @return the banque
+	 */
+	public Banque getBanque() {
+		return banque;
 	}
 
 	/**
@@ -251,7 +259,7 @@ public class Account {
 	}
 
 	public String hidePseudo() {
-		if(username.length() > 5){
+		if (username.length() > 5) {
 			return "*****" + username.substring(5);
 		} else
 			return "*****";

@@ -335,4 +335,10 @@ public class BotHandler implements PacketHandler {
 		// TODO
 	}
 
+	@Override
+	public void handle(GameActionPacket gameActionPacket) {
+		// TODO
+
+	}
+
 }

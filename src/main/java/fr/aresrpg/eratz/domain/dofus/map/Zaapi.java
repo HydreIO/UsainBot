@@ -8,6 +8,8 @@ public enum Zaapi {
 
 	BRAKMAR_MILICE(184, City.BRAKMAR),
 	BONTA_BANQUE(456, City.BONTA),
+	BONTA_BAGRUTTE(267, City.BONTA),
+	BONTA_HDV_CHASSEUR(131, City.BONTA),
 	BONTA_MILICE(254, City.BONTA);
 
 	private int cellid;

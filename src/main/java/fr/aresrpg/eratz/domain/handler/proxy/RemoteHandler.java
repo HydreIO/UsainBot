@@ -332,4 +332,10 @@ public class RemoteHandler extends BaseHandler {
 		transmit(gameEndPacket);
 	}
 
+	@Override
+	public void handle(GameActionPacket gameActionPacket) {
+		transmit(gameActionPacket);
+
+	}
+
 }

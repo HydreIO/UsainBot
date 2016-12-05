@@ -309,14 +309,17 @@ public class LocalHandler extends BaseHandler {
 
 	@Override
 	public void handle(GameStartPacket gameStartPacket) {
-		// TODO
-
+		transmit(gameStartPacket);
 	}
 
 	@Override
 	public void handle(GameEndPacket gameEndPacket) {
-		// TODO
+		transmit(gameEndPacket);
+	}
 
+	@Override
+	public void handle(GameActionPacket gameActionPacket) {
+		transmit(gameActionPacket);
 	}
 
 }

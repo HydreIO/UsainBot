@@ -8,14 +8,10 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.behavior.harvest.type;
 
-import java.util.Set;
-
-import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.behavior.harvest.HarvestBehavior;
 import fr.aresrpg.eratz.domain.dofus.map.Zaap;
-import fr.aresrpg.eratz.domain.dofus.ressource.Ressource;
 import fr.aresrpg.eratz.domain.dofus.ressource.Ressources;
 import fr.aresrpg.eratz.domain.player.Perso;
 
@@ -25,18 +21,16 @@ import fr.aresrpg.eratz.domain.player.Perso;
  */
 public class OrgeHarvestBehavior extends HarvestBehavior {
 
-	private Set<Ressources> res = ArrayUtils.asSet(Ressources.ORGE);
-
 	/**
 	 * @param perso
 	 */
-	public OrgeHarvestBehavior(Perso perso) {
-		super(perso);
+	public OrgeHarvestBehavior(Perso perso,int quantity) {
+		super(perso,quantity);
 	}
 
 	@Override
-	public Set<Ressources> getTypesToHarvest() {
-		return res;
+	public Ressources getTypesToHarvest() {
+		return Ressources.ORGE;
 	}
 
 	@Override
@@ -98,31 +92,6 @@ public class OrgeHarvestBehavior extends HarvestBehavior {
 			return;
 		na.moveRight().moveDown();
 		harvestMap();
-	}
-
-	/**
-	 * Harvest an entire map
-	 * 
-	 * @return true if the map was harvested, false if the perso is full pod
-	 */
-	private boolean harvestMap() {
-		Ressource next = null;
-		while ((next = nextRessource()) != null) {
-			getPerso().getHarvestAbility().harvest(next);
-			if (podMax())
-				return false;
-		}
-		return true;
-	}
-
-	/**
-	 * @return a spawned ressource on the map
-	 */
-	private Ressource nextRessource() {
-		for (Ressource r : getPerso().getCurrentMap().getRessources())
-			if (r.isSpawned() && getTypesToHarvest().contains(r.getType()))
-				return r;
-		return null;
 	}
 
 }

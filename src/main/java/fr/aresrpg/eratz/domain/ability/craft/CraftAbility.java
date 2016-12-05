@@ -12,7 +12,7 @@ public interface CraftAbility {
 
 	void closeGui();
 
-	void startCraft();
+	void startCraft(int quantity);
 
 	void cancelCraft();
 
