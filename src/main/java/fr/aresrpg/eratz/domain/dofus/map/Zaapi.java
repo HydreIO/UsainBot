@@ -10,6 +10,7 @@ public enum Zaapi {
 	BONTA_BANQUE(456, City.BONTA),
 	BONTA_BAGRUTTE(267, City.BONTA),
 	BONTA_HDV_CHASSEUR(131, City.BONTA),
+	BONTA_HDV_BOULANGER(547, City.BONTA),
 	BONTA_MILICE(254, City.BONTA);
 
 	private int cellid;

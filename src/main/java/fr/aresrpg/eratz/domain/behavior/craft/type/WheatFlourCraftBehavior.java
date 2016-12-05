@@ -39,6 +39,8 @@ public class WheatFlourCraftBehavior extends CraftBehavior {
 		int toCraft = getQuantity() - inInv;
 		if (inInv > 0) getPerso().goEmptyInvInBanque(492, 8540, 577);
 		while (toCraft > 0) {
+			ab.goAndOpenBank();
+			ab.getItemFromBank(Items.BLE.getId(), getPerso().getFreePods() / Items.BLE.getPod());
 			ab.goToZaapi(Zaapi.BONTA_HDV_CHASSEUR);
 			na.moveRight().moveDown(8).moveLeft().moveToCell(446).moveToCell(354);
 			ab.useCraftingMachine(1);

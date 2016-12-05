@@ -126,6 +126,10 @@ public class Perso extends Player {
 		return item;
 	}
 
+	public int getFreePods() {
+		return getMaxPods() - getUsedPods();
+	}
+
 	public void goEmptyInvInBanque(int... itemsToKeep) {
 		new BankDepositPath(this, itemsToKeep).startPath();
 	}

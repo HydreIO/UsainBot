@@ -129,6 +129,8 @@ public interface BaseAbility {
 
 	String[] getItemsInBank();
 
+	void getItemFromBank(int itemId, int quantity);
+
 	Object[] getItemInInventory();
 
 	default Object[] getObjectsInBank() {
@@ -140,13 +142,19 @@ public interface BaseAbility {
 	Perso getPerso();
 
 	default boolean goAndOpenBank() {
-		if (!goToZaap(Zaap.ASTRUB)) {
-			getPerso().crashReport("n'a pas pu accéder à la banque | Impossible d'aller au zaap Astrub.");
-			return false;
+		if (!isInBankMap()) {
+			if (!goToZaap(Zaap.ASTRUB)) {
+				getPerso().crashReport("n'a pas pu accéder à la banque | Impossible d'aller au zaap Astrub.");
+				return false;
+			}
+			getPerso().getNavigation().moveDown(3).moveToCell(142);
 		}
-		getPerso().getNavigation().moveDown(3).moveToCell(142);
 		speakToNpc(-2).npcTalkChoice(318, 259);
 		return true;
+	}
+
+	default boolean isInBankMap() {
+		return getPerso().getCurrentMap().getX() == 4 && getPerso().getCurrentMap().getZ() == -16;
 	}
 
 	default boolean goToZaap(Zaap zaap) { // si astrub prendre popo, sinon
