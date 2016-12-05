@@ -1,7 +1,7 @@
 */src/main/generated
 proguard.map
 proguard.dictionary.random
-.yml
+*.yml
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Maven template
