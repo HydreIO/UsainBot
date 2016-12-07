@@ -24,23 +24,22 @@ public class GeneralHandlerImpl implements GeneralHandler {
 
 	@Override
 	public void onEchangeRequest(Player p) {
-
+		getPerso().getBaseAbility().acceptEchangeRequest(getPerso().getCurrentBehavior().acceptEchange(p));
 	}
 
 	@Override
 	public void onDefiRequest(Player p) {
-		if (getPerso().getCurrentBehavior().acceptDefi(p)) getPerso().getBaseAbility().acceptDefiRequest(true);
-		else getPerso().getBaseAbility().acceptDefiRequest(false);
+		getPerso().getBaseAbility().acceptDefiRequest(getPerso().getCurrentBehavior().acceptDefi(p));
 	}
 
 	@Override
 	public void onGroupInvitRequest(String name) {
-
+		getPerso().getBaseAbility().acceptGroupInvitation(getPerso().getCurrentBehavior().acceptGroup(name));
 	}
 
 	@Override
 	public void onGuildInvitRequest(String name) {
-
+		getPerso().getBaseAbility().acceptGuildInvitation(getPerso().getCurrentBehavior().acceptGuilde(name));
 	}
 
 }
