@@ -8,6 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain;
 
+import fr.aresrpg.dofus.Hastebin;
 import fr.aresrpg.eratz.domain.dofus.Constants;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
 import fr.aresrpg.eratz.domain.proxy.DofusProxy;
@@ -97,6 +98,10 @@ public class TheBotFather {
 		while (isRunning()) {
 			if (!sc.hasNext()) continue;
 			String nextLine = sc.nextLine();
+			if (nextLine.equalsIgnoreCase("exit")) {
+				System.out.println(Hastebin.post());
+				System.exit(0);
+			}
 			AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
 				if (a.isClientOnline()) {
 					SocketChannel channel = (SocketChannel) a.getRemoteConnection().getChannel();
