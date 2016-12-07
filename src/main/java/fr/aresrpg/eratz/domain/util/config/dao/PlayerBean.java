@@ -46,6 +46,13 @@ public class PlayerBean {
 	}
 
 	/**
+	 * @return the persosMap
+	 */
+	public Map<String, String> getPersosMap() {
+		return persosMap;
+	}
+
+	/**
 	 * @return the accountName
 	 */
 	public String getAccountName() {
