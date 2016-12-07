@@ -16,7 +16,6 @@ import fr.aresrpg.eratz.domain.ability.craft.CraftAbility;
 import fr.aresrpg.eratz.domain.ability.fight.FightAbility;
 import fr.aresrpg.eratz.domain.ability.harvest.HarvestAbility;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
-import fr.aresrpg.eratz.domain.ability.move.NavigationImpl;
 import fr.aresrpg.eratz.domain.behavior.Behavior;
 import fr.aresrpg.eratz.domain.behavior.harvest.type.WheatHarvestBehavior;
 import fr.aresrpg.eratz.domain.behavior.move.type.BankDepositPath;
@@ -58,7 +57,6 @@ public class Perso extends Player {
 		super(id, pseudo, classe, sexe);
 		this.account = account;
 		this.botJob = job;
-		this.navigation = new NavigationImpl();
 		this.fightOptions = new FightOptions(this);
 		for (Spells s : Spells.values())
 			if (s.getClasse() == getClasse()) spells.put(s, new Spell(s));
