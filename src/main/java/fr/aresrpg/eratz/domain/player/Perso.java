@@ -82,7 +82,6 @@ public class Perso extends Player {
 		try {
 			SocketChannel channel = SocketChannel.open(TheBotFather.SERVER_ADRESS);
 			a.setCurrentPlayed(this);
-			a.getBotHandler().notifyPlayerChange();
 			a.setRemoteConnection(new DofusConnection<SocketChannel>(getPseudo(), channel, new BotHandler(a), Bound.SERVER));
 			Executors.FIXED.execute(a::readRemote);
 		} catch (IOException e) {

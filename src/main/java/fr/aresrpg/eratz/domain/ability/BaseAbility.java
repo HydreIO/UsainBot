@@ -77,19 +77,19 @@ public interface BaseAbility {
 	 */
 	boolean useZaapi(Zaapi current, Zaapi destination);
 
-	BaseAbility freePod(); // a faire plus tard // impl note: liberer les pod en detruisant les ressources en trop (faudra faire des predicates canDestroy(ressource) pour pas faire de connerie)
+	void freePod(); // a faire plus tard // impl note: liberer les pod en detruisant les ressources en trop (faudra faire des predicates canDestroy(ressource) pour pas faire de connerie)
 
-	BaseAbility equip(int itemId);
+	void equip(int itemId);
 
-	BaseAbility dismantle(int slot); // déséquiper
+	void dismantle(int slot); // déséquiper
 
-	/**
-	 * Lance
-	 * 
-	 * @param p
-	 * @return
-	 */
-	BaseAbility echangeWith(Player p);
+	void invitPlayerToGroup(String pname);
+
+	void acceptGroupInvitation(String pname);
+
+	void echangeWith(Player p); // je prend un player car il faut etre sur la meme map pour echanger
+
+	void acceptEchangeWith(Player p);
 
 	/**
 	 * Parle au npc portant ce nom

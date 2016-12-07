@@ -26,7 +26,7 @@ public class EnutrofCoffreBehavior extends FightBehavior {
 	public void playTurn() {
 		tryHuman();
 		if (getPerso().getLvl() > 99) {
-			getPerso().getFightAbility().launchSpell(Spells.COFFRE_ANIME.get(getPerso()), getBeginCellId());
+			getPerso().getFightAbility().launchSpell(Spells.COFFRE_ANIME.get(getPerso()), getPerso().getFightAbility().getSafeCellAwayFromMobs());
 			tryHuman();
 		}
 		getPerso().getFightAbility().endTurn();

@@ -24,4 +24,6 @@ public interface FightAbility {
 
 	void blockToGroup(boolean block);
 
+	int getSafeCellAwayFromMobs();
+
 }

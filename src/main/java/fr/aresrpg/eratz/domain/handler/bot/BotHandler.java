@@ -19,9 +19,8 @@ import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.eratz.domain.handler.bot.craft.CraftHandler;
 import fr.aresrpg.eratz.domain.handler.bot.fight.FightHandler;
-import fr.aresrpg.eratz.domain.handler.bot.harvest.HarvestHandler;
-import fr.aresrpg.eratz.domain.handler.bot.harvest.type.PlayerHarvestHandler;
 import fr.aresrpg.eratz.domain.handler.bot.move.MapHandler;
+import fr.aresrpg.eratz.domain.handler.bot.move.PlayerMapHandler;
 import fr.aresrpg.eratz.domain.player.Account;
 
 /**
@@ -32,7 +31,6 @@ public class BotHandler implements PacketHandler {
 
 	private Account account;
 	private FightHandler fightHandler;
-	private HarvestHandler harvestHandler;
 	private CraftHandler craftHandler;
 	private MapHandler mapHandler;
 
@@ -41,12 +39,7 @@ public class BotHandler implements PacketHandler {
 	 */
 	public BotHandler(Account account) {
 		this.account = account;
-		this.harvestHandler = new PlayerHarvestHandler(getAccount().getCurrentPlayed());
-	}
-
-	public void notifyPlayerChange() {
-		this.harvestHandler = new PlayerHarvestHandler(getAccount().getCurrentPlayed());
-		// TODO
+		this.mapHandler = new PlayerMapHandler(getAccount().getCurrentPlayed());
 	}
 
 	/**
