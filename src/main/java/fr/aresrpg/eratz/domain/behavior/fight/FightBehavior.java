@@ -3,6 +3,7 @@ package fr.aresrpg.eratz.domain.behavior.fight;
 import fr.aresrpg.eratz.domain.behavior.Behavior;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.player.Perso;
+import fr.aresrpg.eratz.domain.player.Player;
 import fr.aresrpg.eratz.domain.util.config.Variables;
 
 import java.util.Random;
@@ -49,6 +50,28 @@ public abstract class FightBehavior extends Behavior {
 	protected void waitCanStartFight() {
 		while (!getPerso().getFightOptions().canStartCombat()) // attente de pouvoir start le combat
 			;
+	}
+
+	@Override
+	public boolean acceptDefi(Player p) {
+		return false;
+	}
+
+	@Override
+	public boolean acceptEchange(Player p) {
+		return false;
+	}
+
+	@Override
+	public boolean acceptGuilde(String pname) {
+		return false;
+	}
+
+	@Override
+	public boolean acceptGroup(String pname) {
+		for (Player p : getPerso().getGroup())
+			if (p.getPseudo().equalsIgnoreCase(pname)) return true;
+		return false;
 	}
 
 }

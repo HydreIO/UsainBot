@@ -17,10 +17,10 @@ public interface MapHandler {
 	void onQuitMap(Map m);
 
 	void onMobSpawn(Mob m);
-	
+
 	void onRessourceSpawn(Ressource r);
 
-	void onRessourceRecolted(Player p, Ressource r); // faire crash ce fdp si p != bot
+	void onRessourceRecolted(Player p, Ressource r); // faire crash ce fdp si p != bot lmao
 
 	void onPlayerJoinMap(Player p, int cellId);
 

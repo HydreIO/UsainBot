@@ -10,6 +10,7 @@ package fr.aresrpg.eratz.domain.behavior;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.eratz.domain.player.Perso;
+import fr.aresrpg.eratz.domain.player.Player;
 
 import java.util.concurrent.TimeUnit;
 
@@ -50,6 +51,14 @@ public abstract class Behavior implements Runnable {
 	}
 
 	public abstract void start();
+
+	public abstract boolean acceptDefi(Player p);
+
+	public abstract boolean acceptEchange(Player p);
+
+	public abstract boolean acceptGuilde(String pname);
+
+	public abstract boolean acceptGroup(String pname);
 
 	@Override
 	public void run() {

@@ -88,5 +88,7 @@ public class AvoineHarvestBehavior extends HarvestBehavior {
 		na.moveRight();
 		harvestMap();
 	}
+	
+	
 
 }

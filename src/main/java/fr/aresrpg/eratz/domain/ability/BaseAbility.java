@@ -85,11 +85,15 @@ public interface BaseAbility {
 
 	void invitPlayerToGroup(String pname);
 
-	void acceptGroupInvitation(String pname);
+	void acceptGroupInvitation(boolean accept);
+
+	void acceptDefiRequest(boolean accept);
 
 	void echangeWith(Player p); // je prend un player car il faut etre sur la meme map pour echanger
 
-	void acceptEchangeWith(Player p);
+	void acceptEchangeRequest(boolean accept);
+
+	void acceptGuildInvitation(boolean accept);
 
 	/**
 	 * Parle au npc portant ce nom
