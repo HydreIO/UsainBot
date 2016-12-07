@@ -332,4 +332,9 @@ public class LocalHandler extends BaseHandler {
 		transmit(gameMapFramePacket);
 	}
 
+	@Override
+	public void handle(GameActionACKPacket gameActionACKPacket) {
+		transmit(gameActionACKPacket);
+	}
+
 }
