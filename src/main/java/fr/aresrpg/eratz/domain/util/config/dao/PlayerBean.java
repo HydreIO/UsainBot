@@ -13,12 +13,12 @@ public class PlayerBean {
 
 	private String accountName;
 	private String password;
-	private Map<String, String> persosMap = new HashMap<>();
+	private Map<String, String> persos = new HashMap<>();
 
 	public PlayerBean(String account, String pass, PersoBean... persos) {
 		this.accountName = account;
 		this.password = pass;
-		Arrays.stream(persos).forEach(p -> this.persosMap.put(p.getPseudo(), p.getBotJob().name().toLowerCase()));
+		Arrays.stream(persos).forEach(p -> this.persos.put(p.getPseudo(), p.getBotJob().name().toLowerCase()));
 	}
 
 	public PlayerBean() {
@@ -29,14 +29,14 @@ public class PlayerBean {
 	 *            the persosMap to set
 	 */
 	public void setPersosMap(Map<String, String> persosMap) {
-		this.persosMap = persosMap;
+		this.persos = persosMap;
 	}
 
 	/**
 	 * @return the persos
 	 */
 	public Set<PersoBean> getPersos() {
-		return persosMap.entrySet().stream().map(PersoBean::fromEntry).collect(Collectors.toSet());
+		return persos.entrySet().stream().map(PersoBean::fromEntry).collect(Collectors.toSet());
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class PlayerBean {
 	 * @return the persosMap
 	 */
 	public Map<String, String> getPersosMap() {
-		return persosMap;
+		return persos;
 	}
 
 	/**
