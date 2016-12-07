@@ -13,6 +13,8 @@ public class Variables {
 
 	@Configured("internal.options.")
 	public static boolean CONNECT_BOT_ON_CLIENT_DECONNECTION = false;
+	@Configured("bot.ia.fight.")
+	public static boolean HUMAN_FIGHT = true;
 	@Configured("internal.recover.")
 	public static boolean AUTO_RECONNECTION = true;
 	@Configured("internal.recover.wait.")

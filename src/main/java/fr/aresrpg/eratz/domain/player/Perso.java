@@ -13,16 +13,19 @@ import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ability.craft.CraftAbility;
+import fr.aresrpg.eratz.domain.ability.fight.FightAbility;
 import fr.aresrpg.eratz.domain.ability.harvest.HarvestAbility;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.behavior.Behavior;
 import fr.aresrpg.eratz.domain.behavior.harvest.type.WheatHarvestBehavior;
 import fr.aresrpg.eratz.domain.behavior.move.type.BankDepositPath;
+import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.dofus.item.Items;
 import fr.aresrpg.eratz.domain.dofus.item.Object;
 import fr.aresrpg.eratz.domain.dofus.map.Map;
 import fr.aresrpg.eratz.domain.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
+import fr.aresrpg.eratz.domain.option.fight.FightOptions;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Variables;
@@ -39,11 +42,14 @@ public class Perso extends Player {
 	private Map currentMap;
 	private BotJob botJob;
 	private Set<Player> group = new HashSet<>();
+	private Fight currentFight;
 	private Behavior currentBehavior;
 	private Navigation navigation;
 	private BaseAbility baseAbility;
 	private HarvestAbility harvestAbility;
 	private CraftAbility craftAbility;
+	private FightAbility fightAbaility;
+	private final FightOptions fightOptions;
 	private int maxPods;
 	private int usedPods;
 
@@ -51,6 +57,7 @@ public class Perso extends Player {
 		super(id, pseudo);
 		this.account = account;
 		this.botJob = job;
+		this.fightOptions = new FightOptions(this);
 	}
 
 	public Perso(int id, String pseudo, Account account) {
@@ -82,6 +89,45 @@ public class Perso extends Player {
 			e.printStackTrace(); // test debug
 		}
 		a.setLastConnection(System.currentTimeMillis());
+	}
+
+	/**
+	 * @return the currentFight
+	 */
+	public Fight getCurrentFight() {
+		return currentFight;
+	}
+
+	/**
+	 * @param currentFight
+	 *            the currentFight to set
+	 */
+	public void setCurrentFight(Fight currentFight) {
+		this.currentFight = currentFight;
+	}
+
+	/**
+	 * @return the fightOptions
+	 */
+	public FightOptions getFightOptions() {
+		return fightOptions;
+	}
+
+	public boolean isInFight(Fight f) {
+		return f == getCurrentFight();
+	}
+
+	public boolean allGroupIsInFight(Fight f) {
+		for (Player p : getGroup())
+			if (!f.hasPlayer(p)) return false;
+		return true;
+	}
+
+	/**
+	 * @return the fightAbaility
+	 */
+	public FightAbility getFightAbility() {
+		return fightAbaility;
 	}
 
 	/**
