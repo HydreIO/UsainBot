@@ -1,8 +1,6 @@
 package fr.aresrpg.eratz.domain.handler.bot;
 
-import fr.aresrpg.dofus.protocol.DofusConnection;
-import fr.aresrpg.dofus.protocol.PacketHandler;
-import fr.aresrpg.dofus.protocol.ProtocolRegistry;
+import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
@@ -19,18 +17,14 @@ import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
-import fr.aresrpg.dofus.structures.character.Character;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.server.ServerState;
-import fr.aresrpg.dofus.util.Crypt;
-import fr.aresrpg.dofus.util.Maps;
-import fr.aresrpg.dofus.util.SwfVariableExtractor;
+import fr.aresrpg.dofus.util.*;
 import fr.aresrpg.eratz.domain.ability.move.NavigationImpl;
 import fr.aresrpg.eratz.domain.handler.bot.craft.CraftHandler;
 import fr.aresrpg.eratz.domain.handler.bot.fight.FightHandler;
 import fr.aresrpg.eratz.domain.handler.bot.move.MapHandler;
 import fr.aresrpg.eratz.domain.handler.bot.move.PlayerMapHandler;
-import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.util.AnsiMapDrawer;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -51,8 +45,6 @@ public class BotHandler implements PacketHandler {
 	private FightHandler fightHandler;
 	private CraftHandler craftHandler;
 	private MapHandler mapHandler;
-	private NavigationImpl navigation;
-	private DofusConnection<?> connection;
 	private String ticket;
 
 	/**
@@ -61,8 +53,6 @@ public class BotHandler implements PacketHandler {
 	public BotHandler(Perso perso) {
 		this.perso = perso;
 		this.mapHandler = new PlayerMapHandler(perso);
-		this.navigation = new NavigationImpl(this);
-		this.perso.setNavigation(navigation);
 	}
 
 	public Perso getPerso() {
@@ -70,18 +60,17 @@ public class BotHandler implements PacketHandler {
 	}
 
 	public DofusConnection<?> getConnection() {
-		return connection;
+		return getPerso().getAccount().getRemoteConnection();
 	}
 
 	@Override
 	public void register(DofusConnection<?> connection) {
-		this.connection = connection;
 	}
 
 	@Override
 	public void handle(HelloGamePacket helloGamePacket) {
 		try {
-			connection.send(new AccountTicketPacket().setTicket(ticket));
+			getConnection().send(new AccountTicketPacket().setTicket(ticket));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -90,7 +79,7 @@ public class BotHandler implements PacketHandler {
 	@Override
 	public void handle(HelloConnectionPacket helloConnectionPacket) {
 		try {
-			connection.send(new AccountAuthPacket()
+			getConnection().send(new AccountAuthPacket()
 					.setPseudo(perso.getAccount().getUsername())
 					.setHashedPassword(Crypt.hash(perso.getAccount().getPass(), helloConnectionPacket.getHashKey()))
 					.setVersion("1.29.1"));
@@ -126,7 +115,7 @@ public class BotHandler implements PacketHandler {
 	public void handle(AccountQuestionPacket accountQuestionPacket) {
 		Executors.SCHEDULED.schedule(() -> {
 			try {
-				connection.send(new AccountListServersPacket());
+				getConnection().send(new AccountListServersPacket());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -139,7 +128,7 @@ public class BotHandler implements PacketHandler {
 	@Override
 	public void handle(AccountServerListPacket accountServerListPacket) {
 		try {
-			connection.send(new AccountAccessServerPacket().setServerId(601));
+			getConnection().send(new AccountAccessServerPacket().setServerId(601));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -152,6 +141,7 @@ public class BotHandler implements PacketHandler {
 	public void handle(AccountServerEncryptedHostPacket accountServerEncryptedHostPacket) {
 		this.ticket = accountServerEncryptedHostPacket.getTicketKey();
 		try {
+			getConnection().close();
 			getPerso().getAccount().setRemoteConnection(new DofusConnection<>(getPerso().getPseudo() ,
 					SocketChannel.open(new InetSocketAddress(accountServerEncryptedHostPacket.getIp(), 443)) , this , ProtocolRegistry.Bound.SERVER));
 		} catch (IOException e) {
@@ -170,7 +160,7 @@ public class BotHandler implements PacketHandler {
 		handle((AccountKeyPacket)accountTicketOkPacket);
 
 		try {
-			connection.send(new AccountRegionalVersionPacket());
+			getConnection().send(new AccountRegionalVersionPacket());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -182,7 +172,7 @@ public class BotHandler implements PacketHandler {
 	@Override
 	public void handle(AccountKeyPacket accountKeyPacket) {
 		try {
-			connection.send(new AccountKeyPacket().setKey(accountKeyPacket.getKey()).setData(accountKeyPacket.getData()));
+			getConnection().send(new AccountKeyPacket().setKey(accountKeyPacket.getKey()).setData(accountKeyPacket.getData()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -191,9 +181,9 @@ public class BotHandler implements PacketHandler {
 	@Override
 	public void handle(AccountRegionalVersionPacket accountRegionalVersionPacket) {
 		try {
-			connection.send(new AccountGetGiftsPacket().setLanguage("fr"));
-			connection.send(new AccountIdentity().setIdentity(Crypt.getRandomNetworkKey()));
-			connection.send(new AccountGetCharactersPacket());
+			getConnection().send(new AccountGetGiftsPacket().setLanguage("fr"));
+			getConnection().send(new AccountIdentity().setIdentity(Crypt.getRandomNetworkKey()));
+			getConnection().send(new AccountGetCharactersPacket());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -213,7 +203,7 @@ public class BotHandler implements PacketHandler {
 		for(AvailableCharacter c : accountCharactersListPacket.getCharacters())
 			if(c.getPseudo().equals(perso.getPseudo())){
 				try {
-					connection.send(new AccountSelectCharacterPacket().setCharacterId(c.getId()));
+					getConnection().send(new AccountSelectCharacterPacket().setCharacterId(c.getId()));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -242,7 +232,7 @@ public class BotHandler implements PacketHandler {
 	public void handle(InfoMessagePacket infoMessagePacket) {
 		if(infoMessagePacket.getMessageId() == 153) {
 			try {
-				connection.send(new GameCreatePacket().setGameType(1));
+				getConnection().send(new GameCreatePacket().setGameType(1));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -274,9 +264,8 @@ public class BotHandler implements PacketHandler {
 					gameMapDataPacket.getSubid()));
 			DofusMap m = Maps.loadMap(d , gameMapDataPacket.getDecryptKey());
 			System.out.println(AnsiMapDrawer.drawMap(m));
-			this.navigation.setMap(m);
-
-			connection.send(new GameExtraInformationPacket());
+			((NavigationImpl)getPerso().getNavigation()).setMap(m);
+			getConnection().send(new GameExtraInformationPacket());
 		}catch(IOException e) {
 			e.printStackTrace();
 		}
@@ -284,9 +273,8 @@ public class BotHandler implements PacketHandler {
 
 	@Override
 	public void handle(GameMovementPacket gameMovementPacket) {
-		if(perso.getPseudo().equals(gameMovementPacket.getName())) {
-			navigation.setCurrentPos(gameMovementPacket.getCell());
-		}
+		if(perso.getPseudo().equals(gameMovementPacket.getName())) 
+			((NavigationImpl)getPerso().getNavigation()).setCurrentPos(gameMovementPacket.getCell());
 	}
 
 	@Override

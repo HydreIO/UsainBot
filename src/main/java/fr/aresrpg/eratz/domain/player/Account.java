@@ -9,7 +9,6 @@
 package fr.aresrpg.eratz.domain.player;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
-import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.Threads;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
