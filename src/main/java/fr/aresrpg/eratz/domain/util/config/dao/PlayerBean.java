@@ -13,7 +13,7 @@ public class PlayerBean {
 
 	private String accountName;
 	private String password;
-	private Map<String, String> persos;
+	private Map<String, String> persos = new HashMap<>();
 
 	public PlayerBean(String account, String pass, PersoBean... persos) {
 		this.accountName = account;
