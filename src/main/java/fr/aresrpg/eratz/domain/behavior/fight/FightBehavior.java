@@ -1,19 +1,21 @@
 package fr.aresrpg.eratz.domain.behavior.fight;
 
 import fr.aresrpg.eratz.domain.behavior.Behavior;
-import fr.aresrpg.eratz.domain.dofus.mob.Mob;
-import fr.aresrpg.eratz.domain.dofus.player.Spell;
-import fr.aresrpg.eratz.domain.dofus.player.Spells;
+import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.player.Perso;
-import fr.aresrpg.eratz.domain.player.Player;
+import fr.aresrpg.eratz.domain.util.config.Variables;
 
-import java.util.Set;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
  * @since
  */
 public abstract class FightBehavior extends Behavior {
+
+	private static Random r = new Random();
+	private Fight fight;
 
 	/**
 	 * @param perso
@@ -22,44 +24,31 @@ public abstract class FightBehavior extends Behavior {
 		super(perso);
 	}
 
-	public abstract boolean canLaunchSpell(Spell s);
+	public boolean humanFight() {
+		return Variables.HUMAN_FIGHT;
+	}
 
-	public abstract boolean canEndTurnHere(int cellid);
+	public abstract int getBeginCellId();
 
-	public abstract int getTryToReachCellId(); // dans le cas ou canEndTurnHere = false (par exemple pour le chall hardi ou il faut coller un mob)
+	@Override
+	public void start() {
+		if (getPerso().getCurrentFight() == null) throw new IllegalStateException("Le combat est null");
+		getPerso().getFightAbility().goToCellBeforeStart(getBeginCellId());
+		waitCanStartFight();
+		getPerso().getFightAbility().beReady(true);
+		while (!getPerso().getCurrentFight().isEnded())
+			if (getPerso().getCurrentFight().getCurrentTurn() == getPerso()) playTurn();
+	}
 
-	public abstract Mob getTarget();
+	public abstract void playTurn();
 
-	public abstract Mob getNearestMob();
+	public void tryHuman() {
+		if (humanFight()) botWait(r.nextInt(3000) + 1000, TimeUnit.MILLISECONDS);
+	}
 
-	public abstract Spell getSpellNeededForChallenge();
-
-	public abstract Set<Spell> getBuffSpells();
-
-	public abstract Set<Spell> getOffensiveSpells();
-
-	public abstract Set<Player> getAllies();
-
-	public abstract boolean canAttackTarget(Spell spell, Mob target);
-
-	public abstract boolean canUseMagicalSpell();
-
-	public abstract boolean canUseWeapon();
-
-	public abstract boolean canUseTrapAndGlyphes();
-
-	public abstract boolean needToKillAnEnnemiBeforeHisTurn();
-
-	public abstract boolean needToKillAtLeastOneMob();
-
-	public abstract boolean canTakeDamage();
-
-	public abstract boolean needToKillAnAlly(Player p);
-
-	public abstract int getTotalMobKilled();
-
-	public abstract int getMobKilledInTurn();
-
-	public abstract boolean hasAlreadyLaunched(Spells s);
+	protected void waitCanStartFight() {
+		while (!getPerso().getFightOptions().canStartCombat()) // attente de pouvoir start le combat
+			;
+	}
 
 }
