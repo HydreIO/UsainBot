@@ -1,7 +1,7 @@
 package fr.aresrpg.eratz.domain.dofus.fight;
 
+import fr.aresrpg.dofus.structures.map.Mob;
 import fr.aresrpg.eratz.domain.dofus.mob.Invocation;
-import fr.aresrpg.eratz.domain.dofus.mob.Mob;
 import fr.aresrpg.eratz.domain.player.Player;
 
 import java.util.Set;

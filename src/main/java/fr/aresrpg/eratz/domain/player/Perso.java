@@ -10,6 +10,7 @@ package fr.aresrpg.eratz.domain.player;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
+import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ability.craft.CraftAbility;
@@ -23,7 +24,6 @@ import fr.aresrpg.eratz.domain.behavior.move.type.BankDepositPath;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.dofus.item.Items;
 import fr.aresrpg.eratz.domain.dofus.item.Object;
-import fr.aresrpg.eratz.domain.dofus.map.Map;
 import fr.aresrpg.eratz.domain.dofus.player.*;
 import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
 import fr.aresrpg.eratz.domain.option.fight.FightOptions;
@@ -39,7 +39,7 @@ import java.util.*;
 public class Perso extends Player {
 
 	private Account account;
-	private Map currentMap;
+	private DofusMap currentMap;
 	private BotJob botJob;
 	private Set<Player> group = new HashSet<>();
 	private java.util.Map<Spells, Spell> spells = new HashMap<>();
@@ -254,7 +254,7 @@ public class Perso extends Player {
 	/**
 	 * @return the currentMap
 	 */
-	public Map getCurrentMap() {
+	public DofusMap getCurrentMap() {
 		return currentMap;
 	}
 

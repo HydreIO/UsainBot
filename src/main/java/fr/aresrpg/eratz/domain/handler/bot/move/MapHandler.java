@@ -1,9 +1,7 @@
 package fr.aresrpg.eratz.domain.handler.bot.move;
 
+import fr.aresrpg.dofus.structures.map.*;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
-import fr.aresrpg.eratz.domain.dofus.map.Map;
-import fr.aresrpg.eratz.domain.dofus.mob.Mob;
-import fr.aresrpg.eratz.domain.dofus.ressource.Ressource;
 import fr.aresrpg.eratz.domain.player.Player;
 
 /**
@@ -12,9 +10,9 @@ import fr.aresrpg.eratz.domain.player.Player;
  */
 public interface MapHandler {
 
-	void onJoinMap(Map m);
+	void onJoinMap(DofusMap m);
 
-	void onQuitMap(Map m);
+	void onQuitMap(DofusMap m);
 
 	void onMobSpawn(Mob m);
 

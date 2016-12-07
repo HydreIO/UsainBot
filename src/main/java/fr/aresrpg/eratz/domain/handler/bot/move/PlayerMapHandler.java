@@ -1,9 +1,7 @@
 package fr.aresrpg.eratz.domain.handler.bot.move;
 
+import fr.aresrpg.dofus.structures.map.*;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
-import fr.aresrpg.eratz.domain.dofus.map.Map;
-import fr.aresrpg.eratz.domain.dofus.mob.Mob;
-import fr.aresrpg.eratz.domain.dofus.ressource.Ressource;
 import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.player.Player;
 
@@ -39,13 +37,13 @@ public class PlayerMapHandler implements MapHandler {
 	}
 
 	@Override
-	public void onJoinMap(Map m) {
+	public void onJoinMap(DofusMap m) {
 		// TODO
 
 	}
 
 	@Override
-	public void onQuitMap(Map m) {
+	public void onQuitMap(DofusMap m) {
 		// TODO
 
 	}
