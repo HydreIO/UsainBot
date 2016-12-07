@@ -63,7 +63,7 @@ public class RemoteHandler extends BaseHandler {
 
 	@Override
 	public boolean parse(ProtocolRegistry registry, String packet) {
-		if (registry == null) {
+		if (registry == null || registry == ProtocolRegistry.GAME_MOVEMENT) {
 			SocketChannel channel = (SocketChannel) getProxy().getLocalConnection().getChannel();
 			try {
 				packet += "\0";
@@ -346,6 +346,11 @@ public class RemoteHandler extends BaseHandler {
 	@Override
 	public void handle(GameMapFramePacket gameMapFramePacket) {
 		transmit(gameMapFramePacket);
+	}
+
+	@Override
+	public void handle(GameActionACKPacket gameActionACKPacket) {
+		transmit(gameActionACKPacket);
 	}
 
 }

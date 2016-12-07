@@ -10,6 +10,7 @@ package fr.aresrpg.eratz.domain;
 
 import fr.aresrpg.dofus.Hastebin;
 import fr.aresrpg.eratz.domain.dofus.Constants;
+import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
 import fr.aresrpg.eratz.domain.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -24,6 +25,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TheBotFather {
 
@@ -98,10 +100,23 @@ public class TheBotFather {
 		Scanner sc = new Scanner(System.in);
 		while (isRunning()) {
 			if (!sc.hasNext()) continue;
-			String nextLine = sc.nextLine();
-			if (nextLine.equalsIgnoreCase("exit")) {
-				System.out.println(Hastebin.post());
-				System.exit(0);
+			String[] nextLine = sc.nextLine().split(" ");
+
+			switch (nextLine[0].toLowerCase()) {
+				case "exit":
+					System.out.println(Hastebin.post());
+					System.exit(0);
+					break;
+				case "listaccounts":
+					System.out.println(AccountsManager.getInstance()
+							.getAccounts().values().stream().map(Account::getUsername)
+							.collect(Collectors.joining(", ")));
+					break;
+				case "selectaccount":
+					String perso = nextLine.length == 3 ? nextLine[2] :
+							AccountsManager.getInstance().getAccounts().get(nextLine[1]).getPersos().get(0).getPseudo();
+					AccountsManager.getInstance().connectAccount(nextLine[1] , perso);
+					break;
 			}
 			AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
 				if (a.isClientOnline()) {

@@ -56,7 +56,7 @@ public class ProxyHandler implements PacketHandler {
 
 	@Override
 	public void register(DofusConnection<?> connection) {
-
+		handlers.forEach((h) -> h.register(connection));
 	}
 
 	@Override
@@ -309,6 +309,11 @@ public class ProxyHandler implements PacketHandler {
 
 	@Override
 	public void handle(GameMapFramePacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameActionACKPacket pkt) {
 		handlers.forEach(h -> h.handle(pkt));
 	}
 }

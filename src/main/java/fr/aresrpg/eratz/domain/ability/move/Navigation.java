@@ -19,21 +19,41 @@ public interface Navigation {
 
 	Navigation moveUp();
 
-	Navigation moveUp(int nbr);
+	default Navigation moveUp(int nbr){
+		for(int i = 0 ; i < nbr ; i++)
+			moveUp();
+		return this;
+	}
 
 	Navigation moveDown();
 
-	Navigation moveDown(int nbr);
+	default Navigation moveDown(int nbr){
+		for(int i = 0 ; i < nbr ; i++)
+			moveDown();
+		return this;
+	}
 
 	Navigation moveLeft();
 
-	Navigation moveLeft(int nbr);
+	default Navigation moveLeft(int nbr){
+		for(int i = 0 ; i < nbr ; i++)
+			moveLeft();
+		return this;
+	}
 
 	Navigation moveRight();
 
-	Navigation moveRight(int nbr);
+	default Navigation moveRight(int nbr){
+		for(int i = 0 ; i < nbr ; i++)
+			moveRight();
+		return this;
+	}
 
-	Navigation moveToCell(int cellid);
+	Navigation moveToCell(int cellid , boolean changeMap);
+
+	default Navigation moveToCell(int cellid) {
+		return moveToCell(cellid , false);
+	}
 
 	Navigation takeZaap(Zaap destination);
 

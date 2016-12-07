@@ -82,7 +82,8 @@ public class Perso extends Player {
 		try {
 			SocketChannel channel = SocketChannel.open(TheBotFather.SERVER_ADRESS);
 			a.setCurrentPlayed(this);
-			a.setRemoteConnection(new DofusConnection<SocketChannel>(getPseudo(), channel, new BotHandler(a), Bound.SERVER));
+			a.setRemoteConnection(new DofusConnection<>(getPseudo(), channel, new BotHandler(this), Bound.SERVER));
+			a.setRemoteConnection(new DofusConnection<SocketChannel>(getPseudo(), channel, new BotHandler(this), Bound.SERVER));
 			Executors.FIXED.execute(a::readRemote);
 		} catch (IOException e) {
 			a.setState(AccountState.OFFLINE);
@@ -294,6 +295,10 @@ public class Perso extends Player {
 	 */
 	public Navigation getNavigation() {
 		return navigation;
+	}
+
+	public void setNavigation(Navigation navigation) {
+		this.navigation = navigation;
 	}
 
 	/**

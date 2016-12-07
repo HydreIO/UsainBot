@@ -29,7 +29,6 @@ public class Account {
 	private Perso defaultBot;
 	private AccountState state = AccountState.OFFLINE;
 	private DofusConnection remoteConnection;
-	private BotHandler botHandler = new BotHandler(this);
 	private long lastConnection;
 	private Banque banque = new Banque();
 
@@ -151,13 +150,6 @@ public class Account {
 	 */
 	public void setLastConnection(long lastConnection) {
 		this.lastConnection = lastConnection;
-	}
-
-	/**
-	 * @return the botHandler
-	 */
-	public BotHandler getBotHandler() {
-		return botHandler;
 	}
 
 	/**

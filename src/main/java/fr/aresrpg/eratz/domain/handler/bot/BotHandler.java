@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.handler.bot;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.PacketHandler;
+import fr.aresrpg.dofus.protocol.ProtocolRegistry;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
@@ -17,11 +18,28 @@ import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
+import fr.aresrpg.dofus.structures.character.AvailableCharacter;
+import fr.aresrpg.dofus.structures.character.Character;
+import fr.aresrpg.dofus.structures.map.DofusMap;
+import fr.aresrpg.dofus.structures.server.ServerState;
+import fr.aresrpg.dofus.util.Crypt;
+import fr.aresrpg.dofus.util.Maps;
+import fr.aresrpg.dofus.util.SwfVariableExtractor;
+import fr.aresrpg.eratz.domain.ability.move.NavigationImpl;
 import fr.aresrpg.eratz.domain.handler.bot.craft.CraftHandler;
 import fr.aresrpg.eratz.domain.handler.bot.fight.FightHandler;
 import fr.aresrpg.eratz.domain.handler.bot.move.MapHandler;
 import fr.aresrpg.eratz.domain.handler.bot.move.PlayerMapHandler;
 import fr.aresrpg.eratz.domain.player.Account;
+import fr.aresrpg.eratz.domain.player.Perso;
+import fr.aresrpg.eratz.domain.util.AnsiMapDrawer;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.channels.SocketChannel;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -29,203 +47,206 @@ import fr.aresrpg.eratz.domain.player.Account;
  */
 public class BotHandler implements PacketHandler {
 
-	private Account account;
+	private Perso perso;
 	private FightHandler fightHandler;
 	private CraftHandler craftHandler;
 	private MapHandler mapHandler;
+	private NavigationImpl navigation;
+	private DofusConnection<?> connection;
+	private String ticket;
 
 	/**
 	 * @param account
 	 */
-	public BotHandler(Account account) {
-		this.account = account;
-		this.mapHandler = new PlayerMapHandler(getAccount().getCurrentPlayed());
+	public BotHandler(Perso perso) {
+		this.perso = perso;
+		this.mapHandler = new PlayerMapHandler(perso);
+		this.navigation = new NavigationImpl(this);
+		this.perso.setNavigation(navigation);
 	}
 
-	/**
-	 * @return the account
-	 */
-	public Account getAccount() {
-		return account;
+	public Perso getPerso() {
+		return perso;
+	}
+
+	public DofusConnection<?> getConnection() {
+		return connection;
 	}
 
 	@Override
 	public void register(DofusConnection<?> connection) {
-		// TODO
-
+		this.connection = connection;
 	}
 
 	@Override
 	public void handle(HelloGamePacket helloGamePacket) {
-		// TODO
-
+		try {
+			connection.send(new AccountTicketPacket().setTicket(ticket));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void handle(HelloConnectionPacket helloConnectionPacket) {
-		// TODO
-
+		try {
+			connection.send(new AccountAuthPacket()
+					.setPseudo(perso.getAccount().getUsername())
+					.setHashedPassword(Crypt.hash(perso.getAccount().getPass(), helloConnectionPacket.getHashKey()))
+					.setVersion("1.29.1"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public void handle(AccountAuthPacket accountAuthPacket) {
-		// TODO
-
-	}
+	public void handle(AccountAuthPacket accountAuthPacket) {}
 
 	@Override
 	public void handle(AccountLoginErrPacket accountLoginErrPacket) {
-		// TODO
-
+		throw new IllegalStateException("Can't login " + accountLoginErrPacket.getErr());
 	}
 
 	@Override
-	public void handle(AccountLoginOkPacket accountLoginOkPacket) {
-		// TODO
-
-	}
+	public void handle(AccountLoginOkPacket accountLoginOkPacket) {}
 
 	@Override
-	public void handle(AccountPseudoPacket accountPseudoPacket) {
-		// TODO
-
-	}
+	public void handle(AccountPseudoPacket accountPseudoPacket) {}
 
 	@Override
-	public void handle(AccountCommunityPacket accountCommunityPacket) {
-		// TODO
-
-	}
+	public void handle(AccountCommunityPacket accountCommunityPacket) {}
 
 	@Override
 	public void handle(AccountHostPacket accountHostPacket) {
-		// IF SERVER IN SAVE DONT CONNECT (ban 6h)
+		if(accountHostPacket.getServers()[0].getState() != ServerState.ONLINE)
+			throw new IllegalStateException("Server not online");
 	}
 
 	@Override
 	public void handle(AccountQuestionPacket accountQuestionPacket) {
-		// TODO
-
+		Executors.SCHEDULED.schedule(() -> {
+			try {
+				connection.send(new AccountListServersPacket());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}, 2 , TimeUnit.SECONDS);
 	}
 
 	@Override
-	public void handle(AccountListServersPacket accountListServersPacket) {
-		// TODO
-
-	}
+	public void handle(AccountListServersPacket accountListServersPacket) {}
 
 	@Override
 	public void handle(AccountServerListPacket accountServerListPacket) {
-		// TODO
-
+		try {
+			connection.send(new AccountAccessServerPacket().setServerId(601));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public void handle(AccountAccessServerPacket accountAccessServerPacket) {
-		// TODO
-
-	}
+	public void handle(AccountAccessServerPacket accountAccessServerPacket) {}
 
 	@Override
 	public void handle(AccountServerEncryptedHostPacket accountServerEncryptedHostPacket) {
-		// TODO
-
+		this.ticket = accountServerEncryptedHostPacket.getTicketKey();
+		try {
+			getPerso().getAccount().setRemoteConnection(new DofusConnection<>(getPerso().getPseudo() ,
+					SocketChannel.open(new InetSocketAddress(accountServerEncryptedHostPacket.getIp(), 443)) , this , ProtocolRegistry.Bound.SERVER));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public void handle(AccountServerHostPacket accountServerHostPacket) {
-		// TODO
-
-	}
+	public void handle(AccountServerHostPacket accountServerHostPacket) {}
 
 	@Override
-	public void handle(AccountTicketPacket accountTicketPacket) {
-		// TODO
-
-	}
+	public void handle(AccountTicketPacket accountTicketPacket) {}
 
 	@Override
 	public void handle(AccountTicketOkPacket accountTicketOkPacket) {
-		// TODO
+		handle((AccountKeyPacket)accountTicketOkPacket);
 
+		try {
+			connection.send(new AccountRegionalVersionPacket());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public void handle(BasicConfirmPacket basicConfirmPacket) {
-		// TODO
-
-	}
+	public void handle(BasicConfirmPacket basicConfirmPacket) {}
 
 	@Override
 	public void handle(AccountKeyPacket accountKeyPacket) {
-		// TODO
-
+		try {
+			connection.send(new AccountKeyPacket().setKey(accountKeyPacket.getKey()).setData(accountKeyPacket.getData()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void handle(AccountRegionalVersionPacket accountRegionalVersionPacket) {
-		// TODO
-
+		try {
+			connection.send(new AccountGetGiftsPacket().setLanguage("fr"));
+			connection.send(new AccountIdentity().setIdentity(Crypt.getRandomNetworkKey()));
+			connection.send(new AccountGetCharactersPacket());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public void handle(AccountGetGiftsPacket accountGetGiftsPacket) {
-		// TODO
-
-	}
+	public void handle(AccountGetGiftsPacket accountGetGiftsPacket) {}
 
 	@Override
-	public void handle(AccountIdentity accountIdentity) {
-		// TODO
-
-	}
+	public void handle(AccountIdentity accountIdentity) {}
 
 	@Override
-	public void handle(AccountGetCharactersPacket accountGetCharactersPacket) {
-		// TODO
-
-	}
+	public void handle(AccountGetCharactersPacket accountGetCharactersPacket) {}
 
 	@Override
 	public void handle(AccountCharactersListPacket accountCharactersListPacket) {
-		// TODO
+		for(AvailableCharacter c : accountCharactersListPacket.getCharacters())
+			if(c.getPseudo().equals(perso.getPseudo())){
+				try {
+					connection.send(new AccountSelectCharacterPacket().setCharacterId(c.getId()));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return;
+			}
 
+		throw new IllegalStateException("No perso with name " + perso.getPseudo());
 	}
 
 	@Override
-	public void handle(AccountSelectCharacterPacket accountSelectCharacterPacket) {
-		// TODO
-
-	}
+	public void handle(AccountSelectCharacterPacket accountSelectCharacterPacket) {}
 
 	@Override
-	public void handle(AccountGetQueuePosition accountGetQueuePosition) {
-		// TODO
-
-	}
+	public void handle(AccountGetQueuePosition accountGetQueuePosition) {}
 
 	@Override
-	public void handle(AccountQueuePosition accountQueuePosition) {
-		// TODO
-
-	}
+	public void handle(AccountQueuePosition accountQueuePosition) {}
 
 	@Override
-	public void handle(MountXpPacket mountXpPacket) {
-		// TODO
-
-	}
+	public void handle(MountXpPacket mountXpPacket) {}
 
 	@Override
-	public void handle(GameExtraInformationPacket gameExtraInformationPacket) {
-		// TODO
-
-	}
+	public void handle(GameExtraInformationPacket gameExtraInformationPacket) {}
 
 	@Override
 	public void handle(InfoMessagePacket infoMessagePacket) {
-		// TODO
-
+		if(infoMessagePacket.getMessageId() == 153) {
+			try {
+				connection.send(new GameCreatePacket().setGameType(1));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
@@ -248,8 +269,24 @@ public class BotHandler implements PacketHandler {
 
 	@Override
 	public void handle(GameMapDataPacket gameMapDataPacket) {
-		// TODO
+		try {
+			Map<String, Object> d = SwfVariableExtractor.extractVariable(Maps.downloadMap(gameMapDataPacket.getMapId(),
+					gameMapDataPacket.getSubid()));
+			DofusMap m = Maps.loadMap(d , gameMapDataPacket.getDecryptKey());
+			System.out.println(AnsiMapDrawer.drawMap(m));
+			this.navigation.setMap(m);
 
+			connection.send(new GameExtraInformationPacket());
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void handle(GameMovementPacket gameMovementPacket) {
+		if(perso.getPseudo().equals(gameMovementPacket.getName())) {
+			navigation.setCurrentPos(gameMovementPacket.getCell());
+		}
 	}
 
 	@Override
@@ -335,14 +372,13 @@ public class BotHandler implements PacketHandler {
 	}
 
 	@Override
-	public void handle(GameMovementPacket gameMovementPacket) {
+	public void handle(GameMapFramePacket gameMapFramePacket) {
 		// TODO
 
 	}
 
 	@Override
-	public void handle(GameMapFramePacket gameMapFramePacket) {
-		// TODO
+	public void handle(GameActionACKPacket gameActionACKPacket) {
 
 	}
 
