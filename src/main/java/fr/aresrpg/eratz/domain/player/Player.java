@@ -26,9 +26,10 @@ public class Player {
 	private int pm;
 	// ajouter resi
 
-	public Player(int id, String pseudo) {
+	public Player(int id, String pseudo, Classe classe) {
 		this.id = id;
 		this.pseudo = pseudo;
+		this.classe = classe;
 	}
 
 	/**

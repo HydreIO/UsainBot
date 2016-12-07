@@ -23,7 +23,7 @@ import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.dofus.item.Items;
 import fr.aresrpg.eratz.domain.dofus.item.Object;
 import fr.aresrpg.eratz.domain.dofus.map.Map;
-import fr.aresrpg.eratz.domain.dofus.player.Channel;
+import fr.aresrpg.eratz.domain.dofus.player.*;
 import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
 import fr.aresrpg.eratz.domain.option.fight.FightOptions;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
@@ -33,8 +33,7 @@ import fr.aresrpg.eratz.domain.util.config.Variables;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Perso extends Player {
 
@@ -42,6 +41,7 @@ public class Perso extends Player {
 	private Map currentMap;
 	private BotJob botJob;
 	private Set<Player> group = new HashSet<>();
+	private java.util.Map<Spells, Spell> spells = new HashMap<>();
 	private Fight currentFight;
 	private Behavior currentBehavior;
 	private Navigation navigation;
@@ -58,6 +58,9 @@ public class Perso extends Player {
 		this.account = account;
 		this.botJob = job;
 		this.fightOptions = new FightOptions(this);
+		for(Spells s : Spells.values()) {
+			if(s.getClasse())
+		}
 	}
 
 	public Perso(int id, String pseudo, Account account) {
@@ -89,6 +92,13 @@ public class Perso extends Player {
 			e.printStackTrace(); // test debug
 		}
 		a.setLastConnection(System.currentTimeMillis());
+	}
+
+	/**
+	 * @return the spells
+	 */
+	public java.util.Map<Spells, Spell> getSpells() {
+		return spells;
 	}
 
 	/**
