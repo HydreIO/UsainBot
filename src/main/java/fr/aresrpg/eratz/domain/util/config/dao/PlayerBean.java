@@ -84,7 +84,7 @@ public class PlayerBean {
 		}
 
 		public BotJob getBotJob() {
-			return botJob == null ? null : BotJob.valueOf(botJob.toUpperCase());
+			return botJob == null ? BotJob.NONE : BotJob.valueOf(botJob.toUpperCase());
 		}
 
 		public static PersoBean fromEntry(Map.Entry<String, String> entry) {
