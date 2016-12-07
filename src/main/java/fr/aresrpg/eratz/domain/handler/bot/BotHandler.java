@@ -341,4 +341,16 @@ public class BotHandler implements PacketHandler {
 
 	}
 
+	@Override
+	public void handle(GameMovementPacket gameMovementPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameMapFramePacket gameMapFramePacket) {
+		// TODO
+
+	}
+
 }

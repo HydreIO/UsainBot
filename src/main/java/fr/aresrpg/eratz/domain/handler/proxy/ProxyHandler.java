@@ -1,8 +1,6 @@
 package fr.aresrpg.eratz.domain.handler.proxy;
 
-import fr.aresrpg.dofus.protocol.DofusConnection;
-import fr.aresrpg.dofus.protocol.PacketHandler;
-import fr.aresrpg.dofus.protocol.ProtocolRegistry;
+import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
@@ -293,14 +291,24 @@ public class ProxyHandler implements PacketHandler {
 
 	@Override
 	public boolean parse(ProtocolRegistry registry, String packet) {
-		for(PacketHandler handler : handlers)
-			if(handler.parse(registry , packet))
+		for (PacketHandler handler : handlers)
+			if (handler.parse(registry, packet))
 				return true;
 		return false;
 	}
 
 	@Override
 	public void handle(GameActionPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameMovementPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameMapFramePacket pkt) {
 		handlers.forEach(h -> h.handle(pkt));
 	}
 }

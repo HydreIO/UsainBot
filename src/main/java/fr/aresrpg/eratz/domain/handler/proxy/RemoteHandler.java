@@ -338,4 +338,14 @@ public class RemoteHandler extends BaseHandler {
 
 	}
 
+	@Override
+	public void handle(GameMovementPacket gameMovementPacket) {
+	transmit(gameMovementPacket);
+	}
+
+	@Override
+	public void handle(GameMapFramePacket gameMapFramePacket) {
+		transmit(gameMapFramePacket);
+	}
+
 }
