@@ -8,6 +8,8 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.dofus.player;
 
+import fr.aresrpg.eratz.domain.player.Perso;
+
 /**
  * 
  * @since
@@ -300,6 +302,10 @@ public enum Spells {
 	 */
 	public Classe getClasse() {
 		return classe;
+	}
+
+	public Spell get(Perso perso) {
+		return perso.getSpells().get(this);
 	}
 
 	public static enum SpellCharac {

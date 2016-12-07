@@ -7,20 +7,11 @@ package fr.aresrpg.eratz.domain.dofus.player;
 public class Spell {
 
 	private final Spells type;
-	private int zone;
 	private int lvl;
 
-	public Spell(Spells type, int zone) {
+	public Spell(Spells type) {
 		this.type = type;
 		this.lvl = 1;
-		this.zone = zone;
-	}
-
-	/**
-	 * @return the zone
-	 */
-	public int getZone() {
-		return zone;
 	}
 
 	/**

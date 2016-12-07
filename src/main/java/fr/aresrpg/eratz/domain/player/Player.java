@@ -9,6 +9,7 @@
 package fr.aresrpg.eratz.domain.player;
 
 import fr.aresrpg.eratz.domain.dofus.player.Classe;
+import fr.aresrpg.eratz.domain.dofus.player.Genre;
 
 /**
  * 
@@ -16,20 +17,29 @@ import fr.aresrpg.eratz.domain.dofus.player.Classe;
  */
 public class Player {
 
-	private int id;
-	private String pseudo;
+	private final int id;
+	private final String pseudo;
 	private int lvl;
 	private int life;
 	private int cellid;
-	private Classe classe;
+	private final Genre sexe;
+	private final Classe classe;
 	private int pa;
 	private int pm;
 	// ajouter resi
 
-	public Player(int id, String pseudo, Classe classe) {
+	public Player(int id, String pseudo, Classe classe, Genre sexe) {
 		this.id = id;
+		this.sexe = sexe;
 		this.pseudo = pseudo;
 		this.classe = classe;
+	}
+
+	/**
+	 * @return the sexe
+	 */
+	public Genre getSexe() {
+		return sexe;
 	}
 
 	/**
@@ -45,22 +55,6 @@ public class Player {
 	 */
 	public void setCellid(int cellid) {
 		this.cellid = cellid;
-	}
-
-	/**
-	 * @param classe
-	 *            the classe to set
-	 */
-	public void setClasse(Classe classe) {
-		this.classe = classe;
-	}
-
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(int id) {
-		this.id = id;
 	}
 
 	/**
@@ -93,14 +87,6 @@ public class Player {
 	 */
 	public void setPm(int pm) {
 		this.pm = pm;
-	}
-
-	/**
-	 * @param pseudo
-	 *            the pseudo to set
-	 */
-	public void setPseudo(String pseudo) {
-		this.pseudo = pseudo;
 	}
 
 	/**

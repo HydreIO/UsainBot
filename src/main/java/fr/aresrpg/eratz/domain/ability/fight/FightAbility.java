@@ -23,5 +23,7 @@ public interface FightAbility {
 	void blockCombat(boolean block);
 
 	void blockToGroup(boolean block);
+	
+	void
 
 }

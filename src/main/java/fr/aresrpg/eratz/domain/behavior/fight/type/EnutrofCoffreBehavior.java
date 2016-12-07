@@ -1,7 +1,7 @@
 package fr.aresrpg.eratz.domain.behavior.fight.type;
 
 import fr.aresrpg.eratz.domain.behavior.fight.FightBehavior;
-import fr.aresrpg.eratz.domain.dofus.player.Spell;
+import fr.aresrpg.eratz.domain.dofus.player.Spells;
 import fr.aresrpg.eratz.domain.player.Perso;
 
 /**
@@ -25,7 +25,7 @@ public class EnutrofCoffreBehavior extends FightBehavior {
 	@Override
 	public void playTurn() {
 		tryHuman();
-		getPerso().getFightAbility().launchSpell(new Spell, getBeginCellId());
+		getPerso().getFightAbility().launchSpell(Spells.COFFRE_ANIME.get(getPerso()), getBeginCellId());
 		getPerso().getFightAbility().endTurn();
 	}
 
