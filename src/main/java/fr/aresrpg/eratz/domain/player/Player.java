@@ -17,13 +17,13 @@ import fr.aresrpg.eratz.domain.dofus.player.Genre;
  */
 public class Player {
 
-	private final int id;
+	private int id;
 	private final String pseudo;
 	private int lvl;
 	private int life;
 	private int cellid;
-	private final Genre sexe;
-	private final Classe classe;
+	private Genre sexe;
+	private Classe classe;
 	private int pa;
 	private int pm;
 	// ajouter resi

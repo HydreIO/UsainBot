@@ -94,6 +94,11 @@ public class Account {
 		perso.connect();
 	}
 
+	public void addPerso(Perso p) {
+		if (getPersos().contains(p)) return;
+		getPersos().add(p);
+	}
+
 	// ============= UTIL ===================
 
 	/**

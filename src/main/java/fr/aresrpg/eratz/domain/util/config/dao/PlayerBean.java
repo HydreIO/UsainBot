@@ -1,5 +1,10 @@
 package fr.aresrpg.eratz.domain.util.config.dao;
 
+import fr.aresrpg.eratz.domain.player.BotJob;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * 
  * @since
@@ -8,13 +13,22 @@ public class PlayerBean {
 
 	private String accountName;
 	private String password;
+	private Map<String, String> persos;
 
-	public PlayerBean(String account, String pass) {
+	public PlayerBean(String account, String pass, PersoBean... persos) {
 		this.accountName = account;
 		this.password = pass;
+		Arrays.stream(persos).forEach(p -> this.persos.put(p.getPseudo(), p.getBotJob().name().toLowerCase()));
 	}
 
 	public PlayerBean() {
+	}
+
+	/**
+	 * @return the persos
+	 */
+	public Set<PersoBean> getPersos() {
+		return persos.entrySet().stream().map(PersoBean::fromEntry).collect(Collectors.toSet());
 	}
 
 	@Override
@@ -51,5 +65,30 @@ public class PlayerBean {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public static class PersoBean {
+		private String pseudo;
+		private String botJob;
+
+		public PersoBean(String pseudo, String job) {
+			this.pseudo = pseudo;
+			this.botJob = job;
+		}
+
+		/**
+		 * @return the pseudo
+		 */
+		public String getPseudo() {
+			return pseudo;
+		}
+
+		public BotJob getBotJob() {
+			return BotJob.valueOf(botJob.toUpperCase());
+		}
+
+		public static PersoBean fromEntry(Map.Entry<String, String> entry) {
+			return new PersoBean(entry.getKey(), entry.getValue());
+		}
 	}
 }

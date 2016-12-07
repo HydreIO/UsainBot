@@ -23,7 +23,21 @@ public class AccountsManager {
 	private Map<String, Account> accounts = new HashMap<>();
 
 	private AccountsManager() {
-		Variables.ACCOUNTS.forEach(b -> accounts.put(b.getAccountName(), new Account(b.getAccountName(), b.getPassword())));
+		Variables.ACCOUNTS.forEach(b -> {
+			Account a = new Account(b.getAccountName(), b.getPassword());
+			b.getPersos().forEach(h -> a.addPerso(new Perso(-1, h.getPseudo(), a, h.getBotJob(), null, null))); // TODO dans le handler faudra set tout les fields quand on reçoit le packet perso list
+			accounts.put(b.getAccountName(), a);
+		});
+	}
+
+	public void connectAccount(String accountName, String perso) {
+		Account a = getAccounts().get(accountName);
+		if (a == null) throw new NullPointerException("L'account n'est pas configuré");
+		for (Perso p : a.getPersos())
+			if (p.getPseudo().equalsIgnoreCase(perso)) {
+				p.connect();
+				return;
+			}
 	}
 
 	/**
