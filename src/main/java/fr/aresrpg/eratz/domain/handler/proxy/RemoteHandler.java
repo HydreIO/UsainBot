@@ -311,6 +311,7 @@ public class RemoteHandler extends BaseHandler {
 				System.out.println("isLayerObject2Flip = " + cell.isLayerObject2Flip());
 				System.out.println("isLayerObject2Inter = " + cell.isLayerObject2Interactive());
 				System.out.println("lineOfSight = " + cell.isLineOfSight());
+				System.out.println("LayerObject2Num = " + cell.getLayerObject2Num());
 
 			}));
 		} catch (IOException e) {

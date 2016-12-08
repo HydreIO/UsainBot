@@ -13,7 +13,7 @@ import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.behavior.harvest.HarvestBehavior;
 import fr.aresrpg.eratz.domain.dofus.map.Zaap;
-import fr.aresrpg.eratz.domain.dofus.ressource.Ressources;
+import fr.aresrpg.eratz.domain.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.player.Perso;
 
 import java.util.Set;
@@ -24,7 +24,7 @@ import java.util.Set;
  */
 public class SeigleHarvestBehavior extends HarvestBehavior {
 
-	private Set<Ressources> res = ArrayUtils.asSet(Ressources.AVOINE);
+	private Set<Interractable> res = ArrayUtils.asSet(Interractable.AVOINE);
 
 	/**
 	 * @param perso
@@ -34,8 +34,8 @@ public class SeigleHarvestBehavior extends HarvestBehavior {
 	}
 
 	@Override
-	public Ressources getTypesToHarvest() {
-		return Ressources.SEIGLE;
+	public Interractable getTypesToHarvest() {
+		return Interractable.SEIGLE;
 	}
 
 	@Override

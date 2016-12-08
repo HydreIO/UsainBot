@@ -1,13 +1,13 @@
 package fr.aresrpg.eratz.domain.dofus.map;
 
-import fr.aresrpg.eratz.domain.dofus.ressource.Ressources;
+import fr.aresrpg.eratz.domain.dofus.ressource.Interractable;
 
 public class Ressource {
 	private int cellId;
-	private Ressources type;
+	private Interractable type;
 	private boolean spawned;
 
-	public Ressource(int cellid, Ressources type, boolean spawned) {
+	public Ressource(int cellid, Interractable type, boolean spawned) {
 		this.cellId = cellid;
 		this.type = type;
 		this.spawned = spawned;
@@ -20,7 +20,7 @@ public class Ressource {
 		return cellId == r.getCellId() && type == r.getType();
 	}
 
-	public Ressource(int cellid, Ressources type) {
+	public Ressource(int cellid, Interractable type) {
 		this(cellid, type, false);
 	}
 
@@ -30,7 +30,7 @@ public class Ressource {
 	}
 
 	/** * @return the type */
-	public Ressources getType() {
+	public Interractable getType() {
 		return type;
 	}
 

@@ -2,7 +2,7 @@ package fr.aresrpg.eratz.domain.behavior.harvest;
 
 import fr.aresrpg.eratz.domain.behavior.Behavior;
 import fr.aresrpg.eratz.domain.dofus.map.Ressource;
-import fr.aresrpg.eratz.domain.dofus.ressource.Ressources;
+import fr.aresrpg.eratz.domain.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.player.Player;
 
@@ -100,6 +100,6 @@ public abstract class HarvestBehavior extends Behavior {
 		return false;
 	}
 
-	public abstract Ressources getTypesToHarvest();
+	public abstract Interractable getTypesToHarvest();
 
 }

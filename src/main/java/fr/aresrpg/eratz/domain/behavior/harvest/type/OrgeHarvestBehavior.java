@@ -12,7 +12,7 @@ import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.behavior.harvest.HarvestBehavior;
 import fr.aresrpg.eratz.domain.dofus.map.Zaap;
-import fr.aresrpg.eratz.domain.dofus.ressource.Ressources;
+import fr.aresrpg.eratz.domain.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.player.Perso;
 
 /**
@@ -29,8 +29,8 @@ public class OrgeHarvestBehavior extends HarvestBehavior {
 	}
 
 	@Override
-	public Ressources getTypesToHarvest() {
-		return Ressources.ORGE;
+	public Interractable getTypesToHarvest() {
+		return Interractable.ORGE;
 	}
 
 	@Override

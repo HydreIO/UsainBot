@@ -3,12 +3,12 @@
  * This class is part of an AresRPG Project.
  *
  * @author Sceat {@literal <sceat@aresrpg.fr>}
- *  
- * Created 2016
+ * 
+ *         Created 2016
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.dofus;
 
-import fr.aresrpg.eratz.domain.dofus.ressource.Ressources;
+import fr.aresrpg.eratz.domain.dofus.ressource.Interractable;
 
 /**
  * 
@@ -16,25 +16,25 @@ import fr.aresrpg.eratz.domain.dofus.ressource.Ressources;
  */
 public enum Poissons {
 
-	GOUJON(LieuPeche.RIVIERE, Ressources.PETITS_POISSONS),
-	TRUITE(LieuPeche.RIVIERE, Ressources.PETITS_POISSONS, Ressources.POISSONS),
-	POISSON_CHATON(LieuPeche.RIVIERE, Ressources.PETITS_POISSONS, Ressources.POISSONS, Ressources.GROS_POISSONS),
-	BROCHET(LieuPeche.RIVIERE, Ressources.POISSONS, Ressources.GROS_POISSONS, Ressources.POISSONS_GEANTS),
-	CARPE_DIEM(LieuPeche.RIVIERE, Ressources.POISSONS, Ressources.GROS_POISSONS, Ressources.POISSONS_GEANTS),
-	BAR_RIKAIN(LieuPeche.RIVIERE, Ressources.GROS_POISSONS, Ressources.POISSONS_GEANTS),
-	PERCHE(LieuPeche.RIVIERE, Ressources.POISSONS_GEANTS),
-	GREU_VETTE(LieuPeche.MER, Ressources.PETITS_POISSONS),
-	CRABE_SOURIMI(LieuPeche.MER, Ressources.PETITS_POISSONS, Ressources.POISSONS),
-	POISSON_PANE(LieuPeche.MER, Ressources.PETITS_POISSONS, Ressources.POISSONS, Ressources.GROS_POISSONS),
-	SARDINE_BRILLANTE(LieuPeche.MER, Ressources.POISSONS, Ressources.GROS_POISSONS, Ressources.POISSONS_GEANTS),
-	KRALAMOURE(LieuPeche.MER, Ressources.POISSONS, Ressources.GROS_POISSONS, Ressources.POISSONS_GEANTS),
-	RAIE_BLEUE(LieuPeche.MER, Ressources.GROS_POISSONS, Ressources.POISSONS_GEANTS),
-	REQUIN_MARTEAU(LieuPeche.MER, Ressources.POISSONS_GEANTS);
+	GOUJON(LieuPeche.RIVIERE, Interractable.PETITS_POISSONS_RIVIERE),
+	TRUITE(LieuPeche.RIVIERE, Interractable.PETITS_POISSONS_RIVIERE, Interractable.POISSONS_RIVIERE),
+	POISSON_CHATON(LieuPeche.RIVIERE, Interractable.PETITS_POISSONS_RIVIERE, Interractable.POISSONS_RIVIERE, Interractable.GROS_POISSONS_RIVIERE),
+	BROCHET(LieuPeche.RIVIERE, Interractable.POISSONS_RIVIERE, Interractable.GROS_POISSONS_RIVIERE, Interractable.POISSONS_GEANTS_RIVIERE),
+	CARPE_DIEM(LieuPeche.RIVIERE, Interractable.POISSONS_RIVIERE, Interractable.GROS_POISSONS_RIVIERE, Interractable.POISSONS_GEANTS_RIVIERE),
+	BAR_RIKAIN(LieuPeche.RIVIERE, Interractable.GROS_POISSONS_RIVIERE, Interractable.POISSONS_GEANTS_RIVIERE),
+	PERCHE(LieuPeche.RIVIERE, Interractable.POISSONS_GEANTS_RIVIERE),
+	GREU_VETTE(LieuPeche.MER, Interractable.PETITS_POISSONS_MER),
+	CRABE_SOURIMI(LieuPeche.MER, Interractable.PETITS_POISSONS_MER, Interractable.POISSONS_MER),
+	POISSON_PANE(LieuPeche.MER, Interractable.PETITS_POISSONS_MER, Interractable.POISSONS_MER, Interractable.GROS_POISSONS_MER),
+	SARDINE_BRILLANTE(LieuPeche.MER, Interractable.POISSONS_MER, Interractable.GROS_POISSONS_MER, Interractable.POISSONS_GEANTS_MER),
+	KRALAMOURE(LieuPeche.MER, Interractable.POISSONS_MER, Interractable.GROS_POISSONS_MER, Interractable.POISSONS_GEANTS_MER),
+	RAIE_BLEUE(LieuPeche.MER, Interractable.GROS_POISSONS_MER, Interractable.POISSONS_GEANTS_MER),
+	REQUIN_MARTEAU(LieuPeche.MER, Interractable.POISSONS_GEANTS_MER);
 
 	private LieuPeche lieu;
-	private Ressources[] ressource;
+	private Interractable[] ressource;
 
-	private Poissons(LieuPeche lieu, Ressources... ressource) {
+	private Poissons(LieuPeche lieu, Interractable... ressource) {
 		this.ressource = ressource;
 		this.lieu = lieu;
 	}
@@ -49,7 +49,7 @@ public enum Poissons {
 	/**
 	 * @return the ressource
 	 */
-	public Ressources[] getRessource() {
+	public Interractable[] getRessource() {
 		return ressource;
 	}
 
