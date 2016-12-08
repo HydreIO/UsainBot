@@ -11,6 +11,7 @@ package fr.aresrpg.eratz.domain;
 import fr.aresrpg.dofus.Hastebin;
 import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.eratz.domain.dofus.Constants;
+import fr.aresrpg.eratz.domain.gui.MapView;
 import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
 import fr.aresrpg.eratz.domain.proxy.DofusProxy;
@@ -23,16 +24,11 @@ import fr.aresrpg.eratz.domain.util.config.dao.PlayerBean.PersoBean;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-
-public class TheBotFather extends Application {
+public class TheBotFather {
 
 	private static TheBotFather instance;
 	public static final InetSocketAddress SERVER_ADRESS = new InetSocketAddress(Constants.IP, Constants.PORT);
@@ -107,8 +103,13 @@ public class TheBotFather extends Application {
 		while (isRunning()) {
 			if (!sc.hasNext()) continue;
 			String[] nextLine = sc.nextLine().split(" ");
-			AccountsManager.getInstance().connectAccount("SceatDrop3", "Jowed");
 			switch (nextLine[0].toLowerCase()) {
+				case "view":
+					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+						if (a.isClientOnline())
+							MapView.getInstance().startView(a.getCurrentPlayed().getDebugView());
+					});
+					break;
 				case "exit":
 					System.out.println(Hastebin.post());
 					System.exit(0);
@@ -123,18 +124,20 @@ public class TheBotFather extends Application {
 					AccountsManager.getInstance().connectAccount(nextLine[1], perso);
 					break;
 			}
-			AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
-				if (a.isClientOnline()) {
-					SocketChannel channel = (SocketChannel) a.getRemoteConnection().getChannel();
-					System.out.println("Send: " + nextLine);
-					String nn = nextLine + "\n\0";
-					try {
-						channel.write(ByteBuffer.wrap(nn.getBytes()));
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			});
+			/*
+			 * AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+			 * if (a.isClientOnline()) {
+			 * SocketChannel channel = (SocketChannel) a.getRemoteConnection().getChannel();
+			 * System.out.println("Send: " + nextLine);
+			 * String nn = nextLine + "\n\0";
+			 * try {
+			 * channel.write(ByteBuffer.wrap(nn.getBytes()));
+			 * } catch (Exception e) {
+			 * e.printStackTrace();
+			 * }
+			 * }
+			 * });
+			 */
 		}
 	}
 
@@ -147,16 +150,8 @@ public class TheBotFather extends Application {
 
 	public static void main(String... args) throws IOException {
 		System.out.println("Starting server..");
-		// new TheBotFather();
-		launch(args);
-	}
-
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-		primaryStage.setTitle("Dofus Map");
-		this.view = new DofusMapView();
-		primaryStage.setScene(new Scene(getView()));
-		primaryStage.show();
+		new TheBotFather();
+		MapView.main(args);
 	}
 
 }

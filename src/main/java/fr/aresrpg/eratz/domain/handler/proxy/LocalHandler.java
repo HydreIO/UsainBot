@@ -26,6 +26,7 @@ import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.eratz.domain.handler.BaseHandler;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
+import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.util.encryption.CryptHelper;
 
@@ -214,6 +215,12 @@ public class LocalHandler extends BaseHandler {
 
 	@Override
 	public void handle(AccountSelectCharacterPacket pkt) {
+		for (Perso p : getAccount().getPersos()) {
+			if (p.getId() == pkt.getCharacterId()) {
+				getAccount().setCurrentPlayed(p);
+				break;
+			}
+		}
 		transmit(pkt);
 	}
 

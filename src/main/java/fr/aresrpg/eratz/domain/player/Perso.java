@@ -10,6 +10,7 @@ package fr.aresrpg.eratz.domain.player;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
+import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ability.craft.CraftAbility;
@@ -51,6 +52,7 @@ public class Perso extends Player {
 	private CraftAbility craftAbility;
 	private FightAbility fightAbaility;
 	private final FightOptions fightOptions;
+	private DofusMapView debugView;
 	private int maxPods;
 	private int usedPods;
 
@@ -62,10 +64,18 @@ public class Perso extends Player {
 		this.navigation = new NavigationImpl(this);
 		for (Spells s : Spells.values())
 			if (s.getClasse() == getClasse()) spells.put(s, new Spell(s));
+		this.debugView = new DofusMapView();
 	}
 
 	public Perso(int id, String pseudo, Account account, Classe classe, Genre sexe) {
 		this(id, pseudo, account, null, classe, sexe);
+	}
+
+	/**
+	 * @return the debugView
+	 */
+	public DofusMapView getDebugView() {
+		return debugView;
 	}
 
 	public void connect() {

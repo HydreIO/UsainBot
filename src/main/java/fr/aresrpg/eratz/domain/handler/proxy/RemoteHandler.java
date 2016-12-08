@@ -26,18 +26,24 @@ import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.dofus.structures.Chat;
+import fr.aresrpg.dofus.structures.map.DofusMap;
+import fr.aresrpg.dofus.util.Maps;
+import fr.aresrpg.dofus.util.SwfVariableExtractor;
+import fr.aresrpg.eratz.domain.ability.move.NavigationImpl;
 import fr.aresrpg.eratz.domain.dofus.Constants;
 import fr.aresrpg.eratz.domain.handler.BaseHandler;
+import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.proxy.Proxy.ProxyConnectionType;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * 
@@ -63,7 +69,7 @@ public class RemoteHandler extends BaseHandler {
 
 	@Override
 	public boolean parse(ProtocolRegistry registry, String packet) {
-		if (registry == null || registry == ProtocolRegistry.GAME_MOVEMENT) {
+		if (registry == null || registry == ProtocolRegistry.GAME_MOVEMENT || registry == ProtocolRegistry.GAME_MAP_FRAME) {
 			SocketChannel channel = (SocketChannel) getProxy().getLocalConnection().getChannel();
 			try {
 				packet += "\0";
@@ -224,12 +230,14 @@ public class RemoteHandler extends BaseHandler {
 
 	@Override
 	public void handle(AccountCharactersListPacket pkt) {
+		Arrays.stream(pkt.getCharacters()).filter(Objects::nonNull).forEach(c -> getAccount().getPersos().add(new Perso(c.getId(), c.getPseudo(), getAccount(), null, null)));
 		transmit(pkt);
 	}
 
 	@Override
 	public void handle(AccountSelectCharacterPacket pkt) {
 		transmit(pkt);
+
 	}
 
 	@Override
@@ -272,9 +280,24 @@ public class RemoteHandler extends BaseHandler {
 		transmit(pkt);
 	}
 
+	public Perso getPerso() {
+		return getAccount().getCurrentPlayed();
+	}
+
 	@Override
 	public void handle(GameMapDataPacket pkt) {
 		transmit(pkt);
+		try {
+			Map<String, Object> d = SwfVariableExtractor.extractVariable(Maps.downloadMap(pkt.getMapId(),
+					pkt.getSubid()));
+			DofusMap m = Maps.loadMap(d, pkt.getDecryptKey());
+			getPerso().getDebugView().setMap(m);
+			((NavigationImpl) getPerso().getNavigation()).setMap(m);
+			getAccount().getRemoteConnection().send(new GameExtraInformationPacket());
+			getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a, m.getCells()[a].getMovement() == 2)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -340,7 +363,7 @@ public class RemoteHandler extends BaseHandler {
 
 	@Override
 	public void handle(GameMovementPacket gameMovementPacket) {
-	transmit(gameMovementPacket);
+		transmit(gameMovementPacket);
 	}
 
 	@Override
