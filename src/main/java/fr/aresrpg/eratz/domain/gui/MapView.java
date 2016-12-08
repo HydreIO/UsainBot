@@ -1,6 +1,7 @@
 package fr.aresrpg.eratz.domain.gui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -32,11 +33,13 @@ public class MapView extends Application {
 		return INSTANCE;
 	}
 
-	public void startView(Parent parent) {
-		Stage stage = new Stage();
-		stage.setTitle("Dofus Map");
-		stage.setScene(new Scene(parent));
-		stage.show();
+	public void startView(Parent parent, String name) {
+		Platform.runLater(() -> {
+			Stage stage = new Stage();
+			stage.setTitle(name);
+			stage.setScene(new Scene(parent));
+			stage.show();
+		});
 	}
 
 }

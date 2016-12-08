@@ -292,6 +292,7 @@ public class RemoteHandler extends BaseHandler {
 					pkt.getSubid()));
 			DofusMap m = Maps.loadMap(d, pkt.getDecryptKey());
 			getPerso().getDebugView().setMap(m);
+			getPerso().getDebugView().clearPath();
 			((NavigationImpl) getPerso().getNavigation()).setMap(m);
 			getAccount().getRemoteConnection().send(new GameExtraInformationPacket());
 			getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a, m.getCells()[a].getMovement() == 2)));

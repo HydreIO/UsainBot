@@ -3,7 +3,6 @@ package fr.aresrpg.eratz.domain.ability.move;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.GameActionACKPacket;
 import fr.aresrpg.dofus.protocol.game.client.GameActionPacket;
-import fr.aresrpg.dofus.protocol.game.client.GameExtraInformationPacket;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.util.Maps;
@@ -14,7 +13,6 @@ import fr.aresrpg.eratz.domain.dofus.map.Zaapi;
 import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.util.Threads;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
-import javafx.application.Platform;
 
 import java.awt.Point;
 import java.io.IOException;
@@ -71,7 +69,7 @@ public class NavigationImpl implements Navigation {
 				Maps.getColumn(currentPos, map.getWidth()), Maps.getLine(currentPos, map.getWidth()),
 				Maps.getColumn(cellid, map.getWidth()),
 				Maps.getLine(cellid, map.getWidth()), map.getCells(), map.getWidth());
-		TheBotFather.getInstance().getView().setPath(p);
+		getPerso().getDebugView().setPath(p);
 		try {
 			getPerso().getAccount().getRemoteConnection().send(new GameActionPacket().setId(1).setAction(new GameMoveAction().setPath(Pathfinding.makeShortPath(p, map.getWidth()))));
 			Executors.SCHEDULED.schedule(() -> {
