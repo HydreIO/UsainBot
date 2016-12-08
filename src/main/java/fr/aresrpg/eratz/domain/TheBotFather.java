@@ -9,6 +9,7 @@
 package fr.aresrpg.eratz.domain;
 
 import fr.aresrpg.dofus.Hastebin;
+import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.eratz.domain.dofus.Constants;
 import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
@@ -27,13 +28,18 @@ import java.nio.channels.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TheBotFather {
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+public class TheBotFather extends Application {
 
 	private static TheBotFather instance;
 	public static final InetSocketAddress SERVER_ADRESS = new InetSocketAddress(Constants.IP, Constants.PORT);
 	private Selector selector;
 	private boolean running;
 	private Config config;
+	private DofusMapView view;
 
 	public TheBotFather() throws IOException {
 		instance = this;
@@ -101,7 +107,7 @@ public class TheBotFather {
 		while (isRunning()) {
 			if (!sc.hasNext()) continue;
 			String[] nextLine = sc.nextLine().split(" ");
-
+			AccountsManager.getInstance().connectAccount("SceatDrop3", "Jowed");
 			switch (nextLine[0].toLowerCase()) {
 				case "exit":
 					System.out.println(Hastebin.post());
@@ -113,9 +119,8 @@ public class TheBotFather {
 							.collect(Collectors.joining(", ")));
 					break;
 				case "selectaccount":
-					String perso = nextLine.length == 3 ? nextLine[2] :
-							AccountsManager.getInstance().getAccounts().get(nextLine[1]).getPersos().get(0).getPseudo();
-					AccountsManager.getInstance().connectAccount(nextLine[1] , perso);
+					String perso = nextLine.length == 3 ? nextLine[2] : AccountsManager.getInstance().getAccounts().get(nextLine[1]).getPersos().get(0).getPseudo();
+					AccountsManager.getInstance().connectAccount(nextLine[1], perso);
 					break;
 			}
 			AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
@@ -133,9 +138,25 @@ public class TheBotFather {
 		}
 	}
 
+	/**
+	 * @return the view
+	 */
+	public DofusMapView getView() {
+		return view;
+	}
+
 	public static void main(String... args) throws IOException {
 		System.out.println("Starting server..");
-		new TheBotFather();
+		// new TheBotFather();
+		launch(args);
+	}
+
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		primaryStage.setTitle("Dofus Map");
+		this.view = new DofusMapView();
+		primaryStage.setScene(new Scene(getView()));
+		primaryStage.show();
 	}
 
 }

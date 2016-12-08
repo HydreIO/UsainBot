@@ -7,6 +7,7 @@ import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.Pathfinding;
+import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.dofus.map.Zaapi;
 import fr.aresrpg.eratz.domain.player.Perso;
@@ -69,18 +70,17 @@ public class NavigationImpl implements Navigation {
 				Maps.getColumn(cellid, map.getWidth()),
 				Maps.getLine(cellid, map.getWidth()), map.getCells(), map.getWidth());
 		currentPos = cellid;
+		TheBotFather.getInstance().getView().setPath(p);
 		try {
 			getPerso().getAccount().getRemoteConnection().send(new GameActionPacket().setId(1).setAction(new GameMoveAction().setPath(Pathfinding.makeShortPath(p, map.getWidth()))));
-			if (changeMap) {
-				Executors.SCHEDULED.schedule(() -> {
-					try {
-						getPerso().getAccount().getRemoteConnection().send(new GameActionACKPacket().setActionId(0));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				} , 3, TimeUnit.SECONDS);
-				lockAndWait();
-			}
+			Executors.SCHEDULED.schedule(() -> {
+				try {
+					getPerso().getAccount().getRemoteConnection().send(new GameActionACKPacket().setActionId(0));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} , 3, TimeUnit.SECONDS);
+			lockAndWait();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

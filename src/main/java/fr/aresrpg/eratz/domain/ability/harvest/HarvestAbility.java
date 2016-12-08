@@ -8,7 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.ability.harvest;
 
-import fr.aresrpg.dofus.structures.map.Ressource;
+import fr.aresrpg.eratz.domain.dofus.map.Ressource;
 
 /**
  * 

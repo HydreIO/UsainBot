@@ -1,7 +1,9 @@
 package fr.aresrpg.eratz.domain.handler.bot.move;
 
-import fr.aresrpg.dofus.structures.map.*;
+import fr.aresrpg.dofus.structures.map.DofusMap;
+import fr.aresrpg.dofus.structures.map.Mob;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
+import fr.aresrpg.eratz.domain.dofus.map.Ressource;
 import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.player.Player;
 
