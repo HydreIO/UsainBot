@@ -283,8 +283,7 @@ public class BotHandler implements PacketHandler {
 			TheBotFather.getInstance().getView().setMap(m);
 			((NavigationImpl) getPerso().getNavigation()).setMap(m);
 			getConnection().send(new GameExtraInformationPacket());
-			TheBotFather.getInstance().getView().setOnCellClick(a ->
-					Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a)));
+			TheBotFather.getInstance().getView().setOnCellClick(a -> Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a)));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

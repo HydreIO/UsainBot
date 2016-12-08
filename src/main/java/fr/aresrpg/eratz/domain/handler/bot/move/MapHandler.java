@@ -1,10 +1,10 @@
 package fr.aresrpg.eratz.domain.handler.bot.move;
 
+import fr.aresrpg.dofus.structures.character.Character;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.map.Mob;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.dofus.map.Ressource;
-import fr.aresrpg.eratz.domain.player.Player;
 
 /**
  * 
@@ -20,11 +20,11 @@ public interface MapHandler {
 
 	void onRessourceSpawn(Ressource r);
 
-	void onRessourceRecolted(Player p, Ressource r); // faire crash ce fdp si p != bot lmao
+	void onRessourceRecolted(Character p, Ressource r); // faire crash ce fdp si p != bot lmao
 
-	void onPlayerJoinMap(Player p, int cellId);
+	void onPlayerJoinMap(Character p, int cellId);
 
-	void onPlayerQuitMap(Player p, int cellId);
+	void onPlayerQuitMap(Character p, int cellId);
 
 	void onFightSpawn(Fight fight, int cellId1, int cellId2);
 

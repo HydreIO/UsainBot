@@ -26,6 +26,7 @@ import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.dofus.structures.Chat;
+import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.SwfVariableExtractor;
@@ -295,7 +296,23 @@ public class RemoteHandler extends BaseHandler {
 			getPerso().getDebugView().clearPath();
 			((NavigationImpl) getPerso().getNavigation()).setMap(m);
 			getAccount().getRemoteConnection().send(new GameExtraInformationPacket());
-			getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a, m.getCells()[a].getMovement() == 2)));
+			// getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a, m.getCells()[a].getMovement() == 2)));
+			getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> {
+				Cell cell = m.getCells()[a];
+				System.out.println("Groundlvl = " + cell.getGroundLevel());
+				System.out.println("GroundSlope = " + cell.getGroundSlope());
+				System.out.println("GroundNum = " + cell.getLayerGroundNum());
+				System.out.println("GroundRot = " + cell.getLayerGroundRot());
+				System.out.println("Object1Num = " + cell.getLayerObject1Num());
+				System.out.println("Object1Rot = " + cell.getLayerObject1Rot());
+				System.out.println("Movement = " + cell.getMovement());
+				System.out.println("isLayerGroundFlip = " + cell.isLayerGroundFlip());
+				System.out.println("isLayerObject1Flip = " + cell.isLayerObject1Flip());
+				System.out.println("isLayerObject2Flip = " + cell.isLayerObject2Flip());
+				System.out.println("isLayerObject2Inter = " + cell.isLayerObject2Interactive());
+				System.out.println("lineOfSight = " + cell.isLineOfSight());
+
+			}));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

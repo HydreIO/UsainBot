@@ -1,11 +1,11 @@
 package fr.aresrpg.eratz.domain.handler.bot.move;
 
+import fr.aresrpg.dofus.structures.character.Character;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.map.Mob;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.dofus.map.Ressource;
 import fr.aresrpg.eratz.domain.player.Perso;
-import fr.aresrpg.eratz.domain.player.Player;
 
 /**
  * 
@@ -26,7 +26,7 @@ public class PlayerMapHandler implements MapHandler {
 	}
 
 	@Override
-	public void onRessourceRecolted(Player p, Ressource r) {
+	public void onRessourceRecolted(Character p, Ressource r) {
 		if (perso != null) for (Ressource res : perso.getCurrentMap().getRessources())
 			if (res.equals(r)) res.setSpawned(false);
 	}
@@ -40,30 +40,26 @@ public class PlayerMapHandler implements MapHandler {
 
 	@Override
 	public void onJoinMap(DofusMap m) {
-		// TODO
-
+		// if (perso != null) getPerso().setCurrentMap();
 	}
 
 	@Override
 	public void onQuitMap(DofusMap m) {
-		// TODO
 
 	}
 
 	@Override
 	public void onMobSpawn(Mob m) {
-		// TODO
-
+		getPerso().getCurrentMap().getDofusMap().getMobs().add(m);
 	}
 
 	@Override
-	public void onPlayerJoinMap(Player p, int cellId) {
-		// TODO
-
+	public void onPlayerJoinMap(Character p, int cellId) {
+		getPerso().getCurrentMap().getDofusMap().getPlayers().add(p);
 	}
 
 	@Override
-	public void onPlayerQuitMap(Player p, int cellId) {
+	public void onPlayerQuitMap(Character p, int cellId) {
 		// TODO
 
 	}

@@ -8,6 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.player;
 
+import fr.aresrpg.dofus.structures.character.Character;
 import fr.aresrpg.eratz.domain.dofus.player.Classe;
 import fr.aresrpg.eratz.domain.dofus.player.Genre;
 
@@ -33,6 +34,10 @@ public class Player {
 		this.sexe = sexe;
 		this.pseudo = pseudo;
 		this.classe = classe;
+	}
+
+	public static Player fromCharacter(Character c) {
+		return new Player(c.getId(), c.getPseudo(), null, c.getSex() == 0 ? Genre.MALE : Genre.FEMALE); // TODO pour le genre j'ai mis au pif
 	}
 
 	/**

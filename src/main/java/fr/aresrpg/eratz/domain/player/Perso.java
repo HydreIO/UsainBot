@@ -39,20 +39,20 @@ import java.util.*;
 
 public class Perso extends Player {
 
-	private Account account;
+	private final Account account;
 	private BotMap currentMap;
 	private BotJob botJob;
-	private Set<Player> group = new HashSet<>();
-	private java.util.Map<Spells, Spell> spells = new HashMap<>();
+	private final Set<Player> group = new HashSet<>();
+	private final java.util.Map<Spells, Spell> spells = new HashMap<>();
 	private Fight currentFight;
 	private Behavior currentBehavior;
-	private Navigation navigation;
-	private BaseAbility baseAbility;
-	private HarvestAbility harvestAbility;
-	private CraftAbility craftAbility;
-	private FightAbility fightAbaility;
+	private final Navigation navigation;
+	private final BaseAbility baseAbility;
+	private final HarvestAbility harvestAbility;
+	private final CraftAbility craftAbility;
+	private final FightAbility fightAbility;
 	private final FightOptions fightOptions;
-	private DofusMapView debugView;
+	private final DofusMapView debugView;
 	private int maxPods;
 	private int usedPods;
 
@@ -62,6 +62,10 @@ public class Perso extends Player {
 		this.botJob = job;
 		this.fightOptions = new FightOptions(this);
 		this.navigation = new NavigationImpl(this);
+		this.baseAbility = null;
+		this.harvestAbility = null;
+		this.craftAbility = null;
+		this.fightAbility = null;
 		for (Spells s : Spells.values())
 			if (s.getClasse() == getClasse()) spells.put(s, new Spell(s));
 		this.debugView = new DofusMapView();
@@ -120,6 +124,14 @@ public class Perso extends Player {
 	}
 
 	/**
+	 * @param currentMap
+	 *            the currentMap to set
+	 */
+	public void setCurrentMap(BotMap currentMap) {
+		this.currentMap = currentMap;
+	}
+
+	/**
 	 * @param currentFight
 	 *            the currentFight to set
 	 */
@@ -148,7 +160,7 @@ public class Perso extends Player {
 	 * @return the fightAbaility
 	 */
 	public FightAbility getFightAbility() {
-		return fightAbaility;
+		return fightAbility;
 	}
 
 	/**
