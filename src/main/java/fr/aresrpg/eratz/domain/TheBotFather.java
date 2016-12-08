@@ -105,9 +105,7 @@ public class TheBotFather {
 			String[] nextLine = sc.nextLine().split(" ");
 			switch (nextLine[0].toLowerCase()) {
 				case "view":
-					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
-						MapView.getInstance().startView(a.getCurrentPlayed().getDebugView(), a.getCurrentPlayed().getPseudo());
-					});
+					AccountsManager.getInstance().getAccounts().forEach((s, a) -> MapView.getInstance().startView(a.getCurrentPlayed().getDebugView(), a.getCurrentPlayed().getPseudo()));
 					break;
 				case "exit":
 					System.out.println(Hastebin.post());
