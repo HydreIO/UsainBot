@@ -106,8 +106,7 @@ public class TheBotFather {
 			switch (nextLine[0].toLowerCase()) {
 				case "view":
 					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
-						if (a.isClientOnline())
-							MapView.getInstance().startView(a.getCurrentPlayed().getDebugView(), a.getCurrentPlayed().getPseudo());
+						MapView.getInstance().startView(a.getCurrentPlayed().getDebugView(), a.getCurrentPlayed().getPseudo());
 					});
 					break;
 				case "exit":
