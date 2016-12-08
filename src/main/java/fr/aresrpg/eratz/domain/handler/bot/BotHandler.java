@@ -283,7 +283,8 @@ public class BotHandler implements PacketHandler {
 			TheBotFather.getInstance().getView().setMap(m);
 			((NavigationImpl) getPerso().getNavigation()).setMap(m);
 			getConnection().send(new GameExtraInformationPacket());
-			TheBotFather.getInstance().getView().setOnCellClick(a -> Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a, m.getCells()[a].getMovement() == 2)));
+			TheBotFather.getInstance().getView().setOnCellClick(a ->
+					Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a)));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -291,8 +292,9 @@ public class BotHandler implements PacketHandler {
 
 	@Override
 	public void handle(GameMovementPacket gameMovementPacket) {
-		if (perso.getPseudo().equals(gameMovementPacket.getName()))
-			((NavigationImpl) getPerso().getNavigation()).setCurrentPos(gameMovementPacket.getCell());
+		for (int i = 0; i < gameMovementPacket.getName().size(); i++)
+			if (perso.getPseudo().equals(gameMovementPacket.getName().get(i)))
+				((NavigationImpl) getPerso().getNavigation()).setCurrentPos(gameMovementPacket.getCell().get(i));
 	}
 
 	@Override
