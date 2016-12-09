@@ -7,11 +7,19 @@ package fr.aresrpg.eratz.domain.dofus.player;
 public class Spell {
 
 	private final Spells type;
-	private int lvl;
+	private int spellLvl;
+	private int po;
 
 	public Spell(Spells type) {
 		this.type = type;
-		this.lvl = 1;
+		this.spellLvl = 1;
+	}
+
+	/**
+	 * @return the po
+	 */
+	public int getPo() {
+		return po;
 	}
 
 	/**
@@ -22,10 +30,10 @@ public class Spell {
 	}
 
 	/**
-	 * @return the lvl
+	 * @return the spellLvl
 	 */
-	public int getLvl() {
-		return lvl;
+	public int getSpellLvl() {
+		return spellLvl;
 	}
 
 	/**
@@ -33,7 +41,7 @@ public class Spell {
 	 *            the lvl to set
 	 */
 	public void setLvl(int lvl) {
-		this.lvl = lvl;
+		this.spellLvl = lvl;
 	}
 
 }

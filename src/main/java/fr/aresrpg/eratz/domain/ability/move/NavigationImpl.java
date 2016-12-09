@@ -134,6 +134,7 @@ public class NavigationImpl implements Navigation {
 	}
 
 	public void setCurrentPos(int currentPos) {
+		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! SET CURRENT POS !!!!!!!!!!!!!!!! " + currentPos);
 		this.currentPos = currentPos;
 		getPerso().getDebugView().setCurrentPosition(currentPos);
 	}

@@ -78,7 +78,6 @@ public class RemoteHandler extends BaseHandler {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			// if (registry == ProtocolRegistry.GAME_MOVEMENT) throw new UnsupportedOperationException();
 			return true;
 		}
 		throw new UnsupportedOperationException();

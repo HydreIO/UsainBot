@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.behavior.fight.type;
 
 import fr.aresrpg.eratz.domain.ability.fight.FightAbility;
 import fr.aresrpg.eratz.domain.behavior.fight.FightBehavior;
+import fr.aresrpg.eratz.domain.dofus.player.Spells;
 import fr.aresrpg.eratz.domain.player.Perso;
 
 /**
@@ -21,7 +22,22 @@ public class CraFeuFightBehavior extends FightBehavior {
 	public void playTurn() {
 		FightAbility fa = getPerso().getFightAbility();
 		tryHuman(); // si enabled le bot va attendre un peu avant de commencer son tour
+		if (is90()) playTurn90();
+		else playTurnBase();
 		fa.endTurn();
+	}
+
+	private void playTurnBase() {
+		FightAbility fa = getPerso().getFightAbility();
+		
+	}
+
+	private void playTurn90() {
+		FightAbility fa = getPerso().getFightAbility();
+		Spells boost = getPerso().getLvl() > 99 ? Spells.MAITRISE_ARC : Spells.TIR_ELOIGNEE;
+		fa.launchSpell(boost.get(getPerso()), getPerso().getCellid());
+		fa.launchSpell(Spells.TIR_PUISSANT.get(getPerso()), getPerso().getCellid());
+
 	}
 
 	private boolean is90() {
