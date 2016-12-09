@@ -12,6 +12,8 @@ import java.util.Set;
  */
 public class Fight {
 
+	private final int beginCellId1;
+	private final int beginCellId2;
 	private Set<Player> team0;
 	private Set<Player> team1;
 	private Set<Mob> mobs;
@@ -20,6 +22,25 @@ public class Fight {
 	private boolean isSpecBlocked;
 	private boolean ended;
 	private Player currentTurn;
+
+	public Fight(int cellid1, int cellid2) {
+		this.beginCellId1 = cellid1;
+		this.beginCellId2 = cellid2;
+	}
+
+	/**
+	 * @return the beginCellId1
+	 */
+	public int getBeginCellId1() {
+		return beginCellId1;
+	}
+
+	/**
+	 * @return the beginCellId2
+	 */
+	public int getBeginCellId2() {
+		return beginCellId2;
+	}
 
 	/**
 	 * @return the currentTurn

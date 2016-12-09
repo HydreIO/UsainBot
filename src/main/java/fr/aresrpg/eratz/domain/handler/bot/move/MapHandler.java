@@ -26,8 +26,8 @@ public interface MapHandler {
 
 	void onPlayerQuitMap(Character p, int cellId);
 
-	void onFightSpawn(Fight fight, int cellId1, int cellId2);
+	void onFightSpawn(Fight fight);
 
-	void onFightEnd();
+	void onFightEnd(Fight fight);
 
 }

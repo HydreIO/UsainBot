@@ -161,8 +161,7 @@ public interface BaseAbility {
 		return getPerso().getCurrentMap().getX() == 4 && getPerso().getCurrentMap().getZ() == -16;
 	}
 
-	default boolean goToZaap(Zaap zaap) { // si astrub prendre popo, sinon
-											// prendre popo + prendre zaap
+	default boolean goToZaap(Zaap zaap) { // si astrub prendre popo, sinon prendre popo + prendre zaap
 		if (!useItem(BotPopo.RAPPEL.getSlot())) {
 			getPerso().crashReport("n'a pas pu accéder au Zaap " + zaap.name() + " | Popo rappel épuisée.");
 			return false;

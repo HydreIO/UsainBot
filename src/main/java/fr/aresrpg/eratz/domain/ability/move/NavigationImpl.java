@@ -7,7 +7,6 @@ import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.Pathfinding;
-import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.dofus.map.Zaapi;
 import fr.aresrpg.eratz.domain.player.Perso;
@@ -45,30 +44,54 @@ public class NavigationImpl implements Navigation {
 
 	@Override
 	public Navigation moveUp() {
-		return moveToCell(getTeleporters(map)[0], true);
+		return moveToCell(getTeleporters(map)[0]);
 	}
 
 	@Override
 	public Navigation moveDown() {
-		return moveToCell(getTeleporters(map)[2], true);
+		return moveToCell(getTeleporters(map)[2]);
 	}
 
 	@Override
 	public Navigation moveLeft() {
-		return moveToCell(getTeleporters(map)[1], true);
+		return moveToCell(getTeleporters(map)[1]);
 	}
 
 	@Override
 	public Navigation moveRight() {
-		return moveToCell(getTeleporters(map)[3], true);
+		return moveToCell(getTeleporters(map)[3]);
 	}
 
-	@Override
-	public Navigation moveToCell(int cellid, boolean changeMap) {
-		List<Point> p = Pathfinding.getPath(
+	private List<Point> searchPath(int cellid) {
+		return Pathfinding.getPath(
 				Maps.getColumn(currentPos, map.getWidth()), Maps.getLine(currentPos, map.getWidth()),
 				Maps.getColumn(cellid, map.getWidth()),
 				Maps.getLine(cellid, map.getWidth()), map.getCells(), map.getWidth());
+	}
+
+	private void defineRandomPosition() {
+		for (int i = 0; i < map.getCells().length; i++) {
+			Cell ce = map.getCells()[i];
+			if (ce != null && ce.getMovement() == 4) {
+				this.currentPos = i;
+				break;
+			}
+		}
+	}
+
+	@Override
+	public Navigation moveToCell(int cellid) {
+		List<Point> p = searchPath(cellid);
+		if (p == null) {
+			System.out.println("Le chemin est introuvable ! nouvel éssai..");
+			System.out.println("Position = " + currentPos);
+			defineRandomPosition();
+			p = searchPath(cellid);
+			if (p == null) {
+				System.out.println("Impossible de trouver un chemin malgré tout mes éffort jte jure wallah jariv ap");
+				return this;
+			}
+		}
 		getPerso().getDebugView().setPath(p);
 		try {
 			getPerso().getAccount().getRemoteConnection().send(new GameActionPacket().setId(1).setAction(new GameMoveAction().setPath(Pathfinding.makeShortPath(p, map.getWidth()))));
@@ -112,7 +135,7 @@ public class NavigationImpl implements Navigation {
 
 	public void setCurrentPos(int currentPos) {
 		this.currentPos = currentPos;
-		TheBotFather.getInstance().getView().setCurrentPosition(currentPos);
+		getPerso().getDebugView().setCurrentPosition(currentPos);
 	}
 
 	private void lockAndWait() {

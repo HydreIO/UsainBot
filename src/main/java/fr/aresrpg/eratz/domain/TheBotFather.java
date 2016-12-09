@@ -9,9 +9,10 @@
 package fr.aresrpg.eratz.domain;
 
 import fr.aresrpg.dofus.Hastebin;
-import fr.aresrpg.dofus.util.DofusMapView;
+import fr.aresrpg.eratz.domain.behavior.move.type.IncarnamToAstrubPath;
 import fr.aresrpg.eratz.domain.dofus.Constants;
 import fr.aresrpg.eratz.domain.gui.MapView;
+import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
 import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
 import fr.aresrpg.eratz.domain.proxy.DofusProxy;
@@ -35,7 +36,6 @@ public class TheBotFather {
 	private Selector selector;
 	private boolean running;
 	private Config config;
-	private DofusMapView view;
 
 	public TheBotFather() throws IOException {
 		instance = this;
@@ -104,6 +104,20 @@ public class TheBotFather {
 			if (!sc.hasNext()) continue;
 			String[] nextLine = sc.nextLine().split(" ");
 			switch (nextLine[0].toLowerCase()) {
+				case "bot":
+					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+						if (a.isClientOnline()) {
+							a.getProxy().getRemoteHandler().addHandler(new BotHandler(a.getCurrentPlayed()));
+							System.out.println("Bot Handler ajouté pour " + a.getCurrentPlayed().getPseudo());
+						}
+					});
+					break;
+				case "way":
+					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+						if (a.isClientOnline() || a.isBotOnline())
+							a.getCurrentPlayed().changeBehavior(new IncarnamToAstrubPath(a.getCurrentPlayed()));
+					});
+					break;
 				case "view":
 					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
 						if (a.isClientOnline() || a.isBotOnline())
@@ -139,13 +153,6 @@ public class TheBotFather {
 			 * });
 			 */
 		}
-	}
-
-	/**
-	 * @return the view
-	 */
-	public DofusMapView getView() {
-		return view;
 	}
 
 	public static void main(String... args) throws IOException {

@@ -218,7 +218,8 @@ public class LocalHandler extends BaseHandler {
 		for (Perso p : getAccount().getPersos()) {
 			if (p.getId() == pkt.getCharacterId()) {
 				getAccount().setCurrentPlayed(p);
-				break;
+			} else {
+				
 			}
 		}
 		transmit(pkt);

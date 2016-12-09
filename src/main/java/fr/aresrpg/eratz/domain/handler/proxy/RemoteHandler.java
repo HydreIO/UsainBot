@@ -78,6 +78,7 @@ public class RemoteHandler extends BaseHandler {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			// if (registry == ProtocolRegistry.GAME_MOVEMENT) throw new UnsupportedOperationException();
 			return true;
 		}
 		throw new UnsupportedOperationException();
@@ -230,7 +231,7 @@ public class RemoteHandler extends BaseHandler {
 	}
 
 	@Override
-	public void handle(AccountCharactersListPacket pkt) {
+	public void handle(AccountCharactersListPacket pkt) { // tkt on verifie bien que les persos existe pas déja
 		Arrays.stream(pkt.getCharacters()).filter(Objects::nonNull).forEach(c -> getAccount().getPersos().add(new Perso(c.getId(), c.getPseudo(), getAccount(), null, null)));
 		transmit(pkt);
 	}
@@ -299,6 +300,7 @@ public class RemoteHandler extends BaseHandler {
 			// getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a, m.getCells()[a].getMovement() == 2)));
 			getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> {
 				Cell cell = m.getCells()[a];
+				System.out.println("frame = " + cell.getFrame() + (cell.getFrame() != null ? cell.getFrame().getId() : ""));
 				System.out.println("Groundlvl = " + cell.getGroundLevel());
 				System.out.println("GroundSlope = " + cell.getGroundSlope());
 				System.out.println("GroundNum = " + cell.getLayerGroundNum());
@@ -312,7 +314,7 @@ public class RemoteHandler extends BaseHandler {
 				System.out.println("isLayerObject2Inter = " + cell.isLayerObject2Interactive());
 				System.out.println("lineOfSight = " + cell.isLineOfSight());
 				System.out.println("LayerObject2Num = " + cell.getLayerObject2Num());
-
+				Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a));
 			}));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -377,7 +379,6 @@ public class RemoteHandler extends BaseHandler {
 	@Override
 	public void handle(GameActionPacket gameActionPacket) {
 		transmit(gameActionPacket);
-
 	}
 
 	@Override

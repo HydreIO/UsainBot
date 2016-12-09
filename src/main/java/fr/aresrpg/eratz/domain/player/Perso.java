@@ -13,12 +13,21 @@ import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
+import fr.aresrpg.eratz.domain.ability.BaseAbilityImpl;
 import fr.aresrpg.eratz.domain.ability.craft.CraftAbility;
+import fr.aresrpg.eratz.domain.ability.craft.CraftAbilityImpl;
 import fr.aresrpg.eratz.domain.ability.fight.FightAbility;
+import fr.aresrpg.eratz.domain.ability.fight.FightAbilityImpl;
 import fr.aresrpg.eratz.domain.ability.harvest.HarvestAbility;
+import fr.aresrpg.eratz.domain.ability.harvest.HarvestAbilityImpl;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.ability.move.NavigationImpl;
+import fr.aresrpg.eratz.domain.ability.sell.SellAbility;
+import fr.aresrpg.eratz.domain.ability.sell.SellAbilityImpl;
 import fr.aresrpg.eratz.domain.behavior.Behavior;
+import fr.aresrpg.eratz.domain.behavior.fight.FightBehavior;
+import fr.aresrpg.eratz.domain.behavior.harvest.HarvestBehavior;
+import fr.aresrpg.eratz.domain.behavior.harvest.type.WheatDePauvreBehavior;
 import fr.aresrpg.eratz.domain.behavior.harvest.type.WheatHarvestBehavior;
 import fr.aresrpg.eratz.domain.behavior.move.type.BankDepositPath;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
@@ -46,11 +55,13 @@ public class Perso extends Player {
 	private final java.util.Map<Spells, Spell> spells = new HashMap<>();
 	private Fight currentFight;
 	private Behavior currentBehavior;
+	private FightBehavior currentFightBehavior;
 	private final Navigation navigation;
 	private final BaseAbility baseAbility;
 	private final HarvestAbility harvestAbility;
 	private final CraftAbility craftAbility;
 	private final FightAbility fightAbility;
+	private final SellAbility sellAbility;
 	private final FightOptions fightOptions;
 	private final DofusMapView debugView;
 	private int maxPods;
@@ -62,17 +73,48 @@ public class Perso extends Player {
 		this.botJob = job;
 		this.fightOptions = new FightOptions(this);
 		this.navigation = new NavigationImpl(this);
-		this.baseAbility = null;
-		this.harvestAbility = null;
-		this.craftAbility = null;
-		this.fightAbility = null;
+		this.baseAbility = new BaseAbilityImpl(this);
+		this.harvestAbility = new HarvestAbilityImpl(this);
+		this.craftAbility = new CraftAbilityImpl(this);
+		this.fightAbility = new FightAbilityImpl(this);
+		this.sellAbility = new SellAbilityImpl(this);
+		this.debugView = new DofusMapView();
 		for (Spells s : Spells.values())
 			if (s.getClasse() == getClasse()) spells.put(s, new Spell(s));
-		this.debugView = new DofusMapView();
 	}
 
 	public Perso(int id, String pseudo, Account account, Classe classe, Genre sexe) {
 		this(id, pseudo, account, null, classe, sexe);
+	}
+
+	/**
+	 * @return the sellAbility
+	 */
+	public SellAbility getSellAbility() {
+		return sellAbility;
+	}
+
+	/**
+	 * @param maxPods
+	 *            the maxPods to set
+	 */
+	public void setMaxPods(int maxPods) {
+		this.maxPods = maxPods;
+	}
+
+	/**
+	 * @param usedPods
+	 *            the usedPods to set
+	 */
+	public void setUsedPods(int usedPods) {
+		this.usedPods = usedPods;
+	}
+
+	/**
+	 * @return the currentFightBehavior
+	 */
+	public FightBehavior getCurrentFightBehavior() {
+		return currentFightBehavior;
 	}
 
 	/**
@@ -150,6 +192,10 @@ public class Perso extends Player {
 		return f == getCurrentFight();
 	}
 
+	public boolean isInFight() {
+		return getCurrentFight() != null;
+	}
+
 	public boolean allGroupIsInFight(Fight f) {
 		for (Player p : getGroup())
 			if (!f.hasPlayer(p)) return false;
@@ -172,14 +218,15 @@ public class Perso extends Player {
 
 	public void crashReport(String msg) {
 		getBaseAbility().speak(Channel.ADMIN, msg);
+		System.out.println("CRASH REPORT [" + msg + "] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		disconnect();
 	}
 
-	public void harvestWheat(int quantity) {
+	public void harvestWheat(int quantity, boolean astrub) {
 		int harvested = 0;
 		goEmptyInvInBanque(492, 8540, 577);
 		while (harvested < quantity) {
-			WheatHarvestBehavior harvester = new WheatHarvestBehavior(this, quantity);
+			HarvestBehavior harvester = astrub ? new WheatDePauvreBehavior(this, quantity) : new WheatHarvestBehavior(this, quantity);
 			harvester.start();
 			if (harvester.isQuantityHarvested()) break;
 			if (harvester.isFullPod()) {
@@ -292,7 +339,14 @@ public class Perso extends Player {
 		if (currentBehavior != null)
 			return false;
 		this.currentBehavior = b;
-		Executors.FIXED.execute(b);
+		if (!isInFight()) Executors.FIXED.execute(b);
+		return true;
+	}
+
+	public boolean changeFightBehavior(FightBehavior behavior) {
+		if (currentFightBehavior != null) return false;
+		this.currentFightBehavior = behavior;
+		if (isInFight()) Executors.FIXED.execute(behavior);
 		return true;
 	}
 

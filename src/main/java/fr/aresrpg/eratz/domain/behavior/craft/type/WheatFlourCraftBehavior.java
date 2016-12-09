@@ -58,7 +58,7 @@ public class WheatFlourCraftBehavior extends CraftBehavior {
 		int wheat = inInv + winBanque;
 		int quantityToHarvest = getQuantity() * 2 - wheat;
 		if (quantityToHarvest > 0)
-			getPerso().harvestWheat(quantityToHarvest);
+			getPerso().harvestWheat(quantityToHarvest, true);
 	}
 
 }

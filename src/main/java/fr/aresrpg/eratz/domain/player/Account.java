@@ -10,6 +10,7 @@ package fr.aresrpg.eratz.domain.player;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
+import fr.aresrpg.eratz.domain.proxy.Proxy;
 import fr.aresrpg.eratz.domain.util.Threads;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Variables;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Account {
+
+	private Proxy proxy;
 	private String username;
 	private String pass;
 	private List<Perso> persos = new ArrayList<>();
@@ -34,6 +37,21 @@ public class Account {
 	public Account(String username, String pass) {
 		this.username = username;
 		this.pass = pass;
+	}
+
+	/**
+	 * @return the proxy
+	 */
+	public Proxy getProxy() {
+		return proxy;
+	}
+
+	/**
+	 * @param proxy
+	 *            the proxy to set
+	 */
+	public void setProxy(Proxy proxy) {
+		this.proxy = proxy;
 	}
 
 	/**

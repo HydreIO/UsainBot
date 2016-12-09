@@ -4,8 +4,10 @@ import fr.aresrpg.dofus.structures.character.Character;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.map.Mob;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
+import fr.aresrpg.eratz.domain.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.dofus.map.Ressource;
 import fr.aresrpg.eratz.domain.player.Perso;
+import fr.aresrpg.eratz.domain.player.Player;
 
 /**
  * 
@@ -21,13 +23,13 @@ public class PlayerMapHandler implements MapHandler {
 
 	@Override
 	public void onRessourceSpawn(Ressource r) {
-		if (perso != null) for (Ressource res : perso.getCurrentMap().getRessources())
+		for (Ressource res : perso.getCurrentMap().getRessources())
 			if (res.equals(r)) res.setSpawned();
 	}
 
 	@Override
 	public void onRessourceRecolted(Character p, Ressource r) {
-		if (perso != null) for (Ressource res : perso.getCurrentMap().getRessources())
+		for (Ressource res : perso.getCurrentMap().getRessources())
 			if (res.equals(r)) res.setSpawned(false);
 	}
 
@@ -40,7 +42,7 @@ public class PlayerMapHandler implements MapHandler {
 
 	@Override
 	public void onJoinMap(DofusMap m) {
-		// if (perso != null) getPerso().setCurrentMap();
+		getPerso().setCurrentMap(BotMap.fromDofusMap(m));
 	}
 
 	@Override
@@ -55,25 +57,22 @@ public class PlayerMapHandler implements MapHandler {
 
 	@Override
 	public void onPlayerJoinMap(Character p, int cellId) {
-		getPerso().getCurrentMap().getDofusMap().getPlayers().add(p);
+		getPerso().getCurrentMap().getPlayers().add(Player.fromCharacter(p));
 	}
 
 	@Override
 	public void onPlayerQuitMap(Character p, int cellId) {
-		// TODO
-
+		getPerso().getCurrentMap().getPlayers().remove(Player.fromCharacter(p));
 	}
 
 	@Override
-	public void onFightSpawn(Fight fight, int cellId1, int cellId2) {
-		// TODO
-
+	public void onFightSpawn(Fight fight) {
+		getPerso().getCurrentMap().getFights().add(fight);
 	}
 
 	@Override
-	public void onFightEnd() {
-		// TODO
-
+	public void onFightEnd(Fight fight) {
+		getPerso().getCurrentMap().getFights().remove(fight);
 	}
 
 }

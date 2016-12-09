@@ -20,7 +20,6 @@ import fr.aresrpg.dofus.structures.character.AvailableCharacter;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.server.ServerState;
 import fr.aresrpg.dofus.util.*;
-import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.ability.move.NavigationImpl;
 import fr.aresrpg.eratz.domain.handler.bot.craft.CraftHandler;
 import fr.aresrpg.eratz.domain.handler.bot.fight.FightHandler;
@@ -34,6 +33,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -280,10 +280,11 @@ public class BotHandler implements PacketHandler {
 			Map<String, Object> d = SwfVariableExtractor.extractVariable(Maps.downloadMap(gameMapDataPacket.getMapId(),
 					gameMapDataPacket.getSubid()));
 			DofusMap m = Maps.loadMap(d, gameMapDataPacket.getDecryptKey());
-			TheBotFather.getInstance().getView().setMap(m);
+			getPerso().getDebugView().setMap(m);
+			mapHandler.onJoinMap(m);
 			((NavigationImpl) getPerso().getNavigation()).setMap(m);
 			getConnection().send(new GameExtraInformationPacket());
-			TheBotFather.getInstance().getView().setOnCellClick(a -> Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a)));
+			getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a)));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -294,6 +295,9 @@ public class BotHandler implements PacketHandler {
 		for (int i = 0; i < gameMovementPacket.getName().size(); i++)
 			if (perso.getPseudo().equals(gameMovementPacket.getName().get(i)))
 				((NavigationImpl) getPerso().getNavigation()).setCurrentPos(gameMovementPacket.getCell().get(i));
+		getPerso().getDebugView().getServerpath().set(Pathfinding.cellsToPoints(
+				gameMovementPacket.getCell().stream().map(i -> getPerso().getCurrentMap().getDofusMap().getCells()[i]).collect(Collectors.toList()), getPerso().getCurrentMap().getDofusMap()));
+		getPerso().getDebugView().drawServerPath();
 	}
 
 	@Override
