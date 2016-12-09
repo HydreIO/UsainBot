@@ -44,22 +44,22 @@ public class NavigationImpl implements Navigation {
 
 	@Override
 	public Navigation moveUp() {
-		return moveToCell(getTeleporters(map)[0]);
+		return moveToCell(getTeleporters(map)[0], true);
 	}
 
 	@Override
 	public Navigation moveDown() {
-		return moveToCell(getTeleporters(map)[2]);
+		return moveToCell(getTeleporters(map)[2], true);
 	}
 
 	@Override
 	public Navigation moveLeft() {
-		return moveToCell(getTeleporters(map)[1]);
+		return moveToCell(getTeleporters(map)[1], true);
 	}
 
 	@Override
 	public Navigation moveRight() {
-		return moveToCell(getTeleporters(map)[3]);
+		return moveToCell(getTeleporters(map)[3] , true);
 	}
 
 	private List<Point> searchPath(int cellid) {
@@ -69,23 +69,13 @@ public class NavigationImpl implements Navigation {
 				Maps.getLine(cellid, map.getWidth()), map.getCells(), map.getWidth());
 	}
 
-	private void defineRandomPosition() {
-		for (int i = 0; i < map.getCells().length; i++) {
-			Cell ce = map.getCells()[i];
-			if (ce != null && ce.getMovement() == 4) {
-				this.currentPos = i;
-				break;
-			}
-		}
-	}
-
 	@Override
-	public Navigation moveToCell(int cellid) {
+	public Navigation moveToCell(int cellid , boolean teleport) {
 		List<Point> p = searchPath(cellid);
+		System.out.println(p);
 		if (p == null) {
 			System.out.println("Le chemin est introuvable ! nouvel éssai..");
 			System.out.println("Position = " + currentPos);
-			defineRandomPosition();
 			p = searchPath(cellid);
 			if (p == null) {
 				System.out.println("Impossible de trouver un chemin malgré tout mes éffort jte jure wallah jariv ap");
@@ -98,11 +88,12 @@ public class NavigationImpl implements Navigation {
 			Executors.SCHEDULED.schedule(() -> {
 				try {
 					getPerso().getAccount().getRemoteConnection().send(new GameActionACKPacket().setActionId(0));
-					setCurrentPos(cellid);
+					if(!teleport) //Avoid set position on map change
+						setCurrentPos(cellid);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			} , 3, TimeUnit.SECONDS);
+			} , 5, TimeUnit.SECONDS);
 			lockAndWait();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -122,21 +113,13 @@ public class NavigationImpl implements Navigation {
 
 	public void setMap(DofusMap map) {
 		this.map = map;
-		if (waiter != null) {
-			Threads.sleep(3, TimeUnit.SECONDS);
-			try {
-				getPerso().getAccount().getRemoteConnection().send(new GameActionACKPacket().setActionId(0));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			LockSupport.unpark(waiter);
-		}
 	}
 
 	public void setCurrentPos(int currentPos) {
 		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! SET CURRENT POS !!!!!!!!!!!!!!!! " + currentPos);
 		this.currentPos = currentPos;
 		getPerso().getDebugView().setCurrentPosition(currentPos);
+		LockSupport.unpark(waiter);
 	}
 
 	private void lockAndWait() {
