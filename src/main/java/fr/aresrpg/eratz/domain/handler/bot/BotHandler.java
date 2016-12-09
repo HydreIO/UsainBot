@@ -33,7 +33,6 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 
@@ -295,9 +294,6 @@ public class BotHandler implements PacketHandler {
 		for (int i = 0; i < gameMovementPacket.getName().size(); i++)
 			if (perso.getPseudo().equals(gameMovementPacket.getName().get(i)))
 				((NavigationImpl) getPerso().getNavigation()).setCurrentPos(gameMovementPacket.getCell().get(i));
-		getPerso().getDebugView().getServerpath().set(Pathfinding.cellsToPoints(
-				gameMovementPacket.getCell().stream().map(i -> getPerso().getCurrentMap().getDofusMap().getCells()[i]).collect(Collectors.toList()), getPerso().getCurrentMap().getDofusMap()));
-		getPerso().getDebugView().drawServerPath();
 	}
 
 	@Override
