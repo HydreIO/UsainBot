@@ -4,6 +4,7 @@ import fr.aresrpg.dofus.structures.map.Mob;
 import fr.aresrpg.eratz.domain.dofus.mob.Invocation;
 import fr.aresrpg.eratz.domain.player.Player;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -14,10 +15,10 @@ public class Fight {
 
 	private final int beginCellId1;
 	private final int beginCellId2;
-	private Set<Player> team0;
-	private Set<Player> team1;
-	private Set<Mob> mobs;
-	private Set<Invocation> invocs;
+	private Set<Player> team0 = new HashSet<>();
+	private Set<Player> team1 = new HashSet<>();
+	private Set<Mob> mobs = new HashSet<>();
+	private Set<Invocation> invocs = new HashSet<>();
 	private boolean isBlocked;
 	private boolean isSpecBlocked;
 	private boolean ended;

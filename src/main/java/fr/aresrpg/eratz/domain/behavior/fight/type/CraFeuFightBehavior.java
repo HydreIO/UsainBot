@@ -1,7 +1,11 @@
 package fr.aresrpg.eratz.domain.behavior.fight.type;
 
+import fr.aresrpg.dofus.structures.map.Cell;
+import fr.aresrpg.dofus.structures.map.Mob;
 import fr.aresrpg.eratz.domain.ability.fight.FightAbility;
 import fr.aresrpg.eratz.domain.behavior.fight.FightBehavior;
+import fr.aresrpg.eratz.domain.dofus.fight.Fight;
+import fr.aresrpg.eratz.domain.dofus.player.Spell;
 import fr.aresrpg.eratz.domain.dofus.player.Spells;
 import fr.aresrpg.eratz.domain.player.Perso;
 
@@ -29,7 +33,7 @@ public class CraFeuFightBehavior extends FightBehavior {
 
 	private void playTurnBase() {
 		FightAbility fa = getPerso().getFightAbility();
-		
+
 	}
 
 	private void playTurn90() {
@@ -38,6 +42,21 @@ public class CraFeuFightBehavior extends FightBehavior {
 		fa.launchSpell(boost.get(getPerso()), getPerso().getCellid());
 		fa.launchSpell(Spells.TIR_PUISSANT.get(getPerso()), getPerso().getCellid());
 
+	}
+
+	private int getRandomCellAtPoForMob(Mob m, Spell s) {
+		Cell[] cells = getPerso().getCurrentMap().getDofusMap().getCells();
+		return 0;
+	}
+
+	private Mob getNearestMob() {
+		Fight fi = getPerso().getCurrentFight();
+		for (Mob m : fi.getMobs()) {}
+		return null;
+	}
+
+	private int getCost(Cell cell) {
+		return 0;
 	}
 
 	private boolean is90() {

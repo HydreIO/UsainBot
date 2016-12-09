@@ -28,8 +28,9 @@ public class IncarnamToAstrubPath extends PathBehavior {
 	public void startPath() {
 		BaseAbility ability = getPerso().getBaseAbility();
 		Navigation na = getPerso().getNavigation();
-		ability.closeGui(); // close si jamais qqn nous défi ou autre
-		na.moveToCell(459).moveToCell(447).moveToCell(463).moveRight(3).moveToCell(376).moveRight(2).moveDown().moveRight();
+		ability.closeGui();
+		// close si jamais qqn nous défi ou autre
+		/* na.moveToCell(459).moveToCell(447) */na.moveToCell(463).moveRight(3).moveToCell(376).moveRight(2).moveDown().moveRight();
 		ability.speakToNpc(-1).npcTalkChoice(3840, 3373);
 	}
 
