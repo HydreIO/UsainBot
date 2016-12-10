@@ -7,6 +7,7 @@ import fr.aresrpg.dofus.protocol.account.client.*;
 import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
+import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
@@ -16,6 +17,7 @@ import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
+import fr.aresrpg.dofus.structures.PathDirection;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.server.ServerState;
@@ -46,10 +48,8 @@ public class BotHandler implements PacketHandler {
 	private CraftHandler craftHandler;
 	private MapHandler mapHandler;
 	private String ticket;
+	private int characterId;
 
-	/**
-	 * @param account
-	 */
 	public BotHandler(Perso perso) {
 		this.perso = perso;
 		this.mapHandler = new PlayerMapHandler(perso);
@@ -223,6 +223,7 @@ public class BotHandler implements PacketHandler {
 		for (AvailableCharacter c : accountCharactersListPacket.getCharacters())
 			if (c.getPseudo().equals(perso.getPseudo())) {
 				try {
+					characterId = c.getId();
 					getConnection().send(new AccountSelectCharacterPacket().setCharacterId(c.getId()));
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -302,7 +303,7 @@ public class BotHandler implements PacketHandler {
 	public void handle(GameMovementPacket gameMovementPacket) {
 		for (int i = 0; i < gameMovementPacket.getName().size(); i++)
 			if (getPerso().getPseudo().equals(gameMovementPacket.getName().get(i)))
-				((NavigationImpl) getPerso().getNavigation()).setCurrentPos(gameMovementPacket.getCell().get(i));
+				((NavigationImpl) getPerso().getNavigation()).setCurrentPos(gameMovementPacket.getCell().get(i) , true);
 	}
 
 	@Override
@@ -382,12 +383,6 @@ public class BotHandler implements PacketHandler {
 	}
 
 	@Override
-	public void handle(GameActionPacket gameActionPacket) {
-		// TODO
-
-	}
-
-	@Override
 	public void handle(GameMapFramePacket gameMapFramePacket) {
 		System.out.println(gameMapFramePacket);
 	}
@@ -395,6 +390,27 @@ public class BotHandler implements PacketHandler {
 	@Override
 	public void handle(GameActionACKPacket gameActionACKPacket) {
 
+	}
+
+	@Override
+	public void handle(GameClientActionPacket gameClientActionPacket) {
+
+	}
+
+	@Override
+	public void handle(GameServerActionPacket pkt) {
+		System.out.println(pkt.getEntityId());
+		System.out.println(characterId);
+		if(pkt.getEntityId() != characterId)
+			return;
+		if(pkt.getAction() instanceof GameMoveAction){
+			GameMoveAction a = (GameMoveAction) pkt.getAction();
+			int id = 0;
+			for (Map.Entry<Integer, PathDirection> e : a.getPath().entrySet())
+				id = e.getKey();
+			((NavigationImpl) getPerso().getNavigation()).setCurrentPos(id);
+
+		}
 	}
 
 }

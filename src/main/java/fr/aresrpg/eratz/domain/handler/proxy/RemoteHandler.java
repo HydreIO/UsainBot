@@ -50,7 +50,7 @@ import java.util.*;
  * 
  * @since
  */
-public class RemoteHandler extends BaseHandler {
+public class RemoteHandler extends TransfertHandler {
 
 	/**
 	 * @param account
@@ -59,7 +59,8 @@ public class RemoteHandler extends BaseHandler {
 		super(proxy);
 	}
 
-	private void transmit(Packet pkt) {
+	@Override
+	protected void transmit(Packet pkt) {
 		try {
 			System.out.println("[RCV:]<< " + pkt);
 			getProxy().getLocalConnection().send(pkt);
@@ -103,64 +104,14 @@ public class RemoteHandler extends BaseHandler {
 	}
 
 	@Override
-	public void handle(HelloGamePacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
 	public void handle(HelloConnectionPacket pkt) {
 		getProxy().setHc(pkt.getHashKey());
 		transmit(pkt);
 	}
 
 	@Override
-	public void handle(AccountAuthPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountLoginErrPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
 	public void handle(AccountLoginOkPacket pkt) {
 		pkt.setAdmin(true);
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountCommunityPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountHostPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountQuestionPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountPseudoPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountListServersPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountServerListPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountAccessServerPacket pkt) {
 		transmit(pkt);
 	}
 
@@ -186,51 +137,6 @@ public class RemoteHandler extends BaseHandler {
 	}
 
 	@Override
-	public void handle(AccountServerHostPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountTicketPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountTicketOkPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(BasicConfirmPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountKeyPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountRegionalVersionPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountGetGiftsPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountIdentity pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountGetCharactersPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
 	public void handle(AccountCharactersListPacket pkt) { // tkt on verifie bien que les persos existe pas déja
 		Arrays.stream(pkt.getCharacters()).filter(Objects::nonNull).forEach(c -> getAccount().getPersos().add(new Perso(c.getId(), c.getPseudo(), getAccount(), null, null)));
 		transmit(pkt);
@@ -240,46 +146,6 @@ public class RemoteHandler extends BaseHandler {
 	public void handle(AccountSelectCharacterPacket pkt) {
 		transmit(pkt);
 
-	}
-
-	@Override
-	public void handle(AccountGetQueuePosition pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountQueuePosition pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(MountXpPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(GameExtraInformationPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(InfoMessagePacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(SpecializationSetPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(InfoMapPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(GameCreatePacket pkt) {
-		transmit(pkt);
 	}
 
 	public Perso getPerso() {
@@ -321,81 +187,11 @@ public class RemoteHandler extends BaseHandler {
 	}
 
 	@Override
-	public void handle(PlayerMountPacket playerMountPacket) {
-		transmit(playerMountPacket);
-	}
-
-	@Override
-	public void handle(GameJoinPacket gameJoinPacket) {
-		transmit(gameJoinPacket);
-	}
-
-	@Override
-	public void handle(GameEndTurnPacket gameEndTurnPacket) {
-		transmit(gameEndTurnPacket);
-	}
-
-	@Override
-	public void handle(GameTurnOkPacket gameTurnOkPacket) {
-		transmit(gameTurnOkPacket);
-	}
-
-	@Override
-	public void handle(FreeMySoulPacket freeMySoulPacket) {
-		transmit(freeMySoulPacket);
-	}
-
-	@Override
-	public void handle(LeaveGamePacket leaveGamePacket) {
-		transmit(leaveGamePacket);
-	}
-
-	@Override
-	public void handle(GameSetPlayerPositionPacket gameSetPlayerPositionPacket) {
-		transmit(gameSetPlayerPositionPacket);
-	}
-
-	@Override
-	public void handle(GamePositionStartPacket gamePositionStartPacket) {
-		transmit(gamePositionStartPacket);
-	}
-
-	@Override
-	public void handle(GameOnReadyPacket gameOnReadyPacket) {
-		transmit(gameOnReadyPacket);
-	}
-
-	@Override
-	public void handle(GameStartPacket gameStartPacket) {
-		transmit(gameStartPacket);
-	}
-
-	@Override
-	public void handle(GameEndPacket gameEndPacket) {
-		transmit(gameEndPacket);
-	}
-
-	@Override
-	public void handle(GameActionPacket gameActionPacket) {
-		transmit(gameActionPacket);
-	}
-
-	@Override
 	public void handle(GameMovementPacket gameMovementPacket) {
 		// transmit(gameMovementPacket);
 		for (int i = 0; i < gameMovementPacket.getName().size(); i++)
 			if (getPerso().getPseudo().equals(gameMovementPacket.getName().get(i)))
 				((NavigationImpl) getPerso().getNavigation()).setCurrentPos(gameMovementPacket.getCell().get(i));
-	}
-
-	@Override
-	public void handle(GameMapFramePacket gameMapFramePacket) {
-		// transmit(gameMapFramePacket);
-	}
-
-	@Override
-	public void handle(GameActionACKPacket gameActionACKPacket) {
-		transmit(gameActionACKPacket);
 	}
 
 }
