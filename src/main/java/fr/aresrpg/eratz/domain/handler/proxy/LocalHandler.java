@@ -15,6 +15,8 @@ import fr.aresrpg.dofus.protocol.account.client.*;
 import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
+import fr.aresrpg.dofus.protocol.game.actions.GameAction;
+import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
@@ -24,6 +26,8 @@ import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
+import fr.aresrpg.dofus.structures.PathDirection;
+import fr.aresrpg.eratz.domain.ability.move.NavigationImpl;
 import fr.aresrpg.eratz.domain.handler.BaseHandler;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
 import fr.aresrpg.eratz.domain.player.Perso;
@@ -33,6 +37,7 @@ import fr.aresrpg.eratz.domain.util.encryption.CryptHelper;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Map;
 
 /**
  * 
@@ -219,7 +224,7 @@ public class LocalHandler extends BaseHandler {
 			if (p.getId() == pkt.getCharacterId()) {
 				getAccount().setCurrentPlayed(p);
 			} else {
-				
+
 			}
 		}
 		transmit(pkt);
@@ -327,6 +332,14 @@ public class LocalHandler extends BaseHandler {
 
 	@Override
 	public void handle(GameActionPacket gameActionPacket) {
+		GameAction action = gameActionPacket.getAction();
+		if (action instanceof GameMoveAction) {
+			GameMoveAction a = (GameMoveAction) action;
+			int id = 0;
+			for (Map.Entry<Integer, PathDirection> e : a.getPath().entrySet())
+				id = e.getKey().intValue();
+			((NavigationImpl) getAccount().getCurrentPlayed().getNavigation()).setCurrentPos(id);
+		}
 		transmit(gameActionPacket);
 	}
 

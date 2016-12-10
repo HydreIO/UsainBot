@@ -35,7 +35,7 @@ public class DofusProxy implements Proxy {
 
 	public DofusProxy(SocketChannel localChannel, SocketChannel remoteChannel) throws IOException {
 		changeConnection(new DofusConnection<>("Local", localChannel, localHandler, Bound.CLIENT), ProxyConnectionType.LOCAL);
-		changeConnection(new DofusConnection<>("Remote", remoteChannel, remoteHandler, Bound.SERVER), ProxyConnectionType.REMOTE);
+		changeConnection(new DofusConnection<>("Remote", remoteChannel, proxyHandler, Bound.SERVER), ProxyConnectionType.REMOTE);
 	}
 
 	public void initAccount(Account account) {

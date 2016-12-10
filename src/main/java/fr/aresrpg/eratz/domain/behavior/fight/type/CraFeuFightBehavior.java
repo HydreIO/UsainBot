@@ -46,17 +46,14 @@ public class CraFeuFightBehavior extends FightBehavior {
 
 	private int getRandomCellAtPoForMob(Mob m, Spell s) {
 		Cell[] cells = getPerso().getCurrentMap().getDofusMap().getCells();
-		return 0;
 	}
 
 	private Mob getNearestMob() {
 		Fight fi = getPerso().getCurrentFight();
 		for (Mob m : fi.getMobs()) {}
-		return null;
 	}
 
 	private int getCost(Cell cell) {
-		return 0;
 	}
 
 	private boolean is90() {

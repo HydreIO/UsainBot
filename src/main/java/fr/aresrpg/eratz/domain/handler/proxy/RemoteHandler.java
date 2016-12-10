@@ -80,7 +80,8 @@ public class RemoteHandler extends BaseHandler {
 			}
 			return true;
 		}
-		throw new UnsupportedOperationException();
+		// throw new UnsupportedOperationException();
+		return true; // temp
 	}
 
 	@Override
@@ -296,7 +297,6 @@ public class RemoteHandler extends BaseHandler {
 			getPerso().getDebugView().clearPath();
 			((NavigationImpl) getPerso().getNavigation()).setMap(m);
 			getAccount().getRemoteConnection().send(new GameExtraInformationPacket());
-			// getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a, m.getCells()[a].getMovement() == 2)));
 			getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> {
 				Cell cell = m.getCells()[a];
 				System.out.println("frame = " + cell.getFrame() + (cell.getFrame() != null ? cell.getFrame().getId() : ""));
@@ -382,12 +382,15 @@ public class RemoteHandler extends BaseHandler {
 
 	@Override
 	public void handle(GameMovementPacket gameMovementPacket) {
-		transmit(gameMovementPacket);
+		// transmit(gameMovementPacket);
+		for (int i = 0; i < gameMovementPacket.getName().size(); i++)
+			if (getPerso().getPseudo().equals(gameMovementPacket.getName().get(i)))
+				((NavigationImpl) getPerso().getNavigation()).setCurrentPos(gameMovementPacket.getCell().get(i));
 	}
 
 	@Override
 	public void handle(GameMapFramePacket gameMapFramePacket) {
-		transmit(gameMapFramePacket);
+		// transmit(gameMapFramePacket);
 	}
 
 	@Override

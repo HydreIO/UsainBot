@@ -135,6 +135,11 @@ public class TheBotFather {
 					break;
 				case "selectaccount":
 					String perso = nextLine.length == 3 ? nextLine[2] : AccountsManager.getInstance().getAccounts().get(nextLine[1]).getPersos().get(0).getPseudo();
+					if (perso == null) {
+						System.out.println("Perso introuvable");
+						break;
+					}
+					System.out.println("Selection de " + perso);
 					AccountsManager.getInstance().connectAccount(nextLine[1], perso);
 					break;
 			}

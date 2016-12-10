@@ -36,6 +36,7 @@ import fr.aresrpg.eratz.domain.dofus.item.Object;
 import fr.aresrpg.eratz.domain.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.dofus.player.*;
 import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
+import fr.aresrpg.eratz.domain.handler.proxy.ProxyHandler;
 import fr.aresrpg.eratz.domain.option.fight.FightOptions;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -140,8 +141,7 @@ public class Perso extends Player {
 		try {
 			SocketChannel channel = SocketChannel.open(TheBotFather.SERVER_ADRESS);
 			a.setCurrentPlayed(this);
-			a.setRemoteConnection(new DofusConnection<>(getPseudo(), channel, new BotHandler(this), Bound.SERVER));
-			a.setRemoteConnection(new DofusConnection<SocketChannel>(getPseudo(), channel, new BotHandler(this), Bound.SERVER));
+			a.setRemoteConnection(new DofusConnection<>(getPseudo(), channel, new ProxyHandler(new BotHandler(this)), Bound.SERVER)); // fix temporaire via proxy handler pour corriger le bug du parse en mitm
 			Executors.FIXED.execute(a::readRemote);
 		} catch (IOException e) {
 			a.setState(AccountState.OFFLINE);

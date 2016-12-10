@@ -25,6 +25,7 @@ import fr.aresrpg.eratz.domain.handler.bot.craft.CraftHandler;
 import fr.aresrpg.eratz.domain.handler.bot.fight.FightHandler;
 import fr.aresrpg.eratz.domain.handler.bot.move.MapHandler;
 import fr.aresrpg.eratz.domain.handler.bot.move.PlayerMapHandler;
+import fr.aresrpg.eratz.domain.handler.proxy.ProxyHandler;
 import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
@@ -52,6 +53,13 @@ public class BotHandler implements PacketHandler {
 	public BotHandler(Perso perso) {
 		this.perso = perso;
 		this.mapHandler = new PlayerMapHandler(perso);
+	}
+
+	@Override
+	public boolean parse(ProtocolRegistry registry, String packet) {
+		// if (registry == null) return true;
+		// throw new UnsupportedOperationException();
+		return true; // temp
 	}
 
 	public Perso getPerso() {
@@ -147,8 +155,9 @@ public class BotHandler implements PacketHandler {
 		this.ticket = accountServerEncryptedHostPacket.getTicketKey();
 		try {
 			getConnection().close();
-			getPerso().getAccount().setRemoteConnection(new DofusConnection<>(getPerso().getPseudo(),
-					SocketChannel.open(new InetSocketAddress(accountServerEncryptedHostPacket.getIp(), 443)), this, ProtocolRegistry.Bound.SERVER));
+			getPerso().getAccount().setRemoteConnection(
+					new DofusConnection<>(getPerso().getPseudo(), SocketChannel.open(new InetSocketAddress(accountServerEncryptedHostPacket.getIp(), 443)), new ProxyHandler(this),
+							ProtocolRegistry.Bound.SERVER));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -292,7 +301,7 @@ public class BotHandler implements PacketHandler {
 	@Override
 	public void handle(GameMovementPacket gameMovementPacket) {
 		for (int i = 0; i < gameMovementPacket.getName().size(); i++)
-			if (perso.getPseudo().equals(gameMovementPacket.getName().get(i)))
+			if (getPerso().getPseudo().equals(gameMovementPacket.getName().get(i)))
 				((NavigationImpl) getPerso().getNavigation()).setCurrentPos(gameMovementPacket.getCell().get(i));
 	}
 

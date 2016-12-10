@@ -31,6 +31,13 @@ public class ProxyHandler implements PacketHandler {
 		Arrays.stream(h).forEach(handlers::add);
 	}
 
+	@Override
+	public boolean parse(ProtocolRegistry registry, String packet) {
+		handlers.forEach(p -> p.parse(registry, packet));
+		if (registry == null) return true;
+		throw new UnsupportedOperationException();
+	}
+
 	/**
 	 * @return the handlers
 	 */
@@ -56,7 +63,7 @@ public class ProxyHandler implements PacketHandler {
 
 	@Override
 	public void register(DofusConnection<?> connection) {
-		handlers.forEach((h) -> h.register(connection));
+		handlers.forEach(h -> h.register(connection));
 	}
 
 	@Override
@@ -287,14 +294,6 @@ public class ProxyHandler implements PacketHandler {
 	@Override
 	public void handle(ChatSubscribeChannelPacket pkt) {
 		handlers.forEach(h -> h.handle(pkt));
-	}
-
-	@Override
-	public boolean parse(ProtocolRegistry registry, String packet) {
-		for (PacketHandler handler : handlers)
-			if (handler.parse(registry, packet))
-				return true;
-		return false;
 	}
 
 	@Override
