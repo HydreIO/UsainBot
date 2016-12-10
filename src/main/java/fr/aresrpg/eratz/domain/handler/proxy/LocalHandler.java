@@ -43,13 +43,10 @@ import java.util.Map;
  * 
  * @since
  */
-public class LocalHandler extends BaseHandler {
+public class LocalHandler extends TransfertHandler {
 
 	private boolean state_machine = false;
 
-	/**
-	 * @param account
-	 */
 	public LocalHandler(DofusProxy proxy) {
 		super(proxy);
 	}
@@ -62,7 +59,8 @@ public class LocalHandler extends BaseHandler {
 		this.state_machine = state_machine;
 	}
 
-	private void transmit(Packet pkt) {
+	@Override
+	protected void transmit(Packet pkt) {
 		try {
 			System.out.println("[SEND:]>> " + pkt);
 			getProxy().getRemoteConnection().send(pkt);
@@ -87,28 +85,8 @@ public class LocalHandler extends BaseHandler {
 	}
 
 	@Override
-	public void handle(AccountSelectCharacterOkPacket pkt) {
-		transmit(pkt);
-	}
+	public void register(DofusConnection<?> connection) {}
 
-	@Override
-	public void handle(ChatSubscribeChannelPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void register(DofusConnection<?> connection) {
-	}
-
-	@Override
-	public void handle(HelloGamePacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(HelloConnectionPacket pkt) {
-		transmit(pkt);
-	}
 
 	@Override
 	public void handle(AccountAuthPacket pkt) {
@@ -119,243 +97,24 @@ public class LocalHandler extends BaseHandler {
 	}
 
 	@Override
-	public void handle(AccountLoginErrPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountLoginOkPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountCommunityPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountHostPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountQuestionPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountPseudoPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountListServersPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountServerListPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountAccessServerPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountServerEncryptedHostPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountServerHostPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountTicketPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountTicketOkPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(BasicConfirmPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountKeyPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountRegionalVersionPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountGetGiftsPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountIdentity pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountGetCharactersPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountCharactersListPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
 	public void handle(AccountSelectCharacterPacket pkt) {
-		for (Perso p : getAccount().getPersos()) {
-			if (p.getId() == pkt.getCharacterId()) {
-				getAccount().setCurrentPlayed(p);
-			} else {
-
-			}
-		}
+		getAccount().getPersos().stream()
+				.filter(p -> p.getId() == pkt.getCharacterId())
+				.forEach(getAccount()::setCurrentPlayed);
 		transmit(pkt);
 	}
 
 	@Override
-	public void handle(AccountGetQueuePosition pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(AccountQueuePosition pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(MountXpPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(GameExtraInformationPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(InfoMessagePacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(SpecializationSetPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(InfoMapPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(GameCreatePacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(GameMapDataPacket pkt) {
-		transmit(pkt);
-	}
-
-	@Override
-	public void handle(PlayerMountPacket playerMountPacket) {
-		transmit(playerMountPacket);
-	}
-
-	@Override
-	public void handle(GameJoinPacket gameJoinPacket) {
-		transmit(gameJoinPacket);
-	}
-
-	@Override
-	public void handle(GameEndTurnPacket gameEndTurnPacket) {
-		transmit(gameEndTurnPacket);
-	}
-
-	@Override
-	public void handle(GameTurnOkPacket gameTurnOkPacket) {
-		transmit(gameTurnOkPacket);
-	}
-
-	@Override
-	public void handle(FreeMySoulPacket freeMySoulPacket) {
-		transmit(freeMySoulPacket);
-	}
-
-	@Override
-	public void handle(LeaveGamePacket leaveGamePacket) {
-		transmit(leaveGamePacket);
-	}
-
-	@Override
-	public void handle(GameSetPlayerPositionPacket gameSetPlayerPositionPacket) {
-		transmit(gameSetPlayerPositionPacket);
-	}
-
-	@Override
-	public void handle(GamePositionStartPacket gamePositionStartPacket) {
-		transmit(gamePositionStartPacket);
-	}
-
-	@Override
-	public void handle(GameOnReadyPacket gameOnReadyPacket) {
-		transmit(gameOnReadyPacket);
-	}
-
-	@Override
-	public void handle(GameStartPacket gameStartPacket) {
-		transmit(gameStartPacket);
-	}
-
-	@Override
-	public void handle(GameEndPacket gameEndPacket) {
-		transmit(gameEndPacket);
-	}
-
-	@Override
-	public void handle(GameActionPacket gameActionPacket) {
+	public void handle(GameClientActionPacket gameActionPacket) {
 		GameAction action = gameActionPacket.getAction();
 		if (action instanceof GameMoveAction) {
 			GameMoveAction a = (GameMoveAction) action;
 			int id = 0;
 			for (Map.Entry<Integer, PathDirection> e : a.getPath().entrySet())
-				id = e.getKey().intValue();
+				id = e.getKey();
 			((NavigationImpl) getAccount().getCurrentPlayed().getNavigation()).setCurrentPos(id);
 		}
 		transmit(gameActionPacket);
-	}
-
-	@Override
-	public void handle(GameMovementPacket gameMovementPacket) {
-		transmit(gameMovementPacket);
-	}
-
-	@Override
-	public void handle(GameMapFramePacket gameMapFramePacket) {
-		transmit(gameMapFramePacket);
-	}
-
-	@Override
-	public void handle(GameActionACKPacket gameActionACKPacket) {
-		transmit(gameActionACKPacket);
 	}
 
 }

@@ -2,7 +2,7 @@ package fr.aresrpg.eratz.domain.ability.move;
 
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.GameActionACKPacket;
-import fr.aresrpg.dofus.protocol.game.client.GameActionPacket;
+import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.util.Maps;
@@ -29,6 +29,7 @@ public class NavigationImpl implements Navigation {
 	private DofusMap map;
 	private int currentPos;
 	private Thread waiter;
+	private boolean teleporting;
 
 	public NavigationImpl(Perso perso) {
 		this.perso = perso;
@@ -71,7 +72,6 @@ public class NavigationImpl implements Navigation {
 	@Override
 	public Navigation moveToCell(int cellid, boolean teleport) {
 		List<Point> p = searchPath(cellid);
-		System.out.println(p);
 		if (p == null) {
 			System.out.println("Le chemin est introuvable ! nouvel éssai..");
 			System.out.println("Position = " + currentPos);
@@ -82,13 +82,14 @@ public class NavigationImpl implements Navigation {
 			}
 		}
 		getPerso().getDebugView().setPath(p);
+		teleporting = teleport;
 		try {
-			getPerso().getAccount().getRemoteConnection().send(new GameActionPacket().setId(1).setAction(new GameMoveAction().setPath(Pathfinding.makeShortPath(p, map.getWidth()))));
+			getPerso().getAccount().getRemoteConnection().send(new GameClientActionPacket().setAction(new GameMoveAction().setPath(Pathfinding.makeShortPath(p, map.getWidth()))));
 			Executors.SCHEDULED.schedule(() -> {
 				try {
 					getPerso().getAccount().getRemoteConnection().send(new GameActionACKPacket().setActionId(0));
-					if (!teleport) // Avoid set position on map change
-						setCurrentPos(cellid);
+					if(!teleporting)
+						LockSupport.unpark(waiter);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -112,13 +113,24 @@ public class NavigationImpl implements Navigation {
 
 	public void setMap(DofusMap map) {
 		this.map = map;
+		getPerso().getDebugView().setPath(null);
 	}
 
 	public void setCurrentPos(int currentPos) {
-		if (this.currentPos == currentPos) return;
+		setCurrentPos(currentPos , false);
+	}
+
+	public void setCurrentPos(int currentPos, boolean unpark) {
+		if (this.currentPos == currentPos)
+			return;
 		this.currentPos = currentPos;
 		getPerso().getDebugView().setCurrentPosition(currentPos);
-		LockSupport.unpark(waiter);
+		if(unpark)
+			LockSupport.unpark(waiter);
+	}
+
+	public boolean isTeleporting() {
+		return teleporting;
 	}
 
 	private void lockAndWait() {
