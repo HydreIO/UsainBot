@@ -9,28 +9,14 @@
 package fr.aresrpg.eratz.domain.handler.proxy;
 
 import fr.aresrpg.dofus.protocol.*;
-import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
-import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
-import fr.aresrpg.dofus.protocol.account.client.*;
-import fr.aresrpg.dofus.protocol.account.server.*;
-import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
-import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
+import fr.aresrpg.dofus.protocol.account.client.AccountAuthPacket;
+import fr.aresrpg.dofus.protocol.account.client.AccountSelectCharacterPacket;
 import fr.aresrpg.dofus.protocol.game.actions.GameAction;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
-import fr.aresrpg.dofus.protocol.game.client.*;
-import fr.aresrpg.dofus.protocol.game.server.*;
-import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
-import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
-import fr.aresrpg.dofus.protocol.info.client.InfoMapPacket;
-import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
-import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
-import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
-import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
+import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
 import fr.aresrpg.dofus.structures.PathDirection;
 import fr.aresrpg.eratz.domain.ability.move.NavigationImpl;
-import fr.aresrpg.eratz.domain.handler.BaseHandler;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
-import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.util.encryption.CryptHelper;
 
@@ -85,8 +71,8 @@ public class LocalHandler extends TransfertHandler {
 	}
 
 	@Override
-	public void register(DofusConnection<?> connection) {}
-
+	public void register(DofusConnection<?> connection) {
+	}
 
 	@Override
 	public void handle(AccountAuthPacket pkt) {

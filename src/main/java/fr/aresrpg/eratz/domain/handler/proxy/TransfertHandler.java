@@ -1,6 +1,5 @@
 package fr.aresrpg.eratz.domain.handler.proxy;
 
-import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.Packet;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
@@ -20,7 +19,7 @@ import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.eratz.domain.handler.BaseHandler;
 import fr.aresrpg.eratz.domain.proxy.Proxy;
 
-public abstract class TransfertHandler extends BaseHandler{
+public abstract class TransfertHandler extends BaseHandler {
 	public TransfertHandler(Proxy proxy) {
 		super(proxy);
 	}
