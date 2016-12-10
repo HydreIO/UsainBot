@@ -10,7 +10,6 @@ import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.eratz.domain.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.dofus.map.Zaapi;
 import fr.aresrpg.eratz.domain.player.Perso;
-import fr.aresrpg.eratz.domain.util.Threads;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.awt.Point;
@@ -59,7 +58,7 @@ public class NavigationImpl implements Navigation {
 
 	@Override
 	public Navigation moveRight() {
-		return moveToCell(getTeleporters(map)[3] , true);
+		return moveToCell(getTeleporters(map)[3], true);
 	}
 
 	private List<Point> searchPath(int cellid) {
@@ -70,7 +69,7 @@ public class NavigationImpl implements Navigation {
 	}
 
 	@Override
-	public Navigation moveToCell(int cellid , boolean teleport) {
+	public Navigation moveToCell(int cellid, boolean teleport) {
 		List<Point> p = searchPath(cellid);
 		System.out.println(p);
 		if (p == null) {
@@ -88,7 +87,7 @@ public class NavigationImpl implements Navigation {
 			Executors.SCHEDULED.schedule(() -> {
 				try {
 					getPerso().getAccount().getRemoteConnection().send(new GameActionACKPacket().setActionId(0));
-					if(!teleport) //Avoid set position on map change
+					if (!teleport) // Avoid set position on map change
 						setCurrentPos(cellid);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -116,7 +115,7 @@ public class NavigationImpl implements Navigation {
 	}
 
 	public void setCurrentPos(int currentPos) {
-		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! SET CURRENT POS !!!!!!!!!!!!!!!! " + currentPos);
+		if (this.currentPos == currentPos) return;
 		this.currentPos = currentPos;
 		getPerso().getDebugView().setCurrentPosition(currentPos);
 		LockSupport.unpark(waiter);
@@ -134,13 +133,13 @@ public class NavigationImpl implements Navigation {
 			int dHi = ((map.getHeight() - 1) * 2) - i;
 			int dWi = (map.getWidth() * 2 - 1) - i;
 			if (t[0] == -1)
-				t[0] = getCaseWithMovement(map.getCells(), 2, i, dWi, i, i, map.getWidth());
+				t[0] = getCaseWithMovement(map.getCells(), 2, 1030, i, dWi, i, i, map.getWidth());
 			if (t[1] == -1)
-				t[1] = getCaseWithMovement(map.getCells(), 2, i, i, i, dHi, map.getWidth());
+				t[1] = getCaseWithMovement(map.getCells(), 2, 1030, i, i, i, dHi, map.getWidth());
 			if (t[2] == -1)
-				t[2] = getCaseWithMovement(map.getCells(), 2, i, dWi, dHi, dHi, map.getWidth());
+				t[2] = getCaseWithMovement(map.getCells(), 2, 1030, i, dWi, dHi, dHi, map.getWidth());
 			if (t[3] == -1)
-				t[3] = getCaseWithMovement(map.getCells(), 2, dWi, dWi, i, dHi, map.getWidth());
+				t[3] = getCaseWithMovement(map.getCells(), 2, 1030, dWi, dWi, i, dHi, map.getWidth());
 		}
 		return t;
 	}
@@ -150,6 +149,17 @@ public class NavigationImpl implements Navigation {
 			for (int y = yFrom; y <= yTo; y++) {
 				if (cells[Maps.getId(x, y, width)].getMovement() == movement)
 					return Maps.getId(x, y, width);
+			}
+		return -1;
+	}
+
+	public static int getCaseWithMovement(Cell[] cells, int movement, int object1num, int xFrom, int xTo, int yFrom, int yTo, int width) {
+		for (int x = xFrom; x <= xTo; x++)
+			for (int y = yFrom; y <= yTo; y++) {
+				int id = Maps.getId(x, y, width);
+				Cell l = cells[id];
+				if (l.getMovement() == movement || l.getLayerObject1Num() == object1num)
+					return id;
 			}
 		return -1;
 	}
