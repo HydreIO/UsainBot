@@ -9,7 +9,7 @@ import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.*;
-import fr.aresrpg.dofus.protocol.game.movement.MovementCreatePlayer;
+import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
 import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
@@ -24,7 +24,6 @@ import fr.aresrpg.dofus.protocol.spell.server.SpellListPacket;
 import fr.aresrpg.dofus.protocol.subarea.server.SubareaListPacket;
 import fr.aresrpg.dofus.structures.PathDirection;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
-import fr.aresrpg.dofus.structures.game.GameMovementAction;
 import fr.aresrpg.dofus.structures.game.GameMovementType;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.server.ServerState;
@@ -307,10 +306,35 @@ public class BotHandler implements PacketHandler {
 
 	@Override
 	public void handle(GameMovementPacket gameMovementPacket) {
-		if (gameMovementPacket.getType() == GameMovementType.REMOVE) return;
-		gameMovementPacket.getActors().entrySet().stream().filter(en -> en.getKey() == GameMovementAction.DEFAULT).forEach(e -> {
-			MovementCreatePlayer player = (MovementCreatePlayer) e.getValue();
-			if (player.getId() == getPerso().getId()) ((NavigationImpl) getPerso().getNavigation()).setCurrentPos(player.getCell(), true);
+		if (gameMovementPacket.getType() == GameMovementType.REMOVE) {
+			gameMovementPacket.getActors().values().forEach(v -> getPerso().getDebugView().removeActor(((MovementRemoveActor) v).getId()));
+			return;
+		}
+		gameMovementPacket.getActors().entrySet().stream().forEach(e -> {
+			switch (e.getKey()) {
+				case DEFAULT:
+					MovementCreatePlayer player = (MovementCreatePlayer) e.getValue();
+					if (player.getId() == getPerso().getId()) ((NavigationImpl) getPerso().getNavigation()).setCurrentPos(player.getCell(), true);
+					else getPerso().getDebugView().addPlayer(player.getId(), player.getCell());
+					return;
+				case CREATE_INVOCATION:
+					MovementCreateInvocation invoc = (MovementCreateInvocation) e.getValue();
+					getPerso().getDebugView().addMob(invoc.getId(), invoc.getCellId());
+					return;
+				case CREATE_MONSTER:
+					MovementCreateMonster mob = (MovementCreateMonster) e.getValue();
+					getPerso().getDebugView().addMob(mob.getId(), mob.getCellId());
+					return;
+				case CREATE_MONSTER_GROUP:
+					MovementCreateMonsterGroup mobs = (MovementCreateMonsterGroup) e.getValue();
+					getPerso().getDebugView().addMob(mobs.getId(), mobs.getCellid());
+					return;
+				case CREATE_NPC:
+					// TODO
+					return;
+				default:
+					break;
+			}
 		});
 	}
 
