@@ -7,6 +7,8 @@ import fr.aresrpg.dofus.protocol.account.client.*;
 import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
+import fr.aresrpg.dofus.protocol.chat.client.ChatUseSmileyPacket;
+import fr.aresrpg.dofus.protocol.emote.client.EmoteUsePacket;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.game.movement.*;
@@ -22,6 +24,10 @@ import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.dofus.protocol.spell.server.SpellChangeOptionPacket;
 import fr.aresrpg.dofus.protocol.spell.server.SpellListPacket;
 import fr.aresrpg.dofus.protocol.subarea.server.SubareaListPacket;
+import fr.aresrpg.dofus.protocol.waypoint.WaypointLeavePacket;
+import fr.aresrpg.dofus.protocol.waypoint.client.WaypointUsePacket;
+import fr.aresrpg.dofus.protocol.waypoint.server.WaypointCreatePacket;
+import fr.aresrpg.dofus.protocol.waypoint.server.WaypointUseErrorPacket;
 import fr.aresrpg.dofus.structures.PathDirection;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
 import fr.aresrpg.dofus.structures.game.GameMovementType;
@@ -33,7 +39,6 @@ import fr.aresrpg.eratz.domain.handler.bot.craft.CraftHandler;
 import fr.aresrpg.eratz.domain.handler.bot.fight.FightHandler;
 import fr.aresrpg.eratz.domain.handler.bot.move.MapHandler;
 import fr.aresrpg.eratz.domain.handler.bot.move.PlayerMapHandler;
-import fr.aresrpg.eratz.domain.handler.proxy.ProxyHandler;
 import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
@@ -62,9 +67,8 @@ public class BotHandler implements PacketHandler {
 
 	@Override
 	public boolean parse(ProtocolRegistry registry, String packet) {
-		// if (registry == null) return true;
-		// throw new UnsupportedOperationException();
-		return true; // temp
+		if (registry == null) return true;
+		throw new UnsupportedOperationException();
 	}
 
 	public Perso getPerso() {
@@ -161,8 +165,7 @@ public class BotHandler implements PacketHandler {
 		try {
 			getConnection().close();
 			getPerso().getAccount().setRemoteConnection(
-					new DofusConnection<>(getPerso().getPseudo(), SocketChannel.open(new InetSocketAddress(accountServerEncryptedHostPacket.getIp(), 443)), new ProxyHandler(this),
-							ProtocolRegistry.Bound.SERVER));
+					new DofusConnection<>(getPerso().getPseudo(), SocketChannel.open(new InetSocketAddress(accountServerEncryptedHostPacket.getIp(), 443)), this, ProtocolRegistry.Bound.SERVER));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -543,6 +546,42 @@ public class BotHandler implements PacketHandler {
 
 	@Override
 	public void handle(GameEffectPacket gameEffectPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(WaypointLeavePacket waypointLeavePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(WaypointUseErrorPacket waypointUseErrorPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(WaypointCreatePacket waypointCreatePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(ChatUseSmileyPacket chatUseSmileyPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(WaypointUsePacket waypointUsePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(EmoteUsePacket emoteUsePacket) {
 		// TODO
 
 	}

@@ -32,7 +32,8 @@ public class IncarnamToAstrubPath extends PathBehavior {
 		// close si jamais qqn nous défi ou autre
 		// na.moveToCell(459, true).moveToCell(447, true)
 		na.moveToCell(463, true).moveRight(3).moveToCell(376, true).moveRight(2).moveDown().moveRight();
-		ability.speakToNpc(-1).npcTalkChoice(3840, 3373);
+		ability.speakToNpc(-1);
+		ability.npcTalkChoice(3840, 3373);
 	}
 
 	@Override

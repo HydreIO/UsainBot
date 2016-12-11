@@ -16,8 +16,9 @@ import fr.aresrpg.eratz.domain.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.player.Player;
 
-import java.util.Arrays;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -37,10 +38,14 @@ public class BankDepositPath extends PathBehavior {
 		BaseAbility ability = getPerso().getBaseAbility();
 		ability.closeGui();
 		if (!ability.goAndOpenBank()) return;
-		Object[] inv = ability.getItemInInventory();
-		ability.depositItemInChest(Arrays.stream(inv).mapToInt(o -> o.getTemplate().getID()).filter(i -> !ArrayUtils.contains(i, items)).toArray());
+		Set<Object> inv = getPerso().getInventory().getContents();
+		ability.depositItemInChest(inv.stream().mapToInt(o -> o.getTemplate().getID()).filter(i -> !ArrayUtils.contains(i, items)).toArray());
 		waitLitle();
-		ability.speak(Channel.ADMIN, "à déposé : " + Arrays.toString(inv) + " en banque !");
+		ability.speak(Channel.ADMIN, "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",")) + " en banque !");
+	}
+
+	private String nameObject(Object o) {
+		return "x" + o.getQuantity() + " " + o.getTemplate().getName();
 	}
 
 	private void waitLitle() { // zone peuplé mieux vaut ne pas se déplacer trop vite

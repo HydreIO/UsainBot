@@ -1,12 +1,15 @@
 package fr.aresrpg.eratz.domain.handler.proxy;
 
 import fr.aresrpg.dofus.protocol.Packet;
+import fr.aresrpg.dofus.protocol.ProtocolRegistry;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
 import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
+import fr.aresrpg.dofus.protocol.chat.client.ChatUseSmileyPacket;
+import fr.aresrpg.dofus.protocol.emote.client.EmoteUsePacket;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
@@ -20,15 +23,44 @@ import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.dofus.protocol.spell.server.SpellChangeOptionPacket;
 import fr.aresrpg.dofus.protocol.spell.server.SpellListPacket;
 import fr.aresrpg.dofus.protocol.subarea.server.SubareaListPacket;
+import fr.aresrpg.dofus.protocol.waypoint.WaypointLeavePacket;
+import fr.aresrpg.dofus.protocol.waypoint.client.WaypointUsePacket;
+import fr.aresrpg.dofus.protocol.waypoint.server.WaypointCreatePacket;
+import fr.aresrpg.dofus.protocol.waypoint.server.WaypointUseErrorPacket;
 import fr.aresrpg.eratz.domain.handler.BaseHandler;
 import fr.aresrpg.eratz.domain.proxy.Proxy;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+
 public abstract class TransfertHandler extends BaseHandler {
+	private static final ProtocolRegistry[] toSkip = { ProtocolRegistry.GAME_MOVEMENT, ProtocolRegistry.GAME_MAP_FRAME };
+
 	public TransfertHandler(Proxy proxy) {
 		super(proxy);
 	}
 
 	protected abstract void transmit(Packet pkt);
+
+	private boolean contains(ProtocolRegistry registry) {
+		for (ProtocolRegistry r : toSkip)
+			if (r == registry) return true;
+		return false;
+	}
+
+	@Override
+	public boolean parse(ProtocolRegistry registry, String packet) {
+		if (registry == null || contains(registry)) {
+			try {
+				((SocketChannel) getProxy().getLocalConnection().getChannel()).write(ByteBuffer.wrap((packet + "\0").getBytes()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return true;
+		}
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
 	public void handle(HelloGamePacket pkt) {
@@ -368,5 +400,41 @@ public abstract class TransfertHandler extends BaseHandler {
 	@Override
 	public void handle(SubareaListPacket pkt) {
 		transmit(pkt);
+	}
+
+	@Override
+	public void handle(ChatUseSmileyPacket chatUseSmileyPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(EmoteUsePacket emoteUsePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(WaypointCreatePacket waypointCreatePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(WaypointLeavePacket waypointLeavePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(WaypointUseErrorPacket waypointUseErrorPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(WaypointUsePacket waypointUsePacket) {
+		// TODO
+
 	}
 }

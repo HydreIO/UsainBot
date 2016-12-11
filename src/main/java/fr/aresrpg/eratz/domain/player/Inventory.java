@@ -11,22 +11,8 @@ import java.util.Set;
  */
 public class Inventory {
 
-	private Set<Object> armes = new HashSet<>();
-	private Set<Object> divers = new HashSet<>();
-	private Set<Object> ressources = new HashSet<>();
+	private Set<Object> contents = new HashSet<>();
 	private int kamas;
-	private Perso perso;
-
-	public Inventory(Perso perso) {
-		this.perso = perso;
-	}
-
-	/**
-	 * @return the perso
-	 */
-	public Perso getPerso() {
-		return perso;
-	}
 
 	/**
 	 * @param kamas
@@ -49,24 +35,10 @@ public class Inventory {
 	}
 
 	/**
-	 * @return the armes
+	 * @return the contents
 	 */
-	public Set<Object> getArmes() {
-		return armes;
-	}
-
-	/**
-	 * @return the divers
-	 */
-	public Set<Object> getDivers() {
-		return divers;
-	}
-
-	/**
-	 * @return the ressources
-	 */
-	public Set<Object> getRessources() {
-		return ressources;
+	public Set<Object> getContents() {
+		return contents;
 	}
 
 	/**
@@ -78,7 +50,7 @@ public class Inventory {
 
 	@Override
 	public String toString() {
-		return "Inventory [armes=" + armes + ", divers=" + divers + ", ressources=" + ressources + ", kamas=" + kamas + "]";
+		return "Inventory [contents=" + contents + ", kamas=" + kamas + "]";
 	}
 
 }

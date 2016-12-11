@@ -36,7 +36,6 @@ import fr.aresrpg.eratz.domain.dofus.item.Items;
 import fr.aresrpg.eratz.domain.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.dofus.player.*;
 import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
-import fr.aresrpg.eratz.domain.handler.proxy.ProxyHandler;
 import fr.aresrpg.eratz.domain.option.fight.FightOptions;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -81,7 +80,7 @@ public class Perso extends Player {
 		this.fightAbility = new FightAbilityImpl(this);
 		this.sellAbility = new SellAbilityImpl(this);
 		this.debugView = new DofusMapView();
-		this.inventory = new Inventory(this);
+		this.inventory = new PlayerInventory(this);
 		for (Spells s : Spells.values())
 			if (s.getClasse() == getClasse()) spells.put(s, new Spell(s));
 	}
@@ -158,7 +157,7 @@ public class Perso extends Player {
 		try {
 			SocketChannel channel = SocketChannel.open(TheBotFather.SERVER_ADRESS);
 			a.setCurrentPlayed(this);
-			a.setRemoteConnection(new DofusConnection<>(getPseudo(), channel, new ProxyHandler(new BotHandler(this)), Bound.SERVER)); // fix temporaire via proxy handler pour corriger le bug du parse en mitm
+			a.setRemoteConnection(new DofusConnection<>(getPseudo(), channel, new BotHandler(this), Bound.SERVER)); // fix temporaire via proxy handler pour corriger le bug du parse en mitm
 			Executors.FIXED.execute(a::readRemote);
 		} catch (IOException e) {
 			a.setState(AccountState.OFFLINE);
@@ -270,22 +269,11 @@ public class Perso extends Player {
 	}
 
 	public boolean inventoryContainsItem(int id) {
-		return containsObject(id, getInventory().getRessources()) || containsObject(id, getInventory().getDivers()) || containsObject(id, getInventory().getArmes());
+		return containsObject(id, getInventory().getContents());
 	}
 
-	/**
-	 * Cette methode anti-optimisation de la triche ultime mdr
-	 * je peut trouver l'item dans un seul inventaire donc ballek de l'adition
-	 * et ballek aussi de demander le type d'inventaire en argument xD
-	 * 
-	 * @param itemId
-	 * @return
-	 */
 	public int getQuantityInInventoryOf(int itemId) {
-		int ress = quantityOf(itemId, getInventory().getRessources());
-		int div = quantityOf(itemId, getInventory().getDivers());
-		int weap = quantityOf(itemId, getInventory().getArmes());
-		return ress + div + weap;
+		return quantityOf(itemId, getInventory().getContents());
 	}
 
 	public int getFreePods() {
@@ -297,10 +285,7 @@ public class Perso extends Player {
 	}
 
 	public int getQuantityInBanqueOf(int itemId) {
-		int ress = quantityOf(itemId, getAccount().getBanque().getRessources());
-		int div = quantityOf(itemId, getAccount().getBanque().getDivers());
-		int weap = quantityOf(itemId, getAccount().getBanque().getArmes());
-		return ress + div + weap;
+		return quantityOf(itemId, getAccount().getBanque().getContents());
 	}
 
 	public void disconnect() {

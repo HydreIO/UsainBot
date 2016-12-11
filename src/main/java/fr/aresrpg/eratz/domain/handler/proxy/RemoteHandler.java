@@ -8,7 +8,8 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.handler.proxy;
 
-import fr.aresrpg.dofus.protocol.*;
+import fr.aresrpg.dofus.protocol.DofusConnection;
+import fr.aresrpg.dofus.protocol.Packet;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.dofus.protocol.account.client.AccountSelectCharacterPacket;
 import fr.aresrpg.dofus.protocol.account.server.*;
@@ -35,7 +36,6 @@ import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.*;
@@ -61,22 +61,6 @@ public class RemoteHandler extends TransfertHandler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public boolean parse(ProtocolRegistry registry, String packet) {
-		if (registry == null || registry == ProtocolRegistry.GAME_MOVEMENT || registry == ProtocolRegistry.GAME_MAP_FRAME) {
-			SocketChannel channel = (SocketChannel) getProxy().getLocalConnection().getChannel();
-			try {
-				packet += "\0";
-				channel.write(ByteBuffer.wrap(packet.getBytes()));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			return true;
-		}
-		// throw new UnsupportedOperationException();
-		return true; // temp
 	}
 
 	@Override

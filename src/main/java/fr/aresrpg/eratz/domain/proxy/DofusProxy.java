@@ -9,10 +9,10 @@
 package fr.aresrpg.eratz.domain.proxy;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
-import fr.aresrpg.dofus.protocol.PacketHandler;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.eratz.domain.handler.BaseHandler;
-import fr.aresrpg.eratz.domain.handler.proxy.*;
+import fr.aresrpg.eratz.domain.handler.proxy.LocalHandler;
+import fr.aresrpg.eratz.domain.handler.proxy.RemoteHandler;
 import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -26,16 +26,15 @@ public class DofusProxy implements Proxy {
 	private DofusConnection localConnection;
 	private DofusConnection remoteConnection;
 
-	private PacketHandler localHandler = new LocalHandler(this);
-	private PacketHandler remoteHandler = new RemoteHandler(this);
-	private ProxyHandler proxyHandler = new ProxyHandler(remoteHandler);
+	private LocalHandler localHandler = new LocalHandler(this);
+	private RemoteHandler remoteHandler = new RemoteHandler(this);
 
 	private Account account;
 	private String hc;
 
 	public DofusProxy(SocketChannel localChannel, SocketChannel remoteChannel) throws IOException {
 		changeConnection(new DofusConnection<>("Local", localChannel, localHandler, Bound.CLIENT), ProxyConnectionType.LOCAL);
-		changeConnection(new DofusConnection<>("Remote", remoteChannel, proxyHandler, Bound.SERVER), ProxyConnectionType.REMOTE);
+		changeConnection(new DofusConnection<>("Remote", remoteChannel, remoteHandler, Bound.SERVER), ProxyConnectionType.REMOTE);
 	}
 
 	public void initAccount(Account account) {
@@ -102,7 +101,6 @@ public class DofusProxy implements Proxy {
 					if (!(e instanceof AsynchronousCloseException)) {
 						try {
 							connection.close(); // on close le server socket
-							getRemoteHandler().removeHandlers(); // on vire les handlers remotre (dofus -> app)
 							if (account != null) account.notifyDisconnect(); // on notify que le client n'est plus la pour possiblement connecter le bot
 						} catch (IOException e1) {
 							e.printStackTrace();
@@ -117,12 +115,12 @@ public class DofusProxy implements Proxy {
 	}
 
 	@Override
-	public ProxyHandler getRemoteHandler() {
-		return this.proxyHandler;
+	public RemoteHandler getRemoteHandler() {
+		return this.remoteHandler;
 	}
 
 	@Override
-	public PacketHandler getLocalHandler() {
+	public LocalHandler getLocalHandler() {
 		return this.localHandler;
 	}
 
