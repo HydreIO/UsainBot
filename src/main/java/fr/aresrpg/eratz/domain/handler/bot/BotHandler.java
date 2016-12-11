@@ -307,26 +307,26 @@ public class BotHandler implements PacketHandler {
 	@Override
 	public void handle(GameMovementPacket gameMovementPacket) {
 		if (gameMovementPacket.getType() == GameMovementType.REMOVE) {
-			gameMovementPacket.getActors().values().forEach(v -> getPerso().getDebugView().removeActor(((MovementRemoveActor) v).getId()));
+			gameMovementPacket.getActors().forEach(v -> getPerso().getDebugView().removeActor(((MovementRemoveActor) ((Object) v.getSecond())).getId()));
 			return;
 		}
-		gameMovementPacket.getActors().entrySet().stream().forEach(e -> {
-			switch (e.getKey()) {
+		gameMovementPacket.getActors().forEach(e -> {
+			switch (e.getFirst()) {
 				case DEFAULT:
-					MovementCreatePlayer player = (MovementCreatePlayer) e.getValue();
+					MovementCreatePlayer player = (MovementCreatePlayer) (Object) e.getSecond();
 					if (player.getId() == getPerso().getId()) ((NavigationImpl) getPerso().getNavigation()).setCurrentPos(player.getCell(), true);
 					else getPerso().getDebugView().addPlayer(player.getId(), player.getCell());
 					return;
 				case CREATE_INVOCATION:
-					MovementCreateInvocation invoc = (MovementCreateInvocation) e.getValue();
+					MovementCreateInvocation invoc = (MovementCreateInvocation) (Object) e.getSecond();
 					getPerso().getDebugView().addMob(invoc.getId(), invoc.getCellId());
 					return;
 				case CREATE_MONSTER:
-					MovementCreateMonster mob = (MovementCreateMonster) e.getValue();
+					MovementCreateMonster mob = (MovementCreateMonster) (Object) e.getSecond();
 					getPerso().getDebugView().addMob(mob.getId(), mob.getCellId());
 					return;
 				case CREATE_MONSTER_GROUP:
-					MovementCreateMonsterGroup mobs = (MovementCreateMonsterGroup) e.getValue();
+					MovementCreateMonsterGroup mobs = (MovementCreateMonsterGroup) (Object) e.getSecond();
 					getPerso().getDebugView().addMob(mobs.getId(), mobs.getCellid());
 					return;
 				case CREATE_NPC:
