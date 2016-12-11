@@ -9,7 +9,9 @@ import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.*;
+import fr.aresrpg.dofus.protocol.game.movement.MovementCreatePlayer;
 import fr.aresrpg.dofus.protocol.game.server.*;
+import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
 import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.protocol.info.client.InfoMapPacket;
@@ -17,8 +19,13 @@ import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
+import fr.aresrpg.dofus.protocol.spell.server.SpellChangeOptionPacket;
+import fr.aresrpg.dofus.protocol.spell.server.SpellListPacket;
+import fr.aresrpg.dofus.protocol.subarea.server.SubareaListPacket;
 import fr.aresrpg.dofus.structures.PathDirection;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
+import fr.aresrpg.dofus.structures.game.GameMovementAction;
+import fr.aresrpg.dofus.structures.game.GameMovementType;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.server.ServerState;
 import fr.aresrpg.dofus.util.*;
@@ -48,7 +55,6 @@ public class BotHandler implements PacketHandler {
 	private CraftHandler craftHandler;
 	private MapHandler mapHandler;
 	private String ticket;
-	private int characterId;
 
 	public BotHandler(Perso perso) {
 		this.perso = perso;
@@ -223,7 +229,7 @@ public class BotHandler implements PacketHandler {
 		for (AvailableCharacter c : accountCharactersListPacket.getCharacters())
 			if (c.getPseudo().equals(perso.getPseudo())) {
 				try {
-					characterId = c.getId();
+					getPerso().setId(c.getId());
 					getConnection().send(new AccountSelectCharacterPacket().setCharacterId(c.getId()));
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -301,9 +307,11 @@ public class BotHandler implements PacketHandler {
 
 	@Override
 	public void handle(GameMovementPacket gameMovementPacket) {
-		for (int i = 0; i < gameMovementPacket.getName().size(); i++)
-			if (getPerso().getPseudo().equals(gameMovementPacket.getName().get(i)))
-				((NavigationImpl) getPerso().getNavigation()).setCurrentPos(gameMovementPacket.getCell().get(i) , true);
+		if (gameMovementPacket.getType() == GameMovementType.REMOVE) return;
+		gameMovementPacket.getActors().entrySet().stream().filter(en -> en.getKey() == GameMovementAction.DEFAULT).forEach(e -> {
+			MovementCreatePlayer player = (MovementCreatePlayer) e.getValue();
+			if (player.getId() == getPerso().getId()) ((NavigationImpl) getPerso().getNavigation()).setCurrentPos(player.getCell(), true);
+		});
 	}
 
 	@Override
@@ -400,10 +408,10 @@ public class BotHandler implements PacketHandler {
 	@Override
 	public void handle(GameServerActionPacket pkt) {
 		System.out.println(pkt.getEntityId());
-		System.out.println(characterId);
-		if(pkt.getEntityId() != characterId)
+		System.out.println(getPerso().getId());
+		if (pkt.getEntityId() != getPerso().getId())
 			return;
-		if(pkt.getAction() instanceof GameMoveAction){
+		if (pkt.getAction() instanceof GameMoveAction) {
 			GameMoveAction a = (GameMoveAction) pkt.getAction();
 			int id = 0;
 			for (Map.Entry<Integer, PathDirection> e : a.getPath().entrySet())
@@ -411,6 +419,108 @@ public class BotHandler implements PacketHandler {
 			((NavigationImpl) getPerso().getNavigation()).setCurrentPos(id);
 
 		}
+	}
+
+	@Override
+	public void handle(GuildStatPacket guildStatPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(SpellChangeOptionPacket spellChangeOptionPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(SpellListPacket spellListPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(SubareaListPacket subareaListPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(AccountRestrictionsPacket accountRestrictionsPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GamePositionsPacket gamePositionPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameClientReadyPacket gameReadyPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameServerReadyPacket gameServerReadyPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameStartToPlayPacket gameStartToPlayPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameTurnListPacket gameTurnListPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameTurnEndPacket gameTurnEndPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameTurnMiddlePacket gameTurnMiddlePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameTurnStartPacket gameTurnStartPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameTurnFinishPacket gameTurnFinishPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameTurnReadyPacket gameTurnReadyPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameActionFinishPacket gameActionFinishPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameEffectPacket gameEffectPacket) {
+		// TODO
+
 	}
 
 }

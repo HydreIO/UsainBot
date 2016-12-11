@@ -9,6 +9,7 @@ import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
+import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
 import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.protocol.info.client.InfoMapPacket;
@@ -16,6 +17,9 @@ import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
+import fr.aresrpg.dofus.protocol.spell.server.SpellChangeOptionPacket;
+import fr.aresrpg.dofus.protocol.spell.server.SpellListPacket;
+import fr.aresrpg.dofus.protocol.subarea.server.SubareaListPacket;
 
 import java.util.*;
 
@@ -318,6 +322,91 @@ public class ProxyHandler implements PacketHandler {
 
 	@Override
 	public void handle(GameServerActionPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GuildStatPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(SpellChangeOptionPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(SpellListPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(SubareaListPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(AccountRestrictionsPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GamePositionsPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameClientReadyPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameServerReadyPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameStartToPlayPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameTurnListPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameTurnEndPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameTurnMiddlePacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameTurnStartPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameTurnFinishPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameTurnReadyPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameActionFinishPacket pkt) {
+		handlers.forEach(h -> h.handle(pkt));
+	}
+
+	@Override
+	public void handle(GameEffectPacket pkt) {
 		handlers.forEach(h -> h.handle(pkt));
 	}
 }

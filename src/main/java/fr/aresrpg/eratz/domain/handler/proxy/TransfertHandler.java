@@ -9,6 +9,7 @@ import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
+import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
 import fr.aresrpg.dofus.protocol.hello.client.HelloGamePacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.protocol.info.client.InfoMapPacket;
@@ -16,6 +17,9 @@ import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.mount.client.PlayerMountPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
+import fr.aresrpg.dofus.protocol.spell.server.SpellChangeOptionPacket;
+import fr.aresrpg.dofus.protocol.spell.server.SpellListPacket;
+import fr.aresrpg.dofus.protocol.subarea.server.SubareaListPacket;
 import fr.aresrpg.eratz.domain.handler.BaseHandler;
 import fr.aresrpg.eratz.domain.proxy.Proxy;
 
@@ -278,6 +282,91 @@ public abstract class TransfertHandler extends BaseHandler {
 
 	@Override
 	public void handle(GameServerActionPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(AccountRestrictionsPacket accountRestrictionsPacket) {
+		transmit(accountRestrictionsPacket);
+	}
+
+	@Override
+	public void handle(GameActionFinishPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(GameClientReadyPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(GameEffectPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(GamePositionsPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(GameServerReadyPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(GameStartToPlayPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(GameTurnEndPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(GameTurnFinishPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(GameTurnListPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(GameTurnMiddlePacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(GameTurnReadyPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(GameTurnStartPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(GuildStatPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(SpellChangeOptionPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(SpellListPacket pkt) {
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(SubareaListPacket pkt) {
 		transmit(pkt);
 	}
 }

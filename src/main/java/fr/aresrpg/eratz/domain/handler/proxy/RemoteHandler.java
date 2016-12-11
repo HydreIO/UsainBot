@@ -13,11 +13,15 @@ import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.dofus.protocol.account.client.AccountSelectCharacterPacket;
 import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
+import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.GameExtraInformationPacket;
-import fr.aresrpg.dofus.protocol.game.server.GameMapDataPacket;
-import fr.aresrpg.dofus.protocol.game.server.GameMovementPacket;
+import fr.aresrpg.dofus.protocol.game.movement.MovementCreatePlayer;
+import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.structures.Chat;
+import fr.aresrpg.dofus.structures.PathDirection;
+import fr.aresrpg.dofus.structures.game.GameMovementAction;
+import fr.aresrpg.dofus.structures.game.GameMovementType;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.util.Maps;
@@ -180,9 +184,28 @@ public class RemoteHandler extends TransfertHandler {
 	@Override
 	public void handle(GameMovementPacket gameMovementPacket) {
 		// transmit(gameMovementPacket);
-		for (int i = 0; i < gameMovementPacket.getName().size(); i++)
-			if (getPerso().getPseudo().equals(gameMovementPacket.getName().get(i)))
-				((NavigationImpl) getPerso().getNavigation()).setCurrentPos(gameMovementPacket.getCell().get(i));
+		if (gameMovementPacket.getType() == GameMovementType.REMOVE) return;
+		gameMovementPacket.getActors().entrySet().stream().filter(en -> en.getKey() == GameMovementAction.DEFAULT).forEach(e -> {
+			MovementCreatePlayer player = (MovementCreatePlayer) e.getValue();
+			if (player.getId() == getPerso().getId()) ((NavigationImpl) getPerso().getNavigation()).setCurrentPos(player.getCell(), true);
+		});
+	}
+
+	@Override
+	public void handle(GameServerActionPacket pkt) {
+		System.out.println(pkt.getEntityId());
+		System.out.println(getPerso().getId());
+		if (pkt.getEntityId() != getPerso().getId())
+			return;
+		if (pkt.getAction() instanceof GameMoveAction) {
+			GameMoveAction a = (GameMoveAction) pkt.getAction();
+			int id = 0;
+			for (Map.Entry<Integer, PathDirection> e : a.getPath().entrySet())
+				id = e.getKey();
+			((NavigationImpl) getPerso().getNavigation()).setCurrentPos(id);
+
+		}
+		transmit(pkt);
 	}
 
 }

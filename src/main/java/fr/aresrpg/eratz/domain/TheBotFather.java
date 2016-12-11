@@ -8,7 +8,6 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain;
 
-import fr.aresrpg.dofus.Hastebin;
 import fr.aresrpg.eratz.domain.behavior.move.type.IncarnamToAstrubPath;
 import fr.aresrpg.eratz.domain.dofus.Constants;
 import fr.aresrpg.eratz.domain.gui.MapView;
@@ -16,6 +15,7 @@ import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
 import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.AccountsManager;
 import fr.aresrpg.eratz.domain.proxy.DofusProxy;
+import fr.aresrpg.eratz.domain.util.Hastebin;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Configurations;
 import fr.aresrpg.eratz.domain.util.config.Configurations.Config;
@@ -23,7 +23,7 @@ import fr.aresrpg.eratz.domain.util.config.Variables;
 import fr.aresrpg.eratz.domain.util.config.dao.PlayerBean;
 import fr.aresrpg.eratz.domain.util.config.dao.PlayerBean.PersoBean;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
 import java.util.*;
@@ -161,6 +161,27 @@ public class TheBotFather {
 	}
 
 	public static void main(String... args) throws IOException {
+		PrintStream old = System.out;
+		System.setOut(new PrintStream(new OutputStream() {
+
+			@Override
+			public void write(int b) throws IOException {
+				old.write(b);
+				Hastebin.stream.write(b);
+			}
+
+			@Override
+			public void write(byte[] b) throws IOException {
+				old.write(b);
+				Hastebin.stream.write(b);
+			}
+
+			@Override
+			public void write(byte[] b, int off, int len) throws IOException {
+				old.write(b, off, len);
+				Hastebin.stream.write(b, off, len);
+			}
+		}));
 		System.out.println("Starting server..");
 		new TheBotFather();
 		MapView.main(args);

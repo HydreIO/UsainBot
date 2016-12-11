@@ -48,6 +48,30 @@ public class Player {
 	}
 
 	/**
+	 * @param classe
+	 *            the classe to set
+	 */
+	public void setClasse(Classe classe) {
+		this.classe = classe;
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	/**
+	 * @param sexe
+	 *            the sexe to set
+	 */
+	public void setSexe(Genre sexe) {
+		this.sexe = sexe;
+	}
+
+	/**
 	 * @return the sexe
 	 */
 	public Genre getSexe() {
