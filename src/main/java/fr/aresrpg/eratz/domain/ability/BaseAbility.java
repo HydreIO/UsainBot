@@ -1,13 +1,10 @@
 package fr.aresrpg.eratz.domain.ability;
 
-import fr.aresrpg.eratz.domain.dofus.item.Object;
 import fr.aresrpg.eratz.domain.dofus.map.*;
 import fr.aresrpg.eratz.domain.dofus.player.*;
 import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.player.Player;
 import fr.aresrpg.eratz.domain.util.exception.ZaapException;
-
-import java.util.Arrays;
 
 /**
  * 
@@ -15,17 +12,46 @@ import java.util.Arrays;
  */
 public interface BaseAbility {
 
-	// AWAITING PACKETS
+	// J'ai besoin du packet qui me donne tout mon inventaire et a chaque fois qu'une update de l'inventaire est produite
+	// pareil pour la banque car je vais handle les deux pour stocker les items sur l'objet perso !
+	// il faut aussi extraire le X et Y de la map dans le packet mapdata et le stocker dans l'Objet dofus map
+
+	void sit(boolean sit); // s'assoir
 
 	/**
-	 * Utilise l'item de l'inventaire rapide correspondant au slot (emplacement des sorts hors combat)
+	 * Parle au npc
 	 * 
-	 * @param slot
-	 *            le slot
-	 * @return true si l'item à été utilisé, false si le bot est a court de
-	 *         cet item
+	 * @param npcname
+	 * @return
 	 */
-	boolean useItem(int slot);
+	void speakToNpc(int npcid);
+
+	/**
+	 * achetter vendre au npc
+	 * 
+	 * @param npcid
+	 * @return
+	 */
+	void buyToNpc(int npcid);
+
+	/**
+	 * Choisit une reponse du npc auquel le bot parle
+	 * 
+	 * @param choice
+	 * @return
+	 */
+	void npcTalkChoice(int questionId, int responseId);
+
+	/**
+	 * Achete un item à un pnj
+	 * 
+	 * @param choice
+	 *            place de l'item
+	 * @param quantity
+	 *            quantité
+	 * @return true si l'item a été achetté, false si kama insufisant // check les kamas du joueur dans perso
+	 */
+	BuyResult npcBuyChoice(int itemId, int quantity);
 
 	/**
 	 * Utilise un item de l'inventaire du joueur
@@ -34,23 +60,6 @@ public interface BaseAbility {
 	 * @return
 	 */
 	boolean useItemInInv(int itemid);
-
-	/**
-	 * close l'inventaire craft/pnj ouvert
-	 */
-	void closeGui();
-
-	void useCraftingMachine(int choice);
-
-	BaseAbility setItemInHotBar(int itemId, int slot);
-
-	BaseAbility sit(boolean sit);
-
-	BaseAbility speak(Channel canal, String msg);
-
-	BaseAbility sendPm(String playername, String msg);
-
-	BaseAbility sendEmot(Emot emot);
 
 	/**
 	 * Utilise un zaap
@@ -77,9 +86,45 @@ public interface BaseAbility {
 	 */
 	boolean useZaapi(Zaapi current, Zaapi destination);
 
-	void freePod(); // a faire plus tard // impl note: liberer les pod en detruisant les ressources en trop (faudra faire des predicates canDestroy(ressource) pour pas faire de connerie)
+	/**
+	 * je connait pas les arguments mais change les pour la quantity etc
+	 * Depose des stacks d'items dans la banque ou dans le coffre ouvert
+	 * 
+	 * @param ids
+	 */
+	void depositItemInChest(int... ids);
 
-	void equip(int itemId);
+	void getItemFromChest(int... ids); // same
+
+	/**
+	 * Je sais pas si c un packet different, si c'est pas different alors suprimer la methode
+	 * Utilise l'item de l'inventaire rapide correspondant au slot (emplacement des sorts hors combat)
+	 * 
+	 * @param slot
+	 *            le slot
+	 * @return true si l'item à été utilisé, false si le bot est a court de
+	 *         cet item
+	 */
+	boolean useItem(int slot);
+
+	/**
+	 * Juste une interraction je pense
+	 * 
+	 * @param choice
+	 */
+	void useCraftingMachine(int choice);
+
+	/**
+	 * Je ne sais pas cb ya d'inventaire different mais on a pu voir EB et EV il me semble donc creer plusieurs method pour chaque ou un argument
+	 * close l'inventaire craft/pnj ouvert
+	 */
+	void closeGui();
+
+	BaseAbility speak(Channel canal, String msg);
+
+	BaseAbility sendPm(String playername, String msg);
+
+	void equip(int itemId); // equip un item
 
 	void dismantle(int slot); // déséquiper
 
@@ -93,53 +138,11 @@ public interface BaseAbility {
 
 	void acceptEchangeRequest(boolean accept);
 
-	void acceptGuildInvitation(boolean accept);
+	void acceptGuildInvitation(boolean accept); // OSEF
 
-	/**
-	 * Parle au npc portant ce nom
-	 * 
-	 * @param npcname
-	 * @return
-	 */
-	BaseAbility speakToNpc(int npcid);
+	void setItemInHotBar(int itemId, int slot); // peut etre useless je sais pas comment ça fonctionne, a suprimer si le packet use item est le meme !
 
-	BaseAbility buyToNpc(int npcid);
-
-	/**
-	 * Choisit une reponse du npc auquel le bot parle
-	 * 
-	 * @param choice
-	 * @return
-	 */
-	BaseAbility npcTalkChoice(int questionId, int responseId);
-
-	/**
-	 * Achete un item à un pnj
-	 * 
-	 * @param choice
-	 *            place de l'item
-	 * @param quantity
-	 *            quantité
-	 * @return true si l'item a été achetté, false si kama insufisant
-	 */
-	BuyResult npcBuyChoice(int itemId, int quantity);
-
-	/**
-	 * Depose des stacks d'items dans la banque ou dans le coffre ouvert
-	 * 
-	 * @param ids
-	 */
-	void depositItemInChest(int... ids);
-
-	String[] getItemsInBank();
-
-	void getItemFromBank(int itemId, int quantity);
-
-	Object[] getItemInInventory();
-
-	default Object[] getObjectsInBank() {
-		return Arrays.stream(getItemsInBank()).map(Object::fromBankPacket).toArray(Object[]::new);
-	}
+	void sendEmot(Emot emot);
 
 	// DEFAULT UTIL
 
@@ -153,7 +156,8 @@ public interface BaseAbility {
 			}
 			getPerso().getNavigation().moveDown(3).moveToCell(142);
 		}
-		speakToNpc(-2).npcTalkChoice(318, 259);
+		speakToNpc(-2);
+		npcTalkChoice(318, 259);
 		return true;
 	}
 
