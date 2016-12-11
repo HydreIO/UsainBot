@@ -9,37 +9,30 @@ import java.util.Set;
  * 
  * @since
  */
-public class Banque {
+public class Inventory {
 
 	private Set<Object> armes = new HashSet<>();
 	private Set<Object> divers = new HashSet<>();
 	private Set<Object> ressources = new HashSet<>();
 	private int kamas;
-	private Account account;
+	private Perso perso;
 
-	public Banque(Account account) {
-		this.account = account;
+	public Inventory(Perso perso) {
+		this.perso = perso;
 	}
 
 	/**
-	 * @return the account
+	 * @return the perso
 	 */
-	public Account getAccount() {
-		return account;
-	}
-
-	/**
-	 * @return the kamas
-	 */
-	public int getKamas() {
-		return kamas;
+	public Perso getPerso() {
+		return perso;
 	}
 
 	/**
 	 * @param kamas
 	 *            the kamas to set
 	 */
-	public void setKamas(int kamas) {
+	private void setKamas(int kamas) {
 		this.kamas = kamas;
 	}
 
@@ -74,6 +67,18 @@ public class Banque {
 	 */
 	public Set<Object> getRessources() {
 		return ressources;
+	}
+
+	/**
+	 * @return the kamas
+	 */
+	public int getKamas() {
+		return kamas;
+	}
+
+	@Override
+	public String toString() {
+		return "Inventory [armes=" + armes + ", divers=" + divers + ", ressources=" + ressources + ", kamas=" + kamas + "]";
 	}
 
 }

@@ -67,6 +67,7 @@ public class Perso extends Player {
 	private final DofusMapView debugView;
 	private int maxPods;
 	private int usedPods;
+	private Inventory inventory;
 
 	public Perso(int id, String pseudo, Account account, BotJob job, Classe classe, Genre sexe) {
 		super(id, pseudo, classe, sexe);
@@ -80,6 +81,7 @@ public class Perso extends Player {
 		this.fightAbility = new FightAbilityImpl(this);
 		this.sellAbility = new SellAbilityImpl(this);
 		this.debugView = new DofusMapView();
+		this.inventory = new Inventory(this);
 		for (Spells s : Spells.values())
 			if (s.getClasse() == getClasse()) spells.put(s, new Spell(s));
 	}
@@ -93,6 +95,21 @@ public class Perso extends Player {
 	 */
 	public SellAbility getSellAbility() {
 		return sellAbility;
+	}
+
+	/**
+	 * @return the inventory
+	 */
+	public Inventory getInventory() {
+		return inventory;
+	}
+
+	/**
+	 * @param inventory
+	 *            the inventory to set
+	 */
+	public void setInventory(Inventory inventory) {
+		this.inventory = inventory;
 	}
 
 	/**
@@ -236,20 +253,39 @@ public class Perso extends Player {
 		}
 	}
 
-	public boolean inventoryContainsItem(int id) {
-		for (Object o : getBaseAbility().getItemInInventory())
+	private boolean containsObject(int id, Set<Object> set) {
+		for (Object o : set)
 			if (o.getTemplate().getID() == id) return true;
 		return false;
 	}
 
-	public int getQuantityInInventoryOf(int itemId) {
+	private int quantityOf(int id, Set<Object> set) {
 		int item = 0;
-		for (Object o : getBaseAbility().getItemInInventory())
-			if (o.getTemplate().getID() == itemId) {
+		for (Object o : set)
+			if (o.getTemplate().getID() == id) {
 				item = o.getQuantity();
 				break;
 			}
 		return item;
+	}
+
+	public boolean inventoryContainsItem(int id) {
+		return containsObject(id, getInventory().getRessources()) || containsObject(id, getInventory().getDivers()) || containsObject(id, getInventory().getArmes());
+	}
+
+	/**
+	 * Cette methode anti-optimisation de la triche ultime mdr
+	 * je peut trouver l'item dans un seul inventaire donc ballek de l'adition
+	 * et ballek aussi de demander le type d'inventaire en argument xD
+	 * 
+	 * @param itemId
+	 * @return
+	 */
+	public int getQuantityInInventoryOf(int itemId) {
+		int ress = quantityOf(itemId, getInventory().getRessources());
+		int div = quantityOf(itemId, getInventory().getDivers());
+		int weap = quantityOf(itemId, getInventory().getArmes());
+		return ress + div + weap;
 	}
 
 	public int getFreePods() {
@@ -261,13 +297,10 @@ public class Perso extends Player {
 	}
 
 	public int getQuantityInBanqueOf(int itemId) {
-		int item = 0;
-		for (Object o : getBaseAbility().getObjectsInBank())
-			if (o.getTemplate().getID() == itemId) {
-				item = o.getQuantity();
-				break;
-			}
-		return item;
+		int ress = quantityOf(itemId, getAccount().getBanque().getRessources());
+		int div = quantityOf(itemId, getAccount().getBanque().getDivers());
+		int weap = quantityOf(itemId, getAccount().getBanque().getArmes());
+		return ress + div + weap;
 	}
 
 	public void disconnect() {

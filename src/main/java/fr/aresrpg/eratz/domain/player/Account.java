@@ -32,11 +32,12 @@ public class Account {
 	private AccountState state = AccountState.OFFLINE;
 	private DofusConnection remoteConnection;
 	private long lastConnection;
-	private Banque banque = new Banque();
+	private Banque banque;
 
 	public Account(String username, String pass) {
 		this.username = username;
 		this.pass = pass;
+		this.banque = new Banque(this);
 	}
 
 	/**
