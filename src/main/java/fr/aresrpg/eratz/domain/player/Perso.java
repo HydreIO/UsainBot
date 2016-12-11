@@ -10,6 +10,7 @@ package fr.aresrpg.eratz.domain.player;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
+import fr.aresrpg.dofus.structures.item.Object;
 import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
@@ -32,7 +33,6 @@ import fr.aresrpg.eratz.domain.behavior.harvest.type.WheatHarvestBehavior;
 import fr.aresrpg.eratz.domain.behavior.move.type.BankDepositPath;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.dofus.item.Items;
-import fr.aresrpg.eratz.domain.dofus.item.Object;
 import fr.aresrpg.eratz.domain.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.dofus.player.*;
 import fr.aresrpg.eratz.domain.handler.bot.BotHandler;

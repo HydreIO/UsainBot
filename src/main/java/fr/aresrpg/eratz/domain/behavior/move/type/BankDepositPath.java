@@ -9,9 +9,9 @@
 package fr.aresrpg.eratz.domain.behavior.move.type;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
+import fr.aresrpg.dofus.structures.item.Object;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.behavior.move.PathBehavior;
-import fr.aresrpg.eratz.domain.dofus.item.Object;
 import fr.aresrpg.eratz.domain.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.player.Perso;
 import fr.aresrpg.eratz.domain.player.Player;

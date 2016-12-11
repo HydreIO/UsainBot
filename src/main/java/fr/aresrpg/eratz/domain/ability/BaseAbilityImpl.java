@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.ability;
 
-import fr.aresrpg.eratz.domain.dofus.item.Object;
+import fr.aresrpg.dofus.structures.item.Object;
 import fr.aresrpg.eratz.domain.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.dofus.map.Zaapi;
 import fr.aresrpg.eratz.domain.dofus.player.Channel;

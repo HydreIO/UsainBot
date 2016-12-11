@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.player;
 
-import fr.aresrpg.eratz.domain.dofus.item.Object;
+import fr.aresrpg.dofus.structures.item.Object;
 
 import java.util.HashSet;
 import java.util.Set;
