@@ -8,8 +8,12 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.behavior.fight.type;
 
+import fr.aresrpg.dofus.structures.Spell;
+import fr.aresrpg.dofus.structures.map.Cell;
+import fr.aresrpg.dofus.structures.map.Mob;
 import fr.aresrpg.eratz.domain.ability.fight.FightAbility;
 import fr.aresrpg.eratz.domain.behavior.fight.FightBehavior;
+import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.dofus.player.Spells;
 import fr.aresrpg.eratz.domain.player.Perso;
 
@@ -48,17 +52,17 @@ public class CraFeuFightBehavior extends FightBehavior {
 
 	}
 
-	/*
-	 * private int getRandomCellAtPoForMob(Mob m, Spell s) {
-	 * Cell[] cells = getPerso().getCurrentMap().getDofusMap().getCells();
-	 * }
-	 * private Mob getNearestMob() {
-	 * Fight fi = getPerso().getCurrentFight();
-	 * for (Mob m : fi.getMobs()) {}
-	 * }
-	 * private int getCost(Cell cell) {
-	 * }
-	 */
+	private int getRandomCellAtPoForMob(Mob m, Spell s) {
+		Cell[] cells = getPerso().getCurrentMap().getDofusMap().getCells();
+	}
+
+	private Mob getNearestMob() {
+		Fight fi = getPerso().getCurrentFight();
+		for (Mob m : fi.getMobs()) {}
+	}
+
+	private int getCost(Cell cell) {
+	}
 
 	private boolean is90() {
 		return getPerso().getLvl() >= 90;
