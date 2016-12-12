@@ -36,13 +36,6 @@ public class Player {
 		this.classe = classe;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof Player) return ((Player) obj).getId() == getId();
-		else if (obj instanceof Character) return ((Character) obj).getId() == getId();
-		return false;
-	}
-
 	public static Player fromCharacter(Character c) {
 		return new Player(c.getId(), c.getPseudo(), null, c.getSex() == 0 ? Genre.MALE : Genre.FEMALE); // TODO pour le genre j'ai mis au pif
 	}

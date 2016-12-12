@@ -16,7 +16,6 @@ import fr.aresrpg.dofus.structures.server.*;
 import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
-import fr.aresrpg.eratz.domain.ability.BaseAbilityImpl;
 import fr.aresrpg.eratz.domain.ability.craft.CraftAbility;
 import fr.aresrpg.eratz.domain.ability.craft.CraftAbilityImpl;
 import fr.aresrpg.eratz.domain.ability.fight.FightAbility;
@@ -35,10 +34,9 @@ import fr.aresrpg.eratz.domain.behavior.harvest.type.WheatHarvestBehavior;
 import fr.aresrpg.eratz.domain.behavior.move.type.BankDepositPath;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.dofus.item.Items;
-import fr.aresrpg.eratz.domain.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.dofus.player.*;
 import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
-import fr.aresrpg.eratz.domain.option.fight.FightOptions;
+import fr.aresrpg.eratz.domain.option.fight.FightInfo;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Variables;
@@ -52,20 +50,18 @@ import java.util.concurrent.TimeUnit;
 public class Perso extends Player {
 
 	private final Account account;
-	private BotMap currentMap;
-	private BotJob botJob;
+	private int id;
+	private String pseudo;
 	private final Set<Player> group = new HashSet<>();
-	private final java.util.Map<Spells, Spell> spells = new HashMap<>();
-	private Fight currentFight;
 	private Behavior currentBehavior;
-	private FightBehavior currentFightBehavior;
 	private final Navigation navigation;
 	private final BaseAbility baseAbility;
 	private final HarvestAbility harvestAbility;
 	private final CraftAbility craftAbility;
 	private final FightAbility fightAbility;
 	private final SellAbility sellAbility;
-	private final FightOptions fightOptions;
+	private final FightInfo fightOptions;
+	private final MapInfo mapInfos;
 	private final DofusMapView debugView;
 	private final DofusServer server;
 	private int maxPods;
@@ -77,9 +73,10 @@ public class Perso extends Player {
 		this.account = account;
 		this.botJob = job;
 		this.server = new DofusServer(srv.getId(), ServerState.ONLINE, 0, true);
-		this.fightOptions = new FightOptions(this);
+		this.fightOptions = new FightInfo(this);
 		this.navigation = new NavigationImpl(this);
-		this.baseAbility = new BaseAbilityImpl(this);
+		this.baseAbility = null;
+		this.mapInfos = new MapInfo(this);
 		this.harvestAbility = new HarvestAbilityImpl(this);
 		this.craftAbility = new CraftAbilityImpl(this);
 		this.fightAbility = new FightAbilityImpl(this);
@@ -92,6 +89,13 @@ public class Perso extends Player {
 
 	public Perso(int id, String pseudo, Account account, Classe classe, Genre sexe, Server srv) {
 		this(id, pseudo, account, null, classe, sexe, srv);
+	}
+
+	/**
+	 * @return the mapInfos
+	 */
+	public MapInfo getMapInfos() {
+		return mapInfos;
 	}
 
 	/**
@@ -194,14 +198,6 @@ public class Perso extends Player {
 	}
 
 	/**
-	 * @param currentMap
-	 *            the currentMap to set
-	 */
-	public void setCurrentMap(BotMap currentMap) {
-		this.currentMap = currentMap;
-	}
-
-	/**
 	 * @param currentFight
 	 *            the currentFight to set
 	 */
@@ -212,7 +208,7 @@ public class Perso extends Player {
 	/**
 	 * @return the fightOptions
 	 */
-	public FightOptions getFightOptions() {
+	public FightInfo getFightOptions() {
 		return fightOptions;
 	}
 
@@ -362,13 +358,6 @@ public class Perso extends Player {
 	}
 
 	/**
-	 * @return the currentMap
-	 */
-	public BotMap getCurrentMap() {
-		return currentMap;
-	}
-
-	/**
 	 * Try to update the behavior and start it
 	 * 
 	 * @param b
@@ -432,6 +421,13 @@ public class Perso extends Player {
 	 */
 	public Account getAccount() {
 		return account;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		return obj instanceof Perso && ((Perso) obj).getId() == getId();
 	}
 
 }

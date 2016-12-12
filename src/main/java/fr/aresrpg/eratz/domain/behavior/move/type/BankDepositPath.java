@@ -9,6 +9,7 @@
 package fr.aresrpg.eratz.domain.behavior.move.type;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
+import fr.aresrpg.dofus.structures.Exchange;
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.behavior.move.PathBehavior;
@@ -39,9 +40,9 @@ public class BankDepositPath extends PathBehavior {
 		ability.closeGui();
 		if (!ability.goAndOpenBank()) return;
 		Set<Item> inv = getPerso().getInventory().getContents();
-		ability.depositItemInChest(inv.stream().mapToInt(o -> o.getUniqueId()).filter(i -> !ArrayUtils.contains(i, items)).toArray());
+		inv.stream().filter(i -> !ArrayUtils.contains(i.getId(), items)).forEach(i -> ability.moveItem(i.getId(), i.getQuantity(), Exchange.PLAYER_INVENTORY, Exchange.BANK));
 		waitLitle();
-		ability.speak(Channel.ADMIN, "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",")) + " en banque !");
+		ability.speak(Channel.ADMIN, "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",", "[", "]")) + " en banque !");
 	}
 
 	private String nameObject(Item o) {

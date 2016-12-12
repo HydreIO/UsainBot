@@ -49,14 +49,16 @@ public interface Navigation {
 		return this;
 	}
 
-	Navigation moveToCell(int cellid , boolean teleport);
+	Navigation moveToCell(int cellid, boolean teleport);
 
-	default Navigation moveToCell(int cellid){
-		return moveToCell(cellid , false);
+	default Navigation moveToCell(int cellid) {
+		return moveToCell(cellid, false);
 	}
 
 	Navigation takeZaap(Zaap destination);
 
 	Navigation takeZaapi(Zaapi destination);
+
+	void notifyMovementEnd();
 
 }

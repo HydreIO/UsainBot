@@ -8,6 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.behavior.craft.type;
 
+import fr.aresrpg.dofus.structures.Exchange;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ability.craft.CraftAbility;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
@@ -56,8 +57,8 @@ public class AmaknaBreadCraftBehavior extends CraftBehavior {
 			int totalpodForOne = Items.EAU.getPod() + Items.FARINE_DE_BLE.getPod();
 			int eau = getPerso().getFreePods() / totalpodForOne;
 			int farine = getPerso().getFreePods() - eau;
-			ba.getItemFromBank(eauId, eau);
-			ba.getItemFromBank(farineId, farine);
+			ba.moveItem(eauId, eau, Exchange.BANK, Exchange.PLAYER_INVENTORY);
+			ba.moveItem(farineId, farine, Exchange.BANK, Exchange.PLAYER_INVENTORY);
 			ba.goToZaapi(Zaapi.BONTA_HDV_BOULANGER);
 			na.moveToCell(472).moveToCell(219);
 			ba.useCraftingMachine(2);

@@ -10,6 +10,7 @@ import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.chat.client.ChatUseSmileyPacket;
 import fr.aresrpg.dofus.protocol.emote.client.EmoteUsePacket;
+import fr.aresrpg.dofus.protocol.exchange.server.ExchangeListPacket;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
@@ -28,6 +29,7 @@ import fr.aresrpg.dofus.protocol.waypoint.client.WaypointUsePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.WaypointCreatePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.WaypointUseErrorPacket;
 import fr.aresrpg.eratz.domain.handler.BaseHandler;
+import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.proxy.Proxy;
 
 import java.io.IOException;
@@ -37,8 +39,33 @@ import java.nio.channels.SocketChannel;
 public abstract class TransfertHandler extends BaseHandler {
 	private static final ProtocolRegistry[] toSkip = { ProtocolRegistry.GAME_MOVEMENT, ProtocolRegistry.GAME_MAP_FRAME };
 
+	private Account account;
+	private Proxy proxy;
+
 	public TransfertHandler(Proxy proxy) {
-		super(proxy);
+		this.proxy = proxy;
+	}
+
+	/**
+	 * @return the proxy
+	 */
+	public Proxy getProxy() {
+		return proxy;
+	}
+
+	/**
+	 * @return the account
+	 */
+	public Account getAccount() {
+		return account;
+	}
+
+	/**
+	 * @param account
+	 *            the account to set
+	 */
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 
 	protected abstract void transmit(Packet pkt);
@@ -403,38 +430,37 @@ public abstract class TransfertHandler extends BaseHandler {
 	}
 
 	@Override
-	public void handle(ChatUseSmileyPacket chatUseSmileyPacket) {
-		// TODO
-
+	public void handle(ChatUseSmileyPacket pkt) {
+		transmit(pkt);
 	}
 
 	@Override
-	public void handle(EmoteUsePacket emoteUsePacket) {
-		// TODO
-
+	public void handle(EmoteUsePacket pkt) {
+		transmit(pkt);
 	}
 
 	@Override
-	public void handle(WaypointCreatePacket waypointCreatePacket) {
-		// TODO
-
+	public void handle(WaypointCreatePacket pkt) {
+		transmit(pkt);
 	}
 
 	@Override
 	public void handle(WaypointLeavePacket waypointLeavePacket) {
-		// TODO
-
+		transmit(waypointLeavePacket);
 	}
 
 	@Override
 	public void handle(WaypointUseErrorPacket waypointUseErrorPacket) {
-		// TODO
-
+		transmit(waypointUseErrorPacket);
 	}
 
 	@Override
 	public void handle(WaypointUsePacket waypointUsePacket) {
-		// TODO
+		transmit(waypointUsePacket);
+	}
 
+	@Override
+	public void handle(ExchangeListPacket exchangeListPacket) {
+		transmit(exchangeListPacket);
 	}
 }

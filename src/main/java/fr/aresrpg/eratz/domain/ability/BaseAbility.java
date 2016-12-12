@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.ability;
 
+import fr.aresrpg.dofus.structures.Exchange;
 import fr.aresrpg.eratz.domain.dofus.map.*;
 import fr.aresrpg.eratz.domain.dofus.player.*;
 import fr.aresrpg.eratz.domain.player.Perso;
@@ -86,15 +87,7 @@ public interface BaseAbility {
 	 */
 	boolean useZaapi(Zaapi current, Zaapi destination);
 
-	/**
-	 * je connait pas les arguments mais change les pour la quantity etc
-	 * Depose des stacks d'items dans la banque ou dans le coffre ouvert
-	 * 
-	 * @param ids
-	 */
-	void depositItemInChest(int... ids);
-
-	void getItemFromChest(int... ids); // same
+	void moveItem(int itemId, int amount, Exchange from, Exchange to);
 
 	/**
 	 * Je sais pas si c un packet different, si c'est pas different alors suprimer la methode
@@ -120,9 +113,9 @@ public interface BaseAbility {
 	 */
 	void closeGui();
 
-	BaseAbility speak(Channel canal, String msg);
+	void speak(Channel canal, String msg); // Impl note: si msg trop long split en plusieurs msg;
 
-	BaseAbility sendPm(String playername, String msg);
+	void sendPm(String playername, String msg); // Impl note: si msg trop long split en plusieurs msg;
 
 	void equip(int itemId); // equip un item
 

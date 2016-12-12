@@ -26,8 +26,6 @@ import java.util.concurrent.locks.LockSupport;
 public class NavigationImpl implements Navigation {
 
 	private Perso perso;
-	private DofusMap map;
-	private int currentPos;
 	private Thread waiter;
 	private boolean teleporting;
 
@@ -42,31 +40,39 @@ public class NavigationImpl implements Navigation {
 		return perso;
 	}
 
+	public DofusMap getMap() {
+		return getPerso().getMapInfos().getMap().getDofusMap();
+	}
+
+	public int getCurrentPos() {
+		return getPerso().getMapInfos().getCellId();
+	}
+
 	@Override
 	public Navigation moveUp() {
-		return moveToCell(getTeleporters(map)[0], true);
+		return moveToCell(getTeleporters(getMap())[0], true);
 	}
 
 	@Override
 	public Navigation moveDown() {
-		return moveToCell(getTeleporters(map)[2], true);
+		return moveToCell(getTeleporters(getMap())[2], true);
 	}
 
 	@Override
 	public Navigation moveLeft() {
-		return moveToCell(getTeleporters(map)[1], true);
+		return moveToCell(getTeleporters(getMap())[1], true);
 	}
 
 	@Override
 	public Navigation moveRight() {
-		return moveToCell(getTeleporters(map)[3], true);
+		return moveToCell(getTeleporters(getMap())[3], true);
 	}
 
 	private List<Point> searchPath(int cellid) {
 		return Pathfinding.getPath(
-				Maps.getColumn(currentPos, map.getWidth()), Maps.getLine(currentPos, map.getWidth()),
-				Maps.getColumn(cellid, map.getWidth()),
-				Maps.getLine(cellid, map.getWidth()), map.getCells(), map.getWidth(), false);
+				Maps.getColumn(getCurrentPos(), getMap().getWidth()), Maps.getLine(getCurrentPos(), getMap().getWidth()),
+				Maps.getColumn(cellid, getMap().getWidth()),
+				Maps.getLine(cellid, getMap().getWidth()), getMap().getCells(), getMap().getWidth(), false);
 	}
 
 	@Override
@@ -74,7 +80,7 @@ public class NavigationImpl implements Navigation {
 		List<Point> p = searchPath(cellid);
 		if (p == null) {
 			System.out.println("Le chemin est introuvable ! nouvel éssai..");
-			System.out.println("Position = " + currentPos);
+			System.out.println("Position = " + getCurrentPos());
 			p = searchPath(cellid);
 			if (p == null) {
 				System.out.println("Impossible de trouver un chemin malgré tout mes éffort jte jure wallah jariv ap");
@@ -84,11 +90,11 @@ public class NavigationImpl implements Navigation {
 		getPerso().getDebugView().setPath(p);
 		teleporting = teleport;
 		try {
-			getPerso().getAccount().getRemoteConnection().send(new GameClientActionPacket().setAction(new GameMoveAction().setPath(Pathfinding.makeShortPath(p, map.getWidth()))));
+			getPerso().getAccount().getRemoteConnection().send(new GameClientActionPacket().setAction(new GameMoveAction().setPath(Pathfinding.makeShortPath(p, getMap().getWidth()))));
 			Executors.SCHEDULED.schedule(() -> {
 				try {
 					getPerso().getAccount().getRemoteConnection().send(new GameActionACKPacket().setActionId(0));
-					if(!teleporting)
+					if (!teleporting)
 						LockSupport.unpark(waiter);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -111,22 +117,9 @@ public class NavigationImpl implements Navigation {
 		return null;
 	}
 
-	public void setMap(DofusMap map) {
-		this.map = map;
-		getPerso().getDebugView().setPath(null);
-	}
-
-	public void setCurrentPos(int currentPos) {
-		setCurrentPos(currentPos , false);
-	}
-
-	public void setCurrentPos(int currentPos, boolean unpark) {
-		if (this.currentPos == currentPos)
-			return;
-		this.currentPos = currentPos;
-		getPerso().getDebugView().setCurrentPosition(currentPos);
-		if(unpark)
-			LockSupport.unpark(waiter);
+	@Override
+	public void notifyMovementEnd() {
+		LockSupport.unpark(waiter);
 	}
 
 	public boolean isTeleporting() {

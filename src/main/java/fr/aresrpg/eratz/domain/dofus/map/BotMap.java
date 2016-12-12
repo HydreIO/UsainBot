@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.dofus.map;
 
-import fr.aresrpg.dofus.protocol.game.movement.MovementPlayer;
+import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 
@@ -18,6 +18,8 @@ public class BotMap {
 	private Set<Ressource> ressources = new HashSet<>();
 	private Set<Fight> fights = new HashSet<>();
 	private CopyOnWriteArraySet<MovementPlayer> players = new CopyOnWriteArraySet<>();
+	private CopyOnWriteArraySet<MovementMonsterGroup> mobs = new CopyOnWriteArraySet<>();
+	private CopyOnWriteArraySet<MovementNpc> npcs = new CopyOnWriteArraySet<>();
 
 	public BotMap(DofusMap m) {
 		this.dofusMap = m;

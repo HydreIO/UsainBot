@@ -1,19 +1,53 @@
 package fr.aresrpg.eratz.domain.option.fight;
 
+import fr.aresrpg.eratz.domain.behavior.fight.FightBehavior;
+import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.player.Perso;
 
 /**
  * 
  * @since
  */
-public class FightOptions {
+public class FightInfo {
 
-	private Perso perso;
+	private final Perso perso;
+	private Fight currentFight;
+	private FightBehavior currentFightBehavior;
 	private boolean waitForGroup;
 	private int currentFightTeam;
 
-	public FightOptions(Perso perso) {
+	public FightInfo(Perso perso) {
 		this.perso = perso;
+	}
+
+	/**
+	 * @return the currentFight
+	 */
+	public Fight getCurrentFight() {
+		return currentFight;
+	}
+
+	/**
+	 * @return the currentFightBehavior
+	 */
+	public FightBehavior getCurrentFightBehavior() {
+		return currentFightBehavior;
+	}
+
+	/**
+	 * @param currentFight
+	 *            the currentFight to set
+	 */
+	public void setCurrentFight(Fight currentFight) {
+		this.currentFight = currentFight;
+	}
+
+	/**
+	 * @param currentFightBehavior
+	 *            the currentFightBehavior to set
+	 */
+	public void setCurrentFightBehavior(FightBehavior currentFightBehavior) {
+		this.currentFightBehavior = currentFightBehavior;
 	}
 
 	/**
@@ -56,11 +90,6 @@ public class FightOptions {
 	 */
 	public boolean isWaitingForGroup() {
 		return waitForGroup;
-	}
-
-	@Override
-	public String toString() {
-		return "FightOptions [perso=" + perso + ", waitForGroup=" + waitForGroup + ", currentFightTeam=" + currentFightTeam + "]";
 	}
 
 }

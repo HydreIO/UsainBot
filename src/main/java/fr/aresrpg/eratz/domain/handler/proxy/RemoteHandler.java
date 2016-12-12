@@ -96,7 +96,7 @@ public class RemoteHandler extends TransfertHandler {
 	@Override
 	public void handle(AccountServerEncryptedHostPacket pkt) {
 		if (getAccount().isBotOnline())
-			getAccount().getCurrentPlayed().disconnect();
+			getAccount().getCurrentPlayed().disconnect("Connection MITM d'un client", -1);
 		try {
 			String ip = pkt.getIp();
 			ServerSocketChannel srvchannel = ServerSocketChannel.open();

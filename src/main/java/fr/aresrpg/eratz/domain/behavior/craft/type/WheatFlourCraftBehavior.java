@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.behavior.craft.type;
 
+import fr.aresrpg.dofus.structures.Exchange;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ability.craft.CraftAbility;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
@@ -40,7 +41,7 @@ public class WheatFlourCraftBehavior extends CraftBehavior {
 		if (inInv > 0) getPerso().goEmptyInvInBanque(492, 8540, 577);
 		while (toCraft > 0) {
 			ab.goAndOpenBank();
-			ab.getItemFromBank(Items.BLE.getId(), getPerso().getFreePods() / Items.BLE.getPod());
+			ab.moveItem(Items.BLE.getId(), getPerso().getFreePods() / Items.BLE.getPod(), Exchange.BANK, Exchange.PLAYER_INVENTORY);
 			ab.goToZaapi(Zaapi.BONTA_HDV_CHASSEUR);
 			na.moveRight().moveDown(8).moveLeft().moveToCell(446).moveToCell(354);
 			ab.useCraftingMachine(1);

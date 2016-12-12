@@ -49,20 +49,21 @@ public abstract class FightBehavior extends Behavior {
 	public Fight getFight() {
 		return fight;
 	}
-	
+
 	protected Cell getBestCellForZoneSpell(int distToPlayer) {
-		
+		return null;
 	}
 
 	/**
 	 * Trouve une case proche du joueur la plus proche possible du mob
 	 * 
-	 * @param distToPlayer limite depuis le joueur
+	 * @param distToPlayer
+	 *            limite depuis le joueur
 	 * @param m
 	 *            le mob
 	 * @return la case ou null si non trouvée
 	 */
-	protected Cell getCellNearMob(Mob m,int distToPlayer) {
+	protected Cell getCellNearMob(Mob m, int distToPlayer) {
 		Set<Cell> aroundP = getCellsAroundPlayer(distToPlayer);
 		Cell nearest = null;
 		int dist = Integer.MAX_VALUE;
@@ -140,7 +141,7 @@ public abstract class FightBehavior extends Behavior {
 	@Override
 	public void start() {
 		if (getPerso().getCurrentFight() == null) throw new IllegalStateException("Le combat est null");
-		getPerso().getFightAbility().goToCellBeforeStart(getBeginCellId());
+		if (getBeginCellId() != -1) getPerso().getFightAbility().goToCellBeforeStart(getBeginCellId());
 		waitCanStartFight();
 		getPerso().getFightAbility().beReady(true);
 		while (!getPerso().getCurrentFight().isEnded())
