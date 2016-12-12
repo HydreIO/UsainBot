@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.player;
 
-import fr.aresrpg.dofus.structures.item.Object;
+import fr.aresrpg.dofus.structures.item.Item;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,7 +11,7 @@ import java.util.Set;
  */
 public class Inventory {
 
-	private Set<Object> contents = new HashSet<>();
+	private Set<Item> contents = new HashSet<>();
 	private int kamas;
 
 	/**
@@ -37,7 +37,7 @@ public class Inventory {
 	/**
 	 * @return the contents
 	 */
-	public Set<Object> getContents() {
+	public Set<Item> getContents() {
 		return contents;
 	}
 

@@ -8,9 +8,11 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.player;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
-import fr.aresrpg.dofus.structures.item.Object;
+import fr.aresrpg.dofus.structures.item.Item;
+import fr.aresrpg.dofus.structures.server.*;
 import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
@@ -45,6 +47,7 @@ import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class Perso extends Player {
 
@@ -64,14 +67,16 @@ public class Perso extends Player {
 	private final SellAbility sellAbility;
 	private final FightOptions fightOptions;
 	private final DofusMapView debugView;
+	private final DofusServer server;
 	private int maxPods;
 	private int usedPods;
 	private Inventory inventory;
 
-	public Perso(int id, String pseudo, Account account, BotJob job, Classe classe, Genre sexe) {
+	public Perso(int id, String pseudo, Account account, BotJob job, Classe classe, Genre sexe, Server srv) {
 		super(id, pseudo, classe, sexe);
 		this.account = account;
 		this.botJob = job;
+		this.server = new DofusServer(srv.getId(), ServerState.ONLINE, 0, true);
 		this.fightOptions = new FightOptions(this);
 		this.navigation = new NavigationImpl(this);
 		this.baseAbility = new BaseAbilityImpl(this);
@@ -85,8 +90,15 @@ public class Perso extends Player {
 			if (s.getClasse() == getClasse()) spells.put(s, new Spell(s));
 	}
 
-	public Perso(int id, String pseudo, Account account, Classe classe, Genre sexe) {
-		this(id, pseudo, account, null, classe, sexe);
+	public Perso(int id, String pseudo, Account account, Classe classe, Genre sexe, Server srv) {
+		this(id, pseudo, account, null, classe, sexe, srv);
+	}
+
+	/**
+	 * @return the server
+	 */
+	public DofusServer getServer() {
+		return server;
 	}
 
 	/**
@@ -234,8 +246,7 @@ public class Perso extends Player {
 
 	public void crashReport(String msg) {
 		getBaseAbility().speak(Channel.ADMIN, msg);
-		System.out.println("CRASH REPORT [" + msg + "] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		disconnect();
+		disconnect(msg, -1);
 	}
 
 	public void harvestWheat(int quantity, boolean astrub) {
@@ -252,16 +263,16 @@ public class Perso extends Player {
 		}
 	}
 
-	private boolean containsObject(int id, Set<Object> set) {
-		for (Object o : set)
-			if (o.getTemplate().getID() == id) return true;
+	private boolean containsObject(int id, Set<Item> set) {
+		for (Item o : set)
+			if (o.getUniqueId() == id) return true;
 		return false;
 	}
 
-	private int quantityOf(int id, Set<Object> set) {
+	private int quantityOf(int id, Set<Item> set) {
 		int item = 0;
-		for (Object o : set)
-			if (o.getTemplate().getID() == id) {
+		for (Item o : set)
+			if (o.getUniqueId() == id) {
 				item = o.getQuantity();
 				break;
 			}
@@ -288,21 +299,33 @@ public class Perso extends Player {
 		return quantityOf(itemId, getAccount().getBanque().getContents());
 	}
 
-	public void disconnect() {
-		if (getAccount().isClientOnline())
-			throw new IllegalAccessError("Unable to disconnect " + getPseudo() + " ! | A client is online");
-		System.out.println("Disconnecting " + getPseudo());
-		Account a = getAccount();
-		try {
-			a.getRemoteConnection().close();
-			a.setCurrentPlayed(null);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			a.setState(AccountState.OFFLINE);
-			System.out.println(getPseudo() + " disconnected.");
-		}
-
+	/**
+	 * Disconnect the player
+	 * 
+	 * @param reason
+	 *            the reason of the disconnect
+	 * @param timeToReco
+	 *            the time in second before reconnection (set to -1 to stay offline) the bot (see config to disable auto reconnection)
+	 */
+	public void disconnect(String reason, int timeToReco) {
+		Executors.FIXED.execute(() -> {
+			if (getAccount().isClientOnline())
+				throw new IllegalAccessError("Unable to disconnect " + getPseudo() + " ! | A client is online");
+			System.out.println("Disconnecting " + getPseudo());
+			Account a = getAccount();
+			try {
+				a.getRemoteConnection().close();
+				a.setCurrentPlayed(null);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				a.setState(AccountState.OFFLINE);
+				System.out.println(getPseudo() + " disconnected. | " + reason);
+			}
+			if (timeToReco == -1 || Variables.AUTO_RECONNECTION) {
+				Threads.uSleep(timeToReco, TimeUnit.SECONDS);
+			}
+		});
 	}
 
 	public BotJob getBotJob() {

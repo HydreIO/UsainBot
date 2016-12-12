@@ -147,6 +147,20 @@ public class Player {
 	}
 
 	/**
+	 * @return the pa
+	 */
+	public int getPa() {
+		return pa;
+	}
+
+	/**
+	 * @return the pm
+	 */
+	public int getPm() {
+		return pm;
+	}
+
+	/**
 	 * @return the cellid
 	 */
 	public int getCellid() {
