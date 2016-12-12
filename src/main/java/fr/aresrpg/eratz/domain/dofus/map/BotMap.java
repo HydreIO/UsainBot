@@ -1,11 +1,12 @@
 package fr.aresrpg.eratz.domain.dofus.map;
 
+import fr.aresrpg.dofus.protocol.game.movement.MovementPlayer;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
-import fr.aresrpg.eratz.domain.player.Player;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * 
@@ -16,7 +17,7 @@ public class BotMap {
 	private DofusMap dofusMap;
 	private Set<Ressource> ressources = new HashSet<>();
 	private Set<Fight> fights = new HashSet<>();
-	private Set<Player> players = new HashSet<>();
+	private CopyOnWriteArraySet<MovementPlayer> players = new CopyOnWriteArraySet<>();
 
 	public BotMap(DofusMap m) {
 		this.dofusMap = m;
@@ -25,16 +26,12 @@ public class BotMap {
 	/**
 	 * @return the players
 	 */
-	public Set<Player> getPlayers() {
+	public Set<MovementPlayer> getPlayers() {
 		return players;
 	}
 
-	/**
-	 * @param players
-	 *            the players to set
-	 */
-	public void setPlayers(Set<Player> players) {
-		this.players = players;
+	public void removePlayer(int id) {
+		players.removeIf(p -> p.getId() == id);
 	}
 
 	/**

@@ -15,5 +15,7 @@ public interface GeneralHandler {
 	void onGroupInvitRequest(String name);
 
 	void onGuildInvitRequest(String name);
+	
+	void onInventory();
 
 }

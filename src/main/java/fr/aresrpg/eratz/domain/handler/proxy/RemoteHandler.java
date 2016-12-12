@@ -173,20 +173,20 @@ public class RemoteHandler extends TransfertHandler {
 		gameMovementPacket.getActors().forEach(e -> {
 			switch (e.getFirst()) {
 				case DEFAULT:
-					MovementCreatePlayer player = (MovementCreatePlayer) (Object) e.getSecond();
+					MovementPlayer player = (MovementPlayer) (Object) e.getSecond();
 					if (player.getId() == getPerso().getId()) ((NavigationImpl) getPerso().getNavigation()).setCurrentPos(player.getCell(), true);
 					else getPerso().getDebugView().addPlayer(player.getId(), player.getCell());
 					return;
 				case CREATE_INVOCATION:
-					MovementCreateInvocation invoc = (MovementCreateInvocation) (Object) e.getSecond();
+					MovementInvocation invoc = (MovementInvocation) (Object) e.getSecond();
 					getPerso().getDebugView().addMob(invoc.getId(), invoc.getCellId());
 					return;
 				case CREATE_MONSTER:
-					MovementCreateMonster mob = (MovementCreateMonster) (Object) e.getSecond();
+					MovementMonster mob = (MovementMonster) (Object) e.getSecond();
 					getPerso().getDebugView().addMob(mob.getId(), mob.getCellId());
 					return;
 				case CREATE_MONSTER_GROUP:
-					MovementCreateMonsterGroup mobs = (MovementCreateMonsterGroup) (Object) e.getSecond();
+					MovementMonsterGroup mobs = (MovementMonsterGroup) (Object) e.getSecond();
 					getPerso().getDebugView().addMob(mobs.getId(), mobs.getCellid());
 					return;
 				case CREATE_NPC:

@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.handler.bot.move;
 
-import fr.aresrpg.dofus.structures.character.Character;
+import fr.aresrpg.dofus.protocol.game.movement.MovementPlayer;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.map.Mob;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
@@ -28,7 +28,7 @@ public class PlayerMapHandler implements MapHandler {
 	}
 
 	@Override
-	public void onRessourceRecolted(Character p, Ressource r) {
+	public void onRessourceRecolted(int id, Ressource r) {
 		for (Ressource res : perso.getCurrentMap().getRessources())
 			if (res.equals(r)) res.setSpawned(false);
 	}
@@ -56,12 +56,12 @@ public class PlayerMapHandler implements MapHandler {
 	}
 
 	@Override
-	public void onPlayerJoinMap(Character p, int cellId) {
-		getPerso().getCurrentMap().getPlayers().add(Player.fromCharacter(p));
+	public void onPlayerJoinMap(MovementPlayer pl) {
+		getPerso().getCurrentMap().getPlayers().add(pl);
 	}
 
 	@Override
-	public void onPlayerQuitMap(Character p, int cellId) {
+	public void onPlayerQuitMap(int id) {
 		getPerso().getCurrentMap().getPlayers().remove(Player.fromCharacter(p));
 	}
 

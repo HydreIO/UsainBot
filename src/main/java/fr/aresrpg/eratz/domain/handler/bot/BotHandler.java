@@ -31,12 +31,15 @@ import fr.aresrpg.dofus.protocol.waypoint.server.WaypointUseErrorPacket;
 import fr.aresrpg.dofus.structures.PathDirection;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
 import fr.aresrpg.dofus.structures.game.GameMovementType;
+import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.map.DofusMap;
-import fr.aresrpg.dofus.structures.server.ServerState;
+import fr.aresrpg.dofus.structures.server.*;
 import fr.aresrpg.dofus.util.*;
 import fr.aresrpg.eratz.domain.ability.move.NavigationImpl;
+import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.handler.bot.craft.CraftHandler;
 import fr.aresrpg.eratz.domain.handler.bot.fight.FightHandler;
+import fr.aresrpg.eratz.domain.handler.bot.fight.PlayerFightHandler;
 import fr.aresrpg.eratz.domain.handler.bot.move.MapHandler;
 import fr.aresrpg.eratz.domain.handler.bot.move.PlayerMapHandler;
 import fr.aresrpg.eratz.domain.player.Perso;
@@ -45,6 +48,7 @@ import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -63,6 +67,7 @@ public class BotHandler implements PacketHandler {
 	public BotHandler(Perso perso) {
 		this.perso = perso;
 		this.mapHandler = new PlayerMapHandler(perso);
+		this.fightHandler = new PlayerFightHandler(perso);
 	}
 
 	@Override
@@ -127,8 +132,10 @@ public class BotHandler implements PacketHandler {
 
 	@Override
 	public void handle(AccountHostPacket accountHostPacket) {
-		if (accountHostPacket.getServers()[0].getState() != ServerState.ONLINE)
-			throw new IllegalStateException("Server not online");
+		for (DofusServer s : accountHostPacket.getServers())
+			if (getPerso().getServer().equals(s)) getPerso().getServer().setState(s.getState());
+		if (getPerso().getServer().getState() != ServerState.ONLINE)
+			getPerso().disconnect(Server.fromId(getPerso().getServer().getId()).name() + " n'est pas en ligne !", 10 * 60);
 	}
 
 	@Override
@@ -149,7 +156,7 @@ public class BotHandler implements PacketHandler {
 	@Override
 	public void handle(AccountServerListPacket accountServerListPacket) {
 		try {
-			getConnection().send(new AccountAccessServerPacket().setServerId(601));
+			getConnection().send(new AccountAccessServerPacket().setServerId(getPerso().getServer().getId()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -266,7 +273,7 @@ public class BotHandler implements PacketHandler {
 	public void handle(InfoMessagePacket infoMessagePacket) {
 		if (infoMessagePacket.getMessageId() == 153) {
 			try {
-				getConnection().send(new GameCreatePacket().setGameType(1));
+				getConnection().send(new GameCreatePacket().setGameType(GameCreatePacket.TYPE_SOLO));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -275,20 +282,14 @@ public class BotHandler implements PacketHandler {
 
 	@Override
 	public void handle(SpecializationSetPacket specializationSetPacket) {
-		// TODO
-
 	}
 
 	@Override
 	public void handle(InfoMapPacket infoMapPacket) {
-		// TODO
-
 	}
 
 	@Override
 	public void handle(GameCreatePacket gameCreatePacket) {
-		// TODO
-
 	}
 
 	@Override
@@ -310,27 +311,36 @@ public class BotHandler implements PacketHandler {
 	@Override
 	public void handle(GameMovementPacket gameMovementPacket) {
 		if (gameMovementPacket.getType() == GameMovementType.REMOVE) {
-			gameMovementPacket.getActors().forEach(v -> getPerso().getDebugView().removeActor(((MovementRemoveActor) ((Object) v.getSecond())).getId()));
+			gameMovementPacket.getActors().forEach(v -> {
+				MovementRemoveActor actor = (MovementRemoveActor) (Object) v.getSecond();
+				getPerso().getDebugView().removeActor(actor.getId());
+				this.mapHandler.onActorLeaveMap(actor.getId());
+			});
+
 			return;
 		}
 		gameMovementPacket.getActors().forEach(e -> {
 			switch (e.getFirst()) {
 				case DEFAULT:
-					MovementCreatePlayer player = (MovementCreatePlayer) (Object) e.getSecond();
+					MovementPlayer player = (MovementPlayer) (Object) e.getSecond();
 					if (player.getId() == getPerso().getId()) ((NavigationImpl) getPerso().getNavigation()).setCurrentPos(player.getCell(), true);
 					else getPerso().getDebugView().addPlayer(player.getId(), player.getCell());
+					this.mapHandler.onPlayerJoinMap(player);
 					return;
 				case CREATE_INVOCATION:
-					MovementCreateInvocation invoc = (MovementCreateInvocation) (Object) e.getSecond();
+					MovementInvocation invoc = (MovementInvocation) (Object) e.getSecond();
 					getPerso().getDebugView().addMob(invoc.getId(), invoc.getCellId());
+					this.mapHandler.onInvocSpawn(invoc);
 					return;
 				case CREATE_MONSTER:
-					MovementCreateMonster mob = (MovementCreateMonster) (Object) e.getSecond();
+					MovementMonster mob = (MovementMonster) (Object) e.getSecond();
 					getPerso().getDebugView().addMob(mob.getId(), mob.getCellId());
+					this.mapHandler.onMobSpawn(mob);
 					return;
 				case CREATE_MONSTER_GROUP:
-					MovementCreateMonsterGroup mobs = (MovementCreateMonsterGroup) (Object) e.getSecond();
+					MovementMonsterGroup mobs = (MovementMonsterGroup) (Object) e.getSecond();
 					getPerso().getDebugView().addMob(mobs.getId(), mobs.getCellid());
+					this.mapHandler.onMobGroupSpawn(mobs);
 					return;
 				case CREATE_NPC:
 					// TODO
@@ -385,8 +395,11 @@ public class BotHandler implements PacketHandler {
 
 	@Override
 	public void handle(GamePositionStartPacket gamePositionStartPacket) {
-		// TODO
-
+		Fight fi = getPerso().getCurrentFight();
+		if (fi == null) return;
+		getPerso().getFightOptions().setCurrentFightTeam(gamePositionStartPacket.getCurrentTeam());
+		fi.setPlaceTeam0(Arrays.stream(gamePositionStartPacket.getPlacesTeam0()).mapToObj(id -> getPerso().getCurrentMap().getDofusMap().getCells()[id]).toArray(Cell[]::new));
+		fi.setPlaceTeam1(Arrays.stream(gamePositionStartPacket.getPlacesTeam1()).mapToObj(id -> getPerso().getCurrentMap().getDofusMap().getCells()[id]).toArray(Cell[]::new));
 	}
 
 	@Override
@@ -522,7 +535,6 @@ public class BotHandler implements PacketHandler {
 
 	@Override
 	public void handle(GameTurnStartPacket gameTurnStartPacket) {
-		// TODO
 
 	}
 

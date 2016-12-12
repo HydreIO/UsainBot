@@ -1,8 +1,7 @@
 package fr.aresrpg.eratz.domain.handler.bot.move;
 
-import fr.aresrpg.dofus.structures.character.Character;
+import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.structures.map.DofusMap;
-import fr.aresrpg.dofus.structures.map.Mob;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.dofus.map.Ressource;
 
@@ -16,15 +15,19 @@ public interface MapHandler {
 
 	void onQuitMap(DofusMap m);
 
-	void onMobSpawn(Mob m);
-
 	void onRessourceSpawn(Ressource r);
 
-	void onRessourceRecolted(Character p, Ressource r); // faire crash ce fdp si p != bot lmao
+	void onRessourceRecolted(int id, Ressource r); // faire crash ce fdp si p != bot lmao
 
-	void onPlayerJoinMap(Character p, int cellId);
+	void onPlayerJoinMap(MovementPlayer p);
 
-	void onPlayerQuitMap(Character p, int cellId);
+	void onInvocSpawn(MovementInvocation i);
+
+	void onMobSpawn(MovementMonster m);
+
+	void onMobGroupSpawn(MovementMonsterGroup mg);
+
+	void onActorLeaveMap(int id);
 
 	void onFightSpawn(Fight fight);
 
