@@ -34,7 +34,7 @@ public class WaterProvider implements ItemProvider {
 
 	@Override
 	public void provide() {
-		BaseAbility ba = getPerso().getBaseAbility();
+		BaseAbility ba = getPerso().getAbilities().getBaseAbility();
 		ba.goToCity(City.BONTA);
 		ba.goToZaapi(Zaapi.BONTA_BAGRUTTE);
 		ba.buyToNpc(-3);

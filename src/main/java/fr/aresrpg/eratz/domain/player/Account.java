@@ -69,14 +69,6 @@ public class Account {
 		return remoteConnection;
 	}
 
-	public void connect(Perso perso) {
-		perso.connect();
-	}
-
-	public void disconnect(Perso perso) {
-		perso.disconnect();
-	}
-
 	/**
 	 * Called when the client close the connection or crash
 	 */
@@ -99,7 +91,7 @@ public class Account {
 	 *            the new perso to connect
 	 */
 	public void switchPerso(Perso perso) {
-		if (getCurrentPlayed() != null) disconnect(getCurrentPlayed());
+		if (getCurrentPlayed() != null) getCurrentPlayed().disconnect("Switching to " + perso.getPseudo(), -1);
 		long timeleft = (getLastConnection() + (Variables.SEC_AFTER_CRASH * 1000)) - System.currentTimeMillis();
 		if (timeleft < 0)
 			try {

@@ -6,21 +6,13 @@ import fr.aresrpg.eratz.domain.dofus.map.BotMap;
  * 
  * @since
  */
-public class MapInfo {
+public class MapInfo extends Info {
 
-	private final Perso perso;
 	private BotMap map;
 	private int cellId;
 
 	public MapInfo(Perso perso) {
-		this.perso = perso;
-	}
-
-	/**
-	 * @return the perso
-	 */
-	public Perso getPerso() {
-		return perso;
+		super(perso);
 	}
 
 	/**
@@ -51,6 +43,11 @@ public class MapInfo {
 	 */
 	public void setCellId(int cellId) {
 		this.cellId = cellId;
+	}
+
+	@Override
+	public String toString() {
+		return "MapInfo [map=" + map + ", cellId=" + cellId + ", " + super.toString() + "]";
 	}
 
 }

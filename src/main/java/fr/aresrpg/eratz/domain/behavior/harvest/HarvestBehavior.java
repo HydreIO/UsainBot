@@ -1,10 +1,12 @@
 package fr.aresrpg.eratz.domain.behavior.harvest;
 
+import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.behavior.Behavior;
 import fr.aresrpg.eratz.domain.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.dofus.map.Ressource;
 import fr.aresrpg.eratz.domain.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.player.Perso;
+import fr.aresrpg.eratz.domain.player.Roads;
 
 /**
  * 
@@ -22,6 +24,21 @@ public abstract class HarvestBehavior extends Behavior {
 	public HarvestBehavior(Perso perso, int quantity) {
 		super(perso);
 		this.quantity = quantity;
+		initMoves();
+	}
+
+	@Override
+	public BehaviorStopReason start() {
+		BaseAbility ab = getPerso().getAbilities().getBaseAbility();
+		BehaviorStopReason reason = BehaviorStopReason.FINISHED;
+		ab.closeGui();
+		Roads.nearestRoad(getPerso()).takeRoad(getPerso()); // go to zaap astrub
+		for (int i = 0; i < moveCount(); i++) {
+			reason = harvestMap();
+			if (reason != BehaviorStopReason.FINISHED) return reason;
+			nextMove().run();
+		}
+		return reason;
 	}
 
 	/**
@@ -46,11 +63,7 @@ public abstract class HarvestBehavior extends Behavior {
 	}
 
 	protected boolean podMax() {
-		return getPerso().getPodsPercent() > 95;
-	}
-
-	protected boolean isValid(BehaviorStopReason reason) {
-		return reason == BehaviorStopReason.FINISHED;
+		return getPerso().getStatsInfos().isFullPod();
 	}
 
 	/**
@@ -61,7 +74,7 @@ public abstract class HarvestBehavior extends Behavior {
 	protected BehaviorStopReason harvestMap() {
 		Ressource next = null;
 		while ((next = nextRessource()) != null) {
-			getPerso().getHarvestAbility().harvest(next);
+			getPerso().getAbilities().getHarvestAbility().harvest(next);
 			if (podMax()) return BehaviorStopReason.POD_LIMIT;
 			else if (getPerso().getQuantityInInventoryOf(getTypesToHarvest().getId()) >= getQuantity()) return BehaviorStopReason.QUANTITY_REACHED;
 		}
@@ -78,5 +91,7 @@ public abstract class HarvestBehavior extends Behavior {
 	}
 
 	public abstract Interractable getTypesToHarvest();
+
+	public abstract void initMoves();
 
 }

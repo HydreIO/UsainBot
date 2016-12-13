@@ -2,22 +2,22 @@ package fr.aresrpg.eratz.domain.option.fight;
 
 import fr.aresrpg.eratz.domain.behavior.fight.FightBehavior;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
+import fr.aresrpg.eratz.domain.player.Info;
 import fr.aresrpg.eratz.domain.player.Perso;
 
 /**
  * 
  * @since
  */
-public class FightInfo {
+public class FightInfo extends Info {
 
-	private final Perso perso;
 	private Fight currentFight;
 	private FightBehavior currentFightBehavior;
 	private boolean waitForGroup;
 	private int currentFightTeam;
 
 	public FightInfo(Perso perso) {
-		this.perso = perso;
+		super(perso);
 	}
 
 	/**
@@ -48,13 +48,6 @@ public class FightInfo {
 	 */
 	public void setCurrentFightBehavior(FightBehavior currentFightBehavior) {
 		this.currentFightBehavior = currentFightBehavior;
-	}
-
-	/**
-	 * @return the perso
-	 */
-	public Perso getPerso() {
-		return perso;
 	}
 
 	public boolean canStartCombat() {
@@ -90,6 +83,12 @@ public class FightInfo {
 	 */
 	public boolean isWaitingForGroup() {
 		return waitForGroup;
+	}
+
+	@Override
+	public String toString() {
+		return "FightInfo [currentFight=" + currentFight + ", currentFightBehavior=" + currentFightBehavior + ", waitForGroup=" + waitForGroup + ", currentFightTeam=" + currentFightTeam + ", "
+				+ super.toString() + "]";
 	}
 
 }

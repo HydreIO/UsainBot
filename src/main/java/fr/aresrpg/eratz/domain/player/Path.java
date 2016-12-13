@@ -11,8 +11,7 @@ import fr.aresrpg.eratz.domain.behavior.harvest.type.*;
  */
 public enum Path {
 
-	BLE_ASTRUB,
-	BLE_BONTA,
+	BLE,
 	AVOINE,
 	SEIGLE,
 	ORGE,
@@ -22,9 +21,7 @@ public enum Path {
 		switch (this) {
 			case AVOINE:
 				return new AvoineHarvestBehavior(perso, quantiy);
-			case BLE_ASTRUB:
-				return new WheatDePauvreBehavior(perso, quantiy);
-			case BLE_BONTA:
+			case BLE:
 				return new WheatHarvestBehavior(perso, quantiy);
 			case ORGE:
 				return new OrgeHarvestBehavior(perso, quantiy);

@@ -38,7 +38,6 @@ public abstract class Behavior implements Future<BehaviorStopReason> {
 	}
 
 	public void reset() {
-		getPerso().resetBehavior();
 		isDone = true;
 	}
 
@@ -76,6 +75,10 @@ public abstract class Behavior implements Future<BehaviorStopReason> {
 
 	protected Runnable nextMove() {
 		return moves.poll();
+	}
+
+	protected int moveCount() {
+		return moves.size();
 	}
 
 	public <T extends Behavior> T botWait(int time, TimeUnit unit) {

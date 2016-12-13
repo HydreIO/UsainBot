@@ -24,7 +24,7 @@ public class PassTurnBehavior extends FightBehavior {
 	@Override
 	public void playTurn() {
 		tryHuman();
-		getPerso().getFightAbility().endTurn();
+		getPerso().getAbilities().getFightAbility().endTurn();
 	}
 
 }

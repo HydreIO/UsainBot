@@ -48,7 +48,7 @@ public class BankDepositPath extends Behavior {
 
 	@Override
 	public BehaviorStopReason start() {
-		BaseAbility ability = getPerso().getBaseAbility();
+		BaseAbility ability = getPerso().getAbilities().getBaseAbility();
 		ability.closeGui();
 		if (!ability.goAndOpenBank()) return BehaviorStopReason.PATH_ERROR;
 		Set<Item> inv = getPerso().getInventory().getContents();

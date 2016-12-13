@@ -70,9 +70,9 @@ public class NavigationImpl implements Navigation {
 
 	private List<Point> searchPath(int cellid) {
 		return Pathfinding.getPath(
-				Maps.getColumn(getCurrentPos(), getMap().getWidth()), Maps.getLine(getCurrentPos(), getMap().getWidth()),
-				Maps.getColumn(cellid, getMap().getWidth()),
-				Maps.getLine(cellid, getMap().getWidth()), getMap().getCells(), getMap().getWidth(), false);
+				Maps.getX(getCurrentPos(), getMap().getWidth()), Maps.getY(getCurrentPos(), getMap().getWidth()),
+				Maps.getX(cellid, getMap().getWidth()),
+				Maps.getY(cellid, getMap().getWidth()), getMap().getCells(), getMap().getWidth(), false);
 	}
 
 	@Override

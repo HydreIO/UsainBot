@@ -10,9 +10,7 @@ package fr.aresrpg.eratz.domain.proxy;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
-import fr.aresrpg.eratz.domain.handler.BaseHandler;
-import fr.aresrpg.eratz.domain.handler.proxy.LocalHandler;
-import fr.aresrpg.eratz.domain.handler.proxy.RemoteHandler;
+import fr.aresrpg.eratz.domain.handler.proxy.*;
 import fr.aresrpg.eratz.domain.player.Account;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -42,8 +40,8 @@ public class DofusProxy implements Proxy {
 		account.setProxy(this);
 		account.setState(AccountState.CLIENT_IN_REALM);
 		account.setLastConnection(System.currentTimeMillis());
-		((BaseHandler) localHandler).setAccount(account);
-		((BaseHandler) remoteHandler).setAccount(account);
+		((TransfertHandler) localHandler).setAccount(account);
+		((TransfertHandler) remoteHandler).setAccount(account);
 	}
 
 	@Override

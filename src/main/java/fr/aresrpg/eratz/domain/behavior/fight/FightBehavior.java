@@ -3,9 +3,9 @@ package fr.aresrpg.eratz.domain.behavior.fight;
 import fr.aresrpg.dofus.structures.map.*;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.eratz.domain.behavior.Behavior;
+import fr.aresrpg.eratz.domain.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.player.Perso;
-import fr.aresrpg.eratz.domain.player.Player;
 import fr.aresrpg.eratz.domain.util.config.Variables;
 
 import java.util.*;
@@ -108,7 +108,7 @@ public abstract class FightBehavior extends Behavior {
 	protected Cell getCellAwayFromMob(int distToPlayer) {
 		Set<Cell> aroundP = getCellsAroundPlayer(distToPlayer);
 		Map<Cell, Integer> cellWithDistance = new HashMap<>();
-		DofusMap map = getPerso().getCurrentMap().getDofusMap();
+		DofusMap map = getPerso().getMapInfos().getMap().getDofusMap();
 		getFight().getMobs().forEach(m -> aroundP.forEach(cell -> {
 			int dist = cell.distanceManathan(m.getCellId());
 			Integer in = cellWithDistance.get(cell);
@@ -126,8 +126,8 @@ public abstract class FightBehavior extends Behavior {
 
 	protected Set<Cell> getCellsAroundPlayer(int dist) {
 		Set<Cell> around = new HashSet<>();
-		DofusMap map = getPerso().getCurrentMap().getDofusMap();
-		Arrays.stream(map.getCells()).filter(c -> Maps.distanceManathan(getPerso().getCellid(), c.getId(), map.getWidth()) <= dist).forEach(around::add);
+		DofusMap map = getPerso().getMapInfos().getMap().getDofusMap();
+		Arrays.stream(map.getCells()).filter(c -> Maps.distanceManathan(getPerso().getMapInfos().getCellId(), c.getId(), map.getWidth()) <= dist).forEach(around::add);
 		return around;
 	}
 
@@ -139,13 +139,14 @@ public abstract class FightBehavior extends Behavior {
 	}
 
 	@Override
-	public void start() {
-		if (getPerso().getCurrentFight() == null) throw new IllegalStateException("Le combat est null");
-		if (getBeginCellId() != -1) getPerso().getFightAbility().goToCellBeforeStart(getBeginCellId());
+	public BehaviorStopReason start() {
+		if (getPerso().getFightInfos().getCurrentFight() == null) throw new IllegalStateException("Le combat est null");
+		if (getBeginCellId() != -1) getPerso().getAbilities().getFightAbility().goToCellBeforeStart(getBeginCellId());
 		waitCanStartFight();
-		getPerso().getFightAbility().beReady(true);
-		while (!getPerso().getCurrentFight().isEnded())
-			if (getPerso().getCurrentFight().getCurrentTurn() == getPerso()) playTurn();
+		getPerso().getAbilities().getFightAbility().beReady(true);
+		while (!getPerso().getFightInfos().getCurrentFight().isEnded())
+			if (getPerso().getFightInfos().getCurrentFight().getCurrentTurn() == getPerso()) playTurn();
+		return BehaviorStopReason.FINISHED;
 	}
 
 	public abstract void playTurn();
@@ -155,30 +156,8 @@ public abstract class FightBehavior extends Behavior {
 	}
 
 	protected void waitCanStartFight() {
-		while (!getPerso().getFightOptions().canStartCombat()) // attente de pouvoir start le combat
+		while (!getPerso().getFightInfos().canStartCombat()) // attente de pouvoir start le combat
 			;
-	}
-
-	@Override
-	public boolean acceptDefi(Player p) {
-		return false;
-	}
-
-	@Override
-	public boolean acceptEchange(Player p) {
-		return false;
-	}
-
-	@Override
-	public boolean acceptGuilde(String pname) {
-		return false;
-	}
-
-	@Override
-	public boolean acceptGroup(String pname) {
-		for (Player p : getPerso().getGroup())
-			if (p.getPseudo().equalsIgnoreCase(pname)) return true;
-		return false;
 	}
 
 	public static enum Humeur {

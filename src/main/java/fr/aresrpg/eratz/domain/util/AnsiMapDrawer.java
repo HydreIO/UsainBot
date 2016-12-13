@@ -6,6 +6,7 @@ import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.util.Maps;
 
 public class AnsiMapDrawer {
+
 	public static String drawMap(DofusMap map) {
 		Cell[] cells = map.getCells();
 		String[][] buffer = new String[map.getHeight() * 4 - 1][map.getWidth() * 4];
@@ -37,19 +38,14 @@ public class AnsiMapDrawer {
 				default:
 					throw new IllegalStateException("Unknown movement " + c.getMovement());
 			}
-			int xp = Maps.getColumn(i, map.getWidth()) * 2 + 1;
-			int yp = Maps.getLine(i, map.getWidth()) * 2 + 1;
-			buffer[yp][xp]
-					= buffer[yp + 1][xp]
-					= buffer[yp][xp + 1]
-					= buffer[yp - 1][xp]
-					= buffer[yp][xp - 1]
-					= AnsiColors.getCode(color, color, false) + " ";
+			int xp = Maps.getX(i, map.getWidth()) * 2 + 1;
+			int yp = Maps.getY(i, map.getWidth()) * 2 + 1;
+			buffer[yp][xp] = buffer[yp + 1][xp] = buffer[yp][xp + 1] = buffer[yp - 1][xp] = buffer[yp][xp - 1] = AnsiColors.getCode(color, color, false) + " ";
 
 		}
 		StringBuilder sb = new StringBuilder();
-		for(int y = 0 ; y < buffer.length ; y++) {
-			for(int x = 0 ; x < buffer[y].length ; x++)
+		for (int y = 0; y < buffer.length; y++) {
+			for (int x = 0; x < buffer[y].length; x++)
 				sb.append(buffer[y][x] == null ? AnsiColors.ANSI_RESET + " " : buffer[y][x]);
 
 			sb.append('\n').append(AnsiColors.ANSI_RESET);

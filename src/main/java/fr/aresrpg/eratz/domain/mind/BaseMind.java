@@ -1,7 +1,6 @@
 package fr.aresrpg.eratz.domain.mind;
 
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
-import fr.aresrpg.eratz.domain.behavior.Behavior;
 import fr.aresrpg.eratz.domain.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.behavior.move.type.BankDepositPath;
 import fr.aresrpg.eratz.domain.dofus.item.Items;
@@ -21,7 +20,6 @@ import java.util.function.Predicate;
 public class BaseMind implements Mind {
 
 	private final Perso perso;
-	private Behavior currentBehavior;
 	private Queue<Future<BehaviorStopReason>> actions = new LinkedList<>();
 	private boolean infinite;
 	private Set<Items> itemsToKeep = new HashSet<>();
@@ -37,7 +35,7 @@ public class BaseMind implements Mind {
 			if (next == null) break;
 			switch (next.get()) { // possibilité d'effectuer des actions selon le type de retour
 				case QUANTITY_REACHED:
-					getPerso().getBaseAbility().speak(Channel.ADMIN, "Récolte terminée.");
+					getPerso().getAbilities().getBaseAbility().speak(Channel.ADMIN, "Récolte terminée.");
 					break;
 			}
 			if (infinite) getActions().add(next); // si infinite loop ajout a la queue
@@ -56,13 +54,6 @@ public class BaseMind implements Mind {
 	 */
 	public Perso getPerso() {
 		return perso;
-	}
-
-	/**
-	 * @return the currentBehavior
-	 */
-	public Behavior getCurrentBehavior() {
-		return currentBehavior;
 	}
 
 	@Override

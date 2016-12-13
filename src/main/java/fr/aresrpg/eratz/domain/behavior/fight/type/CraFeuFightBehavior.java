@@ -28,7 +28,7 @@ public class CraFeuFightBehavior extends FightBehavior {
 
 	@Override
 	public void playTurn() {
-		FightAbility fa = getPerso().getFightAbility();
+		FightAbility fa = getPerso().getAbilities().getFightAbility();
 		tryHuman(); // si enabled le bot va attendre un peu avant de commencer son tour
 		if (is90()) playTurn90();
 		else playTurnBase();
@@ -36,20 +36,20 @@ public class CraFeuFightBehavior extends FightBehavior {
 	}
 
 	private void playTurnBase() {
-		FightAbility fa = getPerso().getFightAbility();
+		FightAbility fa = getPerso().getAbilities().getFightAbility();
 
 	}
 
 	private void playTurn90() {
-		FightAbility fa = getPerso().getFightAbility();
-		Spells boost = getPerso().getLvl() > 99 ? Spells.MAITRISE_ARC : Spells.TIR_ELOIGNEE;
-		fa.launchSpell(boost.get(getPerso()), getPerso().getCellid());
-		fa.launchSpell(Spells.TIR_PUISSANT.get(getPerso()), getPerso().getCellid());
+		FightAbility fa = getPerso().getAbilities().getFightAbility();
+		Spells boost = getPerso().getStatsInfos().getLvl() > 99 ? Spells.MAITRISE_ARC : Spells.TIR_ELOIGNEE;
+		fa.launchSpell(boost.get(getPerso()), getPerso().getMapInfos().getCellId());
+		fa.launchSpell(Spells.TIR_PUISSANT.get(getPerso()), getPerso().getMapInfos().getCellId());
 
 	}
 
 	private boolean is90() {
-		return getPerso().getLvl() >= 90;
+		return getPerso().getStatsInfos().getLvl() >= 90;
 	}
 
 	@Override

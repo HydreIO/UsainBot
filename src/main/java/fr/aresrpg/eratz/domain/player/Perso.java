@@ -15,18 +15,13 @@ import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.dofus.structures.server.*;
 import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.eratz.domain.TheBotFather;
-import fr.aresrpg.eratz.domain.ability.BaseAbility;
-import fr.aresrpg.eratz.domain.ability.craft.CraftAbility;
-import fr.aresrpg.eratz.domain.ability.fight.FightAbility;
-import fr.aresrpg.eratz.domain.ability.harvest.HarvestAbility;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.ability.move.NavigationImpl;
-import fr.aresrpg.eratz.domain.ability.sell.SellAbility;
-import fr.aresrpg.eratz.domain.behavior.Behavior;
-import fr.aresrpg.eratz.domain.behavior.fight.FightBehavior;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.dofus.player.*;
 import fr.aresrpg.eratz.domain.handler.bot.BotHandler;
+import fr.aresrpg.eratz.domain.mind.BaseMind;
+import fr.aresrpg.eratz.domain.mind.Mind;
 import fr.aresrpg.eratz.domain.option.fight.FightInfo;
 import fr.aresrpg.eratz.domain.player.state.AccountState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -45,11 +40,14 @@ public class Perso {
 	private String pseudo;
 
 	private final Navigation navigation = new NavigationImpl(this);
+	private final Mind mind = new BaseMind(this);
 
 	private final AbilityInfo abilities = new AbilityInfo(this);
 	private final LogInfo logInfos = new LogInfo(this);
 	private final BotInfo botInfos = new BotInfo(this);
 	private final MapInfo mapInfos = new MapInfo(this);
+	private final FightInfo fightInfos = new FightInfo(this);
+	private final StatsInfo statsInfos = new StatsInfo(this);
 	private final DofusMapView debugView = new DofusMapView();
 	private final DofusServer server;
 	private final Inventory inventory = new PlayerInventory(this);
@@ -60,12 +58,31 @@ public class Perso {
 		this.account = account;
 		this.botInfos.setBotJob(job);
 		this.server = new DofusServer(srv.getId(), ServerState.ONLINE, 0, true);
-		for (Spells s : Spells.values())
-			if (s.getClasse() == getClasse()) spells.put(s, new Spell(s));
 	}
 
 	public Perso(int id, String pseudo, Account account, Classe classe, Genre sexe, Server srv) {
 		this(id, pseudo, account, null, classe, sexe, srv);
+	}
+
+	/**
+	 * @return the mind
+	 */
+	public Mind getMind() {
+		return mind;
+	}
+
+	/**
+	 * @return the statsInfos
+	 */
+	public StatsInfo getStatsInfos() {
+		return statsInfos;
+	}
+
+	/**
+	 * @return the fightInfos
+	 */
+	public FightInfo getFightInfos() {
+		return fightInfos;
 	}
 
 	/**
@@ -118,48 +135,10 @@ public class Perso {
 	}
 
 	/**
-	 * @return the sellAbility
-	 */
-	public SellAbility getSellAbility() {
-		return sellAbility;
-	}
-
-	/**
 	 * @return the inventory
 	 */
 	public Inventory getInventory() {
 		return inventory;
-	}
-
-	/**
-	 * @param inventory
-	 *            the inventory to set
-	 */
-	public void setInventory(Inventory inventory) {
-		this.inventory = inventory;
-	}
-
-	/**
-	 * @param maxPods
-	 *            the maxPods to set
-	 */
-	public void setMaxPods(int maxPods) {
-		this.maxPods = maxPods;
-	}
-
-	/**
-	 * @param usedPods
-	 *            the usedPods to set
-	 */
-	public void setUsedPods(int usedPods) {
-		this.usedPods = usedPods;
-	}
-
-	/**
-	 * @return the fightInfos
-	 */
-	public FightInfo getFightInfos() {
-		return fightInfos;
 	}
 
 	/**
@@ -203,28 +182,8 @@ public class Perso {
 		return getFightInfos().getCurrentFight() != null;
 	}
 
-	public boolean allGroupIsInFight(Fight f) {
-		for (Player p : getGroup())
-			if (!f.hasPlayer(p)) return false;
-		return true;
-	}
-
-	/**
-	 * @return the fightAbaility
-	 */
-	public FightAbility getFightAbility() {
-		return fightAbility;
-	}
-
-	/**
-	 * @return the craftAbility
-	 */
-	public CraftAbility getCraftAbility() {
-		return craftAbility;
-	}
-
 	public void crashReport(String msg) {
-		getBaseAbility().speak(Channel.ADMIN, msg);
+		getAbilities().getBaseAbility().speak(Channel.ADMIN, msg);
 		disconnect(msg, -1);
 	}
 
@@ -244,10 +203,6 @@ public class Perso {
 
 	public int getQuantityInInventoryOf(int itemId) {
 		return quantityOf(itemId, getInventory().getContents());
-	}
-
-	public int getFreePods() {
-		return getMaxPods() - getUsedPods();
 	}
 
 	public int getQuantityInBanqueOf(int itemId) {
@@ -284,56 +239,6 @@ public class Perso {
 	}
 
 	/**
-	 * @return the baseAbility
-	 */
-	public BaseAbility getBaseAbility() {
-		return baseAbility;
-	}
-
-	/**
-	 * @return the maxPods
-	 */
-	public int getMaxPods() {
-		return maxPods;
-	}
-
-	/**
-	 * @return the usedPods
-	 */
-	public int getUsedPods() {
-		return usedPods;
-	}
-
-	public int getPodsPercent() {
-		return getUsedPods() * 100 / getMaxPods();
-	}
-
-	public boolean changeFightBehavior(FightBehavior behavior) {
-		if (currentFightBehavior != null) return false;
-		this.currentFightBehavior = behavior;
-		if (isInFight()) Executors.FIXED.execute(behavior);
-		return true;
-	}
-
-	public void resetBehavior() {
-		this.currentBehavior = null;
-	}
-
-	/**
-	 * @return the currentBehavior
-	 */
-	public Behavior getCurrentBehavior() {
-		return currentBehavior;
-	}
-
-	/**
-	 * @return the harvestAbility
-	 */
-	public HarvestAbility getHarvestAbility() {
-		return harvestAbility;
-	}
-
-	/**
 	 * @return the navigation
 	 */
 	public Navigation getNavigation() {
@@ -352,6 +257,13 @@ public class Perso {
 		if (obj == null) return false;
 		if (obj == this) return true;
 		return obj instanceof Perso && ((Perso) obj).getId() == getId();
+	}
+
+	@Override
+	public String toString() {
+		return "Perso [account=" + account + ", id=" + id + ", pseudo=" + pseudo + ", navigation=" + navigation + ", mind=" + mind + ", abilities=" + abilities + ", logInfos=" + logInfos
+				+ ", botInfos=" + botInfos + ", mapInfos=" + mapInfos + ", fightInfos=" + fightInfos + ", statsInfos=" + statsInfos + ", debugView=" + debugView + ", server=" + server + ", inventory="
+				+ inventory + "]";
 	}
 
 }

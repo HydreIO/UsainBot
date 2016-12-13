@@ -25,7 +25,7 @@ public class AccountsManager {
 	private AccountsManager() {
 		Variables.ACCOUNTS.forEach(b -> {
 			Account a = new Account(b.getAccountName(), b.getPassword());
-			b.getPersos().forEach(h -> a.addPerso(new Perso(-1, h.getPseudo(), a, h.getBotJob(), null, null))); // TODO dans le handler faudra set tout les fields quand on reçoit le packet perso list
+			b.getPersos().forEach(h -> a.addPerso(new Perso(-1, h.getPseudo(), a, h.getBotJob(), null, null, h.getDofusServer()))); // TODO dans le handler faudra set tout les fields quand on reçoit le packet perso list
 			accounts.put(b.getAccountName(), a);
 		});
 	}
