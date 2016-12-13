@@ -24,8 +24,6 @@ import java.util.Set;
  */
 public class AvoineHarvestBehavior extends HarvestBehavior {
 
-	private Set<Interractable> res = ArrayUtils.asSet(Interractable.AVOINE);
-
 	/**
 	 * @param perso
 	 */

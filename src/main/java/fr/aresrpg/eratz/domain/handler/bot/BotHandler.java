@@ -387,7 +387,6 @@ public class BotHandler extends BaseHandler {
 
 	@Override
 	public void handle(GameMapFramePacket gameMapFramePacket) {
-		System.out.println(gameMapFramePacket);
 	}
 
 	@Override

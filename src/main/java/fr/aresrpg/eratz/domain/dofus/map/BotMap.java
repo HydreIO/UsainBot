@@ -15,6 +15,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class BotMap {
 
 	private DofusMap dofusMap;
+	private int x;
+	private int y;
 	private Set<Ressource> ressources = new HashSet<>();
 	private Set<Fight> fights = new HashSet<>();
 	private CopyOnWriteArraySet<MovementPlayer> players = new CopyOnWriteArraySet<>();
@@ -23,6 +25,36 @@ public class BotMap {
 
 	public BotMap(DofusMap m) {
 		this.dofusMap = m;
+	}
+
+	/**
+	 * @return the x
+	 */
+	public int getX() {
+		return x;
+	}
+
+	/**
+	 * @return the y
+	 */
+	public int getY() {
+		return y;
+	}
+
+	/**
+	 * @param x
+	 *            the x to set
+	 */
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	/**
+	 * @param y
+	 *            the y to set
+	 */
+	public void setY(int y) {
+		this.y = y;
 	}
 
 	/**
@@ -70,18 +102,16 @@ public class BotMap {
 		return new BotMap(map);
 	}
 
-	public int getX() {
-		return dofusMap.getX();
-	}
-
-	public int getZ() {
-		return dofusMap.getZ();
-	}
-
 	/**
 	 * @return the ressources
 	 */
 	public Set<Ressource> getRessources() {
 		return ressources;
 	}
+
+	@Override
+	public String toString() {
+		return "BotMap [dofusMap=" + dofusMap + ", x=" + x + ", y=" + y + ", ressources=" + ressources + ", fights=" + fights + ", players=" + players + ", mobs=" + mobs + ", npcs=" + npcs + "]";
+	}
+
 }

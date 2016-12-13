@@ -18,7 +18,9 @@ import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.chat.client.ChatUseSmileyPacket;
 import fr.aresrpg.dofus.protocol.emote.client.EmoteUsePacket;
-import fr.aresrpg.dofus.protocol.exchange.server.ExchangeListPacket;
+import fr.aresrpg.dofus.protocol.exchange.ExchangeLeavePacket;
+import fr.aresrpg.dofus.protocol.exchange.client.ExchangeAskPacket;
+import fr.aresrpg.dofus.protocol.exchange.server.*;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
@@ -121,283 +123,283 @@ public abstract class BaseHandler implements PacketHandler {
 	@Override
 	public void register(DofusConnection<?> connection) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(HelloGamePacket helloGamePacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(HelloConnectionPacket helloConnectionPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountAuthPacket accountAuthPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountLoginErrPacket accountLoginErrPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountLoginOkPacket accountLoginOkPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountPseudoPacket accountPseudoPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountCommunityPacket accountCommunityPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountHostPacket accountHostPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountQuestionPacket accountQuestionPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountListServersPacket accountListServersPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountServerListPacket accountServerListPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountAccessServerPacket accountAccessServerPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountServerEncryptedHostPacket accountServerEncryptedHostPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountServerHostPacket accountServerHostPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountTicketPacket accountTicketPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountTicketOkPacket accountTicketOkPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(BasicConfirmPacket basicConfirmPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountKeyPacket accountKeyPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountRegionalVersionPacket accountRegionalVersionPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountGetGiftsPacket accountGetGiftsPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountIdentity accountIdentity) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountGetCharactersPacket accountGetCharactersPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountCharactersListPacket accountCharactersListPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountSelectCharacterPacket accountSelectCharacterPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountGetQueuePosition accountGetQueuePosition) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountQueuePosition accountQueuePosition) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(MountXpPacket mountXpPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameExtraInformationPacket gameExtraInformationPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(InfoMessagePacket infoMessagePacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(SpecializationSetPacket specializationSetPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(InfoMapPacket infoMapPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameCreatePacket gameCreatePacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameMapDataPacket gameMapDataPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(PlayerMountPacket playerMountPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameJoinPacket gameJoinPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameEndTurnPacket gameEndTurnPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameTurnOkPacket gameTurnOkPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(FreeMySoulPacket freeMySoulPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(LeaveGamePacket leaveGamePacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameSetPlayerPositionPacket gameSetPlayerPositionPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GamePositionStartPacket gamePositionStartPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameOnReadyPacket gameOnReadyPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameStartPacket gameStartPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameEndPacket gameEndPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountSelectCharacterOkPacket accountSelectCharacterOkPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(ChatSubscribeChannelPacket chatSubscribeChannelPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
@@ -405,7 +407,7 @@ public abstract class BaseHandler implements PacketHandler {
 		if (gameMovementPacket.getType() == GameMovementType.REMOVE) {
 			gameMovementPacket.getActors().forEach(v -> {
 				MovementRemoveActor actor = (MovementRemoveActor) (Object) v.getSecond();
-				getMapHandler().forEach(h->h.onEntityLeave(actor.getId()));
+				getMapHandler().forEach(h -> h.onEntityLeave(actor.getId()));
 			});
 			return;
 		}
@@ -446,169 +448,193 @@ public abstract class BaseHandler implements PacketHandler {
 	@Override
 	public void handle(GameMapFramePacket gameMapFramePacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameActionACKPacket gameActionACKPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameClientActionPacket gameClientActionPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameServerActionPacket gameServerActionPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GuildStatPacket guildStatPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(SpellChangeOptionPacket spellChangeOptionPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(SpellListPacket spellListPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(SubareaListPacket subareaListPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(AccountRestrictionsPacket accountRestrictionsPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GamePositionsPacket gamePositionPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameClientReadyPacket gameReadyPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameServerReadyPacket gameServerReadyPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameStartToPlayPacket gameStartToPlayPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameTurnListPacket gameTurnListPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameTurnEndPacket gameTurnEndPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameTurnMiddlePacket gameTurnMiddlePacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameTurnStartPacket gameTurnStartPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameTurnFinishPacket gameTurnFinishPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameTurnReadyPacket gameTurnReadyPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameActionFinishPacket gameActionFinishPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(GameEffectPacket gameEffectPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(WaypointLeavePacket waypointLeavePacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(WaypointUseErrorPacket waypointUseErrorPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(WaypointCreatePacket waypointCreatePacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(ChatUseSmileyPacket chatUseSmileyPacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(WaypointUsePacket waypointUsePacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(EmoteUsePacket emoteUsePacket) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void handle(ExchangeListPacket exchangeListPacket) {
 		// TODO
-		
+
+	}
+
+	@Override
+	public void handle(ExchangeCreatePacket exchangeCreatePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(ExchangeLeavePacket exchangeLeavePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(ExchangeRequestPacket exchangeRequestPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(ExchangeAskPacket exchangeAskPacket) {
+		// TODO
+
 	}
 
 }

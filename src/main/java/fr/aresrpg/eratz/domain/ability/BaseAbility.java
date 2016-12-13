@@ -1,10 +1,8 @@
 package fr.aresrpg.eratz.domain.ability;
 
-import fr.aresrpg.dofus.structures.Exchange;
 import fr.aresrpg.eratz.domain.dofus.map.*;
 import fr.aresrpg.eratz.domain.dofus.player.*;
 import fr.aresrpg.eratz.domain.player.Perso;
-import fr.aresrpg.eratz.domain.player.Player;
 import fr.aresrpg.eratz.domain.util.exception.ZaapException;
 
 /**
@@ -87,7 +85,9 @@ public interface BaseAbility {
 	 */
 	boolean useZaapi(Zaapi current, Zaapi destination);
 
-	void moveItem(int itemId, int amount, Exchange from, Exchange to);
+	void moveItem(int itemId, int amount);
+
+	void moveKama(int amount);
 
 	/**
 	 * Je sais pas si c un packet different, si c'est pas different alors suprimer la methode
@@ -127,11 +127,13 @@ public interface BaseAbility {
 
 	void acceptDefiRequest(boolean accept);
 
-	void echangeWith(Player p); // je prend un player car il faut etre sur la meme map pour echanger
+	void echangeWith(int id);
+
+	void invitToGuild(String pname);
 
 	void acceptEchangeRequest(boolean accept);
 
-	void acceptGuildInvitation(boolean accept); // OSEF
+	void acceptGuildInvitation(boolean accept);
 
 	void setItemInHotBar(int itemId, int slot); // peut etre useless je sais pas comment ça fonctionne, a suprimer si le packet use item est le meme !
 
@@ -155,7 +157,7 @@ public interface BaseAbility {
 	}
 
 	default boolean isInBankMap() {
-		return getPerso().getCurrentMap().getX() == 4 && getPerso().getCurrentMap().getZ() == -16;
+		return getPerso().getMapInfos().getMap().getX() == 4 && getPerso().getMapInfos().getMap().getY() == -16;
 	}
 
 	default boolean goToZaap(Zaap zaap) { // si astrub prendre popo, sinon prendre popo + prendre zaap

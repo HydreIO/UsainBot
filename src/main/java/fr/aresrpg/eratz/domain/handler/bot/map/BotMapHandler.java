@@ -2,8 +2,8 @@ package fr.aresrpg.eratz.domain.handler.bot.map;
 
 import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.structures.map.DofusMap;
+import fr.aresrpg.dofus.structures.map.Frame;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
-import fr.aresrpg.eratz.domain.dofus.map.Ressource;
 
 /**
  * 
@@ -24,49 +24,43 @@ public class BotMapHandler implements MapHandler {
 	}
 
 	@Override
-	public void onRessourceSpawn(Ressource r) {
+	public void onFrameUpdate(int cellid, Frame frame) {
 		// TODO
 
 	}
 
 	@Override
-	public void onRessourceRecolted(int id, Ressource r) {
+	public void onPlayerMove(MovementPlayer p) {
 		// TODO
 
 	}
 
 	@Override
-	public void onPlayerJoinMap(MovementPlayer p) {
+	public void onInvocMove(MovementInvocation i) {
 		// TODO
 
 	}
 
 	@Override
-	public void onInvocSpawn(MovementInvocation i) {
+	public void onMobMove(MovementMonster m) {
 		// TODO
 
 	}
 
 	@Override
-	public void onMobSpawn(MovementMonster m) {
+	public void onMobGroupMove(MovementMonsterGroup mg) {
 		// TODO
 
 	}
 
 	@Override
-	public void onMobGroupSpawn(MovementMonsterGroup mg) {
+	public void onNpcMove(MovementNpc npc) {
 		// TODO
 
 	}
 
 	@Override
-	public void onNpcSpawn(MovementNpc npc) {
-		// TODO
-
-	}
-
-	@Override
-	public void onActorLeaveMap(int id) {
+	public void onEntityLeave(int id) {
 		// TODO
 
 	}

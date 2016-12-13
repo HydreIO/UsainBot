@@ -1,13 +1,9 @@
 package fr.aresrpg.eratz.domain.dofus.fight;
 
+import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.structures.game.FightType;
-import fr.aresrpg.dofus.structures.map.Cell;
-import fr.aresrpg.dofus.structures.map.Mob;
-import fr.aresrpg.eratz.domain.dofus.mob.Invocation;
-import fr.aresrpg.eratz.domain.player.Player;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 
@@ -15,27 +11,25 @@ import java.util.Set;
  */
 public class Fight {
 
-	private final int beginCellId1;
-	private final int beginCellId2;
+	private final int swordCell1;
+	private final int swordCell2;
 	private FightType type;
-	private Cell[] placeTeam0;
-	private Cell[] placeTeam1;
-	private Set<Player> team0 = new HashSet<>();
-	private Set<Player> team1 = new HashSet<>();
-	private Set<Mob> mobs = new HashSet<>();
-	private Set<Invocation> invocs = new HashSet<>();
+	private int[] placeTeam0;
+	private int[] placeTeam1;
+	private Set<MovementPlayer> team0 = new HashSet<>();
+	private Set<MovementPlayer> team1 = new HashSet<>();
+	private Set<MovementMonster> mobs = new HashSet<>();
+	private Set<MovementInvocation> invocs = new HashSet<>();
 	private boolean isBlocked;
 	private boolean isSpecBlocked;
+	private boolean isGroupBlocked;
+	private boolean isHelpNeeded;
 	private boolean ended;
-	private Player currentTurn;
+	private MovementAction currentTurn;
 
-	public Fight(int cellid1, int cellid2) {
-		this.beginCellId1 = cellid1;
-		this.beginCellId2 = cellid2;
-	}
-
-	public boolean hasPlayer(Player p) {
-		return getTeam0().contains(p) || getTeam1().contains(p);
+	public Fight(int swordCell1, int swordCell2) {
+		this.swordCell1 = swordCell1;
+		this.swordCell2 = swordCell2;
 	}
 
 	/**
@@ -53,10 +47,16 @@ public class Fight {
 		this.type = type;
 	}
 
+	public Set<MovementPlayer> getTeam(int index) {
+		if (index == 0) return getTeam0();
+		else if (index == 1) return getTeam1();
+		throw new IllegalArgumentException("Il n'y a que 2 teams !");
+	}
+
 	/**
 	 * @return the placeTeam0
 	 */
-	public Cell[] getPlaceTeam0() {
+	public int[] getPlaceTeam0() {
 		return placeTeam0;
 	}
 
@@ -64,14 +64,14 @@ public class Fight {
 	 * @param placeTeam0
 	 *            the placeTeam0 to set
 	 */
-	public void setPlaceTeam0(Cell[] placeTeam0) {
+	public void setPlaceTeam0(int[] placeTeam0) {
 		this.placeTeam0 = placeTeam0;
 	}
 
 	/**
 	 * @return the placeTeam1
 	 */
-	public Cell[] getPlaceTeam1() {
+	public int[] getPlaceTeam1() {
 		return placeTeam1;
 	}
 
@@ -79,14 +79,14 @@ public class Fight {
 	 * @param placeTeam1
 	 *            the placeTeam1 to set
 	 */
-	public void setPlaceTeam1(Cell[] placeTeam1) {
+	public void setPlaceTeam1(int[] placeTeam1) {
 		this.placeTeam1 = placeTeam1;
 	}
 
 	/**
 	 * @return the team0
 	 */
-	public Set<Player> getTeam0() {
+	public Set<MovementPlayer> getTeam0() {
 		return team0;
 	}
 
@@ -94,14 +94,14 @@ public class Fight {
 	 * @param team0
 	 *            the team0 to set
 	 */
-	public void setTeam0(Set<Player> team0) {
+	public void setTeam0(Set<MovementPlayer> team0) {
 		this.team0 = team0;
 	}
 
 	/**
 	 * @return the team1
 	 */
-	public Set<Player> getTeam1() {
+	public Set<MovementPlayer> getTeam1() {
 		return team1;
 	}
 
@@ -109,14 +109,14 @@ public class Fight {
 	 * @param team1
 	 *            the team1 to set
 	 */
-	public void setTeam1(Set<Player> team1) {
+	public void setTeam1(Set<MovementPlayer> team1) {
 		this.team1 = team1;
 	}
 
 	/**
 	 * @return the mobs
 	 */
-	public Set<Mob> getMobs() {
+	public Set<MovementMonster> getMobs() {
 		return mobs;
 	}
 
@@ -124,14 +124,14 @@ public class Fight {
 	 * @param mobs
 	 *            the mobs to set
 	 */
-	public void setMobs(Set<Mob> mobs) {
+	public void setMobs(Set<MovementMonster> mobs) {
 		this.mobs = mobs;
 	}
 
 	/**
 	 * @return the invocs
 	 */
-	public Set<Invocation> getInvocs() {
+	public Set<MovementInvocation> getInvocs() {
 		return invocs;
 	}
 
@@ -139,7 +139,7 @@ public class Fight {
 	 * @param invocs
 	 *            the invocs to set
 	 */
-	public void setInvocs(Set<Invocation> invocs) {
+	public void setInvocs(Set<MovementInvocation> invocs) {
 		this.invocs = invocs;
 	}
 
@@ -174,6 +174,36 @@ public class Fight {
 	}
 
 	/**
+	 * @return the isGroupBlocked
+	 */
+	public boolean isGroupBlocked() {
+		return isGroupBlocked;
+	}
+
+	/**
+	 * @param isGroupBlocked
+	 *            the isGroupBlocked to set
+	 */
+	public void setGroupBlocked(boolean isGroupBlocked) {
+		this.isGroupBlocked = isGroupBlocked;
+	}
+
+	/**
+	 * @return the isHelpNeeded
+	 */
+	public boolean isHelpNeeded() {
+		return isHelpNeeded;
+	}
+
+	/**
+	 * @param isHelpNeeded
+	 *            the isHelpNeeded to set
+	 */
+	public void setHelpNeeded(boolean isHelpNeeded) {
+		this.isHelpNeeded = isHelpNeeded;
+	}
+
+	/**
 	 * @return the ended
 	 */
 	public boolean isEnded() {
@@ -191,7 +221,7 @@ public class Fight {
 	/**
 	 * @return the currentTurn
 	 */
-	public Player getCurrentTurn() {
+	public MovementAction getCurrentTurn() {
 		return currentTurn;
 	}
 
@@ -199,22 +229,29 @@ public class Fight {
 	 * @param currentTurn
 	 *            the currentTurn to set
 	 */
-	public void setCurrentTurn(Player currentTurn) {
+	public void setCurrentTurn(MovementAction currentTurn) {
 		this.currentTurn = currentTurn;
 	}
 
 	/**
-	 * @return the beginCellId1
+	 * @return the swordCell1
 	 */
-	public int getBeginCellId1() {
-		return beginCellId1;
+	public int getSwordCell1() {
+		return swordCell1;
 	}
 
 	/**
-	 * @return the beginCellId2
+	 * @return the swordCell2
 	 */
-	public int getBeginCellId2() {
-		return beginCellId2;
+	public int getSwordCell2() {
+		return swordCell2;
+	}
+
+	@Override
+	public String toString() {
+		return "Fight [swordCell1=" + swordCell1 + ", swordCell2=" + swordCell2 + ", type=" + type + ", placeTeam0=" + Arrays.toString(placeTeam0) + ", placeTeam1=" + Arrays.toString(placeTeam1)
+				+ ", team0=" + team0 + ", team1=" + team1 + ", mobs=" + mobs + ", invocs=" + invocs + ", isBlocked=" + isBlocked + ", isSpecBlocked=" + isSpecBlocked + ", isGroupBlocked="
+				+ isGroupBlocked + ", isHelpNeeded=" + isHelpNeeded + ", ended=" + ended + ", currentTurn=" + currentTurn + "]";
 	}
 
 }

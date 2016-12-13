@@ -58,8 +58,8 @@ public class FightInfo {
 	}
 
 	public boolean canStartCombat() {
-		if (getPerso().getCurrentFight() == null) throw new IllegalStateException("Le combat est null !");
-		return !waitForGroup || getPerso().allGroupIsInFight(getPerso().getCurrentFight());
+		if (getCurrentFight() == null) throw new IllegalStateException("Le combat est null !");
+		return !waitForGroup || getPerso().allGroupIsInFight(getCurrentFight());
 	}
 
 	/**

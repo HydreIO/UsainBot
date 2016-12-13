@@ -9,13 +9,12 @@
 package fr.aresrpg.eratz.domain.behavior.move.type;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
-import fr.aresrpg.dofus.structures.Exchange;
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
-import fr.aresrpg.eratz.domain.behavior.move.PathBehavior;
+import fr.aresrpg.eratz.domain.behavior.Behavior;
+import fr.aresrpg.eratz.domain.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.player.Perso;
-import fr.aresrpg.eratz.domain.player.Player;
 
 import java.util.Random;
 import java.util.Set;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
  * 
  * @since
  */
-public class BankDepositPath extends PathBehavior {
+public class BankDepositPath extends Behavior {
 
 	private Random humanRandomizer = new Random();
 	private int[] items;
@@ -36,17 +35,11 @@ public class BankDepositPath extends PathBehavior {
 	}
 
 	public void startPath() {
-		BaseAbility ability = getPerso().getBaseAbility();
-		ability.closeGui();
-		if (!ability.goAndOpenBank()) return;
-		Set<Item> inv = getPerso().getInventory().getContents();
-		inv.stream().filter(i -> !ArrayUtils.contains(i.getId(), items)).forEach(i -> ability.moveItem(i.getId(), i.getQuantity(), Exchange.PLAYER_INVENTORY, Exchange.BANK));
-		waitLitle();
-		ability.speak(Channel.ADMIN, "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",", "[", "]")) + " en banque !");
+
 	}
 
 	private String nameObject(Item o) {
-		return "x" + o.getQuantity() + " " + o.getTemplate().getName();
+		return "x" + o.getQuantity(); // FIXME: + " " + o.getTemplate().getName();
 	}
 
 	private void waitLitle() { // zone peuplé mieux vaut ne pas se déplacer trop vite
@@ -54,30 +47,15 @@ public class BankDepositPath extends PathBehavior {
 	}
 
 	@Override
-	public PathBehavior getPathToReachCurrentPath() {
-		return null;
-	}
-
-	@Override
-	public boolean acceptDefi(Player p) {
-		return false;
-	}
-
-	@Override
-	public boolean acceptEchange(Player p) {
-		return false;
-	}
-
-	@Override
-	public boolean acceptGuilde(String pname) {
-		return false;
-	}
-
-	@Override
-	public boolean acceptGroup(String pname) {
-		for (Player p : getPerso().getGroup())
-			if (p.getPseudo().equalsIgnoreCase(pname)) return true;
-		return false;
+	public BehaviorStopReason start() {
+		BaseAbility ability = getPerso().getBaseAbility();
+		ability.closeGui();
+		if (!ability.goAndOpenBank()) return BehaviorStopReason.PATH_ERROR;
+		Set<Item> inv = getPerso().getInventory().getContents();
+		inv.stream().filter(i -> !ArrayUtils.contains(i.getId(), items)).forEach(i -> ability.moveItem(i.getId(), i.getQuantity()));
+		waitLitle();
+		ability.speak(Channel.ADMIN, "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",", "[", "]")) + " en banque !");
+		return BehaviorStopReason.FINISHED;
 	}
 
 }

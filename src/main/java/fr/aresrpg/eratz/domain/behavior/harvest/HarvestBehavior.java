@@ -1,10 +1,10 @@
 package fr.aresrpg.eratz.domain.behavior.harvest;
 
 import fr.aresrpg.eratz.domain.behavior.Behavior;
+import fr.aresrpg.eratz.domain.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.dofus.map.Ressource;
 import fr.aresrpg.eratz.domain.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.player.Perso;
-import fr.aresrpg.eratz.domain.player.Player;
 
 /**
  * 
@@ -49,55 +49,32 @@ public abstract class HarvestBehavior extends Behavior {
 		return getPerso().getPodsPercent() > 95;
 	}
 
+	protected boolean isValid(BehaviorStopReason reason) {
+		return reason == BehaviorStopReason.FINISHED;
+	}
+
 	/**
 	 * Harvest an entire map
 	 * 
-	 * @return true if the map was harvested, false if the perso is full pod
+	 * @return true if the map was harvested, false if the perso is full pod/quantity reached
 	 */
-	protected boolean harvestMap() {
+	protected BehaviorStopReason harvestMap() {
 		Ressource next = null;
 		while ((next = nextRessource()) != null) {
 			getPerso().getHarvestAbility().harvest(next);
-			if (podMax()) {
-				this.fullPod = true;
-				return false;
-			} else if (getPerso().getQuantityInInventoryOf(getTypesToHarvest().getId()) >= getQuantity()) {
-				this.quantityHarvested = true;
-				return false;
-			}
+			if (podMax()) return BehaviorStopReason.POD_LIMIT;
+			else if (getPerso().getQuantityInInventoryOf(getTypesToHarvest().getId()) >= getQuantity()) return BehaviorStopReason.QUANTITY_REACHED;
 		}
-		return true;
+		return BehaviorStopReason.FINISHED;
 	}
 
 	/**
 	 * @return a spawned ressource on the map
 	 */
 	protected Ressource nextRessource() {
-		for (Ressource r : getPerso().getCurrentMap().getRessources())
+		for (Ressource r : getPerso().getMapInfos().getMap().getRessources())
 			if (getTypesToHarvest() == r.getType() && r.isSpawned()) return r;
 		return null;
-	}
-
-	@Override
-	public boolean acceptDefi(Player p) {
-		return false;
-	}
-
-	@Override
-	public boolean acceptEchange(Player p) {
-		return false;
-	}
-
-	@Override
-	public boolean acceptGuilde(String pname) {
-		return false;
-	}
-
-	@Override
-	public boolean acceptGroup(String pname) {
-		for (Player p : getPerso().getGroup())
-			if (p.getPseudo().equalsIgnoreCase(pname)) return true;
-		return false;
 	}
 
 	public abstract Interractable getTypesToHarvest();

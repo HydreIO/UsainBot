@@ -2,10 +2,13 @@ package fr.aresrpg.eratz.domain.handler.bot.map;
 
 import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.structures.map.DofusMap;
+import fr.aresrpg.dofus.structures.map.Frame;
+import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.dofus.map.BotMap;
-import fr.aresrpg.eratz.domain.dofus.map.Ressource;
 import fr.aresrpg.eratz.domain.player.Perso;
+
+import java.util.Set;
 
 /**
  * 
@@ -19,18 +22,6 @@ public class BaseMapHandler implements MapHandler {
 		this.perso = perso;
 	}
 
-	@Override
-	public void onRessourceSpawn(Ressource r) {
-		for (Ressource res : perso.getCurrentMap().getRessources())
-			if (res.equals(r)) res.setSpawned();
-	}
-
-	@Override
-	public void onRessourceRecolted(int id, Ressource r) {
-		for (Ressource res : perso.getCurrentMap().getRessources())
-			if (res.equals(r)) res.setSpawned(false);
-	}
-
 	/**
 	 * @return the perso
 	 */
@@ -39,26 +30,31 @@ public class BaseMapHandler implements MapHandler {
 	}
 
 	public BotMap getMap() {
-		return getPerso().getCurrentMap();
+		return getPerso().getMapInfos().getMap();
 	}
-
 
 	@Override
 	public void onPlayerMove(MovementPlayer pl) {
-		if(pl.getId() == getPerso().getId()) {
-			
+		if (pl.getId() == getPerso().getId()) {
+			getPerso().getMapInfos().setCellId(pl.getCell());
+			getPerso().getNavigation().notifyMovementEnd();
 		}
-		getPerso().getCurrentMap().getPlayers().add(pl);
+		Set<MovementPlayer> pls;
+		if (pl.isFight()) pls = getPerso().getFightInfos().getCurrentFight().getTeam(pl.getPlayerInFight().getTeam());
+		else pls = getMap().getPlayers();
+		if (pls.contains(pl)) pls.remove(pl); // on peut tricher car le equals de movementplayer est redéfini
+		pls.add(pl); // comme ça j'enleve et j'add le nouveau avec les bon fields
 	}
 
 	@Override
 	public void onFightSpawn(Fight fight) {
-		getPerso().getCurrentMap().getFights().add(fight);
+		getMap().getFights().add(fight);
 	}
 
 	@Override
 	public void onFightEnd(Fight fight) {
-		getPerso().getCurrentMap().getFights().remove(fight);
+		if(getPerso().getFightInfos())
+		// TODO remove fight
 	}
 
 	@Override
@@ -68,38 +64,42 @@ public class BaseMapHandler implements MapHandler {
 
 	@Override
 	public void onJoinMap(DofusMap m) {
-		// TODO
-		
-	}
-
-	@Override
-	public void onQuitMap(DofusMap m) {
-		getPerso().setCurrentMap(BotMap.fromDofusMap(m));
+		getPerso().getMapInfos().setMap(MapsManager.getOrCreate(m));
 		getPerso().getDebugView().setPath(null);
 		getPerso().getDebugView().setMap(m);
 	}
 
 	@Override
+	public void onQuitMap(DofusMap m) {
+
+	}
+
+	@Override
 	public void onInvocMove(MovementInvocation i) {
-		// TODO
-		
+
 	}
 
 	@Override
 	public void onMobMove(MovementMonster m) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void onMobGroupMove(MovementMonsterGroup mg) {
 		// TODO
-		
+
 	}
 
 	@Override
 	public void onNpcMove(MovementNpc npc) {
 		// TODO
-		
+
 	}
+
+	@Override
+	public void onFrameUpdate(int cellid, Frame frame) {
+
+	}
+
 }

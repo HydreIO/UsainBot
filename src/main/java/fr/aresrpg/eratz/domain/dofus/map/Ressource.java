@@ -1,32 +1,27 @@
 package fr.aresrpg.eratz.domain.dofus.map;
 
+import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.eratz.domain.dofus.ressource.Interractable;
 
 public class Ressource {
-	private int cellId;
+	private Cell cell;
 	private Interractable type;
-	private boolean spawned;
 
-	public Ressource(int cellid, Interractable type, boolean spawned) {
-		this.cellId = cellid;
+	public Ressource(Cell cell, Interractable type) {
+		this.cell = cell;
 		this.type = type;
-		this.spawned = spawned;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Ressource)) return false;
-		Ressource r = (Ressource) obj;
-		return cellId == r.getCellId() && type == r.getType();
+		return obj == null ? false : obj == this || (obj instanceof Cell && getCell().equals(obj));
 	}
 
-	public Ressource(int cellid, Interractable type) {
-		this(cellid, type, false);
-	}
-
-	/** * @return the cellId */
-	public int getCellId() {
-		return cellId;
+	/**
+	 * @return the cell
+	 */
+	public Cell getCell() {
+		return cell;
 	}
 
 	/** * @return the type */
@@ -36,15 +31,14 @@ public class Ressource {
 
 	/** * @return the spawned */
 	public boolean isSpawned() {
-		return spawned;
+		switch (getType()) {
+			case BLE:
+				System.out.println("Le layer object 2 du blé = " + getCell().getLayerObject2Num());
+				return getCell().getLayerObject2Num() == 2;
+
+			default:
+				return false;
+		}
 	}
 
-	/** * @param spawned * the spawned to set */
-	public void setSpawned(boolean spawned) {
-		this.spawned = spawned;
-	}
-
-	public void setSpawned() {
-		setSpawned(true);
-	}
 }

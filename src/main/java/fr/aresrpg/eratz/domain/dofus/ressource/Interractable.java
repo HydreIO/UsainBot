@@ -118,6 +118,54 @@ public enum Interractable {
 		this.id = id;
 	}
 
+	public static Interractable fromId(int id) {
+		for (Interractable i : values())
+			if (i.getId() == id) return i;
+		return null;
+	}
+
+	public static boolean isMachineForce(int id) {
+		return contains(id, MACHINE_FORCE);
+	}
+
+	public static boolean isStatueClasse(int id) {
+		return contains(id, STATUE_CLASSE);
+	}
+
+	public static boolean isLevier(int id) {
+		return contains(id, LEVIER);
+	}
+
+	public static boolean isPorte(int id) {
+		return contains(id, PORTE);
+	}
+
+	public static boolean isZaapi(int id) {
+		return contains(id, ZAAPI);
+	}
+
+	public static boolean isMachineTailleur(int id) {
+		return contains(id, MACHINE_TAILLEUR);
+	}
+
+	public static boolean isAtelier(int id) {
+		return contains(id, ATELIER);
+	}
+
+	public static boolean isZaap(int id) {
+		return contains(id, ZAAP);
+	}
+
+	public static boolean isEnclo(int id) {
+		return contains(id, ENCLOS);
+	}
+
+	private static boolean contains(int id, int[] array) {
+		for (int i : array)
+			if (i == id) return true;
+		return false;
+	}
+
 	/**
 	 * @return the id
 	 */

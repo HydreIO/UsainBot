@@ -10,10 +10,11 @@ package fr.aresrpg.eratz.domain.behavior.harvest.type;
 
 import fr.aresrpg.eratz.domain.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ability.move.Navigation;
+import fr.aresrpg.eratz.domain.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.behavior.harvest.HarvestBehavior;
-import fr.aresrpg.eratz.domain.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.player.Perso;
+import fr.aresrpg.eratz.domain.player.Roads;
 
 /**
  * 
@@ -34,12 +35,16 @@ public class WheatHarvestBehavior extends HarvestBehavior {
 	}
 
 	@Override
-	public void start() {
+	public BehaviorStopReason start() {
 		BaseAbility ab = getPerso().getBaseAbility();
 		Navigation na = getPerso().getNavigation();
-		ab.goToZaap(Zaap.PLAINE_ROCHEUSE);
+		BehaviorStopReason reason;
+		Roads.nearestRoad(getPerso()).takeRoad(getPerso()); // go to zaap astrub
+
 		na.moveLeft(5);
-		if (!harvestMap()) return;
+		reason = harvestMap();
+		if (reason != finish)
+			if (!harvestMap()) return;
 		na.moveUp();
 		if (!harvestMap()) return;
 		na.moveLeft();
