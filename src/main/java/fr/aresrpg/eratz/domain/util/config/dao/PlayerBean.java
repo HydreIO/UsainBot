@@ -1,7 +1,7 @@
 package fr.aresrpg.eratz.domain.util.config.dao;
 
 import fr.aresrpg.dofus.structures.server.Server;
-import fr.aresrpg.eratz.domain.player.BotJob;
+import fr.aresrpg.eratz.domain.data.dofus.player.BotJob;
 
 import java.util.Arrays;
 import java.util.List;
@@ -84,6 +84,10 @@ public class PlayerBean {
 		public PersoBean(String pseudo, String job, String server) {
 			this.pseudo = pseudo;
 			this.botJob = job;
+		}
+
+		public PersoBean(String pseudo, String job, Server server) {
+			this(pseudo, job, server.name());
 		}
 
 		public PersoBean() {

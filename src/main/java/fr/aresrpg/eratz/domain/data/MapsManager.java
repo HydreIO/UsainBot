@@ -1,7 +1,7 @@
 package fr.aresrpg.eratz.domain.data;
 
 import fr.aresrpg.dofus.structures.map.DofusMap;
-import fr.aresrpg.eratz.domain.dofus.map.BotMap;
+import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

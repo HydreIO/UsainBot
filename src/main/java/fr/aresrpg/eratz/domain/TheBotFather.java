@@ -8,13 +8,13 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain;
 
-import fr.aresrpg.eratz.domain.behavior.move.type.IncarnamToAstrubPath;
-import fr.aresrpg.eratz.domain.dofus.Constants;
+import fr.aresrpg.dofus.structures.server.Server;
+import fr.aresrpg.dofus.util.Lang;
+import fr.aresrpg.eratz.domain.data.*;
+import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.gui.MapView;
-import fr.aresrpg.eratz.domain.player.Account;
-import fr.aresrpg.eratz.domain.player.AccountsManager;
-import fr.aresrpg.eratz.domain.proxy.DofusProxy;
-import fr.aresrpg.eratz.domain.util.Hastebin;
+import fr.aresrpg.eratz.domain.io.proxy.DofusProxy;
+import fr.aresrpg.eratz.domain.util.*;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Configurations;
 import fr.aresrpg.eratz.domain.util.config.Configurations.Config;
@@ -39,11 +39,26 @@ public class TheBotFather {
 	public TheBotFather() throws IOException {
 		instance = this;
 		this.running = true;
+		Executors.FIXED.execute(() -> {
+			try {
+				System.out.println("Initialisating items..");
+				BenchTime t = new BenchTime();
+				ItemsData.getInstance().init(Lang.getDatas("fr", "items"));
+				System.out.println("Items initialized ! (" + t.getAsLong() + "ms)");
+				System.out.println("Initialisating maps..");
+				BenchTime t2 = new BenchTime();
+				MapsData.getInstance().init(Lang.getDatas("fr", "maps"));
+				System.out.println("Maps initialized ! (" + t2.getAsLong() + "ms)");
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
 		this.config = Configurations.generate("botfather.yml", Variables.class, Optional.of(() -> {
 			System.out.println("CONFIGURATION JUST CREATED PLEASE RESTART !");
 			System.exit(0);
 		}), Optional.of(() -> {
-			Variables.ACCOUNTS.add(new PlayerBean("Exemple1", "password", new PersoBean("Jowed", null), new PersoBean("Joe-larecolte", "bread_provider")));
+			Variables.ACCOUNTS.add(new PlayerBean("Exemple1", "password", new PersoBean("Jowed", null, Server.ERATZ), new PersoBean("Joe-larecolte", "bread_provider", Server.ERATZ)));
 			Variables.ACCOUNTS.add(new PlayerBean("Exemple2", "password"));
 		}));
 		this.selector = Selector.open();
@@ -103,12 +118,6 @@ public class TheBotFather {
 			if (!sc.hasNext()) continue;
 			String[] nextLine = sc.nextLine().split(" ");
 			switch (nextLine[0].toLowerCase()) {
-				case "way":
-					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
-						if (a.isClientOnline() || a.isBotOnline())
-							a.getCurrentPlayed().changeBehavior(new IncarnamToAstrubPath(a.getCurrentPlayed()));
-					});
-					break;
 				case "view":
 					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
 						if (a.isClientOnline() || a.isBotOnline())

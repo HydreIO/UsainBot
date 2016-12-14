@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.util.exception;
 
-import fr.aresrpg.eratz.domain.dofus.map.Zaap;
+import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
 
 /**
  * 

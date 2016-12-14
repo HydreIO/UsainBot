@@ -1,14 +1,35 @@
 package fr.aresrpg.eratz.domain.util;
 
+import fr.aresrpg.dofus.util.Lang;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Hastebin {
 
-	public static final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+	public static ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
+	public static void main(String[] args) throws IOException {
+		Map<String, Object> datas = Lang.getDatas("fr", "maps");
+		AtomicInteger index = new AtomicInteger();
+		datas.forEach((a, b) -> {
+			try {
+				stream.write((a + "|" + b + "\n").getBytes());
+				if (index.incrementAndGet() > 1000) {
+					System.out.println(post());
+					stream = new ByteArrayOutputStream();
+					index.set(0);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+		System.out.println(post());
+
+	}
 
 	public static String post() {
 		return post(stream.toByteArray());
