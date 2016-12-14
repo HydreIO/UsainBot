@@ -2,8 +2,8 @@ package fr.aresrpg.eratz.domain.data.player.inventory;
 
 import fr.aresrpg.dofus.structures.item.Item;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 
@@ -11,7 +11,7 @@ import java.util.Set;
  */
 public class Inventory {
 
-	private Set<Item> contents = new HashSet<>();
+	private Map<Integer, Item> contents = new HashMap<>(); // itemtype | item
 	private int kamas;
 
 	/**
@@ -37,8 +37,12 @@ public class Inventory {
 	/**
 	 * @return the contents
 	 */
-	public Set<Item> getContents() {
+	public Map<Integer, Item> getContents() {
 		return contents;
+	}
+
+	public Item getItem(int itemtype) {
+		return getContents().get(itemtype);
 	}
 
 	/**

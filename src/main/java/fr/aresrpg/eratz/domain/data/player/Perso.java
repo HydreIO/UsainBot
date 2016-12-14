@@ -10,6 +10,7 @@ package fr.aresrpg.eratz.domain.data.player;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.protocol.DofusConnection;
+import fr.aresrpg.dofus.protocol.Packet;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.dofus.structures.server.*;
@@ -20,6 +21,7 @@ import fr.aresrpg.eratz.domain.data.dofus.player.*;
 import fr.aresrpg.eratz.domain.data.player.info.*;
 import fr.aresrpg.eratz.domain.data.player.inventory.Inventory;
 import fr.aresrpg.eratz.domain.data.player.inventory.PlayerInventory;
+import fr.aresrpg.eratz.domain.data.player.object.Group;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
 import fr.aresrpg.eratz.domain.ia.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.ia.ability.move.NavigationImpl;
@@ -53,6 +55,8 @@ public class Perso {
 	private final DofusMapView debugView = new DofusMapView();
 	private final DofusServer server;
 	private final Inventory inventory = new PlayerInventory(this);
+
+	private Group group;
 
 	public Perso(int id, String pseudo, Account account, BotJob job, Classe classe, Genre sexe, Server srv) {
 		this.id = id;
@@ -99,6 +103,14 @@ public class Perso {
 	 */
 	public LogInfo getLogInfos() {
 		return logInfos;
+	}
+
+	public void sendPacketToServer(Packet pkt) {
+		try {
+			getAccount().getRemoteConnection().send(pkt);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -184,15 +196,28 @@ public class Perso {
 		return getFightInfos().getCurrentFight() != null;
 	}
 
+	public boolean hasGroup() {
+		return this.group != null;
+	}
+
+	/**
+	 * @return the group
+	 */
+	public Group getGroup() {
+		return group;
+	}
+
+	/**
+	 * @param group
+	 *            the group to set
+	 */
+	public void setGroup(Group group) {
+		this.group = group;
+	}
+
 	public void crashReport(String msg) {
 		getAbilities().getBaseAbility().speak(Channel.ADMIN, msg);
 		disconnect(msg, -1);
-	}
-
-	private boolean containsObject(int id, Set<Item> set) {
-		for (Item o : set)
-			if (o.getUniqueId() == id) return true;
-		return false;
 	}
 
 	private int quantityOf(int id, Set<Item> set) { // pr item non stackable
@@ -200,15 +225,24 @@ public class Perso {
 	}
 
 	public boolean inventoryContainsItem(int id) {
-		return containsObject(id, getInventory().getContents());
+		return getInventory().getContents().keySet().contains(id);
 	}
 
 	public int getQuantityInInventoryOf(int itemId) {
-		return quantityOf(itemId, getInventory().getContents());
+		Item i = getInventory().getItem(itemId);
+		return i == null ? 0 : i.getQuantity();
 	}
 
 	public int getQuantityInBanqueOf(int itemId) {
-		return quantityOf(itemId, getAccount().getBanque().getContents());
+		Item i = getAccount().getBanque().getItem(itemId);
+		return i == null ? 0 : i.getQuantity();
+	}
+
+	public boolean allGroupIsInFight(Fight currentFight) {
+		if (!hasGroup()) return false;
+		for (Perso p : getGroup().getMembers())
+			if (!p.isInFight(currentFight)) return false;
+		return false;
 	}
 
 	/**
@@ -265,7 +299,7 @@ public class Perso {
 	public String toString() {
 		return "Perso [account=" + account + ", id=" + id + ", pseudo=" + pseudo + ", navigation=" + navigation + ", mind=" + mind + ", abilities=" + abilities + ", logInfos=" + logInfos
 				+ ", botInfos=" + botInfos + ", mapInfos=" + mapInfos + ", fightInfos=" + fightInfos + ", statsInfos=" + statsInfos + ", debugView=" + debugView + ", server=" + server + ", inventory="
-				+ inventory + "]";
+				+ inventory + ", group=" + group + "]";
 	}
 
 }

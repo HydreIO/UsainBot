@@ -1,12 +1,15 @@
 package fr.aresrpg.eratz.domain.ia.behavior.harvest;
 
-import fr.aresrpg.eratz.domain.ability.BaseAbility;
+import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
 import fr.aresrpg.eratz.domain.ia.Roads;
+import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
+
+import java.util.stream.IntStream;
 
 /**
  * 
@@ -32,12 +35,12 @@ public abstract class HarvestBehavior extends Behavior {
 		BaseAbility ab = getPerso().getAbilities().getBaseAbility();
 		BehaviorStopReason reason = BehaviorStopReason.FINISHED;
 		ab.closeGui();
-		ab.useItemInInv(quantity)
-		Roads.nearestRoad(getPerso()).takeRoad(getPerso()); // go to zaap astrub
-		for (int i = 0; i < moveCount(); i++) {
+		if (!ab.useItem(DofusItems2.POTION_DE_RAPPEL)) Roads.nearestRoad(getPerso()).takeRoad(getPerso()); // go to zaap astrub
+		IntStream.range(0, pathMoveCount()).forEach(i -> nextPathMove().run()); // go to zone
+		for (int i = 0; i < zoneMoveCount(); i++) { // start behavior
 			reason = harvestMap();
 			if (reason != BehaviorStopReason.FINISHED) return reason;
-			nextMove().run();
+			nextZoneMove().run();
 		}
 		return reason;
 	}

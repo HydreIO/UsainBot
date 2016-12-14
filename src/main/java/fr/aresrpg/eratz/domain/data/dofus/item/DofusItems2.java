@@ -4775,4 +4775,10 @@ public enum DofusItems2 {
 		this.id = id;
 	}
 
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
 }

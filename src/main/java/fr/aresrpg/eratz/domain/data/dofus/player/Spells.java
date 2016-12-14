@@ -317,7 +317,7 @@ public enum Spells {
 	}
 
 	public Spell get(Perso perso) {
-		return perso.getSpells().get(this);
+		return perso.getStatsInfos().getSpells().get(this);
 	}
 
 	public static enum SpellCharac {

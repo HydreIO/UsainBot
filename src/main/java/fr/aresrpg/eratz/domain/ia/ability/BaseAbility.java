@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.ia.ability;
 
+import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems;
+import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.map.*;
 import fr.aresrpg.eratz.domain.data.dofus.player.*;
 import fr.aresrpg.eratz.domain.data.player.Perso;
@@ -53,14 +55,6 @@ public interface BaseAbility {
 	BuyResult npcBuyChoice(int itemId, int quantity);
 
 	/**
-	 * Utilise un item de l'inventaire du joueur
-	 * 
-	 * @param itemid
-	 * @return
-	 */
-	boolean useItemInInv(int itemid);
-
-	/**
 	 * Utilise un zaap
 	 * 
 	 * @param cellid
@@ -90,15 +84,20 @@ public interface BaseAbility {
 	void moveKama(int amount);
 
 	/**
-	 * Je sais pas si c un packet different, si c'est pas different alors suprimer la methode
-	 * Utilise l'item de l'inventaire rapide correspondant au slot (emplacement des sorts hors combat)
+	 * Utilise un item
 	 * 
-	 * @param slot
-	 *            le slot
-	 * @return true si l'item à été utilisé, false si le bot est a court de
-	 *         cet item
+	 * @param itemuid
+	 * @return true si l'item à été utilisé
 	 */
-	boolean useItem(int slot);
+	boolean useItem(int itemuid);
+
+	default boolean useItem(DofusItems item) {
+		return useItem(item.getId());
+	}
+
+	default boolean useItem(DofusItems2 item) {
+		return useItem(item.getId());
+	}
 
 	/**
 	 * Juste une interraction je pense
@@ -107,10 +106,6 @@ public interface BaseAbility {
 	 */
 	void useCraftingMachine(int choice);
 
-	/**
-	 * Je ne sais pas cb ya d'inventaire different mais on a pu voir EB et EV il me semble donc creer plusieurs method pour chaque ou un argument
-	 * close l'inventaire craft/pnj ouvert
-	 */
 	void closeGui();
 
 	void speak(Channel canal, String msg); // Impl note: si msg trop long split en plusieurs msg;
@@ -121,15 +116,22 @@ public interface BaseAbility {
 
 	void dismantle(int slot); // déséquiper
 
-	void invitPlayerToGroup(String pname);
+	/**
+	 * Invite un joueur dans un groupe et attend une réponse
+	 * 
+	 * @param pname
+	 *            nom du joueur
+	 * @return true si le joueur a accepté l'invitation
+	 */
+	boolean invitPlayerToGroup(String pname);
 
 	void acceptGroupInvitation(boolean accept);
 
 	void acceptDefiRequest(boolean accept);
 
-	void echangeWith(int id);
+	void echangeWith(int id); // doit être blockant jusqu'a ce qu'un packet accept ou cancel arrive
 
-	void invitToGuild(String pname);
+	void invitToGuild(String pname); // doit être blockant jusqu'a ce qu'un packet accept ou cancel arrive
 
 	void acceptEchangeRequest(boolean accept);
 

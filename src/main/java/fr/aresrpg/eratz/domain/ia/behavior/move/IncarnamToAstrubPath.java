@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.ia.behavior.move.type;
+package fr.aresrpg.eratz.domain.ia.behavior.move;
 
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;

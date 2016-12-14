@@ -6,10 +6,11 @@
  * 
  *         Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.ia.behavior.move.type;
+package fr.aresrpg.eratz.domain.ia.behavior.move;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.dofus.structures.item.Item;
+import fr.aresrpg.eratz.domain.data.ItemsData;
 import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
@@ -39,7 +40,7 @@ public class BankDepositPath extends Behavior {
 	}
 
 	private String nameObject(Item o) {
-		return "x" + o.getQuantity(); // FIXME: + " " + o.getTemplate().getName();
+		return "x" + o.getQuantity() + " " + ItemsData.getName(o.getId());
 	}
 
 	private void waitLitle() { // zone peuplé mieux vaut ne pas se déplacer trop vite
@@ -51,8 +52,8 @@ public class BankDepositPath extends Behavior {
 		BaseAbility ability = getPerso().getAbilities().getBaseAbility();
 		ability.closeGui();
 		if (!ability.goAndOpenBank()) return BehaviorStopReason.PATH_ERROR;
-		Set<Item> inv = getPerso().getInventory().getContents();
-		inv.stream().filter(i -> !ArrayUtils.contains(i.getId(), items)).forEach(i -> ability.moveItem(i.getId(), i.getQuantity()));
+		Set<Item> inv = getPerso().getInventory().getContents().entrySet().stream().filter(e -> ArrayUtils.contains(e, items)).map(e -> e.getValue()).collect(Collectors.toSet());
+		inv.stream().forEach(i -> ability.moveItem(i.getId(), i.getQuantity()));
 		waitLitle();
 		ability.speak(Channel.ADMIN, "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",", "[", "]")) + " en banque !");
 		return BehaviorStopReason.FINISHED;

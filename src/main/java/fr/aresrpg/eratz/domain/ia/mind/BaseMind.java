@@ -1,12 +1,11 @@
 package fr.aresrpg.eratz.domain.ia.mind;
 
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
-import fr.aresrpg.eratz.domain.data.ItemsData;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
-import fr.aresrpg.eratz.domain.ia.behavior.move.type.BankDepositPath;
+import fr.aresrpg.eratz.domain.ia.behavior.move.BankDepositPath;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -22,7 +21,7 @@ public class BaseMind implements Mind {
 	private final Perso perso;
 	private Queue<Future<BehaviorStopReason>> actions = new LinkedList<>();
 	private boolean infinite;
-	private Set<ItemsData> itemsToKeep = new HashSet<>();
+	private Set<Integer> itemsToKeep = new HashSet<>();
 
 	public BaseMind(Perso perso) {
 		this.perso = perso;
@@ -63,7 +62,7 @@ public class BaseMind implements Mind {
 	}
 
 	@Override
-	public Mind thenDrop(ItemsData item, int quantity) {
+	public Mind thenDrop(int item, int quantity) {
 		throw new NotImplementedException();
 	}
 
@@ -75,7 +74,7 @@ public class BaseMind implements Mind {
 
 	@Override
 	public Mind thenDepositToBank() {
-		getActions().add(new BankDepositPath(getPerso(), getItemToKeep().stream().mapToInt(ItemsData::getId).toArray()));
+		getActions().add(new BankDepositPath(getPerso(), getItemToKeep().stream().mapToInt(Integer::intValue).toArray()));
 		return this;
 	}
 
@@ -90,7 +89,7 @@ public class BaseMind implements Mind {
 	}
 
 	@Override
-	public Mind thenSell(ItemsData item) {
+	public Mind thenSell(Path path) {
 		throw new NotImplementedException();
 	}
 
@@ -106,7 +105,7 @@ public class BaseMind implements Mind {
 	}
 
 	@Override
-	public Set<ItemsData> getItemToKeep() {
+	public Set<Integer> getItemToKeep() {
 		return this.itemsToKeep;
 	}
 

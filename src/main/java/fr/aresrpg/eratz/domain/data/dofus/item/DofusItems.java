@@ -4332,8 +4332,7 @@ public enum DofusItems {
 	EPEE_DE_RICOCHE(2759),
 	EPEE_DE_RIMUVEL(2940),
 	EPEE_DE_ROGEHEDAS(2800),
-	EPEE_DE_ROKERYHU(3352),
-	;
+	EPEE_DE_ROKERYHU(3352),;
 
 	private int id;
 
@@ -4341,4 +4340,10 @@ public enum DofusItems {
 		this.id = id;
 	}
 
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
 }

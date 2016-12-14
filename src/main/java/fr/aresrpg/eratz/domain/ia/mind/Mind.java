@@ -1,6 +1,5 @@
 package fr.aresrpg.eratz.domain.ia.mind;
 
-import fr.aresrpg.eratz.domain.data.ItemsData;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 
@@ -34,7 +33,7 @@ public interface Mind {
 	 *            the amount
 	 * @return the mind for chaining
 	 */
-	Mind thenDrop(ItemsData item, int quantity);
+	Mind thenDrop(int item, int quantity);
 
 	/**
 	 * Try to craft an item
@@ -73,11 +72,11 @@ public interface Mind {
 	/**
 	 * Go sell items
 	 * 
-	 * @param item
-	 *            the item to sell
+	 * @param path
+	 *            the path
 	 * @return the mind for chaining
 	 */
-	Mind thenSell(ItemsData item);
+	Mind thenSell(Path path);
 
 	/**
 	 * Disconnect the bot a certain amount of time
@@ -142,7 +141,7 @@ public interface Mind {
 	 * 
 	 * @return items to keep
 	 */
-	Set<ItemsData> getItemToKeep();
+	Set<Integer> getItemToKeep();
 
 	/**
 	 * Start actions

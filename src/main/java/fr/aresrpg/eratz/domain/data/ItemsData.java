@@ -1,5 +1,8 @@
 package fr.aresrpg.eratz.domain.data;
 
+import fr.aresrpg.dofus.util.Lang;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,15 +49,9 @@ public class ItemsData {
 		return Integer.valueOf(data.split("\\.")[2]);
 	}
 
-	public static void main(String[] args) {
-		Map<String, Object> m = new HashMap<>();
-		m.put("I.u.2410", "{p=5500, s=3, t=16, d=L'Abracaska permet d'éviter les gueules de bois., g=40, fm=true, w=50, ep=1, l=45, wd=true, n=Abracaska}");
-		m.put("z", "ceqceqqe");
-		m.put("I.t.116", "{t=6, n=Potion de familier}");
-		m.put("I.u.51",
-				"{c=CS>42&CI>6, d=Cette épée très prisée des jeunes Iops, vous permettra peut-être de faire vos preuves. Mais attention, leur propriétaire, une fois équipé, finit toujours par perdre l'Epée d'Alle., e=false, g=1, fm=true, false=50, ep=1, l=21, wd=true, an=14, n=Petite Epée d'Alle, p=1350, 1=4, t=6, 6=8, w=25, 50=1}");
-		instance.init(m);
-		System.out.println(instance.names);
+	public static void main(String[] args) throws IOException {
+		instance.init(Lang.getDatas("fr", "items"));
+		System.out.println(instance.getName(2091));
 	}
 
 }

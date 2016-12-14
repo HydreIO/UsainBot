@@ -1,6 +1,5 @@
 package fr.aresrpg.eratz.domain.ia.behavior.craft;
 
-import fr.aresrpg.eratz.domain.data.ItemsData;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 
@@ -26,7 +25,5 @@ public abstract class CraftBehavior extends Behavior {
 	public int getQuantity() {
 		return quantity;
 	}
-
-	public abstract ItemsData getItemToCraft();
 
 }

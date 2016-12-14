@@ -25,6 +25,8 @@ public abstract class Behavior implements Future<BehaviorStopReason> {
 	private boolean isDone;
 	private boolean isCancelled;
 	private Queue<Runnable> moves = new LinkedList<>();
+	private Queue<Runnable> path = new LinkedList<>();
+	private boolean pathEnd;
 
 	public Behavior(Perso perso) {
 		this.perso = perso;
@@ -41,44 +43,71 @@ public abstract class Behavior implements Future<BehaviorStopReason> {
 		isDone = true;
 	}
 
+	/**
+	 * State machine to know if the current path is part of the behavior or is just the road to reach the behavior zone
+	 */
+	protected void switchMove() {
+		this.pathEnd = !pathEnd;
+	}
+
+	public boolean isOnZone() {
+		return this.pathEnd;
+	}
+
 	protected void moveUp() {
-		moves.add(getPerso().getNavigation()::moveUp);
+		if (isOnZone()) moves.add(getPerso().getNavigation()::moveUp);
+		else path.add(getPerso().getNavigation()::moveUp);
 	}
 
 	protected void moveUp(int count) {
-		moves.add(() -> getPerso().getNavigation().moveUp(count));
+		if (isOnZone()) moves.add(() -> getPerso().getNavigation().moveUp(count));
+		else path.add(() -> getPerso().getNavigation().moveUp(count));
 	}
 
 	protected void moveDown() {
-		moves.add(getPerso().getNavigation()::moveDown);
+		if (isOnZone()) moves.add(getPerso().getNavigation()::moveDown);
+		else path.add(getPerso().getNavigation()::moveDown);
 	}
 
 	protected void moveDown(int count) {
-		moves.add(() -> getPerso().getNavigation().moveDown(count));
+		if (isOnZone()) moves.add(() -> getPerso().getNavigation().moveDown(count));
+		else path.add(() -> getPerso().getNavigation().moveDown(count));
 	}
 
 	protected void moveLeft() {
-		moves.add(getPerso().getNavigation()::moveLeft);
+		if (isOnZone()) moves.add(getPerso().getNavigation()::moveLeft);
+		else path.add(getPerso().getNavigation()::moveLeft);
 	}
 
 	protected void moveLeft(int count) {
-		moves.add(() -> getPerso().getNavigation().moveLeft(count));
+		if (isOnZone()) moves.add(() -> getPerso().getNavigation().moveLeft(count));
+		else path.add(() -> getPerso().getNavigation().moveLeft(count));
 	}
 
 	protected void moveRight() {
-		moves.add(getPerso().getNavigation()::moveRight);
+		if (isOnZone()) moves.add(getPerso().getNavigation()::moveRight);
+		else path.add(getPerso().getNavigation()::moveRight);
 	}
 
 	protected void moveRight(int count) {
-		moves.add(() -> getPerso().getNavigation().moveRight(count));
+		if (isOnZone()) moves.add(() -> getPerso().getNavigation().moveRight(count));
+		else path.add(() -> getPerso().getNavigation().moveRight(count));
 	}
 
-	protected Runnable nextMove() {
+	protected Runnable nextZoneMove() {
 		return moves.poll();
 	}
 
-	protected int moveCount() {
+	protected Runnable nextPathMove() {
+		return path.poll();
+	}
+
+	protected int zoneMoveCount() {
 		return moves.size();
+	}
+
+	protected int pathMoveCount() {
+		return path.size();
 	}
 
 	public <T extends Behavior> T botWait(int time, TimeUnit unit) {
