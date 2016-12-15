@@ -42,6 +42,7 @@ public class Perso {
 	private final Account account;
 	private int id;
 	private String pseudo;
+	private String ticket;
 
 	private final Navigation navigation = new NavigationImpl(this);
 	private final Mind mind = new BaseMind(this);
@@ -89,6 +90,21 @@ public class Perso {
 	 */
 	public FightInfo getFightInfos() {
 		return fightInfos;
+	}
+
+	/**
+	 * @return the ticket
+	 */
+	public String getTicket() {
+		return ticket;
+	}
+
+	/**
+	 * @param ticket
+	 *            the ticket to set
+	 */
+	public void setTicket(String ticket) {
+		this.ticket = ticket;
 	}
 
 	/**

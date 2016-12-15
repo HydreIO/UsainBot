@@ -92,18 +92,6 @@ public class BotHandler extends BaseServerPacketHandler {
 	}
 
 	@Override
-	public void handle(AccountLoginOkPacket accountLoginOkPacket) {
-	}
-
-	@Override
-	public void handle(AccountPseudoPacket accountPseudoPacket) {
-	}
-
-	@Override
-	public void handle(AccountCommunityPacket accountCommunityPacket) {
-	}
-
-	@Override
 	public void handle(AccountHostPacket accountHostPacket) {
 		for (DofusServer s : accountHostPacket.getServers())
 			if (getPerso().getServer().equals(s)) getPerso().getServer().setState(s.getState());
