@@ -1,9 +1,9 @@
 package fr.aresrpg.eratz.domain.io.handler.bot.map;
 
 import fr.aresrpg.dofus.protocol.game.movement.*;
+import fr.aresrpg.dofus.protocol.game.server.GameEndPacket;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.map.Frame;
-import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 
 /**
  * 
@@ -29,8 +29,6 @@ public interface MapHandler {
 
 	void onEntityLeave(int id);
 
-	void onFightSpawn(Fight fight);
-
-	void onFightEnd(Fight fight);
+	void onFightEnd(GameEndPacket packet);
 
 }

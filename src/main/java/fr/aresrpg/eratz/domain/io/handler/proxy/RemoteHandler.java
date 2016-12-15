@@ -8,34 +8,34 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.io.handler.proxy;
 
-import fr.aresrpg.dofus.protocol.DofusConnection;
-import fr.aresrpg.dofus.protocol.Packet;
+import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
-import fr.aresrpg.dofus.protocol.account.client.AccountSelectCharacterPacket;
 import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.GameExtraInformationPacket;
-import fr.aresrpg.dofus.protocol.game.movement.*;
-import fr.aresrpg.dofus.protocol.game.server.*;
+import fr.aresrpg.dofus.protocol.game.server.GameMapDataPacket;
+import fr.aresrpg.dofus.protocol.game.server.GameServerActionPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.PathDirection;
-import fr.aresrpg.dofus.structures.game.GameMovementType;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.SwfVariableExtractor;
+import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
 import fr.aresrpg.eratz.domain.ia.ability.move.NavigationImpl;
-import fr.aresrpg.eratz.domain.io.proxy.DofusProxy;
+import fr.aresrpg.eratz.domain.io.handler.BaseServerPacketHandler;
+import fr.aresrpg.eratz.domain.io.proxy.Proxy;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy.ProxyConnectionType;
 import fr.aresrpg.eratz.domain.util.Constants;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.*;
@@ -44,16 +44,40 @@ import java.util.*;
  * 
  * @since
  */
-public class RemoteHandler extends TransfertHandler {
+public class RemoteHandler extends BaseServerPacketHandler {
+	static final ProtocolRegistry[] toSkip = { ProtocolRegistry.GAME_MOVEMENT };
+	private Account account;
+	private Proxy proxy;
 
 	/**
 	 * @param account
 	 */
-	public RemoteHandler(DofusProxy proxy) {
-		super(proxy);
+	public RemoteHandler(Proxy proxy) {
+		this.proxy = proxy;
 	}
 
-	@Override
+	/**
+	 * @return the account
+	 */
+	public Account getAccount() {
+		return account;
+	}
+
+	/**
+	 * @return the proxy
+	 */
+	public Proxy getProxy() {
+		return proxy;
+	}
+
+	/**
+	 * @param account
+	 *            the account to set
+	 */
+	public void setAccount(Account account) {
+		this.account = account;
+	}
+
 	protected void transmit(Packet pkt) {
 		try {
 			System.out.println("[RCV:]<< " + pkt);
@@ -61,6 +85,25 @@ public class RemoteHandler extends TransfertHandler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean contains(ProtocolRegistry registry) {
+		for (ProtocolRegistry r : toSkip)
+			if (r == registry) return true;
+		return false;
+	}
+
+	@Override
+	public boolean parse(ProtocolRegistry registry, String packet) {
+		if (registry == null || contains(registry)) {
+			try {
+				((SocketChannel) getProxy().getLocalConnection().getChannel()).write(ByteBuffer.wrap((packet + "\0").getBytes()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return true;
+		}
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -120,12 +163,6 @@ public class RemoteHandler extends TransfertHandler {
 		transmit(pkt);
 	}
 
-	@Override
-	public void handle(AccountSelectCharacterPacket pkt) {
-		transmit(pkt);
-
-	}
-
 	public Perso getPerso() {
 		return getAccount().getCurrentPlayed();
 	}
@@ -134,8 +171,7 @@ public class RemoteHandler extends TransfertHandler {
 	public void handle(GameMapDataPacket pkt) {
 		transmit(pkt);
 		try {
-			Map<String, Object> d = SwfVariableExtractor.extractVariable(Maps.downloadMap(pkt.getMapId(),
-					pkt.getSubid()));
+			Map<String, Object> d = SwfVariableExtractor.extractVariable(Maps.downloadMap(pkt.getMapId(), pkt.getSubid()));
 			DofusMap m = Maps.loadMap(d, pkt.getDecryptKey());
 			getPerso().getDebugView().setMap(m);
 			getPerso().getDebugView().clearPath();
@@ -162,40 +198,6 @@ public class RemoteHandler extends TransfertHandler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public void handle(GameMovementPacket gameMovementPacket) {
-		if (gameMovementPacket.getType() == GameMovementType.REMOVE) {
-			gameMovementPacket.getActors().forEach(v -> getPerso().getDebugView().removeActor(((MovementRemoveActor) ((Object) v.getSecond())).getId()));
-			return;
-		}
-		gameMovementPacket.getActors().forEach(e -> {
-			switch (e.getFirst()) {
-				case DEFAULT:
-					MovementPlayer player = (MovementPlayer) (Object) e.getSecond();
-					if (player.getId() == getPerso().getId()) ((NavigationImpl) getPerso().getNavigation()).setCurrentPos(player.getCell(), true);
-					else getPerso().getDebugView().addPlayer(player.getId(), player.getCell());
-					return;
-				case CREATE_INVOCATION:
-					MovementInvocation invoc = (MovementInvocation) (Object) e.getSecond();
-					getPerso().getDebugView().addMob(invoc.getId(), invoc.getCellId());
-					return;
-				case CREATE_MONSTER:
-					MovementMonster mob = (MovementMonster) (Object) e.getSecond();
-					getPerso().getDebugView().addMob(mob.getId(), mob.getCellId());
-					return;
-				case CREATE_MONSTER_GROUP:
-					MovementMonsterGroup mobs = (MovementMonsterGroup) (Object) e.getSecond();
-					getPerso().getDebugView().addMob(mobs.getId(), mobs.getCellid());
-					return;
-				case CREATE_NPC:
-					// TODO
-					return;
-				default:
-					break;
-			}
-		});
 	}
 
 	@Override

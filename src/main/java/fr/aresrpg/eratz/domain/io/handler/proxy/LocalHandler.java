@@ -16,8 +16,11 @@ import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
 import fr.aresrpg.dofus.structures.PathDirection;
 import fr.aresrpg.eratz.domain.data.AccountsManager;
+import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.ia.ability.move.NavigationImpl;
+import fr.aresrpg.eratz.domain.io.handler.BaseClientPacketHandler;
 import fr.aresrpg.eratz.domain.io.proxy.DofusProxy;
+import fr.aresrpg.eratz.domain.io.proxy.Proxy;
 import fr.aresrpg.eratz.domain.util.encryption.CryptHelper;
 
 import java.io.IOException;
@@ -29,12 +32,45 @@ import java.util.Map;
  * 
  * @since
  */
-public class LocalHandler extends TransfertHandler {
+public class LocalHandler extends BaseClientPacketHandler {
 
 	private boolean state_machine = false;
+	private Account account;
+	private Proxy proxy;
 
-	public LocalHandler(DofusProxy proxy) {
-		super(proxy);
+	public LocalHandler(Proxy proxy) {
+		this.proxy = proxy;
+	}
+
+	/**
+	 * @return the account
+	 */
+	public Account getAccount() {
+		return account;
+	}
+
+	protected void transmit(Packet pkt) {
+		try {
+			System.out.println("[SEND:]>> " + pkt);
+			getProxy().getRemoteConnection().send(pkt);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * @return the proxy
+	 */
+	public Proxy getProxy() {
+		return proxy;
+	}
+
+	/**
+	 * @param account
+	 *            the account to set
+	 */
+	public void setAccount(Account account) {
+		this.account = account;
 	}
 
 	/**
@@ -45,23 +81,17 @@ public class LocalHandler extends TransfertHandler {
 		this.state_machine = state_machine;
 	}
 
-	@Override
-	protected void transmit(Packet pkt) {
-		try {
-			System.out.println("[SEND:]>> " + pkt);
-			getProxy().getRemoteConnection().send(pkt);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	private boolean contains(ProtocolRegistry registry) {
+		for (ProtocolRegistry r : RemoteHandler.toSkip)
+			if (r == registry) return true;
+		return false;
 	}
 
 	@Override
 	public boolean parse(ProtocolRegistry registry, String packet) {
-		if (state_machine && registry == null) {
-			SocketChannel channel = (SocketChannel) getProxy().getRemoteConnection().getChannel();
+		if (registry == null || contains(registry)) {
 			try {
-				packet += "\0";
-				channel.write(ByteBuffer.wrap(packet.getBytes()));
+				((SocketChannel) getProxy().getLocalConnection().getChannel()).write(ByteBuffer.wrap((packet + "\n\0").getBytes()));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

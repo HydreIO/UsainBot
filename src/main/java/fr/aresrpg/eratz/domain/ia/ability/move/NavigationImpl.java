@@ -90,7 +90,7 @@ public class NavigationImpl implements Navigation {
 		getPerso().getDebugView().setPath(p);
 		teleporting = teleport;
 		try {
-			getPerso().getAccount().getRemoteConnection().send(new GameClientActionPacket().setAction(new GameMoveAction().setPath(Pathfinding.makeShortPath(p, getMap().getWidth()))));
+			getPerso().getAccount().getRemoteConnection().send(new GameClientActionPacket(null, null).setAction(new GameMoveAction().setPath(Pathfinding.makeShortPath(p, getMap().getWidth()))));
 			Executors.SCHEDULED.schedule(() -> {
 				try {
 					getPerso().getAccount().getRemoteConnection().send(new GameActionACKPacket().setActionId(0));

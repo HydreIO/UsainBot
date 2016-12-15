@@ -156,6 +156,22 @@ public class Perso {
 	}
 
 	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	/**
+	 * @param pseudo
+	 *            the pseudo to set
+	 */
+	public void setPseudo(String pseudo) {
+		this.pseudo = pseudo;
+	}
+
+	/**
 	 * @return the debugView
 	 */
 	public DofusMapView getDebugView() {
@@ -221,7 +237,7 @@ public class Perso {
 	}
 
 	private int quantityOf(int id, Set<Item> set) { // pr item non stackable
-		return (int) set.stream().filter(i -> i.getUniqueId() == id).count();
+		return (int) set.stream().filter(i -> i.getItemTypeId() == id).count();
 	}
 
 	public boolean inventoryContainsItem(int id) {

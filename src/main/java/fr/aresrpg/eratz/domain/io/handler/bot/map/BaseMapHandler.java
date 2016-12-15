@@ -1,12 +1,12 @@
 package fr.aresrpg.eratz.domain.io.handler.bot.map;
 
 import fr.aresrpg.dofus.protocol.game.movement.*;
+import fr.aresrpg.dofus.protocol.game.server.GameEndPacket;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.map.Frame;
 import fr.aresrpg.eratz.domain.data.MapsManager;
-import fr.aresrpg.eratz.domain.dofus.fight.Fight;
-import fr.aresrpg.eratz.domain.dofus.map.BotMap;
-import fr.aresrpg.eratz.domain.player.Perso;
+import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
+import fr.aresrpg.eratz.domain.data.player.Perso;
 
 import java.util.Set;
 
@@ -44,17 +44,6 @@ public class BaseMapHandler implements MapHandler {
 		else pls = getMap().getPlayers();
 		if (pls.contains(pl)) pls.remove(pl); // on peut tricher car le equals de movementplayer est redéfini
 		pls.add(pl); // comme ça j'enleve et j'add le nouveau avec les bon fields
-	}
-
-	@Override
-	public void onFightSpawn(Fight fight) {
-		getMap().getFights().add(fight);
-	}
-
-	@Override
-	public void onFightEnd(Fight fight) {
-		if(getPerso().getFightInfos())
-		// TODO remove fight
 	}
 
 	@Override
@@ -99,6 +88,12 @@ public class BaseMapHandler implements MapHandler {
 
 	@Override
 	public void onFrameUpdate(int cellid, Frame frame) {
+
+	}
+
+	@Override
+	public void onFightEnd(GameEndPacket packet) {
+		// TODO
 
 	}
 

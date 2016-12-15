@@ -40,7 +40,7 @@ public class BankDepositPath extends Behavior {
 	}
 
 	private String nameObject(Item o) {
-		return "x" + o.getQuantity() + " " + ItemsData.getName(o.getId());
+		return "x" + o.getQuantity() + " " + ItemsData.getName(o.getItemTypeId());
 	}
 
 	private void waitLitle() { // zone peuplé mieux vaut ne pas se déplacer trop vite
@@ -53,7 +53,7 @@ public class BankDepositPath extends Behavior {
 		ability.closeGui();
 		if (!ability.goAndOpenBank()) return BehaviorStopReason.PATH_ERROR;
 		Set<Item> inv = getPerso().getInventory().getContents().entrySet().stream().filter(e -> ArrayUtils.contains(e, items)).map(e -> e.getValue()).collect(Collectors.toSet());
-		inv.stream().forEach(i -> ability.moveItem(i.getId(), i.getQuantity()));
+		inv.stream().forEach(i -> ability.moveItem(i.getUid(), i.getQuantity()));
 		waitLitle();
 		ability.speak(Channel.ADMIN, "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",", "[", "]")) + " en banque !");
 		return BehaviorStopReason.FINISHED;

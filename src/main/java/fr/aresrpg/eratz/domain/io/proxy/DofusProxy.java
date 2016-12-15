@@ -40,8 +40,8 @@ public class DofusProxy implements Proxy {
 		account.setProxy(this);
 		account.setState(AccountState.CLIENT_IN_REALM);
 		account.setLastConnection(System.currentTimeMillis());
-		((TransfertHandler) localHandler).setAccount(account);
-		((TransfertHandler) remoteHandler).setAccount(account);
+		((ClientTransferHandler) localHandler).setAccount(account);
+		((ClientTransferHandler) remoteHandler).setAccount(account);
 	}
 
 	@Override
