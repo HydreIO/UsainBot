@@ -27,7 +27,7 @@ import fr.aresrpg.eratz.domain.ia.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.ia.ability.move.NavigationImpl;
 import fr.aresrpg.eratz.domain.ia.mind.BaseMind;
 import fr.aresrpg.eratz.domain.ia.mind.Mind;
-import fr.aresrpg.eratz.domain.io.handler.bot.BotHandler;
+import fr.aresrpg.eratz.domain.io.handler.impl.bot.BotHandler;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Variables;
 

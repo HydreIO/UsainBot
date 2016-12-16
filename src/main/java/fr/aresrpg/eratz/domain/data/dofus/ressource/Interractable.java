@@ -124,6 +124,10 @@ public enum Interractable {
 		return null;
 	}
 
+	public static boolean isInterractable(int id) {
+		return fromId(id) != null || isMachineForce(id) || isStatueClasse(id) || isLevier(id) || isPorte(id) || isZaapi(id) || isMachineTailleur(id) || isAtelier(id) || isZaap(id) || isEnclo(id);
+	}
+
 	public static boolean isMachineForce(int id) {
 		return contains(id, MACHINE_FORCE);
 	}
