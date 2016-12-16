@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.io.handler.bot.sell;
+package fr.aresrpg.eratz.domain.io.handler.std.sell;
 
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.eratz.domain.data.dofus.item.Hdv;

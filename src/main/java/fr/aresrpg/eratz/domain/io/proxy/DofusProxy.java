@@ -12,7 +12,7 @@ import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
-import fr.aresrpg.eratz.domain.io.handler.proxy.*;
+import fr.aresrpg.eratz.domain.io.handler.impl.proxy.*;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;

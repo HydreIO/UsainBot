@@ -1,9 +1,10 @@
-package fr.aresrpg.eratz.domain.io.handler.bot.map;
+package fr.aresrpg.eratz.domain.io.handler.impl;
 
 import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.map.Frame;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
+import fr.aresrpg.eratz.domain.io.handler.std.map.MapHandler;
 
 /**
  * 

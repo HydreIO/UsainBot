@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.io.handler.bot;
+package fr.aresrpg.eratz.domain.io.handler.impl.bot;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry;
@@ -22,8 +22,8 @@ import fr.aresrpg.dofus.util.*;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.io.handler.BaseServerPacketHandler;
-import fr.aresrpg.eratz.domain.io.handler.bot.fight.PlayerFightHandler;
-import fr.aresrpg.eratz.domain.io.handler.bot.map.BaseMapHandler;
+import fr.aresrpg.eratz.domain.io.handler.impl.BaseMapHandler;
+import fr.aresrpg.eratz.domain.io.handler.std.fight.PlayerFightHandler;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;

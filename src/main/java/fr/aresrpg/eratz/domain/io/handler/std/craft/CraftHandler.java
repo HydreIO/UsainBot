@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.io.handler.bot.craft;
+package fr.aresrpg.eratz.domain.io.handler.std.craft;
 
 import fr.aresrpg.eratz.domain.data.dofus.job.JobAction;
 

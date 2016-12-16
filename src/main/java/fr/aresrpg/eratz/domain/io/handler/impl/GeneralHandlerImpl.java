@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.io.handler.bot.base;
+package fr.aresrpg.eratz.domain.io.handler.impl;
 
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.Player;

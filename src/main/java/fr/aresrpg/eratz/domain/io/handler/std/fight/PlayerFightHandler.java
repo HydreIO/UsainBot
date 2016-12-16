@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.io.handler.bot.fight;
+package fr.aresrpg.eratz.domain.io.handler.std.fight;
 
 import fr.aresrpg.eratz.domain.data.dofus.fight.*;
 import fr.aresrpg.eratz.domain.data.dofus.player.Spells;

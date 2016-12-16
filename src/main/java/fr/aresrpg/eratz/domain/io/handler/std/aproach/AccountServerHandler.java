@@ -1,15 +1,18 @@
-package fr.aresrpg.eratz.domain.io.handler.bot.conn;
+package fr.aresrpg.eratz.domain.io.handler.std.aproach;
 
 import fr.aresrpg.dofus.protocol.account.server.AccountLoginErrPacket.Error;
 import fr.aresrpg.dofus.structures.Community;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
+import fr.aresrpg.dofus.structures.character.Character;
 import fr.aresrpg.dofus.structures.server.DofusServer;
+
+import java.util.Map;
 
 /**
  * 
  * @since
  */
-public interface AccountHandler {
+public interface AccountServerHandler {
 
 	void onHelloConnection(String key);
 
@@ -19,20 +22,26 @@ public interface AccountHandler {
 
 	void onRegion();
 
-	void onCharacterList(int subscription, AvailableCharacter... characters);
+	void onCharacterList(long subscription, AvailableCharacter... characters);
 
 	void onCommunity(Community commu);
 
 	void onServers(DofusServer... servers);
 
-	void onLoginError(Error err, int minutes, int version);
+	void onLoginError(Error err, int minutes, String version);
 
-	boolean onLogged(boolean isAdmin); // return bool to set
+	void onLogged(boolean isAdmin);
 
 	void onPseudo(String pseudo);
 
 	void onSecretQuestion(String question);
 
 	void onQueueRealmPosition(int position, int totalSub, int totalNoSub, boolean sub, int positionInQueue);
+
+	void onCharacterSelect(Character p);
+
+	void onReceiveServerHost(String ip, int port, String ticket);
+
+	void onReceiveServerPersoCount(long subtime, Map<Integer, Integer> srvIdAndCount);
 
 }

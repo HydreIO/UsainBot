@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.io.handler.bot.map;
+package fr.aresrpg.eratz.domain.io.handler.impl;
 
 import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.protocol.game.server.GameEndPacket;
@@ -7,6 +7,7 @@ import fr.aresrpg.dofus.structures.map.Frame;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.io.handler.std.map.MapHandler;
 
 import java.util.Set;
 

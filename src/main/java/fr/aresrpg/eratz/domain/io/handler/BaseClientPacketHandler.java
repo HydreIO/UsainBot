@@ -22,16 +22,15 @@ import fr.aresrpg.dofus.protocol.exchange.ExchangeLeavePacket;
 import fr.aresrpg.dofus.protocol.exchange.client.*;
 import fr.aresrpg.dofus.protocol.fight.client.*;
 import fr.aresrpg.dofus.protocol.game.client.*;
-import fr.aresrpg.dofus.protocol.hello.server.HelloGamePacket;
 import fr.aresrpg.dofus.protocol.info.client.InfoMapPacket;
 import fr.aresrpg.dofus.protocol.item.client.*;
 import fr.aresrpg.dofus.protocol.mount.client.MountPlayerPacket;
 import fr.aresrpg.dofus.protocol.waypoint.ZaapLeavePacket;
 import fr.aresrpg.dofus.protocol.waypoint.client.ZaapUsePacket;
 import fr.aresrpg.eratz.domain.data.player.Perso;
-import fr.aresrpg.eratz.domain.io.handler.bot.craft.CraftHandler;
-import fr.aresrpg.eratz.domain.io.handler.bot.fight.FightHandler;
-import fr.aresrpg.eratz.domain.io.handler.bot.map.MapHandler;
+import fr.aresrpg.eratz.domain.io.handler.std.craft.CraftHandler;
+import fr.aresrpg.eratz.domain.io.handler.std.fight.FightHandler;
+import fr.aresrpg.eratz.domain.io.handler.std.map.MapHandler;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -282,12 +281,6 @@ public abstract class BaseClientPacketHandler implements ClientPacketHandler {
 
 	@Override
 	public void handle(GameTurnOkPacket gameTurnOkPacket) {
-		// TODO
-
-	}
-
-	@Override
-	public void handle(HelloGamePacket helloGamePacket) {
 		// TODO
 
 	}
