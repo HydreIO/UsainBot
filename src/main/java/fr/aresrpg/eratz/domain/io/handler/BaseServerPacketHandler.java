@@ -562,7 +562,7 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 		});
 	}
 
-	@Override
+	@Override 45.63.115.102
 	public void handle(GameOnReadyPacket pkt) {
 		log(pkt);
 		getGameHandler().forEach(h -> h.onGameReady(pkt.isReady(), pkt.getPlayerid()));
