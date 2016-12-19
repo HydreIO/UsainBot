@@ -32,6 +32,29 @@ public class Fight {
 		this.swordCell2 = swordCell2;
 	}
 
+	public void moveEntity(int entityId, int cellId) {
+		movePlayer(entityId, cellId);
+		moveMonster(entityId, cellId);
+		moveInvoc(entityId, cellId);
+	}
+
+	public void movePlayer(int id, int cellid) {
+		for (MovementPlayer m : team0)
+			if (m.getId() == id) m.setCell(cellid);
+		for (MovementPlayer m : team1)
+			if (m.getId() == id) m.setCell(cellid);
+	}
+
+	public void moveMonster(int id, int cellid) {
+		for (MovementMonster m : mobs)
+			if (m.getId() == id) m.setCellId(cellid);
+	}
+
+	public void moveInvoc(int id, int cellid) {
+		for (MovementInvocation m : invocs)
+			if (m.getId() == id) m.setCellId(cellid);
+	}
+
 	/**
 	 * @return the type
 	 */
