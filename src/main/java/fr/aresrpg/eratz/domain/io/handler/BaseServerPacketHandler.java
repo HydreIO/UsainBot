@@ -20,6 +20,8 @@ import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.dialog.server.*;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeRequestPacket;
 import fr.aresrpg.dofus.protocol.exchange.server.*;
+import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
+import fr.aresrpg.dofus.protocol.game.actions.server.*;
 import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
@@ -27,7 +29,11 @@ import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloGamePacket;
 import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.item.server.*;
+import fr.aresrpg.dofus.protocol.job.server.*;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
+import fr.aresrpg.dofus.protocol.party.PartyAcceptPacket;
+import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
+import fr.aresrpg.dofus.protocol.party.server.*;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
 import fr.aresrpg.dofus.protocol.spell.server.SpellChangeOptionPacket;
 import fr.aresrpg.dofus.protocol.spell.server.SpellListPacket;
@@ -39,6 +45,7 @@ import fr.aresrpg.dofus.structures.game.GameMovementType;
 import fr.aresrpg.dofus.structures.map.*;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.SwfVariableExtractor;
+import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Perso;
@@ -47,6 +54,7 @@ import fr.aresrpg.eratz.domain.io.handler.std.aproach.AccountServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.area.SubareaServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.chat.ChatServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.craft.CraftHandler;
+import fr.aresrpg.eratz.domain.io.handler.std.dialog.DialogServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.exchange.ExchangeServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.fight.FightHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.game.GameServerHandler;
@@ -85,6 +93,11 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	private Set<SubareaServerHandler> subareaServerHandler = new HashSet<>();
 	private Set<GameActionServerHandler> gameActionHandler = new HashSet<>();
 	private Set<GameServerHandler> gameHandler = new HashSet<>();
+	private Set<DialogServerHandler> dialogHandler = new HashSet<>();
+
+	public void addDialogHandlers(DialogServerHandler... handlers) {
+		Arrays.stream(handlers).forEach(dialogHandler::add);
+	}
 
 	public void addGameActionHandlers(GameActionServerHandler... handlers) {
 		Arrays.stream(handlers).forEach(gameActionHandler::add);
@@ -169,6 +182,13 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	 */
 	public Set<SubareaServerHandler> getSubareaServerHandler() {
 		return subareaServerHandler;
+	}
+
+	/**
+	 * @return the dialogHandler
+	 */
+	public Set<DialogServerHandler> getDialogHandler() {
+		return dialogHandler;
 	}
 
 	/**
@@ -397,7 +417,7 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(ExchangeListPacket pkt) {
 		log(pkt);
-		getExchangeHandler().forEach(h -> h.onInventoryList(pkt.getItems(), pkt.getKamas()));
+		getExchangeHandler().forEach(h -> h.onInventoryList(pkt.getInvType(), pkt.getItems(), pkt.getKamas()));
 	}
 
 	@Override
@@ -521,7 +541,6 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 			for (Entry<Integer, Frame> i : pkt.getFrames().entrySet())
 				if (cell.getId() == i.getKey()) {
 					cell.applyFrame(i.getValue());
-
 				}
 	}
 
@@ -562,76 +581,101 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 		});
 	}
 
-	@Override 45.63.115.102
-	public void handle(GameOnReadyPacket pkt) {
-		log(pkt);
-		getGameHandler().forEach(h -> h.onGameReady(pkt.isReady(), pkt.getPlayerid()));
-	}
-
 	@Override
 	public void handle(GamePositionsPacket pkt) {
 		log(pkt);
-
+		getGameHandler().forEach(h -> pkt.getPositions().forEach(p -> h.onEntityFightPositionChange(p.getEntityId(), p.getPosition())));
 	}
 
 	@Override
 	public void handle(GamePositionStartPacket pkt) {
 		log(pkt);
-
+		Fight f = getPerso().getFightInfos().getCurrentFight();
+		f.setPlaceTeam0(pkt.getPlacesTeam0());
+		f.setPlaceTeam1(pkt.getPlacesTeam1());
+		getGameHandler().forEach(h -> h.onTeamAssign(pkt.getCurrentTeam()));
 	}
 
 	@Override
 	public void handle(GameServerActionPacket pkt) {
 		log(pkt);
-
+		switch (pkt.getType()) {
+			case ERROR:
+				getGameHandler().forEach(GameServerHandler::onActionError);
+				break;
+			case LIFE_CHANGE:
+				GameLifeChangeAction actionl = (GameLifeChangeAction) pkt.getAction();
+				getGameActionHandler().forEach(h -> h.onEntityLifeChange(actionl.getEntity(), actionl.getLife()));
+				break;
+			case PA_CHANGE:
+				GamePaChangeAction actionpa = (GamePaChangeAction) pkt.getAction();
+				getGameActionHandler().forEach(h -> h.onEntityPaChange(actionpa.getEntity(), actionpa.getPa()));
+				break;
+			case PM_CHANGE:
+				GamePmChangeAction actionpm = (GamePmChangeAction) pkt.getAction();
+				getGameActionHandler().forEach(h -> h.onEntityPmChange(actionpm.getEntity(), actionpm.getPm()));
+				break;
+			case KILL:
+				GameKillAction actionk = (GameKillAction) pkt.getAction();
+				getGameActionHandler().forEach(h -> h.onEntityKilled(actionk.getKilled()));
+				break;
+			case SUMMON:
+				GameSummonAction actions = (GameSummonAction) pkt.getAction();
+				getGameActionHandler().forEach(h -> actions.getSummoned().forEach(s -> h.onEntitySummoned(s)));
+				break;
+			case FIGHT_JOIN_ERROR:
+				GameJoinErrorAction actionj = (GameJoinErrorAction) pkt.getAction();
+				getGameActionHandler().forEach(h -> h.onFightJoinError(actionj.getError()));
+				break;
+			case MOVE:
+				GameMoveAction actionm = (GameMoveAction) pkt.getAction();
+				getGameActionHandler().forEach(h -> h.onEntityMove(pkt.getEntityId(), actionm.getPath()));
+				break;
+			default:
+				break;
+		}
 	}
 
 	@Override
 	public void handle(GameServerReadyPacket pkt) {
 		log(pkt);
-
-	}
-
-	@Override
-	public void handle(GameStartPacket pkt) {
-		log(pkt);
-
+		getGameHandler().forEach(h -> h.onPlayerReadyToFight(pkt.getEntityId(), pkt.isReady()));
 	}
 
 	@Override
 	public void handle(GameStartToPlayPacket pkt) {
 		log(pkt);
-
+		getGameHandler().forEach(GameServerHandler::onFightStart);
 	}
 
 	@Override
 	public void handle(GameTurnFinishPacket pkt) {
 		log(pkt);
-
+		getGameHandler().forEach(h -> h.onEntityTurnEnd(pkt.getEntityId()));
 	}
 
 	@Override
 	public void handle(GameTurnListPacket pkt) {
 		log(pkt);
-
+		getGameHandler().forEach(h -> h.onFightTurnInfos(pkt.getTurns()));
 	}
 
 	@Override
 	public void handle(GameTurnMiddlePacket pkt) {
 		log(pkt);
-
+		getGameHandler().forEach(h -> h.onFighterInfos(pkt.getEntities()));
 	}
 
 	@Override
 	public void handle(GameTurnReadyPacket pkt) {
 		log(pkt);
-
+		getGameHandler().forEach(h -> h.onEntityTurnReady(pkt.getEntityId()));
 	}
 
 	@Override
 	public void handle(GameTurnStartPacket pkt) {
 		log(pkt);
-
+		getGameHandler().forEach(h -> h.onEntityTurnStart(pkt.getCharacterId(), pkt.getTime()));
 	}
 
 	@Override
@@ -643,7 +687,7 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(DialogCreateOkPacket pkt) {
 		log(pkt);
-
+		getDialogHandler().forEach(h -> h.onDialogCreate(pkt.getNpcId()));
 	}
 
 	@Override
@@ -799,6 +843,90 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	public void handle(ExchangeLeaveResultPacket pkt) {
 		log(pkt);
 		getExchangeHandler().forEach(h -> h.onLeave(pkt.isSuccess()));
+	}
+
+	@Override
+	public void handle(PartyAcceptPacket partyAcceptPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(PartyRefusePacket partyRefusePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(PartyInviteRequestOkPacket partyInviteRequestPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(PartyInviteRequestErrorPacket partyInviteRequestErrorPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(PartyLeaderPacket partyLeaderPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(PartyCreateOkPacket partyCreateOkPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(PartyCreateErrorPacket partyCreateErrorPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(PartyPlayerLeavePacket partyPlayerLeavePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(PartyFollowReceivePacket partyFollowReceivePacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(PartyMovementPacket partyMovementPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(GameTeamPacket gameTeamPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(JobSkillsPacket jobSkillsPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(JobXpPacket jobXpPacket) {
+		// TODO
+
+	}
+
+	@Override
+	public void handle(JobLevelPacket jobLevelPacket) {
+		// TODO
+
 	}
 
 }

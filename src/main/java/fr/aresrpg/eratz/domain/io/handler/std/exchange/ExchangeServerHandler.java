@@ -4,6 +4,8 @@ import fr.aresrpg.dofus.protocol.exchange.server.ExchangeCreatePacket.ExchangeDa
 import fr.aresrpg.dofus.structures.*;
 import fr.aresrpg.dofus.structures.item.Item;
 
+import java.util.Collection;
+
 /**
  * 
  * @since
@@ -12,7 +14,7 @@ public interface ExchangeServerHandler {
 
 	void onCreate(Exchange type, ExchangeData datas);
 
-	void onInventoryList(Item[] items, int kamas);
+	void onInventoryList(Exchange type, Collection<Item> items, int kamas);
 
 	void onExchangeRequest(int targetId, Exchange exchange, int cell);
 

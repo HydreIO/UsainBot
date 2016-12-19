@@ -20,6 +20,8 @@ public interface GameServerHandler {
 
 	void onFightJoin(int state, FightType fightType, boolean isSpectator, int startTimer, boolean cancelButton, boolean isDuel);
 
+	void onTeamAssign(int team);
+
 	void onMap(BotMap map);
 
 	void onInterractRespawn(Interractable type, int cellid);
@@ -36,5 +38,22 @@ public interface GameServerHandler {
 
 	void onMobGroupMove(MovementMonsterGroup mobs);
 
-	void onGameReady(boolean ready, String playerid);
+	void onActionError();
+
+	void onEntityFightPositionChange(int entityId, int position);
+
+	void onPlayerReadyToFight(int entityId, boolean ready);
+
+	void onFightStart();
+	
+	void onEntityTurnEnd(int entityId);
+	
+	void onFightTurnInfos(int... turns);
+	
+	void onFighterInfos(FightEntity... entities);
+	
+	void onEntityTurnReady(int entityId);
+	
+	void onEntityTurnStart(int entityId,int time);
+
 }
