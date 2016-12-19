@@ -54,6 +54,8 @@ public class Perso {
 	private final FightInfo fightInfos = new FightInfo(this);
 	private final StatsInfo statsInfos = new StatsInfo(this);
 	private final DofusMapView debugView = new DofusMapView();
+	private final PvpInfo pvpInfos = new PvpInfo(this);
+
 	private final DofusServer server;
 	private final Inventory inventory = new PlayerInventory(this);
 
@@ -90,6 +92,13 @@ public class Perso {
 	 */
 	public FightInfo getFightInfos() {
 		return fightInfos;
+	}
+
+	/**
+	 * @return the pvpInfos
+	 */
+	public PvpInfo getPvpInfos() {
+		return pvpInfos;
 	}
 
 	/**

@@ -44,4 +44,10 @@ public interface AccountServerHandler {
 
 	void onReceiveServerPersoCount(long subtime, Map<Integer, Integer> srvIdAndCount);
 
+	void onStatsUpdate(); // le base handler applique les stats et notifi ici qu'elles ont été update
+
+	void onNewLvl(int lvl); // je suppose qu'on reçoit un packet stat juste apres alors inutile de set le lvl ici
+
+	void onServerQueue(int currentPos);
+
 }

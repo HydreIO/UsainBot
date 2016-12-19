@@ -18,7 +18,7 @@ public class Inventory {
 	 * @param kamas
 	 *            the kamas to set
 	 */
-	private void setKamas(int kamas) {
+	public void setKamas(int kamas) {
 		this.kamas = kamas;
 	}
 

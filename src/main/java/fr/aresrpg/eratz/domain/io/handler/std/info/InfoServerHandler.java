@@ -1,13 +1,18 @@
 package fr.aresrpg.eratz.domain.io.handler.std.info;
 
+import fr.aresrpg.dofus.protocol.info.server.InfoCoordinatePacket.MovingPlayer;
 import fr.aresrpg.dofus.structures.InfosMessage;
 
 /**
  * 
- * @since 
+ * @since
  */
 public interface InfoServerHandler {
-	
-	void onInfos(InfosMessage msg,String data);
+
+	void onInfos(InfosMessage msg, String data);
+
+	void onCompass(int x, int y);
+
+	void onFollowedPlayerMove(MovingPlayer player);
 
 }

@@ -20,6 +20,7 @@ import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.dialog.server.*;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeRequestPacket;
 import fr.aresrpg.dofus.protocol.exchange.server.*;
+import fr.aresrpg.dofus.protocol.fight.server.*;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.actions.server.*;
 import fr.aresrpg.dofus.protocol.game.movement.*;
@@ -27,7 +28,7 @@ import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloGamePacket;
-import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
+import fr.aresrpg.dofus.protocol.info.server.*;
 import fr.aresrpg.dofus.protocol.item.server.*;
 import fr.aresrpg.dofus.protocol.job.server.*;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
@@ -49,24 +50,27 @@ import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.info.StatsInfo;
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
 import fr.aresrpg.eratz.domain.io.handler.std.aproach.AccountServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.area.SubareaServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.chat.ChatServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.craft.CraftHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.dialog.DialogServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.exchange.ExchangeServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.fight.FightHandler;
+import fr.aresrpg.eratz.domain.io.handler.std.fight.FightServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.game.GameServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.game.action.GameActionServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.guild.GuildServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.info.InfoServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.item.ItemServerHandler;
+import fr.aresrpg.eratz.domain.io.handler.std.job.JobServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.mount.MountServerHandler;
+import fr.aresrpg.eratz.domain.io.handler.std.party.PartyServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.specialization.SpecializationServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.spell.SpellServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.zaap.ZaapServerHandler;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
@@ -80,8 +84,6 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	private static final Logger logger = new LoggerBuilder("Game").setUseConsoleHandler(true, true, Option.none(), Option.none()).build();
 	private Perso perso;
 	private Set<FightServerHandler> fightHandler = new HashSet<>();
-	private Set<CraftServerHandler> craftHandler = new HashSet<>();
-	private Set<MapServerHandler> mapHandler = new HashSet<>();
 	private Set<AccountServerHandler> accountHandler = new HashSet<>();
 	private Set<ChatServerHandler> chatHandler = new HashSet<>();
 	private Set<ExchangeServerHandler> exchangeHandler = new HashSet<>();
@@ -96,6 +98,16 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	private Set<GameServerHandler> gameHandler = new HashSet<>();
 	private Set<DialogServerHandler> dialogHandler = new HashSet<>();
 	private Set<ItemServerHandler> itemHandler = new HashSet<>();
+	private Set<PartyServerHandler> partyHandler = new HashSet<>();
+	private Set<JobServerHandler> jobHandler = new HashSet<>();
+
+	public void addDialogHandlers(JobServerHandler... handlers) {
+		Arrays.stream(handlers).forEach(jobHandler::add);
+	}
+
+	public void addDialogHandlers(PartyServerHandler... handlers) {
+		Arrays.stream(handlers).forEach(partyHandler::add);
+	}
 
 	public void addDialogHandlers(ItemServerHandler... handlers) {
 		Arrays.stream(handlers).forEach(itemHandler::add);
@@ -137,20 +149,12 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 		Arrays.stream(handlers).forEach(guildHandler::add);
 	}
 
-	public void addFightHandlers(FightHandler... handlers) {
+	public void addFightHandlers(FightServerHandler... handlers) {
 		Arrays.stream(handlers).forEach(fightHandler::add);
 	}
 
 	public void addFightHandlers(ExchangeServerHandler... handlers) {
 		Arrays.stream(handlers).forEach(exchangeHandler::add);
-	}
-
-	public void addCraftHandlers(CraftHandler... handlers) {
-		Arrays.stream(handlers).forEach(craftHandler::add);
-	}
-
-	public void addMapHandlers(MapHandler... handlers) {
-		Arrays.stream(handlers).forEach(mapHandler::add);
 	}
 
 	public void addZaapHandlers(ZaapServerHandler... handlers) {
@@ -177,10 +181,24 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	}
 
 	/**
+	 * @return the jobHandler
+	 */
+	public Set<JobServerHandler> getJobHandler() {
+		return jobHandler;
+	}
+
+	/**
 	 * @return the exchangeHandler
 	 */
 	public Set<ExchangeServerHandler> getExchangeHandler() {
 		return exchangeHandler;
+	}
+
+	/**
+	 * @return the partyHandler
+	 */
+	public Set<PartyServerHandler> getPartyHandler() {
+		return partyHandler;
 	}
 
 	/**
@@ -230,6 +248,13 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	 */
 	public Set<GuildServerHandler> getGuildHandler() {
 		return guildHandler;
+	}
+
+	/**
+	 * @return the fightHandler
+	 */
+	public Set<FightServerHandler> getFightHandler() {
+		return fightHandler;
 	}
 
 	/**
@@ -322,7 +347,7 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	public void handle(ChatSubscribeChannelPacket pkt) {
 		log(pkt);
 		if (pkt.isAdd()) getChatHandler().forEach(h -> h.onSubscribeChannel(pkt.getChannels()));
-		else getChatHandler().forEach(h -> h.onUnsubscribre(pkt.getChannels()));
+		else getChatHandler().forEach(h -> h.onUnsubscribe(pkt.getChannels()));
 	}
 
 	@Override
@@ -412,13 +437,13 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(AccountTicketOkPacket pkt) {
 		log(pkt);
-
+		// useless
 	}
 
 	@Override
 	public void handle(AccountTicketPacket pkt) {
 		log(pkt);
-
+		// useless
 	}
 
 	@Override
@@ -442,7 +467,7 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(BasicConfirmPacket pkt) {
 		log(pkt);
-
+		// useless
 	}
 
 	@Override
@@ -538,7 +563,13 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(GameMapDataPacket pkt) {
 		log(pkt);
-		DofusMap m = Maps.loadMap(SwfVariableExtractor.extractVariable(Maps.downloadMap(pkt.getMapId(), pkt.getSubid())), pkt.getDecryptKey());
+		DofusMap m = null;
+		try {
+			m = Maps.loadMap(SwfVariableExtractor.extractVariable(Maps.downloadMap(pkt.getMapId(), pkt.getSubid())), pkt.getDecryptKey());
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
 		BotMap bm = BotMap.fromDofusMap(m);
 		for (Cell cell : m.getCells()) {
 			if (Interractable.isInterractable(cell.getLayerObject2Num())) // add ressource
@@ -772,18 +803,36 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(AccountStatsPacket pkt) {
 		log(pkt);
-
+		Perso p = getPerso();
+		StatsInfo s = p.getStatsInfos();
+		s.setXp(pkt.getXp());
+		s.setMinXp(pkt.getXpLow());
+		s.setMaxXp(pkt.getXpHigh());
+		p.getInventory().setKamas(pkt.getKama());
+		s.setStatsPoint(pkt.getBonusPoints());
+		s.setSpellsPoints(pkt.getBonusPointsSpell());
+		p.getPvpInfos().setAlignment(pkt.getAlignment());
+		p.getPvpInfos().setRank(pkt.getRank());
+		s.setLife(pkt.getLife());
+		s.setLifeMax(pkt.getLifeMax());
+		s.setEnergy(pkt.getEnergy());
+		s.setEnergyMax(pkt.getEnergyMax());
+		s.setInitiative(pkt.getInitiative());
+		s.setProspection(pkt.getProspection());
+		s.setStats(pkt.getStats());
+		getAccountHandler().forEach(AccountServerHandler::onStatsUpdate);
 	}
 
 	@Override
 	public void handle(AccountNewLevelPacket pkt) {
 		log(pkt);
-
+		getAccountHandler().forEach(h -> h.onNewLvl(pkt.getNewlvl()));
 	}
 
 	@Override
 	public void handle(AccountServerQueuePacket pkt) {
 		log(pkt);
+		getAccountHandler().forEach(h -> h.onServerQueue(pkt.getPosition()));
 	}
 
 	@Override
@@ -859,87 +908,126 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	}
 
 	@Override
-	public void handle(PartyAcceptPacket partyAcceptPacket) {
-		// TODO
-
+	public void handle(PartyAcceptPacket pkt) {
+		log(pkt);
+		getPartyHandler().forEach(PartyServerHandler::onPlayerAccept);
 	}
 
 	@Override
-	public void handle(PartyRefusePacket partyRefusePacket) {
-		// TODO
-
+	public void handle(PartyRefusePacket pkt) {
+		log(pkt);
+		getPartyHandler().forEach(PartyServerHandler::onPlayerRefuse);
 	}
 
 	@Override
-	public void handle(PartyInviteRequestOkPacket partyInviteRequestPacket) {
-		// TODO
-
+	public void handle(PartyInviteRequestOkPacket pkt) {
+		log(pkt);
+		getPartyHandler().forEach(h -> h.onInvitePlayerInGroup(pkt.getInviter(), pkt.getInvited()));
 	}
 
 	@Override
-	public void handle(PartyInviteRequestErrorPacket partyInviteRequestErrorPacket) {
-		// TODO
-
+	public void handle(PartyInviteRequestErrorPacket pkt) {
+		log(pkt);
+		getPartyHandler().forEach(h -> h.onInviteFail(pkt.getReason()));
 	}
 
 	@Override
-	public void handle(PartyLeaderPacket partyLeaderPacket) {
-		// TODO
-
+	public void handle(PartyLeaderPacket pkt) {
+		log(pkt);
+		getPartyHandler().forEach(h -> h.onGroupLeaderUpdate(pkt.getLeaderId()));
 	}
 
 	@Override
-	public void handle(PartyCreateOkPacket partyCreateOkPacket) {
-		// TODO
-
+	public void handle(PartyCreateOkPacket pkt) {
+		log(pkt);
+		getPartyHandler().forEach(PartyServerHandler::onJoinGroupOk);
 	}
 
 	@Override
-	public void handle(PartyCreateErrorPacket partyCreateErrorPacket) {
-		// TODO
-
+	public void handle(PartyCreateErrorPacket pkt) {
+		log(pkt);
+		getPartyHandler().forEach(h -> h.onJoinGroupError(pkt.getReason()));
 	}
 
 	@Override
-	public void handle(PartyPlayerLeavePacket partyPlayerLeavePacket) {
-		// TODO
-
+	public void handle(PartyPlayerLeavePacket pkt) {
+		log(pkt);
+		getPartyHandler().forEach(h -> h.onPlayerLeaveGroup(pkt.getPlayer()));
 	}
 
 	@Override
-	public void handle(PartyFollowReceivePacket partyFollowReceivePacket) {
-		// TODO
-
+	public void handle(PartyFollowReceivePacket pkt) {
+		log(pkt);
+		if (pkt.isSuccess())
+			getPartyHandler().forEach(h -> h.onFollow(pkt.getFollowed()));
+		else getPartyHandler().forEach(PartyServerHandler::onStopFollow);
 	}
 
 	@Override
-	public void handle(PartyMovementPacket partyMovementPacket) {
-		// TODO
-
+	public void handle(PartyMovementPacket pkt) {
+		log(pkt);
+		getPartyHandler().forEach(h -> Arrays.stream(pkt.getMembers()).forEach(h::onPartyMemberUpdate));
 	}
 
 	@Override
-	public void handle(GameTeamPacket gameTeamPacket) {
-		// TODO
-
+	public void handle(GameTeamPacket pkt) {
+		log(pkt);
+		getGameHandler().forEach(h -> h.onFightTeams(pkt.getFirstId(), pkt.getEntities()));
 	}
 
 	@Override
-	public void handle(JobSkillsPacket jobSkillsPacket) {
-		// TODO
-
+	public void handle(JobSkillsPacket pkt) {
+		log(pkt);
+		getJobHandler().forEach(h -> Arrays.stream(pkt.getJobs()).forEach(h::onPlayerJobInfo));
 	}
 
 	@Override
-	public void handle(JobXpPacket jobXpPacket) {
-		// TODO
-
+	public void handle(JobXpPacket pkt) {
+		log(pkt);
+		getJobHandler().forEach(h -> Arrays.stream(pkt.getInfos()).forEach(h::onJobXp));
 	}
 
 	@Override
-	public void handle(JobLevelPacket jobLevelPacket) {
-		// TODO
+	public void handle(JobLevelPacket pkt) {
+		log(pkt);
+		getJobHandler().forEach(h -> h.onJobLvl(pkt.getJob(), pkt.getLvl()));
+	}
 
+	@Override
+	public void handle(GameSpawnPacket pkt) {
+		log(pkt);
+		if (pkt.isCreated()) getGameHandler().forEach(h -> h.onFightSpawn(pkt.getFight()));
+		else getGameHandler().forEach(h -> h.onFightRemoved(pkt.getFight()));
+	}
+
+	@Override
+	public void handle(FightCountPacket pkt) {
+		log(pkt);
+		getFightHandler().forEach(h -> h.onFightCount(pkt.getCount()));
+	}
+
+	@Override
+	public void handle(FightListPacket pkt) {
+		log(pkt);
+		getFightHandler().forEach(h -> pkt.getFights().forEach(h::onFightInfos));
+	}
+
+	@Override
+	public void handle(FightDetailsPacket pkt) {
+		log(pkt);
+		getFightHandler().forEach(h -> h.onFightDetails(pkt.getDetailsId(), pkt.getT0(), pkt.getT1()));
+	}
+
+	@Override
+	public void handle(InfoCompassPacket pkt) {
+		log(pkt);
+		getInfoHandler().forEach(h -> h.onCompass(pkt.getX(), pkt.getY()));
+	}
+
+	@Override
+	public void handle(InfoCoordinatePacket pkt) {
+		log(pkt);
+		getInfoHandler().forEach(h -> pkt.getPlayers().forEach(h::onFollowedPlayerMove));
 	}
 
 }

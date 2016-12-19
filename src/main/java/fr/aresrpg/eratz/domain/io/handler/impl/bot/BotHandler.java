@@ -12,7 +12,7 @@ import fr.aresrpg.dofus.protocol.game.client.GameExtraInformationPacket;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloGamePacket;
-import fr.aresrpg.dofus.protocol.info.server.message.InfoMessagePacket;
+import fr.aresrpg.dofus.protocol.info.server.InfoMessagePacket;
 import fr.aresrpg.dofus.structures.InfosMessage;
 import fr.aresrpg.dofus.structures.PathDirection;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;

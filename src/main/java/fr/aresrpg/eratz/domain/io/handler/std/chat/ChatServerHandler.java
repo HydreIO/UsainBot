@@ -10,5 +10,5 @@ public interface ChatServerHandler {
 
 	void onSubscribeChannel(Chat[] added);
 	
-	void onUnsubscribre(Chat[] removed);
+	void onUnsubscribe(Chat[] removed);
 }
