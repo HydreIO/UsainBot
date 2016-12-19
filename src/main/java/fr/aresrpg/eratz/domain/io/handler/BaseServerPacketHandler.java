@@ -61,6 +61,7 @@ import fr.aresrpg.eratz.domain.io.handler.std.game.GameServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.game.action.GameActionServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.guild.GuildServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.info.InfoServerHandler;
+import fr.aresrpg.eratz.domain.io.handler.std.item.ItemServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.mount.MountServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.specialization.SpecializationServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.spell.SpellServerHandler;
@@ -94,6 +95,11 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	private Set<GameActionServerHandler> gameActionHandler = new HashSet<>();
 	private Set<GameServerHandler> gameHandler = new HashSet<>();
 	private Set<DialogServerHandler> dialogHandler = new HashSet<>();
+	private Set<ItemServerHandler> itemHandler = new HashSet<>();
+
+	public void addDialogHandlers(ItemServerHandler... handlers) {
+		Arrays.stream(handlers).forEach(itemHandler::add);
+	}
 
 	public void addDialogHandlers(DialogServerHandler... handlers) {
 		Arrays.stream(handlers).forEach(dialogHandler::add);
@@ -189,6 +195,13 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	 */
 	public Set<DialogServerHandler> getDialogHandler() {
 		return dialogHandler;
+	}
+
+	/**
+	 * @return the itemHandler
+	 */
+	public Set<ItemServerHandler> getItemHandler() {
+		return itemHandler;
 	}
 
 	/**
@@ -621,7 +634,7 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 				break;
 			case SUMMON:
 				GameSummonAction actions = (GameSummonAction) pkt.getAction();
-				getGameActionHandler().forEach(h -> actions.getSummoned().forEach(s -> h.onEntitySummoned(s)));
+				getGameActionHandler().forEach(h -> actions.getSummoned().forEach(h::onEntitySummoned));
 				break;
 			case FIGHT_JOIN_ERROR:
 				GameJoinErrorAction actionj = (GameJoinErrorAction) pkt.getAction();
@@ -693,13 +706,13 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(DialogQuestionPacket pkt) {
 		log(pkt);
-
+		getDialogHandler().forEach(h -> h.onQuestion(pkt.getQuestion(), pkt.getQuestionParam(), pkt.getResponse()));
 	}
 
 	@Override
 	public void handle(DialogPausePacket pkt) {
 		log(pkt);
-
+		getDialogHandler().forEach(DialogServerHandler::onDialogPause);
 	}
 
 	@Override
@@ -711,49 +724,49 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(ItemAddOkPacket pkt) {
 		log(pkt);
-
+		getItemHandler().forEach(h -> h.onItemsAdd(pkt.getItems()));
 	}
 
 	@Override
 	public void handle(ItemAddErrorPacket pkt) {
 		log(pkt);
-
+		getItemHandler().forEach(h -> h.onItemAddError(pkt.getResult()));
 	}
 
 	@Override
 	public void handle(ItemDropErrorPacket pkt) {
 		log(pkt);
-
+		getItemHandler().forEach(h -> h.onItemDropError(pkt.getResult()));
 	}
 
 	@Override
 	public void handle(ItemRemovePacket pkt) {
 		log(pkt);
-
+		getItemHandler().forEach(h -> h.onItemRemove(pkt.getItemuid()));
 	}
 
 	@Override
 	public void handle(ItemQuantityUpdatePacket pkt) {
 		log(pkt);
-
+		getItemHandler().forEach(h -> h.onItemQuantityUpdate(pkt.getItemUid(), pkt.getAmount()));
 	}
 
 	@Override
 	public void handle(ItemMovementConfirmPacket pkt) {
 		log(pkt);
-
+		getItemHandler().forEach(h -> h.onItemMove(pkt.getItemUid(), pkt.getPosition()));
 	}
 
 	@Override
 	public void handle(ItemToolPacket pkt) {
 		log(pkt);
-
+		getItemHandler().forEach(h -> h.onItemToolEquip(pkt.getJobId()));
 	}
 
 	@Override
 	public void handle(ItemWeightPacket pkt) {
 		log(pkt);
-
+		getItemHandler().forEach(h -> h.onPodsUpdate(pkt.getCurrentWeight(), pkt.getMaxWeight()));
 	}
 
 	@Override
