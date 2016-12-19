@@ -23,7 +23,7 @@ import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.io.handler.BaseServerPacketHandler;
 import fr.aresrpg.eratz.domain.io.handler.impl.BaseMapHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.fight.PlayerFightHandler;
+import fr.aresrpg.eratz.domain.io.handler.impl.PlayerFightHandler;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;

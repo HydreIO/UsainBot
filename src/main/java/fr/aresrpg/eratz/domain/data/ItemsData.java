@@ -51,7 +51,7 @@ public class ItemsData {
 
 	public static void main(String[] args) throws IOException {
 		instance.init(Lang.getDatas("fr", "items"));
-		System.out.println(instance.getName(993));
+		System.out.println(instance.getName(449));
 	}
 
 }

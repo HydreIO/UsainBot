@@ -1,9 +1,10 @@
-package fr.aresrpg.eratz.domain.io.handler.std.fight;
+package fr.aresrpg.eratz.domain.io.handler.impl;
 
 import fr.aresrpg.eratz.domain.data.dofus.fight.*;
 import fr.aresrpg.eratz.domain.data.dofus.player.Spells;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.Player;
+import fr.aresrpg.eratz.domain.io.handler.std.fight.FightHandler;
 
 import java.util.Optional;
 
