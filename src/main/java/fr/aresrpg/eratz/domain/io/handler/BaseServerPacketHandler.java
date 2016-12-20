@@ -15,6 +15,7 @@ import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.server.*;
+import fr.aresrpg.dofus.protocol.aks.Aks0MessagePacket;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.dialog.server.*;
@@ -55,6 +56,7 @@ import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.info.StatsInfo;
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
+import fr.aresrpg.eratz.domain.gui.MapView;
 import fr.aresrpg.eratz.domain.io.handler.std.aproach.AccountServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.area.SubareaServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.chat.ChatServerHandler;
@@ -74,6 +76,7 @@ import fr.aresrpg.eratz.domain.io.handler.std.spell.SpellServerHandler;
 import fr.aresrpg.eratz.domain.io.handler.std.zaap.ZaapServerHandler;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
@@ -485,6 +488,12 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	}
 
 	@Override
+	public void handle(Aks0MessagePacket pkt) {
+		log(pkt);
+
+	}
+
+	@Override
 	public void handle(GuildStatPacket pkt) {
 		log(pkt);
 		getGuildHandler().forEach(h -> h.onGuildStats(pkt.getGuild()));
@@ -579,7 +588,9 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 		log(pkt);
 		DofusMap m = null;
 		try {
-			m = Maps.loadMap(SwfVariableExtractor.extractVariable(Maps.downloadMap(pkt.getMapId(), pkt.getSubid())), pkt.getDecryptKey());
+			InputStream downloadMap = Maps.downloadMap(pkt.getMapId(), pkt.getSubid());
+			Map<String, Object> extractVariable = SwfVariableExtractor.extractVariable(downloadMap);
+			m = Maps.loadMap(extractVariable, pkt.getDecryptKey());
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;
@@ -589,6 +600,8 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 			if (Interractable.isInterractable(cell.getLayerObject2Num())) // add ressource
 				bm.getRessources().add(new Ressource(cell, Interractable.fromId(cell.getLayerObject2Num()))); // interractable peut etre null dans le cas des zaapi porte coffre etc
 		}
+		getPerso().getMapInfos().setMap(bm);
+		MapView.setTitle(getPerso().getPseudo() + " | " + bm.getInfos());
 		getGameHandler().forEach(h -> h.onMap(bm));
 	}
 
@@ -617,8 +630,13 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 			switch (e.getFirst()) {
 				case DEFAULT:
 					MovementPlayer player = (MovementPlayer) (Object) e.getSecond();
-					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(player);
-					else getPerso().getMapInfos().getMap().entityUpdate(player);
+					if (player.getId() == getPerso().getId()) {
+						getPerso().getMapInfos().setCellId(player.getCell());
+						getPerso().getNavigation().notifyMovementEnd();
+					} else {
+						if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(player);
+						else getPerso().getMapInfos().getMap().entityUpdate(player);
+					}
 					getGameHandler().forEach(h -> h.onPlayerMove(player));
 					return;
 				case CREATE_INVOCATION:

@@ -75,7 +75,10 @@ public class BotGameActionServerHandler extends BotHandlerAbstract implements Ga
 		if (entityId == getPerso().getId()) {
 			getPerso().getMapInfos().setCellId(id);
 			getPerso().getNavigation().notifyMovementEnd();
-		} else getPerso().getMapInfos().getMap().entityMove(entityId, id);
+		} else {
+			getPerso().getMapInfos().getMap().entityMove(entityId, id);
+			//	getPerso().getDebugView().addMob(entityId, id);
+		}
 	}
 
 }

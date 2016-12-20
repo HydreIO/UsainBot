@@ -1,6 +1,10 @@
 package fr.aresrpg.eratz.domain.data;
 
+import fr.aresrpg.commons.domain.util.Pair;
+import fr.aresrpg.dofus.util.Lang;
+
 import java.awt.Point;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,21 +16,63 @@ import java.util.Map.Entry;
 public class MapsData {
 
 	private static final MapsData instance = new MapsData();
-	private final Map<Integer, Point> coords = new HashMap<>();
+	private final Map<Integer, Pair<Point, Integer>> coords = new HashMap<>(); // <mapid,<coords,subarea>>
+	private final Map<Integer, String> area = new HashMap<>(); // <areaid,name>
+	private final Map<Integer, Pair<String, Integer>> subarea = new HashMap<>(); // <subareaid,<name,areaid>>
 
 	private MapsData() {
-		coords.put(5867, new Point(-27, -50));
+		coords.put(5867, new Pair<>(new Point(-27, -50), 44));
 	}
 
 	public void init(Map<String, Object> datas) {
 		for (Entry<String, Object> d : datas.entrySet()) {
-			if (d.getKey().length() < 6 || d.getKey().charAt(5) == 'F' || !d.getKey().startsWith("MA.m.")) continue;
-			coords.put(parseId(d.getKey()), parseCoords(d.getValue().toString()));
+			if (d.getKey().startsWith("MA.m")) parseCoords(d);
+			else if (d.getKey().startsWith("MA.a")) parseArea(d);
+			else if (d.getKey().startsWith("MA.sa")) parseSubarea(d);
+
 		}
 	}
 
+	private void parseCoords(Entry<String, Object> entry) {
+		int id = Integer.parseInt(entry.getKey().substring(5));
+		if (id == 1) return; // FIXME
+		Map<String, Object> val = (Map<String, Object>) entry.getValue();
+		int x = Integer.parseInt(String.valueOf(val.get("x")));
+		int y = Integer.parseInt(String.valueOf(val.get("y")));
+		int subarea = Integer.parseInt(String.valueOf(val.get("sa")));
+		coords.put(id, new Pair<>(new Point(x, y), subarea));
+	}
+
+	private void parseArea(Entry<String, Object> entry) {
+		int id = Integer.parseInt(entry.getKey().substring(5));
+		Map<String, Object> val = (Map<String, Object>) entry.getValue();
+		area.put(id, String.valueOf(val.get("n")));
+	}
+
+	private void parseSubarea(Entry<String, Object> entry) {
+		int id = Integer.parseInt(entry.getKey().substring(6));
+		Map<String, Object> val = (Map<String, Object>) entry.getValue();
+		subarea.put(id, new Pair<>(String.valueOf(val.get("n")), Integer.parseInt(String.valueOf(val.get("a")))));
+	}
+
 	public static Point getCoords(int mapid) {
-		return instance.coords.get(mapid);
+		return instance.coords.get(mapid).getFirst();
+	}
+
+	public static String getArea(int mapid) {
+		return instance.area.get(instance.areaId(instance.subareaId(mapid)));
+	}
+
+	private int subareaId(int mapId) {
+		return coords.get(mapId).getSecond();
+	}
+
+	private int areaId(int subareaId) {
+		return subarea.get(subareaId).getSecond();
+	}
+
+	public static String getSubArea(int mapid) {
+		return instance.subarea.get(instance.subareaId(mapid)).getFirst();
 	}
 
 	/**
@@ -36,25 +82,10 @@ public class MapsData {
 		return instance;
 	}
 
-	private Point parseCoords(String data) {
-		int xindex = data.lastIndexOf("x=");
-		int yindex = data.lastIndexOf("y=");
-		int x = Integer.parseInt(data.substring(xindex + 2).split(",")[0]);
-		int y = Integer.parseInt(data.substring(yindex + 2).split(",")[0]);
-		return new Point(x, y);
-	}
-
-	private int parseId(String data) {
-		return Integer.valueOf(data.split("\\.")[2]);
-	}
-
-	public static void main(String[] args) {
-		Map<String, Object> m = new HashMap<>();
-		m.put("MA.m.1547", "{x=8, y=2, ep=2, sa=14}");
-		m.put("z", "ceqceqqe");
-		m.put("I.t.116", "{t=6, n=Potion de familier}");
-		instance.init(m);
-		System.out.println(instance.coords);
+	public static void main(String[] args) throws IOException {
+		System.out.println(Lang.getLangVersion("fr"));
+		Map<String, Object> datas = Lang.getDatas("fr", "maps");
+		System.out.println(datas);
 	}
 
 }

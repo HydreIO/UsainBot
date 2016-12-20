@@ -56,7 +56,10 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 	@Override
 	public void onMap(BotMap map) {
 		getPerso().sendPacketToServer(new GameExtraInformationPacket());
-		getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a)));
+		getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> {
+			System.out.println(map.getDofusMap().getCell(a));
+			getPerso().getNavigation().moveToCell(a);
+		}));
 		getPerso().getDebugView().setPath(null);
 		getPerso().getDebugView().setMap(map.getDofusMap());
 		getPerso().getAccount().notifyBotOnline(); // pour autoriser les actions qui onts besoin que le bot soit bien en jeux
@@ -75,32 +78,29 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 
 	@Override
 	public void onPlayerMove(MovementPlayer player) {
-		// TODO
-
+		if (player.getId() != getPerso().getId())
+			getPerso().getDebugView().addPlayer(player.getId(), player.getCell());
 	}
 
 	@Override
 	public void onInvocMove(MovementInvocation invoc) {
-		// TODO
 
 	}
 
 	@Override
 	public void onMobMove(MovementMonster mob) {
-		// TODO
+		getPerso().getDebugView().addMob(mob.getId(), mob.getCellId());
 
 	}
 
 	@Override
 	public void onNpcMove(MovementNpc npc) {
-		// TODO
-
+		getPerso().getDebugView().addNpc(npc.getId(), npc.getCellid());
 	}
 
 	@Override
 	public void onMobGroupMove(MovementMonsterGroup mobs) {
-		// TODO
-
+		getPerso().getDebugView().addMob(mobs.getId(), mobs.getCellid());
 	}
 
 	@Override

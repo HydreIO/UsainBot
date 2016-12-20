@@ -18,6 +18,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class BotMap {
 
 	private DofusMap dofusMap;
+	private String area;
+	private String subarea;
 	private int x;
 	private int y;
 	private Set<Ressource> ressources = new HashSet<>();
@@ -31,6 +33,12 @@ public class BotMap {
 		Point coords = MapsData.getCoords(m.getId());
 		this.x = coords.x;
 		this.y = coords.y;
+		this.area = MapsData.getArea(m.getId());
+		this.subarea = MapsData.getSubArea(m.getId());
+	}
+
+	public String getInfos() {
+		return area + " (" + subarea + ")[" + x + "," + y + "]";
 	}
 
 	public void entityMove(int id, int cellid) {

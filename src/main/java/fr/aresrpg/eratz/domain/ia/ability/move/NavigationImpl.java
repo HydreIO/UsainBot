@@ -74,7 +74,7 @@ public class NavigationImpl implements Navigation {
 		return Pathfinding.getPath(
 				Maps.getX(getCurrentPos(), getMap().getWidth()), Maps.getY(getCurrentPos(), getMap().getWidth()),
 				Maps.getX(cellid, getMap().getWidth()),
-				Maps.getY(cellid, getMap().getWidth()), getMap().getCells(), getMap().getWidth(), false);
+				Maps.getY(cellid, getMap().getWidth()), getMap().getCells(), getMap().getWidth(), true);
 	}
 
 	@Override

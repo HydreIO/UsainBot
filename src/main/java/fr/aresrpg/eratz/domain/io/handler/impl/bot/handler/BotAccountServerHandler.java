@@ -157,7 +157,8 @@ public class BotAccountServerHandler extends BotHandlerAbstract implements Accou
 	public void onReceiveServerHost(String ip, int port, PacketHandler handler) {
 		try {
 			getPerso().getAccount().getRemoteConnection().closeConnection();
-			getPerso().getAccount().setRemoteConnection(new DofusConnection<>(getPerso().getPseudo(), SocketChannel.open(new InetSocketAddress(ip, 443)), handler, ProtocolRegistry.Bound.SERVER));
+			getPerso().getAccount().setRemoteConnection(new DofusConnection<>(getPerso().getPseudo(), SocketChannel.open(new InetSocketAddress(ip, port)), handler, ProtocolRegistry.Bound.SERVER));
+			getPerso().getAccount().readRemote();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

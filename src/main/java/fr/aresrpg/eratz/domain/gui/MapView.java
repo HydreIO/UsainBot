@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 public class MapView extends Application {
 
 	private static MapView INSTANCE = new MapView();
+	private static Stage stage;
 
 	public static void main(String[] args) {
 		MapView.launch(args);
@@ -22,8 +23,21 @@ public class MapView extends Application {
 		INSTANCE = this;
 	}
 
+	public static void setTitle(String name) {
+		if (stage != null)
+			Platform.runLater(() -> stage.setTitle(name));
+	}
+
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+	}
+
+	/**
+	 * @param stage
+	 *            the stage to set
+	 */
+	public static void setStage(Stage stage) {
+		MapView.stage = stage;
 	}
 
 	/**
@@ -36,6 +50,7 @@ public class MapView extends Application {
 	public void startView(Parent parent, String name) {
 		Platform.runLater(() -> {
 			Stage stage = new Stage();
+			setStage(stage);
 			stage.setTitle(name);
 			stage.setScene(new Scene(parent));
 			stage.show();
