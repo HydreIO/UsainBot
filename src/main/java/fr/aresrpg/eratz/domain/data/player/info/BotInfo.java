@@ -10,12 +10,28 @@ import fr.aresrpg.eratz.domain.data.player.Perso;
 public class BotInfo extends Info {
 
 	private BotJob botJob;
+	private boolean sit;
 
 	/**
 	 * @param perso
 	 */
 	public BotInfo(Perso perso) {
 		super(perso);
+	}
+
+	/**
+	 * @return the sit
+	 */
+	public boolean isSit() {
+		return sit;
+	}
+
+	/**
+	 * @param sit
+	 *            the sit to set
+	 */
+	public void setSit(boolean sit) {
+		this.sit = sit;
 	}
 
 	/**

@@ -26,9 +26,9 @@ public class MapsData {
 
 	public void init(Map<String, Object> datas) {
 		for (Entry<String, Object> d : datas.entrySet()) {
-			if (d.getKey().startsWith("MA.m")) parseCoords(d);
-			else if (d.getKey().startsWith("MA.a")) parseArea(d);
-			else if (d.getKey().startsWith("MA.sa")) parseSubarea(d);
+			if (d.getKey().startsWith("MA.m.")) parseCoords(d);
+			else if (d.getKey().startsWith("MA.a.")) parseArea(d);
+			else if (d.getKey().startsWith("MA.sa.")) parseSubarea(d);
 
 		}
 	}

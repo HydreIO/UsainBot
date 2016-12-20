@@ -8,9 +8,8 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.io.handler;
 
-import fr.aresrpg.commons.domain.condition.Option;
-import fr.aresrpg.commons.domain.log.Logger;
-import fr.aresrpg.commons.domain.log.LoggerBuilder;
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
 import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
@@ -87,7 +86,6 @@ import java.util.function.Consumer;
  */
 public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 
-	private static final Logger logger = new LoggerBuilder("Game").setUseConsoleHandler(true, true, Option.none(), Option.none()).build();
 	private Perso perso;
 	private Set<FightServerHandler> fightHandler = new HashSet<>();
 	private Set<AccountServerHandler> accountHandler = new HashSet<>();
@@ -322,7 +320,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	}
 
 	protected void log(Packet pkt) {
-		logger.info(pkt.toString());
+		LOGGER.info(pkt.toString());
 	}
 
 	@Override

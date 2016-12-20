@@ -26,8 +26,8 @@ public class DofusProxy implements Proxy {
 	private DofusConnection localConnection;
 	private DofusConnection remoteConnection;
 
-	private LocalHandler localHandler;
-	private RemoteHandler remoteHandler;
+	private LocalHandler localHandler = new LocalHandler(this);
+	private RemoteHandler remoteHandler = new RemoteHandler(this);
 
 	private Account account;
 	private String hc;
@@ -42,8 +42,8 @@ public class DofusProxy implements Proxy {
 		account.setProxy(this);
 		account.setState(AccountState.CLIENT_IN_REALM);
 		account.setLastConnection(System.currentTimeMillis());
-		//	((ClientTransferHandler) localHandler).setAccount(account);
-		//	((ClientTransferHandler) remoteHandler).setAccount(account);
+		localHandler.setAccount(account);
+		remoteHandler.setAccount(account);
 	}
 
 	@Override
