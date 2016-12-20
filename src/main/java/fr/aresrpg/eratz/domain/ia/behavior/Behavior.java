@@ -9,17 +9,18 @@
 package fr.aresrpg.eratz.domain.ia.behavior;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
+import fr.aresrpg.commons.domain.functional.suplier.Supplier;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
  * @since
  */
-public abstract class Behavior implements Future<BehaviorStopReason> {
+public abstract class Behavior implements Supplier<BehaviorStopReason> {
 
 	private Perso perso;
 	private boolean isDone;
@@ -131,31 +132,15 @@ public abstract class Behavior implements Future<BehaviorStopReason> {
 		return result;
 	}
 
-	@Override
-	public boolean cancel(boolean mayInterruptIfRunning) {
-		if (isDone()) return false;
-		getPerso().disconnect("Cancel du behavior", 0); // seul moyen de stop immédiatement n'importe quel action
+	public boolean cancel() {
+		getPerso().disconnect("Cancel du behavior"); // seul moyen de stop immédiatement n'importe quel action
+		getPerso().connectIn(3, TimeUnit.SECONDS);
 		return true;
 	}
 
 	@Override
-	public boolean isCancelled() {
-		return isCancelled;
-	}
-
-	@Override
-	public boolean isDone() {
-		return isDone;
-	}
-
-	@Override
-	public BehaviorStopReason get() throws InterruptedException, ExecutionException {
+	public BehaviorStopReason get() {
 		return run();
-	}
-
-	@Override
-	public BehaviorStopReason get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-		return CompletableFuture.<BehaviorStopReason> supplyAsync(this::run).get(timeout, unit);
 	}
 
 }

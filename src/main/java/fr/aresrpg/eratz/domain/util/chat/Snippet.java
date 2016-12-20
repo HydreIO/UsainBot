@@ -1,7 +1,8 @@
 package fr.aresrpg.eratz.domain.util.chat;
 
-import java.util.Locale;
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
+import java.util.Locale;
 /**
  * 
  * @since
@@ -19,10 +20,10 @@ public class Snippet {
 		String s = "je vote Donald Trump";
 		while (true) {
 			Thread.sleep(1000);
-			System.out.println("bot1> " + s);
+			LOGGER.info("bot1> " + s);
 
 			s = bot2session.think(s);
-			System.out.println("bot2> " + s);
+			LOGGER.info("bot2> " + s);
 
 			s = bot1session.think(s);
 		}

@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.data.player.object;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 
@@ -33,7 +35,7 @@ public class Ressource {
 	public boolean isSpawned() {
 		switch (getType()) {
 			case BLE:
-				System.out.println("Le layer object 2 du blé = " + getCell().getLayerObject2Num());
+				LOGGER.info("Le layer object 2 du blé = " + getCell().getLayerObject2Num());
 				return getCell().getLayerObject2Num() == 2;
 
 			default:

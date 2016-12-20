@@ -8,9 +8,13 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain;
 
+import fr.aresrpg.commons.domain.condition.Option;
+import fr.aresrpg.commons.domain.log.Logger;
+import fr.aresrpg.commons.domain.log.LoggerBuilder;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.dofus.util.Lang;
 import fr.aresrpg.eratz.domain.data.*;
+import fr.aresrpg.eratz.domain.data.dofus.player.Classe;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.gui.MapView;
 import fr.aresrpg.eratz.domain.io.proxy.DofusProxy;
@@ -31,6 +35,7 @@ import java.util.stream.Collectors;
 public class TheBotFather {
 
 	private static TheBotFather instance;
+	public static final Logger LOGGER = new LoggerBuilder("BOT").setUseConsoleHandler(true, true, Option.none(), Option.none()).build();
 	public static final InetSocketAddress SERVER_ADRESS = new InetSocketAddress(Constants.IP, Constants.PORT);
 	private Selector selector;
 	private boolean running;
@@ -41,24 +46,25 @@ public class TheBotFather {
 		this.running = true;
 		Executors.FIXED.execute(() -> {
 			try {
-				System.out.println("Initialisating items..");
+				LOGGER.info("Initialisating items..");
 				BenchTime t = new BenchTime();
 				ItemsData.getInstance().init(Lang.getDatas("fr", "items"));
-				System.out.println("Items initialized ! (" + t.getAsLong() + "ms)");
-				System.out.println("Initialisating maps..");
+				LOGGER.info("Items initialized ! (" + t.getAsLong() + "ms)");
+				LOGGER.info("Initialisating maps..");
 				BenchTime t2 = new BenchTime();
 				MapsData.getInstance().init(Lang.getDatas("fr", "maps"));
-				System.out.println("Maps initialized ! (" + t2.getAsLong() + "ms)");
+				LOGGER.info("Maps initialized ! (" + t2.getAsLong() + "ms)");
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		});
 		this.config = Configurations.generate("botfather.yml", Variables.class, Optional.of(() -> {
-			System.out.println("CONFIGURATION JUST CREATED PLEASE RESTART !");
+			LOGGER.info("CONFIGURATION JUST CREATED PLEASE RESTART !");
 			System.exit(0);
 		}), Optional.of(() -> {
-			Variables.ACCOUNTS.add(new PlayerBean("Exemple1", "password", new PersoBean("Jowed", null, Server.ERATZ), new PersoBean("Joe-larecolte", "bread_provider", Server.ERATZ)));
+			Variables.ACCOUNTS.add(new PlayerBean("Exemple1", "password", new PersoBean("Jowed", null, Server.ERATZ, Classe.ENUTROF.name(), true),
+					new PersoBean("Joe-larecolte", "bread_provider", Server.ERATZ, Classe.SRAM.name(), true)));
 			Variables.ACCOUNTS.add(new PlayerBean("Exemple2", "password"));
 		}));
 		this.selector = Selector.open();
@@ -80,7 +86,7 @@ public class TheBotFather {
 
 	private void startServer(ServerSocketChannel channel) {
 		while (isRunning()) {
-			System.out.println("Listening for connection..");
+			LOGGER.info("Listening for connection..");
 			try {
 				selector.select();
 				Set<SelectionKey> keys = selector.selectedKeys();
@@ -91,7 +97,7 @@ public class TheBotFather {
 					if (key.isAcceptable()) {
 						SocketChannel client = channel.accept();
 						client.configureBlocking(false);
-						System.out.println("Client Accepted");
+						LOGGER.info("Client Accepted");
 						new DofusProxy(client, SocketChannel.open(SERVER_ADRESS));
 					}
 				}
@@ -125,21 +131,21 @@ public class TheBotFather {
 					});
 					break;
 				case "exit":
-					System.out.println(Hastebin.post());
+					LOGGER.info(Hastebin.post());
 					System.exit(0);
 					break;
 				case "listaccounts":
-					System.out.println(AccountsManager.getInstance()
+					LOGGER.info(AccountsManager.getInstance()
 							.getAccounts().values().stream().map(Account::getUsername)
 							.collect(Collectors.joining(", ")));
 					break;
 				case "selectaccount":
 					String perso = nextLine.length == 3 ? nextLine[2] : AccountsManager.getInstance().getAccounts().get(nextLine[1]).getPersos().get(0).getPseudo();
 					if (perso == null) {
-						System.out.println("Perso introuvable");
+						LOGGER.info("Perso introuvable");
 						break;
 					}
-					System.out.println("Selection de " + perso);
+					LOGGER.info("Selection de " + perso);
 					AccountsManager.getInstance().connectAccount(nextLine[1], perso);
 					break;
 			}
@@ -147,7 +153,7 @@ public class TheBotFather {
 			 * AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
 			 * if (a.isClientOnline()) {
 			 * SocketChannel channel = (SocketChannel) a.getRemoteConnection().getChannel();
-			 * System.out.println("Send: " + nextLine);
+			 * LOGGER.info("Send: " + nextLine);
 			 * String nn = nextLine + "\n\0";
 			 * try {
 			 * channel.write(ByteBuffer.wrap(nn.getBytes()));
@@ -182,7 +188,7 @@ public class TheBotFather {
 				Hastebin.stream.write(b, off, len);
 			}
 		}));
-		System.out.println("Starting server..");
+		LOGGER.info("Starting server..");
 		new TheBotFather();
 		MapView.main(args);
 	}

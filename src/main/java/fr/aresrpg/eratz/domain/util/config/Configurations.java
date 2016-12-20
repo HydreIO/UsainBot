@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.util.config;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -43,7 +45,7 @@ public class Configurations {
 		private Config(File file, Class<?> configBundle, Optional<Runnable> r, Optional<Runnable> before) {
 			this.file = file;
 			this.bundle = configBundle;
-			System.out.println("Loading configuration...");
+			LOGGER.info("Loading configuration...");
 			boolean mkdir = true;
 			try {
 				mkdir = file.exists() ? false : file.createNewFile();
@@ -60,7 +62,7 @@ public class Configurations {
 		}
 
 		protected void pull() {
-			System.out.println("Pulling configuration file...");
+			LOGGER.info("Pulling configuration file...");
 			Arrays.stream(getBundle().getFields()).filter(f -> {
 				f.setAccessible(true);
 				return f.isAnnotationPresent(Configured.class);
@@ -71,14 +73,14 @@ public class Configurations {
 					t = getConf().get(an.value() + f.getName(), f.get(null));
 					f.set(null, t);
 				} catch (Exception e) {
-					System.out.println("Unable to set field " + f.getName() + " with type " + t);
+					LOGGER.info("Unable to set field " + f.getName() + " with type " + t);
 					e.printStackTrace();
 				}
 			});
 		}
 
 		public void apply() {
-			System.out.println("Applying configuration file...");
+			LOGGER.info("Applying configuration file...");
 			Arrays.stream(getBundle().getFields()).filter(f -> f.isAnnotationPresent(Configured.class)).forEach(f -> { // NOSONAR
 				Configured an = f.getAnnotation(Configured.class);
 				try {

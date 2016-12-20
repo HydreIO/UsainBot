@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.io.handler.std.aproach;
 
+import fr.aresrpg.dofus.protocol.PacketHandler;
 import fr.aresrpg.dofus.protocol.account.server.AccountLoginErrPacket.Error;
 import fr.aresrpg.dofus.structures.Community;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
@@ -17,8 +18,6 @@ public interface AccountServerHandler {
 	void onHelloConnection(String key);
 
 	void onHelloServer();
-
-	void onKey(int key, String data);
 
 	void onRegion();
 
@@ -40,7 +39,7 @@ public interface AccountServerHandler {
 
 	void onCharacterSelect(Character p);
 
-	void onReceiveServerHost(String ip, int port, String ticket);
+	void onReceiveServerHost(String ip, int port, PacketHandler handler);
 
 	void onReceiveServerPersoCount(long subtime, Map<Integer, Integer> srvIdAndCount);
 
@@ -49,5 +48,11 @@ public interface AccountServerHandler {
 	void onNewLvl(int lvl); // je suppose qu'on reçoit un packet stat juste apres alors inutile de set le lvl ici
 
 	void onServerQueue(int currentPos);
+
+	void onTicketOk(int key, String data);
+
+	void onKey(int key, String data);
+
+	void onTicket(String ticket);
 
 }

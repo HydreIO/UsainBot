@@ -8,7 +8,8 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.data.player;
 
-import fr.aresrpg.commons.domain.concurrent.Threads;
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.Packet;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
@@ -27,13 +28,13 @@ import fr.aresrpg.eratz.domain.ia.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.ia.ability.move.NavigationImpl;
 import fr.aresrpg.eratz.domain.ia.mind.BaseMind;
 import fr.aresrpg.eratz.domain.ia.mind.Mind;
-import fr.aresrpg.eratz.domain.io.handler.impl.bot.BotHandler;
+import fr.aresrpg.eratz.domain.io.handler.impl.bot.BotPacketHandler;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
-import fr.aresrpg.eratz.domain.util.config.Variables;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -130,12 +131,20 @@ public class Perso {
 		return logInfos;
 	}
 
+	public void sendPacketToServer(Packet... pkts) {
+		Arrays.stream(pkts).forEach(this::sendPacketToServer);
+	}
+
 	public void sendPacketToServer(Packet pkt) {
 		try {
 			getAccount().getRemoteConnection().send(pkt);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void sendPacketToServer(Packet pkt, int delay, TimeUnit unit) {
+		Executors.SCHEDULED.schedule(() -> sendPacketToServer(pkt), delay, unit);
 	}
 
 	/**
@@ -203,27 +212,27 @@ public class Perso {
 		return debugView;
 	}
 
+	public void connectIn(long time, TimeUnit unit) {
+		Executors.SCHEDULED.schedule(this::connect, time, unit);
+	}
+
 	public void connect() {
 		Account a = getAccount();
-		if (a.getLastConnection() + (Variables.SEC_AFTER_CRASH * 1000) > System.currentTimeMillis())
-			throw new IllegalAccessError("[ANTI-BAN] Connection refused, please wait at least "
-					+ Variables.SEC_AFTER_CRASH + "s before every reconnection.");
-		System.out.println("[" + Instant.now().toString() + "] Connecting " + getPseudo());
+		LOGGER.info("[" + Instant.now().toString() + "] Connecting " + getPseudo());
 		if (a.isClientOnline())
 			throw new IllegalAccessError(
 					"The account of " + getPseudo() + " is already online | No need to connect the bot");
 		if (a.isBotOnline())
 			throw new IllegalAccessError("The bot " + a.getCurrentPlayed().getPseudo()
 					+ " is already online | you need to deconnect it first");
-		a.setState(AccountState.BOT_ONLINE);
 		try {
 			SocketChannel channel = SocketChannel.open(TheBotFather.SERVER_ADRESS);
 			a.setCurrentPlayed(this);
-			a.setRemoteConnection(new DofusConnection<>(getPseudo(), channel, new BotHandler(this), Bound.SERVER)); // fix temporaire via proxy handler pour corriger le bug du parse en mitm
+			a.setRemoteConnection(new DofusConnection<>(getPseudo(), channel, new BotPacketHandler(this), Bound.SERVER));
 			Executors.FIXED.execute(a::readRemote);
 		} catch (IOException e) {
 			a.setState(AccountState.OFFLINE);
-			System.out.println("Bot crash."); // test debug
+			LOGGER.info("Bot crash."); // test debug
 			e.printStackTrace(); // test debug
 		}
 		a.setLastConnection(System.currentTimeMillis());
@@ -258,7 +267,7 @@ public class Perso {
 
 	public void crashReport(String msg) {
 		getAbilities().getBaseAbility().speak(Channel.ADMIN, msg);
-		disconnect(msg, -1);
+		disconnect(msg);
 	}
 
 	private int quantityOf(int id, Set<Item> set) { // pr item non stackable
@@ -291,27 +300,17 @@ public class Perso {
 	 * 
 	 * @param reason
 	 *            the reason of the disconnect
-	 * @param timeToReco
-	 *            the time in second before reconnection (set to -1 to stay offline) the bot (see config to disable auto reconnection)
 	 */
-	public void disconnect(String reason, int timeToReco) {
+	public void disconnect(String reason) {
 		Executors.FIXED.execute(() -> {
 			if (getAccount().isClientOnline())
 				throw new IllegalAccessError("Unable to disconnect " + getPseudo() + " ! | A client is online");
-			System.out.println("Disconnecting " + getPseudo());
+			LOGGER.info("Disconnecting " + getPseudo());
 			Account a = getAccount();
-			try {
-				a.getRemoteConnection().close();
-				a.setCurrentPlayed(null);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				a.setState(AccountState.OFFLINE);
-				System.out.println(getPseudo() + " disconnected. | " + reason);
-			}
-			if (timeToReco == -1 || Variables.AUTO_RECONNECTION) {
-				Threads.uSleep(timeToReco, TimeUnit.SECONDS);
-			}
+			a.setCurrentPlayed(null);
+			a.getRemoteConnection().closeConnection();
+			a.setState(AccountState.OFFLINE);
+			LOGGER.success(getPseudo() + " disconnected. | " + reason);
 		});
 	}
 

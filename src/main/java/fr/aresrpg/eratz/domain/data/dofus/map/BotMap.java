@@ -2,9 +2,11 @@ package fr.aresrpg.eratz.domain.data.dofus.map;
 
 import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.structures.map.DofusMap;
+import fr.aresrpg.eratz.domain.data.MapsData;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
 
+import java.awt.Point;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -26,6 +28,57 @@ public class BotMap {
 
 	public BotMap(DofusMap m) {
 		this.dofusMap = m;
+		Point coords = MapsData.getCoords(m.getId());
+		this.x = coords.x;
+		this.y = coords.y;
+	}
+
+	public void entityMove(int id, int cellid) {
+		if (id > 1000) playerMove(id, cellid);
+		else {
+			monsterMove(id, cellid);
+			npcMove(id, cellid);
+		}
+	}
+
+	public void playerMove(int id, int cellid) {
+		for (MovementPlayer i : players)
+			if (i.getId() == id) {
+				i.setCellid(cellid);
+				return;
+			}
+	}
+
+	public void monsterMove(int id, int cellid) {
+		for (MovementMonsterGroup i : mobs)
+			if (i.getId() == id) i.setCellid(cellid);
+	}
+
+	public void npcMove(int id, int cellid) {
+		for (MovementNpc i : npcs)
+			if (i.getId() == id) i.setCellid(cellid);
+	}
+
+	public void entityUpdate(MovementAction action) {
+		if (action instanceof MovementPlayer) updatePlayer((MovementPlayer) action);
+		else if (action instanceof MovementMonsterGroup) updateMobs((MovementMonsterGroup) action);
+		else if (action instanceof MovementNpc) updateNpc((MovementNpc) action);
+		else throw new IllegalArgumentException(action + " has not a valid type");
+	}
+
+	private void updatePlayer(MovementPlayer player) {
+		players.remove(player);
+		players.add(player);
+	}
+
+	public void updateMobs(MovementMonsterGroup group) {
+		mobs.remove(group);
+		mobs.add(group);
+	}
+
+	public void updateNpc(MovementNpc npc) {
+		npcs.remove(npc);
+		npcs.add(npc);
 	}
 
 	/**
@@ -43,30 +96,30 @@ public class BotMap {
 	}
 
 	/**
-	 * @param x
-	 *            the x to set
-	 */
-	public void setX(int x) {
-		this.x = x;
-	}
-
-	/**
-	 * @param y
-	 *            the y to set
-	 */
-	public void setY(int y) {
-		this.y = y;
-	}
-
-	/**
 	 * @return the players
 	 */
 	public Set<MovementPlayer> getPlayers() {
 		return players;
 	}
 
+	public void removeActor(int id) {
+		if (id > 1000) removePlayer(id);
+		else {
+			removeMob(id);
+			removeNpc(id);
+		}
+	}
+
 	public void removePlayer(int id) {
 		players.removeIf(p -> p.getId() == id);
+	}
+
+	public void removeMob(int id) {
+		mobs.removeIf(p -> p.getId() == id);
+	}
+
+	public void removeNpc(int id) {
+		npcs.removeIf(p -> p.getId() == id);
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.ia.mind;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
+import fr.aresrpg.commons.domain.functional.suplier.Supplier;
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
@@ -9,7 +11,7 @@ import fr.aresrpg.eratz.domain.ia.behavior.move.BankDepositPath;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 /**
@@ -19,7 +21,7 @@ import java.util.function.Predicate;
 public class BaseMind implements Mind {
 
 	private final Perso perso;
-	private Queue<Future<BehaviorStopReason>> actions = new LinkedList<>();
+	private Queue<Supplier<BehaviorStopReason>> actions = new LinkedList<>();
 	private boolean infinite;
 	private Set<Integer> itemsToKeep = new HashSet<>();
 
@@ -30,7 +32,7 @@ public class BaseMind implements Mind {
 	@Override
 	public void process() throws InterruptedException, ExecutionException {
 		while (getPerso().getAccount().isActive()) {
-			Future<BehaviorStopReason> next = getActions().poll();
+			Supplier<BehaviorStopReason> next = getActions().poll();
 			if (next == null) break;
 			switch (next.get()) { // possibilité d'effectuer des actions selon le type de retour
 				case QUANTITY_REACHED:
@@ -44,7 +46,7 @@ public class BaseMind implements Mind {
 	/**
 	 * @return the actions
 	 */
-	public Queue<Future<BehaviorStopReason>> getActions() {
+	public Queue<Supplier<BehaviorStopReason>> getActions() {
 		return actions;
 	}
 
@@ -99,14 +101,46 @@ public class BaseMind implements Mind {
 	}
 
 	@Override
-	public Mind thenDisconnectIf(String reason, int timeToStayOffline, Predicate<Perso> condition) {
-		if (condition.test(getPerso())) getPerso().disconnect(reason, timeToStayOffline);
+	public Mind thenDisconnectIf(String reason, Predicate<Perso> condition) {
+		getActions().add(() -> {
+			if (condition.test(getPerso())) getPerso().disconnect(reason);
+			while (!getPerso().getAccount().isOffline())
+				;
+			return BehaviorStopReason.FINISHED;
+		});
 		return this;
 	}
 
 	@Override
 	public Set<Integer> getItemToKeep() {
 		return this.itemsToKeep;
+	}
+
+	@Override
+	public Mind thenConnect(Perso perso) {
+		getActions().add(() -> {
+			getPerso().connect();
+			return BehaviorStopReason.FINISHED;
+		});
+		return this;
+	}
+
+	@Override
+	public Mind thenReconnect() {
+		getPerso().connect();
+		return this;
+	}
+
+	@Override
+	public Mind thenWait(long time, TimeUnit unit) {
+		Threads.uSleep(time, unit);
+		return this;
+	}
+
+	@Override
+	public Mind thenIdle() {
+		// TODO
+		return this;
 	}
 
 }

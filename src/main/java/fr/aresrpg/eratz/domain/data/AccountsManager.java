@@ -8,6 +8,10 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.data;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
+import fr.aresrpg.eratz.domain.data.dofus.player.Classe;
+import fr.aresrpg.eratz.domain.data.dofus.player.Genre;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.util.config.Variables;
@@ -27,7 +31,8 @@ public class AccountsManager {
 	private AccountsManager() {
 		Variables.ACCOUNTS.forEach(b -> {
 			Account a = new Account(b.getAccountName(), b.getPassword());
-			b.getPersos().forEach(h -> a.addPerso(new Perso(-1, h.getPseudo(), a, h.getBotJob(), null, null, h.getDofusServer()))); // TODO dans le handler faudra set tout les fields quand on reçoit le packet perso list
+			b.getPersos()
+					.forEach(h -> a.addPerso(new Perso(-1, h.getPseudo(), a, h.getBotJob(), Classe.valueOf(h.getClasse().toUpperCase()), h.isMale() ? Genre.MALE : Genre.FEMALE, h.getDofusServer())));
 			accounts.put(b.getAccountName(), a);
 		});
 	}
@@ -40,6 +45,7 @@ public class AccountsManager {
 				p.connect();
 				return;
 			}
+		throw new NullPointerException("Le Perso '" + perso + "' n'existe pas");
 	}
 
 	/**
@@ -66,7 +72,7 @@ public class AccountsManager {
 	}
 
 	private void registerAccount(Account account) {
-		System.out.println("New account registered ! | " + account);
+		LOGGER.info("New account registered ! | " + account);
 		getAccounts().put(account.getUsername(), account);
 	}
 

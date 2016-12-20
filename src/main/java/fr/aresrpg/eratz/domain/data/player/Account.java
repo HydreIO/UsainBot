@@ -8,6 +8,9 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.data.player;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
+import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.eratz.domain.data.player.inventory.Banque;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
@@ -17,7 +20,6 @@ import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Variables;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -48,6 +50,10 @@ public class Account {
 		return proxy;
 	}
 
+	public void notifyBotOnline() { // pour confirmer que le bot est bien en jeux
+		setState(AccountState.BOT_ONLINE);
+	}
+
 	/**
 	 * @param proxy
 	 *            the proxy to set
@@ -74,11 +80,11 @@ public class Account {
 	 * Called when the client close the connection or crash
 	 */
 	public void notifyDisconnect() {
-		System.out.println("Client disconnected !");
+		LOGGER.info("Client disconnected !");
 		setState(AccountState.OFFLINE);
 		if (!Variables.CONNECT_BOT_ON_CLIENT_DECONNECTION || getDefaultBot() == null) return;
 		Executors.FIXED.execute(() -> {
-			System.out.println("Connecting bot on " + getDefaultBot().getPseudo() + " in " + Variables.SEC_AFTER_CRASH + "s !");
+			LOGGER.info("Connecting bot on " + getDefaultBot().getPseudo() + " in " + Variables.SEC_AFTER_CRASH + "s !");
 			Threads.sleep(Variables.SEC_AFTER_CRASH, TimeUnit.SECONDS);
 			getDefaultBot().connect();
 		});
@@ -92,16 +98,9 @@ public class Account {
 	 *            the new perso to connect
 	 */
 	public void switchPerso(Perso perso) {
-		if (getCurrentPlayed() != null) getCurrentPlayed().disconnect("Switching to " + perso.getPseudo(), -1);
-		long timeleft = (getLastConnection() + (Variables.SEC_AFTER_CRASH * 1000)) - System.currentTimeMillis();
-		if (timeleft < 0)
-			try {
-			System.out.println("[ANTI-BAN] Reconnecting in " + Instant.ofEpochMilli(timeleft + 2000).getEpochSecond() + "s...");
-			Thread.sleep(timeleft + 2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		perso.connect();
+		if (getCurrentPlayed() != null) getCurrentPlayed().disconnect("Switching to " + perso.getPseudo());
+		LOGGER.info("Switching to " + perso.getPseudo() + " in ~5s");
+		perso.connectIn(Randoms.nextBetween(3, 7), TimeUnit.SECONDS);
 	}
 
 	public void addPerso(Perso p) {
@@ -112,18 +111,17 @@ public class Account {
 	// ============= UTIL ===================
 
 	/**
-	 * Listen for packet from dofus while the bot is online and the client is offline
+	 * Listen for packet from dofus
 	 * 
 	 * @throws IOException
 	 *             if some I/O error occur
 	 */
 	public void readRemote() {
-		while (isActive())
-			try {
-				getRemoteConnection().read();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		try {
+			getRemoteConnection().start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -131,6 +129,10 @@ public class Account {
 	 */
 	public boolean isActive() {
 		return isBotOnline() || isClientOnline();
+	}
+
+	public boolean isOffline() {
+		return getState() == AccountState.OFFLINE;
 	}
 
 	/**

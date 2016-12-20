@@ -3,7 +3,9 @@ package fr.aresrpg.eratz.domain.data.dofus.fight;
 import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.structures.game.FightType;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * 
@@ -16,10 +18,10 @@ public class Fight {
 	private FightType type;
 	private int[] placeTeam0;
 	private int[] placeTeam1;
-	private Set<MovementPlayer> team0 = new HashSet<>();
-	private Set<MovementPlayer> team1 = new HashSet<>();
-	private Set<MovementMonster> mobs = new HashSet<>();
-	private Set<MovementInvocation> invocs = new HashSet<>();
+	private CopyOnWriteArraySet<MovementPlayer> team0 = new CopyOnWriteArraySet<>();
+	private CopyOnWriteArraySet<MovementPlayer> team1 = new CopyOnWriteArraySet<>();
+	private CopyOnWriteArraySet<MovementMonster> mobs = new CopyOnWriteArraySet<>();
+	private CopyOnWriteArraySet<MovementInvocation> invocs = new CopyOnWriteArraySet<>();
 	private boolean isBlocked;
 	private boolean isSpecBlocked;
 	private boolean isGroupBlocked;
@@ -32,27 +34,83 @@ public class Fight {
 		this.swordCell2 = swordCell2;
 	}
 
-	public void moveEntity(int entityId, int cellId) {
-		movePlayer(entityId, cellId);
-		moveMonster(entityId, cellId);
-		moveInvoc(entityId, cellId);
+	public void entityMove(int id, int cellid) {
+		if (id > 1000) playerMove(id, cellid);
+		else {
+			monsterMove(id, cellid);
+			invocMove(id, cellid);
+		}
 	}
 
-	public void movePlayer(int id, int cellid) {
-		for (MovementPlayer m : team0)
-			if (m.getId() == id) m.setCell(cellid);
-		for (MovementPlayer m : team1)
-			if (m.getId() == id) m.setCell(cellid);
+	public void playerMove(int id, int cellid) {
+		for (MovementPlayer i : team0)
+			if (i.getId() == id) {
+				i.setCellid(cellid);
+				return;
+			}
+		for (MovementPlayer i : team1)
+			if (i.getId() == id) {
+				i.setCellid(cellid);
+				return;
+			}
 	}
 
-	public void moveMonster(int id, int cellid) {
-		for (MovementMonster m : mobs)
-			if (m.getId() == id) m.setCellId(cellid);
+	public void monsterMove(int id, int cellid) {
+		for (MovementMonster i : mobs)
+			if (i.getId() == id) i.setCellId(cellid);
 	}
 
-	public void moveInvoc(int id, int cellid) {
-		for (MovementInvocation m : invocs)
-			if (m.getId() == id) m.setCellId(cellid);
+	public void invocMove(int id, int cellid) {
+		for (MovementInvocation i : invocs)
+			if (i.getId() == id) i.setCellId(cellid);
+	}
+
+	public void entityUpdate(MovementAction action) {
+		if (action instanceof MovementPlayer) updatePlayer((MovementPlayer) action);
+		else if (action instanceof MovementMonster) updateMonster((MovementMonster) action);
+		else if (action instanceof MovementInvocation) updateInvoc((MovementInvocation) action);
+		else throw new IllegalArgumentException(action + " has not a valid type");
+	}
+
+	public void removeActor(int id) {
+		if (id > 1000) removePlayer(id);
+		else {
+			removeMob(id);
+			removeInvoc(id);
+		}
+	}
+
+	public void removePlayer(int id) {
+		team0.removeIf(p -> p.getId() == id);
+		team1.removeIf(p -> p.getId() == id);
+	}
+
+	public void removeMob(int id) {
+		mobs.removeIf(p -> p.getId() == id);
+	}
+
+	public void removeInvoc(int id) {
+		invocs.removeIf(p -> p.getId() == id);
+	}
+
+	private void updatePlayer(MovementPlayer player) {
+		if (team0.contains(player)) {
+			team0.remove(player);
+			team0.add(player);
+		} else if (team1.contains(player)) {
+			team1.remove(player);
+			team1.add(player);
+		}
+	}
+
+	public void updateMonster(MovementMonster mob) {
+		mobs.remove(mob);
+		mobs.add(mob);
+	}
+
+	public void updateInvoc(MovementInvocation npc) {
+		invocs.remove(npc);
+		invocs.add(npc);
 	}
 
 	/**
@@ -109,7 +167,7 @@ public class Fight {
 	/**
 	 * @return the team0
 	 */
-	public Set<MovementPlayer> getTeam0() {
+	public CopyOnWriteArraySet<MovementPlayer> getTeam0() {
 		return team0;
 	}
 
@@ -117,14 +175,14 @@ public class Fight {
 	 * @param team0
 	 *            the team0 to set
 	 */
-	public void setTeam0(Set<MovementPlayer> team0) {
+	public void setTeam0(CopyOnWriteArraySet<MovementPlayer> team0) {
 		this.team0 = team0;
 	}
 
 	/**
 	 * @return the team1
 	 */
-	public Set<MovementPlayer> getTeam1() {
+	public CopyOnWriteArraySet<MovementPlayer> getTeam1() {
 		return team1;
 	}
 
@@ -132,14 +190,14 @@ public class Fight {
 	 * @param team1
 	 *            the team1 to set
 	 */
-	public void setTeam1(Set<MovementPlayer> team1) {
+	public void setTeam1(CopyOnWriteArraySet<MovementPlayer> team1) {
 		this.team1 = team1;
 	}
 
 	/**
 	 * @return the mobs
 	 */
-	public Set<MovementMonster> getMobs() {
+	public CopyOnWriteArraySet<MovementMonster> getMobs() {
 		return mobs;
 	}
 
@@ -147,14 +205,14 @@ public class Fight {
 	 * @param mobs
 	 *            the mobs to set
 	 */
-	public void setMobs(Set<MovementMonster> mobs) {
+	public void setMobs(CopyOnWriteArraySet<MovementMonster> mobs) {
 		this.mobs = mobs;
 	}
 
 	/**
 	 * @return the invocs
 	 */
-	public Set<MovementInvocation> getInvocs() {
+	public CopyOnWriteArraySet<MovementInvocation> getInvocs() {
 		return invocs;
 	}
 
@@ -162,7 +220,7 @@ public class Fight {
 	 * @param invocs
 	 *            the invocs to set
 	 */
-	public void setInvocs(Set<MovementInvocation> invocs) {
+	public void setInvocs(CopyOnWriteArraySet<MovementInvocation> invocs) {
 		this.invocs = invocs;
 	}
 

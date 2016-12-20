@@ -3,10 +3,12 @@
  * This class is part of an AresRPG Project.
  *
  * @author Sceat {@literal <sceat@aresrpg.fr>}
- *  
- * Created 2016
+ * 
+ *         Created 2016
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.data.dofus.mob;
+
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 public enum DofusMobs {
 	LARVE_BLEUE(31, false),
@@ -1351,9 +1353,9 @@ public enum DofusMobs {
 
 	public static void main(String[] args) { // manque 31 bordel ;_;
 		int i = 0;
-		System.out.println("Counting archis..");
+		LOGGER.info("Counting archis..");
 		for (DofusMobs m : values())
 			if (m.isArchi()) i++;
-		System.out.println("archis = " + i);
+		LOGGER.info("archis = " + i);
 	}
 }

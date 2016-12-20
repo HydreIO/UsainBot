@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.util;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
 import fr.aresrpg.dofus.util.Lang;
 
 import java.io.*;
@@ -19,7 +21,7 @@ public class Hastebin {
 			try {
 				stream.write((a + "|" + b + "\n").getBytes());
 				if (index.incrementAndGet() > 1000) {
-					System.out.println(post());
+					LOGGER.info(post());
 					stream = new ByteArrayOutputStream();
 					index.set(0);
 				}
@@ -27,7 +29,7 @@ public class Hastebin {
 				e.printStackTrace();
 			}
 		});
-		System.out.println(post());
+		LOGGER.info(post());
 
 	}
 

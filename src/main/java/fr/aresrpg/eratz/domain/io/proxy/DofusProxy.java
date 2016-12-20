@@ -8,15 +8,17 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.io.proxy;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
-import fr.aresrpg.eratz.domain.io.handler.impl.proxy.*;
+import fr.aresrpg.eratz.domain.io.handler.impl.proxy.LocalHandler;
+import fr.aresrpg.eratz.domain.io.handler.impl.proxy.RemoteHandler;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
-import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SocketChannel;
 
 public class DofusProxy implements Proxy {
@@ -24,8 +26,8 @@ public class DofusProxy implements Proxy {
 	private DofusConnection localConnection;
 	private DofusConnection remoteConnection;
 
-	private LocalHandler localHandler = new LocalHandler(this);
-	private RemoteHandler remoteHandler = new RemoteHandler(this);
+	private LocalHandler localHandler;
+	private RemoteHandler remoteHandler;
 
 	private Account account;
 	private String hc;
@@ -40,8 +42,8 @@ public class DofusProxy implements Proxy {
 		account.setProxy(this);
 		account.setState(AccountState.CLIENT_IN_REALM);
 		account.setLastConnection(System.currentTimeMillis());
-		((ClientTransferHandler) localHandler).setAccount(account);
-		((ClientTransferHandler) remoteHandler).setAccount(account);
+		//	((ClientTransferHandler) localHandler).setAccount(account);
+		//	((ClientTransferHandler) remoteHandler).setAccount(account);
 	}
 
 	@Override
@@ -56,12 +58,8 @@ public class DofusProxy implements Proxy {
 
 	@Override
 	public void shutdown() {
-		try {
-			getLocalConnection().close();
-			getRemoteConnection().close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		getLocalConnection().closeConnection();
+		getRemoteConnection().closeConnection();
 	}
 
 	/**
@@ -82,34 +80,26 @@ public class DofusProxy implements Proxy {
 	public void changeConnection(DofusConnection connection, ProxyConnectionType type) {
 		try {
 			if (type == ProxyConnectionType.LOCAL) {
-				if (this.localConnection != null) this.localConnection.close();
+				if (this.localConnection != null) this.localConnection.closeConnection();
 				this.localConnection = connection;
 			} else {
-				if (this.remoteConnection != null) this.remoteConnection.close();
+				if (this.remoteConnection != null) this.remoteConnection.closeConnection();
 				this.remoteConnection = connection;
 				if (account != null) account.setRemoteConnection(remoteConnection);
 			}
 			Executors.FIXED.execute(() -> {
-				System.out.println("Start connection.");
+				LOGGER.info("Start connection.");
 				try {
-					while (connection.getChannel().isOpen())
-						connection.read();
+					connection.start();
 				} catch (Exception e) {
 					e.printStackTrace();
-					if (!(e instanceof AsynchronousCloseException)) {
-						try {
-							connection.close(); // on close le server socket
-							if (account != null) account.notifyDisconnect(); // on notify que le client n'est plus la pour possiblement connecter le bot
-						} catch (IOException e1) {
-							e.printStackTrace();
-						}
-					}
+					connection.closeConnection(); // on close le server socket
+					if (account != null) account.notifyDisconnect(); // on notify que le client n'est plus la pour possiblement connecter le bot
 				}
 			});
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
-
 	}
 
 	@Override

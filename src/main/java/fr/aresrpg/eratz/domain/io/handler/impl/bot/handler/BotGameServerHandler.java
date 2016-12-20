@@ -1,0 +1,178 @@
+package fr.aresrpg.eratz.domain.io.handler.impl.bot.handler;
+
+import fr.aresrpg.dofus.protocol.game.client.GameExtraInformationPacket;
+import fr.aresrpg.dofus.protocol.game.movement.*;
+import fr.aresrpg.dofus.protocol.game.server.GameEndPacket;
+import fr.aresrpg.dofus.protocol.game.server.GameTeamPacket.TeamEntity;
+import fr.aresrpg.dofus.structures.game.*;
+import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
+import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
+import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.io.handler.std.game.GameServerHandler;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+
+/**
+ * 
+ * @since
+ */
+public class BotGameServerHandler extends BotHandlerAbstract implements GameServerHandler {
+
+	/**
+	 * @param perso
+	 */
+	public BotGameServerHandler(Perso perso) {
+		super(perso);
+	}
+
+	@Override
+	public void onEffect(Effect eff, int... entities) {
+		// TODO
+
+	}
+
+	@Override
+	public void onFightEnd(GameEndPacket pkt) {
+		// TODO
+
+	}
+
+	@Override
+	public void onFightChallenge(FightChallenge chall) {
+		// TODO
+
+	}
+
+	@Override
+	public void onFightJoin(int state, FightType fightType, boolean isSpectator, int startTimer, boolean cancelButton, boolean isDuel) {
+		// TODO
+
+	}
+
+	@Override
+	public void onTeamAssign(int team) {
+		getPerso().getFightInfos().setCurrentFightTeam(team);
+	}
+
+	@Override
+	public void onMap(BotMap map) {
+		getPerso().sendPacketToServer(new GameExtraInformationPacket());
+		getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a)));
+		getPerso().getDebugView().setPath(null);
+		getPerso().getDebugView().setMap(map.getDofusMap());
+		getPerso().getAccount().notifyBotOnline(); // pour autoriser les actions qui onts besoin que le bot soit bien en jeux
+	}
+
+	@Override
+	public void onInterractRespawn(Interractable type, int cellid) {
+		// TODO
+	}
+
+	@Override
+	public void onEntityLeave(int id) {
+		// TODO
+
+	}
+
+	@Override
+	public void onPlayerMove(MovementPlayer player) {
+		// TODO
+
+	}
+
+	@Override
+	public void onInvocMove(MovementInvocation invoc) {
+		// TODO
+
+	}
+
+	@Override
+	public void onMobMove(MovementMonster mob) {
+		// TODO
+
+	}
+
+	@Override
+	public void onNpcMove(MovementNpc npc) {
+		// TODO
+
+	}
+
+	@Override
+	public void onMobGroupMove(MovementMonsterGroup mobs) {
+		// TODO
+
+	}
+
+	@Override
+	public void onActionError() {
+		// TODO
+
+	}
+
+	@Override
+	public void onEntityFightPositionChange(int entityId, int position) {
+		// TODO
+
+	}
+
+	@Override
+	public void onPlayerReadyToFight(int entityId, boolean ready) {
+		// TODO
+
+	}
+
+	@Override
+	public void onFightStart() {
+		// TODO
+
+	}
+
+	@Override
+	public void onEntityTurnEnd(int entityId) {
+		// TODO
+
+	}
+
+	@Override
+	public void onFightTurnInfos(int... turns) {
+		// TODO
+
+	}
+
+	@Override
+	public void onFighterInfos(FightEntity... entities) {
+		// TODO
+
+	}
+
+	@Override
+	public void onEntityTurnReady(int entityId) {
+		// TODO
+
+	}
+
+	@Override
+	public void onEntityTurnStart(int entityId, int time) {
+		// TODO
+
+	}
+
+	@Override
+	public void onFightTeams(int firstId, TeamEntity... entities) {
+		// TODO
+
+	}
+
+	@Override
+	public void onFightSpawn(FightSpawn fight) {
+		// TODO
+
+	}
+
+	@Override
+	public void onFightRemoved(FightSpawn fight) {
+		// TODO
+
+	}
+
+}

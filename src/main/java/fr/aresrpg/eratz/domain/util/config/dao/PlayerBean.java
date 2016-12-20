@@ -80,14 +80,19 @@ public class PlayerBean {
 		private String pseudo;
 		private String botJob;
 		private String server;
+		private String classe;
+		private boolean male;
 
-		public PersoBean(String pseudo, String job, String server) {
+		public PersoBean(String pseudo, String botJob, String server, String classe, boolean male) {
 			this.pseudo = pseudo;
-			this.botJob = job;
+			this.botJob = botJob;
+			this.server = server;
+			this.classe = classe;
+			this.male = male;
 		}
 
-		public PersoBean(String pseudo, String job, Server server) {
-			this(pseudo, job, server.name());
+		public PersoBean(String pseudo, String job, Server server, String classe, boolean male) {
+			this(pseudo, job, server.name(), classe, male);
 		}
 
 		public PersoBean() {
@@ -117,6 +122,36 @@ public class PlayerBean {
 		}
 
 		/**
+		 * @return the classe
+		 */
+		public String getClasse() {
+			return classe;
+		}
+
+		/**
+		 * @param classe
+		 *            the classe to set
+		 */
+		public void setClasse(String classe) {
+			this.classe = classe;
+		}
+
+		/**
+		 * @return the male
+		 */
+		public boolean isMale() {
+			return male;
+		}
+
+		/**
+		 * @param male
+		 *            the male to set
+		 */
+		public void setMale(boolean male) {
+			this.male = male;
+		}
+
+		/**
 		 * @param botJob
 		 *            the botJob to set
 		 */
@@ -141,7 +176,7 @@ public class PlayerBean {
 
 		@Override
 		public String toString() {
-			return "PersoBean [pseudo=" + pseudo + ", botJob=" + botJob + ", server=" + server + "]";
+			return "PersoBean [pseudo=" + pseudo + ", botJob=" + botJob + ", server=" + server + ", classe=" + classe + ", male=" + male + "]";
 		}
 
 	}

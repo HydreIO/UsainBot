@@ -42,10 +42,13 @@ import fr.aresrpg.dofus.protocol.subarea.server.SubareaListPacket;
 import fr.aresrpg.dofus.protocol.waypoint.ZaapLeavePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapCreatePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapUseErrorPacket;
+import fr.aresrpg.dofus.structures.character.AvailableCharacter;
 import fr.aresrpg.dofus.structures.game.GameMovementType;
 import fr.aresrpg.dofus.structures.map.*;
+import fr.aresrpg.dofus.structures.server.DofusServer;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.SwfVariableExtractor;
+import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
@@ -79,7 +82,7 @@ import java.util.function.Consumer;
  * 
  * @since
  */
-public class BaseServerPacketHandler implements ServerPacketHandler {
+public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 
 	private static final Logger logger = new LoggerBuilder("Game").setUseConsoleHandler(true, true, Option.none(), Option.none()).build();
 	private Perso perso;
@@ -100,6 +103,10 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	private Set<ItemServerHandler> itemHandler = new HashSet<>();
 	private Set<PartyServerHandler> partyHandler = new HashSet<>();
 	private Set<JobServerHandler> jobHandler = new HashSet<>();
+
+	public BaseServerPacketHandler(Perso perso) {
+		this.perso = perso;
+	}
 
 	public void addDialogHandlers(JobServerHandler... handlers) {
 		Arrays.stream(handlers).forEach(jobHandler::add);
@@ -359,6 +366,9 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(AccountCharactersListPacket pkt) {
 		log(pkt);
+		for (AvailableCharacter c : pkt.getCharacters())
+			for (Perso p : getPerso().getAccount().getPersos())
+				if (p.getPseudo().equals(c.getPseudo())) p.setId(c.getId());
 		forEachAccountHandlers(h -> h.onCharacterList(pkt.getSubscriptionTime(), pkt.getCharacters()));
 	}
 
@@ -371,6 +381,8 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(AccountHostPacket pkt) {
 		log(pkt);
+		for (DofusServer s : pkt.getServers())
+			if (getPerso().getServer().equals(s)) getPerso().getServer().setState(s.getState());
 		forEachAccountHandlers(h -> h.onServers(pkt.getServers()));
 	}
 
@@ -419,13 +431,15 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(AccountServerEncryptedHostPacket pkt) {
 		log(pkt);
-		forEachAccountHandlers(h -> h.onReceiveServerHost(pkt.getIp(), pkt.getPort(), pkt.getTicketKey()));
+		getPerso().setTicket(pkt.getTicketKey());
+		forEachAccountHandlers(h -> h.onReceiveServerHost(pkt.getIp(), pkt.getPort(), this));
 	}
 
 	@Override
 	public void handle(AccountServerHostPacket pkt) {
 		log(pkt);
-		forEachAccountHandlers(h -> h.onReceiveServerHost(pkt.getIp(), pkt.getPort(), pkt.getTicketKey()));
+		getPerso().setTicket(pkt.getTicketKey());
+		forEachAccountHandlers(h -> h.onReceiveServerHost(pkt.getIp(), pkt.getPort(), this));
 	}
 
 	@Override
@@ -437,13 +451,13 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(AccountTicketOkPacket pkt) {
 		log(pkt);
-		// useless
+		getAccountHandler().forEach(h -> h.onTicketOk(pkt.getKey(), pkt.getData()));
 	}
 
 	@Override
 	public void handle(AccountTicketPacket pkt) {
 		log(pkt);
-		// useless
+		getAccountHandler().forEach(h -> h.onTicket(pkt.getTicket()));
 	}
 
 	@Override
@@ -570,7 +584,7 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 			e.printStackTrace();
 			return;
 		}
-		BotMap bm = BotMap.fromDofusMap(m);
+		BotMap bm = MapsManager.getOrCreate(m);
 		for (Cell cell : m.getCells()) {
 			if (Interractable.isInterractable(cell.getLayerObject2Num())) // add ressource
 				bm.getRessources().add(new Ressource(cell, Interractable.fromId(cell.getLayerObject2Num()))); // interractable peut etre null dans le cas des zaapi porte coffre etc
@@ -593,6 +607,8 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 		if (gameMovementPacket.getType() == GameMovementType.REMOVE) {
 			gameMovementPacket.getActors().forEach(v -> {
 				MovementRemoveActor actor = (MovementRemoveActor) (Object) v.getSecond();
+				if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().removeActor(actor.getId());
+				else getPerso().getMapInfos().getMap().removeActor(actor.getId());
 				getGameHandler().forEach(h -> h.onEntityLeave(actor.getId()));
 			});
 			return;
@@ -601,22 +617,32 @@ public class BaseServerPacketHandler implements ServerPacketHandler {
 			switch (e.getFirst()) {
 				case DEFAULT:
 					MovementPlayer player = (MovementPlayer) (Object) e.getSecond();
+					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(player);
+					else getPerso().getMapInfos().getMap().entityUpdate(player);
 					getGameHandler().forEach(h -> h.onPlayerMove(player));
 					return;
 				case CREATE_INVOCATION:
 					MovementInvocation invoc = (MovementInvocation) (Object) e.getSecond();
+					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(invoc);
+					else getPerso().getMapInfos().getMap().entityUpdate(invoc);
 					getGameHandler().forEach(h -> h.onInvocMove(invoc));
 					return;
 				case CREATE_MONSTER:
 					MovementMonster mob = (MovementMonster) (Object) e.getSecond();
+					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(mob);
+					else getPerso().getMapInfos().getMap().entityUpdate(mob);
 					getGameHandler().forEach(h -> h.onMobMove(mob));
 					return;
 				case CREATE_MONSTER_GROUP:
 					MovementMonsterGroup mobs = (MovementMonsterGroup) (Object) e.getSecond();
+					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(mobs);
+					else getPerso().getMapInfos().getMap().entityUpdate(mobs);
 					getGameHandler().forEach(h -> h.onMobGroupMove(mobs));
 					return;
 				case CREATE_NPC:
 					MovementNpc npc = (MovementNpc) (Object) e.getSecond();
+					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(npc);
+					else getPerso().getMapInfos().getMap().entityUpdate(npc);
 					getGameHandler().forEach(h -> h.onNpcMove(npc));
 					return;
 				default:

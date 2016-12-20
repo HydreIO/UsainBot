@@ -1,10 +1,10 @@
 package fr.aresrpg.eratz.domain.io.handler.std.game.action;
 
+import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
 import fr.aresrpg.dofus.protocol.game.movement.MovementInvocation;
-import fr.aresrpg.dofus.structures.PathDirection;
 import fr.aresrpg.dofus.structures.game.FightJoinError;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * 
@@ -28,5 +28,6 @@ public interface GameActionServerHandler {
 
 	void onFightJoinError(FightJoinError error);
 
-	void onEntityMove(int entityId, Map<Integer, PathDirection> path);
+	void onEntityMove(int entityId, List<PathFragment> path);
+
 }

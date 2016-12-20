@@ -1,10 +1,13 @@
 package fr.aresrpg.eratz.domain.ia.mind;
 
+import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems;
+import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 /**
@@ -19,10 +22,14 @@ public interface Mind {
 	 * @param path
 	 *            the path
 	 * @param quantity
-	 *            ressource amount
+	 *            ressource amount (the bot will not harvest more than his maxpods)
 	 * @return the mind for chaining
 	 */
 	Mind thenHarvest(Path path, int quantity);
+
+	default Mind thenHarvest(Path path) {
+		return thenHarvest(path, Integer.MAX_VALUE);
+	}
 
 	/**
 	 * Try to drop a ressource
@@ -35,6 +42,26 @@ public interface Mind {
 	 */
 	Mind thenDrop(int item, int quantity);
 
+	default Mind thenDrop(int item) {
+		return thenDrop(item, Integer.MAX_VALUE);
+	}
+
+	default Mind thenDrop(DofusItems item, int quantity) {
+		return thenDrop(item.getId(), quantity);
+	}
+
+	default Mind thenDrop(DofusItems item) {
+		return thenDrop(item.getId());
+	}
+
+	default Mind thenDrop(DofusItems2 item, int quantity) {
+		return thenDrop(item.getId(), quantity);
+	}
+
+	default Mind thenDrop(DofusItems2 item) {
+		return thenDrop(item.getId());
+	}
+
 	/**
 	 * Try to craft an item
 	 * 
@@ -45,6 +72,10 @@ public interface Mind {
 	 * @return the mind for chaining
 	 */
 	Mind thenCraft(Path path, int quantity);
+
+	default Mind thenCraft(Path path) {
+		return thenCraft(path, Integer.MAX_VALUE);
+	}
 
 	/**
 	 * Depose all inventory in bank
@@ -87,20 +118,8 @@ public interface Mind {
 	 *            the time in seconds
 	 * @return the mind for chaining
 	 */
-	default Mind thenDisconnect(String reason, int timeToStayOffline) {
-		thenDisconnectIf(reason, timeToStayOffline, p -> true);
-		return this;
-	}
-
-	/**
-	 * Disconnect the bot
-	 * 
-	 * @param reason
-	 *            the reason
-	 * @return the mind for chaining
-	 */
 	default Mind thenDisconnect(String reason) {
-		thenDisconnect(reason, -1);
+		thenDisconnectIf(reason, p -> true);
 		return this;
 	}
 
@@ -113,23 +132,41 @@ public interface Mind {
 	 *            the condition
 	 * @return the mind for chaining
 	 */
-	default Mind thenDisconnectIf(String reason, Predicate<Perso> condition) {
-		thenDisconnectIf(reason, -1, condition);
-		return this;
-	}
+	Mind thenDisconnectIf(String reason, Predicate<Perso> condition);
 
 	/**
-	 * Disconnect the bot if the condition is valid
+	 * Switch to the given perso
 	 * 
-	 * @param reason
-	 *            the reason
-	 * @param timeToStayOffline
-	 *            the time to stay offline
-	 * @param condition
-	 *            the condition
+	 * @param perso
+	 *            the perso to switch
 	 * @return the mind for chaining
 	 */
-	Mind thenDisconnectIf(String reason, int timeToStayOffline, Predicate<Perso> condition);
+	Mind thenConnect(Perso perso);
+
+	/**
+	 * Reconnect the perso
+	 * 
+	 * @return the mind for chaining
+	 */
+	Mind thenReconnect();
+
+	/**
+	 * Wait the given time
+	 * 
+	 * @param time
+	 *            the time
+	 * @param unit
+	 *            the unit
+	 * @return the mind for chaining
+	 */
+	Mind thenWait(long time, TimeUnit unit);
+
+	/**
+	 * Wait indefinitly until new actions
+	 * 
+	 * @return the mind for chaining
+	 */
+	Mind thenIdle();
 
 	/**
 	 * Infinite loop the actions

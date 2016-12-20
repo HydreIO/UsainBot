@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.ia.ability.move;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.GameActionACKPacket;
 import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
@@ -79,11 +81,11 @@ public class NavigationImpl implements Navigation {
 	public Navigation moveToCell(int cellid, boolean teleport) {
 		List<Point> p = searchPath(cellid);
 		if (p == null) {
-			System.out.println("Le chemin est introuvable ! nouvel éssai..");
-			System.out.println("Position = " + getCurrentPos());
+			LOGGER.info("Le chemin est introuvable ! nouvel éssai..");
+			LOGGER.info("Position = " + getCurrentPos());
 			p = searchPath(cellid);
 			if (p == null) {
-				System.out.println("Impossible de trouver un chemin malgré tout mes éffort jte jure wallah jariv ap");
+				LOGGER.info("Impossible de trouver un chemin malgré tout mes éffort jte jure wallah jariv ap");
 				return this;
 			}
 		}

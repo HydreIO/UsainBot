@@ -8,52 +8,48 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.io.handler.impl.proxy;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
 import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
-import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
-import fr.aresrpg.dofus.protocol.game.client.GameExtraInformationPacket;
 import fr.aresrpg.dofus.protocol.game.server.GameMapDataPacket;
 import fr.aresrpg.dofus.protocol.game.server.GameServerActionPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.structures.Chat;
-import fr.aresrpg.dofus.structures.PathDirection;
-import fr.aresrpg.dofus.structures.map.Cell;
-import fr.aresrpg.dofus.structures.map.DofusMap;
-import fr.aresrpg.dofus.util.Maps;
-import fr.aresrpg.dofus.util.SwfVariableExtractor;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
-import fr.aresrpg.eratz.domain.ia.ability.move.NavigationImpl;
 import fr.aresrpg.eratz.domain.io.handler.BaseServerPacketHandler;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy.ProxyConnectionType;
 import fr.aresrpg.eratz.domain.util.Constants;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.*;
+import java.util.Arrays;
 
 /**
  * 
  * @since
  */
 public class RemoteHandler extends BaseServerPacketHandler {
+
 	static final ProtocolRegistry[] toSkip = { ProtocolRegistry.GAME_MOVEMENT };
 	private Account account;
 	private Proxy proxy;
 
 	/**
-	 * @param account
+	 * @param perso
 	 */
-	public RemoteHandler(Proxy proxy) {
+	public RemoteHandler(Proxy proxy, Perso perso) {
+		super(perso);
 		this.proxy = proxy;
+		this.account = perso.getAccount();
 	}
 
 	/**
@@ -80,7 +76,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 
 	protected void transmit(Packet pkt) {
 		try {
-			System.out.println("[RCV:]<< " + pkt);
+			LOGGER.info("[RCV:]<< " + pkt);
 			getProxy().getLocalConnection().send(pkt);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -108,6 +104,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 
 	@Override
 	public void handle(AccountSelectCharacterOkPacket pkt) {
+		super.handle(pkt);
 		transmit(pkt);
 	}
 
@@ -126,20 +123,21 @@ public class RemoteHandler extends BaseServerPacketHandler {
 
 	@Override
 	public void handle(HelloConnectionPacket pkt) {
+		super.handle(pkt);
 		getProxy().setHc(pkt.getHashKey());
 		transmit(pkt);
 	}
 
 	@Override
 	public void handle(AccountLoginOkPacket pkt) {
+		super.handle(pkt);
 		pkt.setAdmin(true);
 		transmit(pkt);
 	}
 
 	@Override
 	public void handle(AccountServerEncryptedHostPacket pkt) {
-		if (getAccount().isBotOnline())
-			getAccount().getCurrentPlayed().disconnect("Connection MITM d'un client", -1);
+		super.handle(pkt);
 		try {
 			String ip = pkt.getIp();
 			ServerSocketChannel srvchannel = ServerSocketChannel.open();
@@ -159,7 +157,8 @@ public class RemoteHandler extends BaseServerPacketHandler {
 
 	@Override
 	public void handle(AccountCharactersListPacket pkt) { // tkt on verifie bien que les persos existe pas déja
-		Arrays.stream(pkt.getCharacters()).filter(Objects::nonNull).forEach(c -> getAccount().getPersos().add(new Perso(c.getId(), c.getPseudo(), getAccount(), null, null)));
+		super.handle(pkt);
+		//Arrays.stream(pkt.getCharacters()).filter(Objects::nonNull).forEach(c -> getAccount().getPersos().add(new Perso(c.getId(), c.getPseudo(), getAccount(), null, null)));
 		transmit(pkt);
 	}
 
@@ -169,51 +168,35 @@ public class RemoteHandler extends BaseServerPacketHandler {
 
 	@Override
 	public void handle(GameMapDataPacket pkt) {
+		super.handle(pkt);
 		transmit(pkt);
-		try {
-			Map<String, Object> d = SwfVariableExtractor.extractVariable(Maps.downloadMap(pkt.getMapId(), pkt.getSubid()));
-			DofusMap m = Maps.loadMap(d, pkt.getDecryptKey());
-			getPerso().getDebugView().setMap(m);
-			getPerso().getDebugView().clearPath();
-			((NavigationImpl) getPerso().getNavigation()).setMap(m);
-			getAccount().getRemoteConnection().send(new GameExtraInformationPacket());
-			getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> {
-				Cell cell = m.getCells()[a];
-				System.out.println("frame = " + cell.getFrame() + (cell.getFrame() != null ? cell.getFrame().getId() : ""));
-				System.out.println("Groundlvl = " + cell.getGroundLevel());
-				System.out.println("GroundSlope = " + cell.getGroundSlope());
-				System.out.println("GroundNum = " + cell.getLayerGroundNum());
-				System.out.println("GroundRot = " + cell.getLayerGroundRot());
-				System.out.println("Object1Num = " + cell.getLayerObject1Num());
-				System.out.println("Object1Rot = " + cell.getLayerObject1Rot());
-				System.out.println("Movement = " + cell.getMovement());
-				System.out.println("isLayerGroundFlip = " + cell.isLayerGroundFlip());
-				System.out.println("isLayerObject1Flip = " + cell.isLayerObject1Flip());
-				System.out.println("isLayerObject2Flip = " + cell.isLayerObject2Flip());
-				System.out.println("isLayerObject2Inter = " + cell.isLayerObject2Interactive());
-				System.out.println("lineOfSight = " + cell.isLineOfSight());
-				System.out.println("LayerObject2Num = " + cell.getLayerObject2Num());
-				Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a));
-			}));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		/*
+		 * getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> {
+		 * Cell cell = m.getCells()[a];
+		 * LOGGER.info("frame = " + cell.getFrame());
+		 * LOGGER.info("Groundlvl = " + cell.getGroundLevel());
+		 * LOGGER.info("GroundSlope = " + cell.getGroundSlope());
+		 * LOGGER.info("GroundNum = " + cell.getLayerGroundNum());
+		 * LOGGER.info("GroundRot = " + cell.getLayerGroundRot());
+		 * LOGGER.info("Object1Num = " + cell.getLayerObject1Num());
+		 * LOGGER.info("Object1Rot = " + cell.getLayerObject1Rot());
+		 * LOGGER.info("Movement = " + cell.getMovement());
+		 * LOGGER.info("isLayerGroundFlip = " + cell.isLayerGroundFlip());
+		 * LOGGER.info("isLayerObject1Flip = " + cell.isLayerObject1Flip());
+		 * LOGGER.info("isLayerObject2Flip = " + cell.isLayerObject2Flip());
+		 * LOGGER.info("isLayerObject2Inter = " + cell.isLayerObject2Interactive());
+		 * LOGGER.info("lineOfSight = " + cell.isLineOfSight());
+		 * LOGGER.info("LayerObject2Num = " + cell.getLayerObject2Num());
+		 * Executors.FIXED.execute(() -> getPerso().getNavigation().moveToCell(a));
+		 * }));
+		 */
 	}
 
 	@Override
 	public void handle(GameServerActionPacket pkt) {
-		System.out.println(pkt.getEntityId());
-		System.out.println(getPerso().getId());
-		if (pkt.getEntityId() != getPerso().getId())
-			return;
-		if (pkt.getAction() instanceof GameMoveAction) {
-			GameMoveAction a = (GameMoveAction) pkt.getAction();
-			int id = 0;
-			for (Map.Entry<Integer, PathDirection> e : a.getPath().entrySet())
-				id = e.getKey();
-			((NavigationImpl) getPerso().getNavigation()).setCurrentPos(id);
-
-		}
+		super.handle(pkt);
+		LOGGER.info("" + pkt.getEntityId());
+		LOGGER.info("" + getPerso().getId());
 		transmit(pkt);
 	}
 
