@@ -14,9 +14,11 @@ import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.Packet;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.dofus.structures.item.Item;
-import fr.aresrpg.dofus.structures.server.*;
+import fr.aresrpg.dofus.structures.server.DofusServer;
+import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.eratz.domain.TheBotFather;
+import fr.aresrpg.eratz.domain.data.AccountsManager;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.player.*;
 import fr.aresrpg.eratz.domain.data.player.info.*;
@@ -43,7 +45,6 @@ public class Perso {
 	private final Account account;
 	private int id;
 	private String pseudo;
-	private String ticket;
 
 	private final Navigation navigation = new NavigationImpl(this);
 	private final Mind mind = new BaseMind(this);
@@ -57,7 +58,7 @@ public class Perso {
 	private final DofusMapView debugView = new DofusMapView();
 	private final PvpInfo pvpInfos = new PvpInfo(this);
 
-	private final DofusServer server;
+	private final Server server;
 	private final Inventory inventory = new PlayerInventory(this);
 
 	private Group group;
@@ -67,7 +68,7 @@ public class Perso {
 		this.pseudo = pseudo;
 		this.account = account;
 		this.botInfos.setBotJob(job);
-		this.server = new DofusServer(srv.getId(), ServerState.ONLINE, 0, true);
+		this.server = srv;
 	}
 
 	public Perso(int id, String pseudo, Account account, Classe classe, Genre sexe, Server srv) {
@@ -100,21 +101,6 @@ public class Perso {
 	 */
 	public PvpInfo getPvpInfos() {
 		return pvpInfos;
-	}
-
-	/**
-	 * @return the ticket
-	 */
-	public String getTicket() {
-		return ticket;
-	}
-
-	/**
-	 * @param ticket
-	 *            the ticket to set
-	 */
-	public void setTicket(String ticket) {
-		this.ticket = ticket;
 	}
 
 	/**
@@ -161,6 +147,11 @@ public class Perso {
 		return pseudo;
 	}
 
+	public DofusServer getDofusServer() {
+		if (this.server == Server.ERATZ) return AccountsManager.ERATZ;
+		else return AccountsManager.HENUAL;
+	}
+
 	/**
 	 * @return the botInfos
 	 */
@@ -178,7 +169,7 @@ public class Perso {
 	/**
 	 * @return the server
 	 */
-	public DofusServer getServer() {
+	public Server getServer() {
 		return server;
 	}
 

@@ -46,8 +46,10 @@ import fr.aresrpg.dofus.structures.character.AvailableCharacter;
 import fr.aresrpg.dofus.structures.game.GameMovementType;
 import fr.aresrpg.dofus.structures.map.*;
 import fr.aresrpg.dofus.structures.server.DofusServer;
+import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.SwfVariableExtractor;
+import fr.aresrpg.eratz.domain.data.AccountsManager;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
@@ -87,6 +89,7 @@ import java.util.function.Consumer;
 public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 
 	private Perso perso;
+	private String ticket;
 	private Set<FightServerHandler> fightHandler = new HashSet<>();
 	private Set<AccountServerHandler> accountHandler = new HashSet<>();
 	private Set<ChatServerHandler> chatHandler = new HashSet<>();
@@ -109,15 +112,15 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 		this.perso = perso;
 	}
 
-	public void addDialogHandlers(JobServerHandler... handlers) {
+	public void addJobHandlers(JobServerHandler... handlers) {
 		Arrays.stream(handlers).forEach(jobHandler::add);
 	}
 
-	public void addDialogHandlers(PartyServerHandler... handlers) {
+	public void addPartyHandlers(PartyServerHandler... handlers) {
 		Arrays.stream(handlers).forEach(partyHandler::add);
 	}
 
-	public void addDialogHandlers(ItemServerHandler... handlers) {
+	public void addItemHandlers(ItemServerHandler... handlers) {
 		Arrays.stream(handlers).forEach(itemHandler::add);
 	}
 
@@ -336,7 +339,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(HelloGamePacket pkt) {
 		log(pkt);
-		forEachAccountHandlers(AccountServerHandler::onHelloServer);
+		forEachAccountHandlers(h -> h.onHelloServer(ticket));
 	}
 
 	@Override
@@ -383,7 +386,13 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	public void handle(AccountHostPacket pkt) {
 		log(pkt);
 		for (DofusServer s : pkt.getServers())
-			if (getPerso().getServer().equals(s)) getPerso().getServer().setState(s.getState());
+			if (s.getId() == Server.ERATZ.getId()) {
+				AccountsManager.ERATZ.setState(s.getState());
+				AccountsManager.ERATZ.setServerPopulation(s.getServerPopulation());
+			} else {
+				AccountsManager.HENUAL.setState(s.getState());
+				AccountsManager.HENUAL.setServerPopulation(s.getServerPopulation());
+			}
 		forEachAccountHandlers(h -> h.onServers(pkt.getServers()));
 	}
 
@@ -432,14 +441,14 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(AccountServerEncryptedHostPacket pkt) {
 		log(pkt);
-		getPerso().setTicket(pkt.getTicketKey());
+		this.ticket = pkt.getTicketKey();
 		forEachAccountHandlers(h -> h.onReceiveServerHost(pkt.getIp(), pkt.getPort(), this));
 	}
 
 	@Override
 	public void handle(AccountServerHostPacket pkt) {
 		log(pkt);
-		getPerso().setTicket(pkt.getTicketKey());
+		this.ticket = pkt.getTicketKey();
 		forEachAccountHandlers(h -> h.onReceiveServerHost(pkt.getIp(), pkt.getPort(), this));
 	}
 
@@ -773,6 +782,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(DialogCreateOkPacket pkt) {
 		log(pkt);
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		getDialogHandler().forEach(h -> h.onDialogCreate(pkt.getNpcId()));
 	}
 

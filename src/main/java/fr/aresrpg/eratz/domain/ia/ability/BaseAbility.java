@@ -5,6 +5,7 @@ import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.map.*;
 import fr.aresrpg.eratz.domain.data.dofus.player.*;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.exception.ZaapException;
 
 /**
@@ -13,11 +14,9 @@ import fr.aresrpg.eratz.domain.util.exception.ZaapException;
  */
 public interface BaseAbility {
 
-	// J'ai besoin du packet qui me donne tout mon inventaire et a chaque fois qu'une update de l'inventaire est produite
-	// pareil pour la banque car je vais handle les deux pour stocker les items sur l'objet perso !
-	// il faut aussi extraire le X et Y de la map dans le packet mapdata et le stocker dans l'Objet dofus map
-
 	void sit(boolean sit); // s'assoir
+
+	BotThread getBotThread();
 
 	/**
 	 * Parle au npc

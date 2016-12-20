@@ -110,7 +110,7 @@ public class LocalHandler extends BaseClientPacketHandler {
 
 	@Override
 	public boolean parse(ProtocolRegistry registry, String packet) {
-		if (registry == null || contains(registry)) {
+		if (state_machine && registry == null || contains(registry)) {
 			try {
 				((SocketChannel) getProxy().getLocalConnection().getChannel()).write(ByteBuffer.wrap((packet + "\n\0").getBytes()));
 			} catch (IOException e) {

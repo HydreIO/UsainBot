@@ -10,6 +10,7 @@ package fr.aresrpg.eratz.domain.data;
 
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
+import fr.aresrpg.dofus.structures.server.*;
 import fr.aresrpg.eratz.domain.data.dofus.player.Classe;
 import fr.aresrpg.eratz.domain.data.dofus.player.Genre;
 import fr.aresrpg.eratz.domain.data.player.Account;
@@ -27,6 +28,8 @@ public class AccountsManager {
 
 	private static final AccountsManager instance = new AccountsManager();
 	private Map<String, Account> accounts = new HashMap<>();
+	public static final DofusServer ERATZ = new DofusServer(Server.ERATZ.getId(), ServerState.OFFLINE, 0, true);
+	public static final DofusServer HENUAL = new DofusServer(Server.HENUAL.getId(), ServerState.OFFLINE, 0, true);
 
 	private AccountsManager() {
 		Variables.ACCOUNTS.forEach(b -> {

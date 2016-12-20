@@ -17,7 +17,7 @@ public interface AccountServerHandler {
 
 	void onHelloConnection(String key);
 
-	void onHelloServer();
+	void onHelloServer(String ticket);
 
 	void onRegion();
 

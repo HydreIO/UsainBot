@@ -1,10 +1,9 @@
 package fr.aresrpg.eratz.domain.ia.behavior.craft.type;
 
+import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.ia.behavior.craft.CraftBehavior;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * 

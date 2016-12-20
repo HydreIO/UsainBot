@@ -48,8 +48,8 @@ public class BotAccountServerHandler extends BotHandlerAbstract implements Accou
 	}
 
 	@Override
-	public void onHelloServer() {
-		getPerso().sendPacketToServer(new AccountTicketPacket().setTicket(getPerso().getTicket()));
+	public void onHelloServer(String ticket) {
+		getPerso().sendPacketToServer(new AccountTicketPacket().setTicket(ticket));
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class BotAccountServerHandler extends BotHandlerAbstract implements Accou
 
 	@Override
 	public void onServers(DofusServer... servers) {
-		switch (getPerso().getServer().getState()) {
+		switch (getPerso().getDofusServer().getState()) {
 			case OFFLINE:
 				LOGGER.warning(Server.fromId(getPerso().getServer().getId()).name() + " is not online ! Reconnecting in ~2 hours");
 				getPerso().disconnect(Server.fromId(getPerso().getServer().getId()).name() + " is not online !");

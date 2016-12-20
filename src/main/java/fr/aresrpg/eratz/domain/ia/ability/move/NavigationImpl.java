@@ -12,6 +12,7 @@ import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaapi;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.awt.Point;
@@ -19,7 +20,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  *
@@ -28,7 +28,7 @@ import java.util.concurrent.locks.LockSupport;
 public class NavigationImpl implements Navigation {
 
 	private Perso perso;
-	private Thread waiter;
+	private BotThread botThread = new BotThread();
 	private boolean teleporting;
 
 	public NavigationImpl(Perso perso) {
@@ -97,12 +97,12 @@ public class NavigationImpl implements Navigation {
 				try {
 					getPerso().getAccount().getRemoteConnection().send(new GameActionACKPacket().setActionId(0));
 					if (!teleporting)
-						LockSupport.unpark(waiter);
+						getBotThread().unpause();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			} , 5, TimeUnit.SECONDS);
-			lockAndWait();
+			getBotThread().pause(Thread.currentThread());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -121,16 +121,18 @@ public class NavigationImpl implements Navigation {
 
 	@Override
 	public void notifyMovementEnd() {
-		LockSupport.unpark(waiter);
+		getBotThread().unpause();
+	}
+
+	/**
+	 * @return the botThread
+	 */
+	public BotThread getBotThread() {
+		return botThread;
 	}
 
 	public boolean isTeleporting() {
 		return teleporting;
-	}
-
-	private void lockAndWait() {
-		this.waiter = Thread.currentThread();
-		LockSupport.park();
 	}
 
 	public static int[] getTeleporters(DofusMap map) {

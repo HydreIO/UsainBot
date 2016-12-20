@@ -1,10 +1,13 @@
 package fr.aresrpg.eratz.domain.ia.ability;
 
+import fr.aresrpg.dofus.protocol.dialog.client.DialogCreatePacket;
+import fr.aresrpg.dofus.protocol.emote.client.EmoteUsePacket;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaapi;
 import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.data.dofus.player.Emot;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.exception.ZaapException;
 
 /**
@@ -14,6 +17,7 @@ import fr.aresrpg.eratz.domain.util.exception.ZaapException;
 public class BaseAbilityImpl implements BaseAbility {
 
 	private Perso perso;
+	private BotThread botThread = new BotThread();
 
 	public BaseAbilityImpl(Perso perso) {
 		this.perso = perso;
@@ -21,19 +25,27 @@ public class BaseAbilityImpl implements BaseAbility {
 
 	@Override
 	public void sit(boolean sit) {
-
+		if ((getPerso().getBotInfos().isSit() && !sit) || (!getPerso().getBotInfos().isSit() && sit)) getPerso().sendPacketToServer(new EmoteUsePacket().setEmoteId(1));
 	}
 
 	@Override
 	public void speakToNpc(int npcid) {
-		// TODO
+		DialogCreatePacket pkt = new DialogCreatePacket();
+		pkt.setNpcId(npcid);
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause(Thread.currentThread());
+	}
 
+	/**
+	 * @return the botThread
+	 */
+	public BotThread getBotThread() {
+		return botThread;
 	}
 
 	@Override
 	public void buyToNpc(int npcid) {
-		// TODO
-
+		
 	}
 
 	@Override
