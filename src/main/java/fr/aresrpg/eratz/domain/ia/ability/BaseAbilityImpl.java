@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.ia.ability;
 
 import fr.aresrpg.dofus.protocol.dialog.client.DialogCreatePacket;
 import fr.aresrpg.dofus.protocol.emote.client.EmoteUsePacket;
+import fr.aresrpg.dofus.protocol.party.client.PartyInvitePacket;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaapi;
 import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
@@ -9,6 +10,8 @@ import fr.aresrpg.eratz.domain.data.dofus.player.Emot;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.exception.ZaapException;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -18,6 +21,7 @@ public class BaseAbilityImpl implements BaseAbility {
 
 	private Perso perso;
 	private BotThread botThread = new BotThread();
+	private BaseAbilityState states = new BaseAbilityState();
 
 	public BaseAbilityImpl(Perso perso) {
 		this.perso = perso;
@@ -45,7 +49,7 @@ public class BaseAbilityImpl implements BaseAbility {
 
 	@Override
 	public void buyToNpc(int npcid) {
-		
+
 	}
 
 	@Override
@@ -128,8 +132,12 @@ public class BaseAbilityImpl implements BaseAbility {
 
 	@Override
 	public boolean invitPlayerToGroup(String pname) {
-		// TODO
-		return false;
+		PartyInvitePacket pkt = new PartyInvitePacket();
+		pkt.setPname(pname);
+		getPerso().getAbilities().getBaseAbility().getStates().currentInvited = pname;
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause(Thread.currentThread());
+		return getStates().partyInvitAccepted;
 	}
 
 	@Override
@@ -146,12 +154,6 @@ public class BaseAbilityImpl implements BaseAbility {
 
 	@Override
 	public void echangeWith(int id) {
-		// TODO
-
-	}
-
-	@Override
-	public void invitToGuild(String pname) {
 		// TODO
 
 	}
@@ -183,6 +185,29 @@ public class BaseAbilityImpl implements BaseAbility {
 	@Override
 	public Perso getPerso() {
 		return this.perso;
+	}
+
+	@Override
+	public boolean invitPlayerToGroupAndCancel(String name, long cancelAfter, TimeUnit unit) {
+		// TODO
+		return false;
+	}
+
+	@Override
+	public boolean defiPlayer(int id) {
+		// TODO
+		return false;
+	}
+
+	@Override
+	public boolean defiPlayerAndCancel(int id, long cancelAfter, TimeUnit unit) {
+		// TODO
+		return false;
+	}
+
+	@Override
+	public BaseAbilityState getStates() {
+		return this.states;
 	}
 
 }

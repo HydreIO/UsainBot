@@ -8,8 +8,6 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.io.handler.impl.proxy;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
-
 import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
@@ -72,7 +70,6 @@ public class LocalHandler extends BaseClientPacketHandler {
 
 	protected void transmit(Packet pkt) {
 		try {
-			LOGGER.info("[SEND:]>> " + pkt);
 			getProxy().getRemoteConnection().send(pkt);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -112,7 +109,8 @@ public class LocalHandler extends BaseClientPacketHandler {
 	public boolean parse(ProtocolRegistry registry, String packet) {
 		if (state_machine && registry == null || contains(registry)) {
 			try {
-				((SocketChannel) getProxy().getLocalConnection().getChannel()).write(ByteBuffer.wrap((packet + "\n\0").getBytes()));
+				System.out.println("[SEND direct] -> " + packet);
+				((SocketChannel) getProxy().getRemoteConnection().getChannel()).write(ByteBuffer.wrap((packet + "\n\0").getBytes()));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -136,6 +134,7 @@ public class LocalHandler extends BaseClientPacketHandler {
 
 	@Override
 	public void handle(AccountSelectCharacterPacket pkt) {
+		super.handle(pkt);
 		getAccount().getPersos().stream()
 				.filter(p -> p.getId() == pkt.getCharacterId())
 				.forEach(getAccount()::setCurrentPlayed);

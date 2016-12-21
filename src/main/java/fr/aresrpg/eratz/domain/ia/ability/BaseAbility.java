@@ -8,6 +8,8 @@ import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.exception.ZaapException;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * 
  * @since
@@ -124,13 +126,18 @@ public interface BaseAbility {
 	 */
 	boolean invitPlayerToGroup(String pname);
 
+	boolean invitPlayerToGroupAndCancel(String name, long cancelAfter, TimeUnit unit);
+
 	void acceptGroupInvitation(boolean accept);
+
+	boolean defiPlayer(int id);
+
+	// return true si le joueur accepte, false si il n'a pas eu le temps
+	boolean defiPlayerAndCancel(int id, long cancelAfter, TimeUnit unit);
 
 	void acceptDefiRequest(boolean accept);
 
 	void echangeWith(int id); // doit être blockant jusqu'a ce qu'un packet accept ou cancel arrive
-
-	void invitToGuild(String pname); // doit être blockant jusqu'a ce qu'un packet accept ou cancel arrive
 
 	void acceptEchangeRequest(boolean accept);
 
@@ -143,6 +150,8 @@ public interface BaseAbility {
 	// DEFAULT UTIL
 
 	Perso getPerso();
+
+	BaseAbilityState getStates();
 
 	default boolean goAndOpenBank() {
 		if (!isInBankMap()) {

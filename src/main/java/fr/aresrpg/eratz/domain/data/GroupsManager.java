@@ -1,9 +1,13 @@
 package fr.aresrpg.eratz.domain.data;
 
-import fr.aresrpg.eratz.domain.data.player.object.Group;
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
-import java.util.HashSet;
-import java.util.Set;
+import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.object.Group;
+import fr.aresrpg.eratz.domain.util.config.Variables;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 
@@ -11,8 +15,35 @@ import java.util.Set;
  */
 public class GroupsManager {
 
-	private static GroupsManager instance = new GroupsManager();
-	private Set<Group> groups = new HashSet<>();
+	private static final GroupsManager instance = new GroupsManager();
+	private Map<String, Group> groups = new HashMap<>();
+
+	private GroupsManager() {
+		fetchGroup();
+	}
+
+	/**
+	 * Permet d'update les groupes en fonction des comptes initialisés
+	 */
+	public void fetchGroup() {
+		Variables.GROUPS.forEach(g -> {
+			Perso boss = AccountsManager.getInstance().getPerso(g.getChef());
+			if (boss == null) LOGGER.warning("Unable to fetch group '" + g.getLabel() + "' | Boss '" + g.getChef() + "' doesn't exist !");
+			else {
+				Group gr = new Group(g.getLabel(), boss);
+				for (String s : g.getMembers()) {
+					Perso memb = AccountsManager.getInstance().getPerso(s);
+					if (memb == null) LOGGER.warning("Unable to add '" + s + "' in group '" + gr.getLabel() + "' | Perso doesn't exist !");
+					else {
+						gr.getMembers().add(memb);
+						memb.setGroup(gr);
+					}
+				}
+				groups.put(gr.getLabel(), gr);
+				LOGGER.success("Group '" + gr.getLabel() + "' initialized ! " + gr);
+			}
+		});
+	}
 
 	/**
 	 * @return the instance
@@ -24,8 +55,7 @@ public class GroupsManager {
 	/**
 	 * @return the groups
 	 */
-	public Set<Group> getGroups() {
+	public Map<String, Group> getGroups() {
 		return groups;
 	}
-
 }

@@ -28,6 +28,7 @@ import fr.aresrpg.eratz.domain.data.player.object.Group;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
 import fr.aresrpg.eratz.domain.ia.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.ia.ability.move.NavigationImpl;
+import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.mind.BaseMind;
 import fr.aresrpg.eratz.domain.ia.mind.Mind;
 import fr.aresrpg.eratz.domain.io.handler.impl.bot.BotPacketHandler;
@@ -35,7 +36,6 @@ import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -62,6 +62,7 @@ public class Perso {
 	private final Inventory inventory = new PlayerInventory(this);
 
 	private Group group;
+	private Behavior currentBehavior;
 
 	public Perso(int id, String pseudo, Account account, BotJob job, Classe classe, Genre sexe, Server srv) {
 		this.id = id;
@@ -80,6 +81,21 @@ public class Perso {
 	 */
 	public Mind getMind() {
 		return mind;
+	}
+
+	/**
+	 * @return the currentBehavior
+	 */
+	public Behavior getCurrentBehavior() {
+		return currentBehavior;
+	}
+
+	/**
+	 * @param currentBehavior
+	 *            the currentBehavior to set
+	 */
+	public void setCurrentBehavior(Behavior currentBehavior) {
+		this.currentBehavior = currentBehavior;
 	}
 
 	/**
@@ -209,13 +225,15 @@ public class Perso {
 
 	public void connect() {
 		Account a = getAccount();
-		LOGGER.info("[" + Instant.now().toString() + "] Connecting " + getPseudo());
-		if (a.isClientOnline())
-			throw new IllegalAccessError(
-					"The account of " + getPseudo() + " is already online | No need to connect the bot");
-		if (a.isBotOnline())
-			throw new IllegalAccessError("The bot " + a.getCurrentPlayed().getPseudo()
-					+ " is already online | you need to deconnect it first");
+		LOGGER.info("Connecting " + getPseudo());
+		if (a.isClientOnline()) {
+			LOGGER.error("The account of " + getPseudo() + " is already online | No need to connect the bot");
+			return;
+		}
+		if (a.isBotOnline()) {
+			LOGGER.error("The bot " + a.getCurrentPlayed().getPseudo() + " is already online | you need to deconnect it first");
+			return;
+		}
 		try {
 			SocketChannel channel = SocketChannel.open(TheBotFather.SERVER_ADRESS);
 			a.setCurrentPlayed(this);
@@ -329,8 +347,8 @@ public class Perso {
 	@Override
 	public String toString() {
 		return "Perso [account=" + account + ", id=" + id + ", pseudo=" + pseudo + ", navigation=" + navigation + ", mind=" + mind + ", abilities=" + abilities + ", logInfos=" + logInfos
-				+ ", botInfos=" + botInfos + ", mapInfos=" + mapInfos + ", fightInfos=" + fightInfos + ", statsInfos=" + statsInfos + ", debugView=" + debugView + ", server=" + server + ", inventory="
-				+ inventory + ", group=" + group + "]";
+				+ ", botInfos=" + botInfos + ", mapInfos=" + mapInfos + ", fightInfos=" + fightInfos + ", statsInfos=" + statsInfos + ", debugView=" + debugView + ", pvpInfos=" + pvpInfos
+				+ ", server=" + server + ", inventory=" + inventory + ", group=" + group + "]";
 	}
 
 }

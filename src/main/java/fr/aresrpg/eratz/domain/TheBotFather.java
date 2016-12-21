@@ -23,6 +23,7 @@ import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Configurations;
 import fr.aresrpg.eratz.domain.util.config.Configurations.Config;
 import fr.aresrpg.eratz.domain.util.config.Variables;
+import fr.aresrpg.eratz.domain.util.config.dao.GroupBean;
 import fr.aresrpg.eratz.domain.util.config.dao.PlayerBean;
 import fr.aresrpg.eratz.domain.util.config.dao.PlayerBean.PersoBean;
 
@@ -66,13 +67,16 @@ public class TheBotFather {
 			Variables.ACCOUNTS.add(new PlayerBean("Exemple1", "password", new PersoBean("Jowed", null, Server.ERATZ, Classe.ENUTROF.name(), true),
 					new PersoBean("Joe-larecolte", "bread_provider", Server.ERATZ, Classe.SRAM.name(), true)));
 			Variables.ACCOUNTS.add(new PlayerBean("Exemple2", "password"));
+			Variables.GROUPS.add(new GroupBean("Testgroup", "Jowed", "Jawad"));
 		}));
 		this.selector = Selector.open();
 		ServerSocketChannel botSocket = ServerSocketChannel.open();
-		InetSocketAddress addr = new InetSocketAddress(Constants.LOCALHOST, 2727);
+		InetSocketAddress addr = new InetSocketAddress(Variables.IP_MACHINE, Variables.PORT_BOT);
 		botSocket.bind(addr);
 		botSocket.configureBlocking(false);
 		botSocket.register(selector, botSocket.validOps());
+		AccountsManager.getInstance(); // init
+		GroupsManager.getInstance(); // init
 		Executors.FIXED.execute(() -> startServer(botSocket));
 		Executors.FIXED.execute(this::startScanner);
 	}
@@ -125,7 +129,7 @@ public class TheBotFather {
 			String[] nextLine = sc.nextLine().split(" ");
 			switch (nextLine[0].toLowerCase()) {
 				case "crash":
-					
+
 					break;
 				case "view":
 					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {

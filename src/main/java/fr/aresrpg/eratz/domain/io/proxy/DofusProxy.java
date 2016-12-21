@@ -78,6 +78,7 @@ public class DofusProxy implements Proxy {
 
 	@Override
 	public void changeConnection(DofusConnection connection, ProxyConnectionType type) {
+		LOGGER.info("Starting '" + connection.getLabel() + "' connection !");
 		try {
 			if (type == ProxyConnectionType.LOCAL) {
 				if (this.localConnection != null) this.localConnection.closeConnection();
@@ -88,7 +89,7 @@ public class DofusProxy implements Proxy {
 				if (account != null) account.setRemoteConnection(remoteConnection);
 			}
 			Executors.FIXED.execute(() -> {
-				LOGGER.info("Start connection.");
+				LOGGER.info("Connection '" + connection.getLabel() + "' Started !");
 				try {
 					connection.start();
 				} catch (Exception e) {

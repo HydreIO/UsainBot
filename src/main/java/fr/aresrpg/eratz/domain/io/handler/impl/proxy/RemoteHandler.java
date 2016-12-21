@@ -8,8 +8,6 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.io.handler.impl.proxy;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
-
 import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
@@ -41,13 +39,12 @@ import fr.aresrpg.dofus.protocol.waypoint.ZaapLeavePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapCreatePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapUseErrorPacket;
 import fr.aresrpg.dofus.structures.Chat;
-import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
 import fr.aresrpg.eratz.domain.io.handler.BaseServerPacketHandler;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy.ProxyConnectionType;
-import fr.aresrpg.eratz.domain.util.Constants;
+import fr.aresrpg.eratz.domain.util.config.Variables;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -64,7 +61,6 @@ import java.util.Objects;
 public class RemoteHandler extends BaseServerPacketHandler {
 
 	static final ProtocolRegistry[] toSkip = { ProtocolRegistry.GAME_MOVEMENT };
-	private Account account;
 	private Proxy proxy;
 
 	/**
@@ -76,30 +72,14 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	}
 
 	/**
-	 * @return the account
-	 */
-	public Account getAccount() {
-		return account;
-	}
-
-	/**
 	 * @return the proxy
 	 */
 	public Proxy getProxy() {
 		return proxy;
 	}
 
-	/**
-	 * @param account
-	 *            the account to set
-	 */
-	public void setAccount(Account account) {
-		this.account = account;
-	}
-
 	protected void transmit(Packet pkt) {
 		try {
-			LOGGER.info("[RCV:]<< " + pkt);
 			getProxy().getLocalConnection().send(pkt);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -116,6 +96,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	public boolean parse(ProtocolRegistry registry, String packet) {
 		if (registry == null || contains(registry)) {
 			try {
+				System.out.println("[RECEIVE direct] " + packet);
 				((SocketChannel) getProxy().getLocalConnection().getChannel()).write(ByteBuffer.wrap((packet + "\0").getBytes()));
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -147,8 +128,8 @@ public class RemoteHandler extends BaseServerPacketHandler {
 
 	@Override
 	public void handle(HelloConnectionPacket pkt) {
-		super.handle(pkt);
 		getProxy().setHc(pkt.getHashKey());
+		super.handle(pkt);
 		transmit(pkt);
 	}
 
@@ -167,12 +148,12 @@ public class RemoteHandler extends BaseServerPacketHandler {
 			ServerSocketChannel srvchannel = ServerSocketChannel.open();
 			srvchannel.bind(new InetSocketAddress(0));
 			int localPort = srvchannel.socket().getLocalPort();
-			getProxy().getLocalConnection().send(new AccountServerHostPacket().setIp(Constants.LOCALHOST).setPort(localPort).setTicketKey(pkt.getTicketKey()));
-			getProxy().changeConnection(
-					new DofusConnection<>("RemoteGame", SocketChannel.open(new InetSocketAddress(ip, 443)), getProxy().getRemoteHandler(), Bound.SERVER),
-					ProxyConnectionType.REMOTE);
-			getProxy().changeConnection(new DofusConnection<>("LocalGame", srvchannel.accept(), getProxy().getLocalHandler(), Bound.CLIENT),
+			getProxy().getLocalConnection().send(new AccountServerHostPacket().setIp(Variables.IP_MACHINE).setPort(localPort).setTicketKey(pkt.getTicketKey()));
+			getProxy().changeConnection(new DofusConnection<>("Client", srvchannel.accept(), getProxy().getLocalHandler(), Bound.CLIENT),
 					ProxyConnectionType.LOCAL);
+			getProxy().changeConnection(
+					new DofusConnection<>("Server", SocketChannel.open(new InetSocketAddress(ip, pkt.getPort())), getProxy().getRemoteHandler(), Bound.SERVER),
+					ProxyConnectionType.REMOTE);
 			getAccount().setState(AccountState.CLIENT_IN_GAME);
 		} catch (Exception e) {
 			e.printStackTrace();

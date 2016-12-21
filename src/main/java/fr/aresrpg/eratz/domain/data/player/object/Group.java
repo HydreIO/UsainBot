@@ -4,6 +4,7 @@ import fr.aresrpg.eratz.domain.data.player.Perso;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -11,16 +12,33 @@ import java.util.Set;
  */
 public class Group {
 
+	private String label;
 	private Perso boss;
 	private Set<Perso> members = new HashSet<>();
 
-	public Group(Perso boss) {
+	public Group(String label, Perso boss) {
 		this.boss = boss;
+		this.label = label;
 	}
 
 	public void formGroup() {
 		if (boss == null || !boss.getAccount().isActive()) throw new IllegalStateException("Unable to make group | The boss is not online");
 		getMembers().forEach(p -> boss.getAbilities().getBaseAbility().invitPlayerToGroup(p.getPseudo()));
+	}
+
+	/**
+	 * @return the label
+	 */
+	public String getLabel() {
+		return label;
+	}
+
+	/**
+	 * @param label
+	 *            the label to set
+	 */
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 	/**
@@ -47,7 +65,7 @@ public class Group {
 
 	@Override
 	public String toString() {
-		return "Group [boss=" + boss + ", members=" + members + "]";
+		return "Group [label=" + label + ", boss=" + boss + ", members=" + members.stream().map(Perso::getPseudo).collect(Collectors.toList()) + "]";
 	}
 
 }

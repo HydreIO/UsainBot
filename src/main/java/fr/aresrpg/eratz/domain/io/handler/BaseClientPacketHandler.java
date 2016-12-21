@@ -64,7 +64,7 @@ public class BaseClientPacketHandler implements ClientPacketHandler {
 	}
 
 	protected void log(Packet pkt) {
-		LOGGER.info(pkt.toString());
+		LOGGER.info("[SND]> " + pkt);
 	}
 
 	@Override

@@ -140,6 +140,7 @@ public abstract class Behavior implements Supplier<BehaviorStopReason> {
 
 	@Override
 	public BehaviorStopReason get() {
+		getPerso().setCurrentBehavior(this);
 		return run();
 	}
 

@@ -5,30 +5,32 @@ import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
  * 
  * @since
  */
-public class DuelCrashBehavior extends Behavior {
+public class GroupCrashBehavior extends Behavior {
 
 	private boolean running;
-	private int target;
+	private List<String> targets = new ArrayList<>();
 
 	/**
 	 * @param perso
 	 */
-	public DuelCrashBehavior(Perso perso) {
+	public GroupCrashBehavior(Perso perso) {
 		super(perso);
 		this.running = true;
 	}
 
 	/**
-	 * @return the target
+	 * @return the targets
 	 */
-	public int getTarget() {
-		return target;
+	public List<String> getTargets() {
+		return targets;
 	}
 
 	/**
@@ -45,15 +47,16 @@ public class DuelCrashBehavior extends Behavior {
 	@Override
 	public BehaviorStopReason start() {
 		BaseAbility ab = getPerso().getAbilities().getBaseAbility();
-		while (isRunning()) {
-			if (ab.defiPlayerAndCancel(getTarget(), 0, TimeUnit.NANOSECONDS)) break;
+		loop: while (isRunning()) {
+			for (String i : targets)
+				if (ab.invitPlayerToGroupAndCancel(i, 0, TimeUnit.NANOSECONDS)) break loop;
 		}
 		return BehaviorStopReason.FINISHED;
 	}
 
 	@Override
 	public String toString() {
-		return "DuelCrashBehavior [running=" + running + ", target=" + target + "]";
+		return "GroupCrashBehavior [running=" + running + ", targets=" + targets + "]";
 	}
 
 }

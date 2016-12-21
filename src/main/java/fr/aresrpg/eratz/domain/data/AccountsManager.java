@@ -83,6 +83,17 @@ public class AccountsManager {
 		return getAccounts().containsKey(accountname);
 	}
 
+	public Account getAccount(String accountName) {
+		return getAccounts().get(accountName);
+	}
+
+	public Perso getPerso(String pname) {
+		for (Account a : getAccounts().values())
+			for (Perso p : a.getPersos())
+				if (p.getPseudo().equalsIgnoreCase(pname)) return p;
+		return null;
+	}
+
 	/**
 	 * @return the accounts
 	 */

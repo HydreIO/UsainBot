@@ -54,6 +54,7 @@ import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
+import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.info.StatsInfo;
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
@@ -89,6 +90,7 @@ import java.util.function.Consumer;
 public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 
 	private Perso perso;
+	private Account account;
 	private String ticket;
 	private Set<FightServerHandler> fightHandler = new HashSet<>();
 	private Set<AccountServerHandler> accountHandler = new HashSet<>();
@@ -189,6 +191,21 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	 */
 	public Perso getPerso() {
 		return perso;
+	}
+
+	/**
+	 * @param account
+	 *            the account to set
+	 */
+	public void setAccount(Account account) {
+		this.account = account;
+	}
+
+	/**
+	 * @return the account
+	 */
+	public Account getAccount() {
+		return account;
 	}
 
 	/**
@@ -323,7 +340,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	}
 
 	protected void log(Packet pkt) {
-		LOGGER.info(pkt.toString());
+		LOGGER.info("[RCV:]< " + pkt);
 	}
 
 	@Override
@@ -371,7 +388,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	public void handle(AccountCharactersListPacket pkt) {
 		log(pkt);
 		for (AvailableCharacter c : pkt.getCharacters())
-			for (Perso p : getPerso().getAccount().getPersos())
+			for (Perso p : getAccount().getPersos())
 				if (p.getPseudo().equals(c.getPseudo())) p.setId(c.getId());
 		forEachAccountHandlers(h -> h.onCharacterList(pkt.getSubscriptionTime(), pkt.getCharacters()));
 	}
