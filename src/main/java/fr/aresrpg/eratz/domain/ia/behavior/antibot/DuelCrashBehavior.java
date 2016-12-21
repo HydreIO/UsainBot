@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.ia.behavior.antibot;
 
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
+import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 
@@ -46,7 +47,8 @@ public class DuelCrashBehavior extends Behavior {
 	public BehaviorStopReason start() {
 		BaseAbility ab = getPerso().getAbilities().getBaseAbility();
 		while (isRunning()) {
-			if (ab.defiPlayerAndCancel(getTarget(), 0, TimeUnit.NANOSECONDS)) break;
+			InvitationState state = ab.defiPlayerAndCancel(getTarget(), 0, TimeUnit.NANOSECONDS);
+			if (state == InvitationState.ACCEPTED) break;
 		}
 		return BehaviorStopReason.FINISHED;
 	}

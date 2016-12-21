@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.ia.behavior.antibot;
 
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
+import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 
@@ -48,8 +49,10 @@ public class GroupCrashBehavior extends Behavior {
 	public BehaviorStopReason start() {
 		BaseAbility ab = getPerso().getAbilities().getBaseAbility();
 		loop: while (isRunning()) {
-			for (String i : targets)
-				if (ab.invitPlayerToGroupAndCancel(i, 0, TimeUnit.NANOSECONDS)) break loop;
+			for (String i : targets) {
+				InvitationState st = ab.invitPlayerToGroupAndCancel(i, 0, TimeUnit.NANOSECONDS);
+				if (st == InvitationState.ACCEPTED) break loop;
+			}
 		}
 		return BehaviorStopReason.FINISHED;
 	}

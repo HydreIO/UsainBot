@@ -5,6 +5,7 @@ import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 import fr.aresrpg.dofus.structures.PartyErrorReason;
 import fr.aresrpg.dofus.structures.character.PartyMember;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.ia.behavior.antibot.DuelCrashBehavior;
 import fr.aresrpg.eratz.domain.io.handler.std.party.PartyServerHandler;
 
@@ -24,7 +25,7 @@ public class BotPartyServerHandler extends BotHandlerAbstract implements PartySe
 	@Override
 	public void onPlayerAccept() {
 		LOGGER.success(getPerso().getAbilities().getBaseAbility().getStates().currentInvited + " has joined the group '" + getPerso().getGroup().getLabel() + "' !");
-		getPerso().getAbilities().getBaseAbility().getStates().partyInvitAccepted = true;
+		getPerso().getAbilities().getBaseAbility().getStates().partyInvit = InvitationState.ACCEPTED;
 		getPerso().getAbilities().getBaseAbility().getStates().currentInvited = null;
 		if (getPerso().getCurrentBehavior() != null && getPerso().getCurrentBehavior() instanceof DuelCrashBehavior) {
 			DuelCrashBehavior ba = (DuelCrashBehavior) getPerso().getCurrentBehavior();
@@ -36,7 +37,7 @@ public class BotPartyServerHandler extends BotHandlerAbstract implements PartySe
 	@Override
 	public void onPlayerRefuse() {
 		LOGGER.info(getPerso().getAbilities().getBaseAbility().getStates().currentInvited + " refused to join the group '" + getPerso().getGroup().getLabel() + "' !");
-		getPerso().getAbilities().getBaseAbility().getStates().partyInvitAccepted = false;
+		getPerso().getAbilities().getBaseAbility().getStates().partyInvit = InvitationState.REFUSED;
 		getPerso().getAbilities().getBaseAbility().getStates().currentInvited = null;
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}
@@ -65,7 +66,7 @@ public class BotPartyServerHandler extends BotHandlerAbstract implements PartySe
 			default:
 				break;
 		}
-		getPerso().getAbilities().getBaseAbility().getStates().partyInvitAccepted = false;
+		getPerso().getAbilities().getBaseAbility().getStates().partyInvit = InvitationState.REFUSED;
 		getPerso().getAbilities().getBaseAbility().getStates().currentInvited = null;
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}

@@ -75,8 +75,6 @@ public class TheBotFather {
 		botSocket.bind(addr);
 		botSocket.configureBlocking(false);
 		botSocket.register(selector, botSocket.validOps());
-		AccountsManager.getInstance(); // init
-		GroupsManager.getInstance(); // init
 		Executors.FIXED.execute(() -> startServer(botSocket));
 		Executors.FIXED.execute(this::startScanner);
 	}

@@ -5,6 +5,7 @@ import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.map.*;
 import fr.aresrpg.eratz.domain.data.dofus.player.*;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.exception.ZaapException;
 
@@ -124,16 +125,15 @@ public interface BaseAbility {
 	 *            nom du joueur
 	 * @return true si le joueur a accepté l'invitation
 	 */
-	boolean invitPlayerToGroup(String pname);
+	InvitationState invitPlayerToGroup(String pname);
 
-	boolean invitPlayerToGroupAndCancel(String name, long cancelAfter, TimeUnit unit);
+	InvitationState invitPlayerToGroupAndCancel(String name, long cancelAfter, TimeUnit unit);
 
 	void acceptGroupInvitation(boolean accept);
 
-	boolean defiPlayer(int id);
+	InvitationState defiPlayer(int id);
 
-	// return true si le joueur accepte, false si il n'a pas eu le temps
-	boolean defiPlayerAndCancel(int id, long cancelAfter, TimeUnit unit);
+	InvitationState defiPlayerAndCancel(int id, long cancelAfter, TimeUnit unit);
 
 	void acceptDefiRequest(boolean accept);
 
