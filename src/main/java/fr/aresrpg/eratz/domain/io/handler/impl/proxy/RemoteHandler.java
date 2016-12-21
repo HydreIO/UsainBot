@@ -8,7 +8,9 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.io.handler.impl.proxy;
 
-import fr.aresrpg.dofus.protocol.*;
+import fr.aresrpg.dofus.protocol.DofusConnection;
+import fr.aresrpg.dofus.protocol.Packet;
+import fr.aresrpg.dofus.protocol.ProtocolRegistry;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
@@ -16,17 +18,25 @@ import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.aks.Aks0MessagePacket;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
-import fr.aresrpg.dofus.protocol.dialog.server.*;
+import fr.aresrpg.dofus.protocol.dialog.server.DialogCreateOkPacket;
+import fr.aresrpg.dofus.protocol.dialog.server.DialogPausePacket;
+import fr.aresrpg.dofus.protocol.dialog.server.DialogQuestionPacket;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeRequestPacket;
 import fr.aresrpg.dofus.protocol.exchange.server.*;
-import fr.aresrpg.dofus.protocol.fight.server.*;
+import fr.aresrpg.dofus.protocol.fight.server.FightCountPacket;
+import fr.aresrpg.dofus.protocol.fight.server.FightDetailsPacket;
+import fr.aresrpg.dofus.protocol.fight.server.FightListPacket;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloGamePacket;
-import fr.aresrpg.dofus.protocol.info.server.*;
+import fr.aresrpg.dofus.protocol.info.server.InfoCompassPacket;
+import fr.aresrpg.dofus.protocol.info.server.InfoCoordinatePacket;
+import fr.aresrpg.dofus.protocol.info.server.InfoMessagePacket;
 import fr.aresrpg.dofus.protocol.item.server.*;
-import fr.aresrpg.dofus.protocol.job.server.*;
+import fr.aresrpg.dofus.protocol.job.server.JobLevelPacket;
+import fr.aresrpg.dofus.protocol.job.server.JobSkillsPacket;
+import fr.aresrpg.dofus.protocol.job.server.JobXpPacket;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.party.PartyAcceptPacket;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
@@ -64,7 +74,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	private Proxy proxy;
 
 	/**
-	 * @param perso
+	 * @param proxy
 	 */
 	public RemoteHandler(Proxy proxy) {
 		super(null);
@@ -97,7 +107,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 		if (registry == null || contains(registry)) {
 			try {
 				System.out.println("[RECEIVE direct] " + packet);
-				((SocketChannel) getProxy().getLocalConnection().getChannel()).write(ByteBuffer.wrap((packet + "\0").getBytes()));
+				((SocketChannel) getProxy().getLocalConnection().getChannel()).write(ByteBuffer.wrap(packet.getBytes()));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
