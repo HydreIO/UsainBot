@@ -113,7 +113,7 @@ public class BaseAbilityImpl implements BaseAbility {
 		getPerso().sendPacketToServer(new GameClientActionPacket(GameActions.INTERRACT, action));
 		getBotThread().pause();
 		ZaapUsePacket pkt = new ZaapUsePacket();
-		pkt.setWaypointId(destination.getZaapId());
+		pkt.setWaypointId(destination.getMapId());
 		getPerso().sendPacketToServer(pkt);
 		getBotThread().pause();
 	}

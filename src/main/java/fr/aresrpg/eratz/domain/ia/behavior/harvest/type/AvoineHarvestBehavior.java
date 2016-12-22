@@ -8,6 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.ia.behavior.harvest.type;
 
+import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.harvest.HarvestBehavior;
@@ -28,6 +29,11 @@ public class AvoineHarvestBehavior extends HarvestBehavior {
 	@Override
 	public Interractable getTypesToHarvest() {
 		return Interractable.AVOINE;
+	}
+
+	@Override
+	public Skills getSkill() {
+		return Skills.FAUCHER_AVOINE;
 	}
 
 	@Override

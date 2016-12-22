@@ -63,7 +63,7 @@ public class BotExchangeServerHandler extends BotHandlerAbstract implements Exch
 	@Override
 	public void onLocalMove(int itemtype, int amount, int localkama) {
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
-
+		getPerso().getAbilities().getCraftAbility().getBotThread().unpause();
 	}
 
 	@Override
@@ -113,7 +113,7 @@ public class BotExchangeServerHandler extends BotHandlerAbstract implements Exch
 
 	@Override
 	public void onCraftLoopEnd(CraftLoopEndResult result) {
-		// TODO
+		getPerso().getAbilities().getCraftAbility().getBotThread().unpause();
 	}
 
 	@Override

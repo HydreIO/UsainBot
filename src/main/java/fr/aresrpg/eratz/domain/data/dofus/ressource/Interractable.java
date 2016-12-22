@@ -8,7 +8,6 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.data.dofus.ressource;
 
-import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.dofus.structures.job.Jobs;
 
 /**
@@ -101,7 +100,6 @@ public enum Interractable {
 
 	private int id;
 	private Jobs[] requiredJob;
-	private Skills skill;
 	public static final int ENCLOS[] = { 6766, 6767, 6763, 6772 };
 	public static final int ZAAP[] = { 7000, 7026, 7029, 4287 };
 	public static final int ATELIER[] = { 7008, 7009, 7010 };
@@ -118,12 +116,6 @@ public enum Interractable {
 	private Interractable(int id, Jobs... job) {
 		this.requiredJob = job;
 		this.id = id;
-	}
-
-	private Interractable(int id, Skills skill, Jobs... job) {
-		this.requiredJob = job;
-		this.id = id;
-		this.skill = skill;
 	}
 
 	public static Interractable fromId(int id) {

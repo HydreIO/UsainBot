@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.ability.craft;
 
+import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.Closeable;
 
 /**
@@ -8,14 +9,14 @@ import fr.aresrpg.eratz.domain.util.Closeable;
  */
 public interface CraftAbility extends Closeable {
 
-	void placeItem(int id, int quantity);
+	void startCraft();
 
-	void removeItem(int index);
-
-	void closeGui();
-
-	void startCraft(int quantity);
+	void startCraft(int nbr);
 
 	void cancelCraft();
+
+	void replaceCraft();
+
+	BotThread getBotThread();
 
 }

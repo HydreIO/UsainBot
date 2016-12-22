@@ -9,6 +9,7 @@
 package fr.aresrpg.eratz.domain.ia.behavior.harvest.type;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
+import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.harvest.HarvestBehavior;
@@ -33,6 +34,11 @@ public class SeigleHarvestBehavior extends HarvestBehavior {
 	@Override
 	public Interractable getTypesToHarvest() {
 		return Interractable.SEIGLE;
+	}
+
+	@Override
+	public Skills getSkill() {
+		return Skills.FAUCHER_SEIGLE;
 	}
 
 	@Override

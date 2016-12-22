@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.behavior.harvest;
 
+import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Perso;
@@ -77,12 +78,14 @@ public abstract class HarvestBehavior extends Behavior {
 	protected BehaviorStopReason harvestMap() {
 		Ressource next = null;
 		while ((next = nextRessource()) != null) {
-			getPerso().getAbilities().getHarvestAbility().harvest(next);
+			getPerso().getAbilities().getHarvestAbility().harvest(next, getSkill());
 			if (podMax()) return BehaviorStopReason.POD_LIMIT;
 			else if (getPerso().getQuantityInInventoryOf(getTypesToHarvest().getId()) >= getQuantity()) return BehaviorStopReason.QUANTITY_REACHED;
 		}
 		return BehaviorStopReason.FINISHED;
 	}
+
+	public abstract Skills getSkill();
 
 	/**
 	 * @return a spawned ressource on the map

@@ -12,6 +12,7 @@ import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
+import fr.aresrpg.dofus.protocol.basic.client.BasicChatMessageSendPacket;
 import fr.aresrpg.dofus.protocol.basic.client.BasicUseSmileyPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.conquest.client.WorldInfosJoinPacket;
@@ -22,6 +23,7 @@ import fr.aresrpg.dofus.protocol.emote.client.EmoteUsePacket;
 import fr.aresrpg.dofus.protocol.exchange.ExchangeLeavePacket;
 import fr.aresrpg.dofus.protocol.exchange.client.*;
 import fr.aresrpg.dofus.protocol.fight.client.*;
+import fr.aresrpg.dofus.protocol.friend.client.*;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.info.client.InfoMapPacket;
 import fr.aresrpg.dofus.protocol.item.client.*;
@@ -615,7 +617,30 @@ public class LocalHandler extends BaseClientPacketHandler {
 	public void handle(PartyRefusePacket pkt) {
 		super.handle(pkt);
 		transmit(pkt);
+	}
 
+	@Override
+	public void handle(BasicChatMessageSendPacket pkt) {
+		super.handle(pkt);
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(FriendAddPacket pkt) {
+		super.handle(pkt);
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(FriendGetListPacket pkt) {
+		super.handle(pkt);
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(FriendRemovePacket pkt) {
+		super.handle(pkt);
+		transmit(pkt);
 	}
 
 }

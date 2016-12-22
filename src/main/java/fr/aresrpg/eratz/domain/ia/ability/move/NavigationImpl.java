@@ -142,13 +142,13 @@ public class NavigationImpl implements Navigation {
 			int dHi = ((map.getHeight() - 1) * 2) - i;
 			int dWi = (map.getWidth() * 2 - 1) - i;
 			if (t[0] == -1)
-				t[0] = getCaseWithMovement(map.getCells(), 2, 1030, i, dWi, i, i, map.getWidth());
+				t[0] = getCaseWithMovement(map.getCells(), 2, 1030, 1030, i, dWi, i, i, map.getWidth());
 			if (t[1] == -1)
-				t[1] = getCaseWithMovement(map.getCells(), 2, 1030, i, i, i, dHi, map.getWidth());
+				t[1] = getCaseWithMovement(map.getCells(), 2, 1030, 1030, i, i, i, dHi, map.getWidth());
 			if (t[2] == -1)
-				t[2] = getCaseWithMovement(map.getCells(), 2, 1030, i, dWi, dHi, dHi, map.getWidth());
+				t[2] = getCaseWithMovement(map.getCells(), 2, 1030, 1030, i, dWi, dHi, dHi, map.getWidth());
 			if (t[3] == -1)
-				t[3] = getCaseWithMovement(map.getCells(), 2, 1030, dWi, dWi, i, dHi, map.getWidth());
+				t[3] = getCaseWithMovement(map.getCells(), 2, 1030, 1030, dWi, dWi, i, dHi, map.getWidth());
 		}
 		return t;
 	}
@@ -162,7 +162,7 @@ public class NavigationImpl implements Navigation {
 		return -1;
 	}
 
-	public static int getCaseWithMovement(Cell[] cells, int movement, int object1num, int xFrom, int xTo, int yFrom, int yTo, int width) {
+	public static int getCaseWithMovement(Cell[] cells, int movement, int object1num, int object2num, int xFrom, int xTo, int yFrom, int yTo, int width) {
 		for (int x = xFrom; x <= xTo; x++)
 			for (int y = yFrom; y <= yTo; y++) {
 				int id = Maps.getId(x, y, width);

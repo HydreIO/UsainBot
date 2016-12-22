@@ -8,6 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.ia.ability.harvest;
 
+import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
 import fr.aresrpg.eratz.domain.util.Closeable;
 
@@ -17,6 +18,6 @@ import fr.aresrpg.eratz.domain.util.Closeable;
  */
 public interface HarvestAbility extends Closeable {
 
-	void harvest(Ressource r);
+	void harvest(Ressource r, Skills skill);
 
 }
