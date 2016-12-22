@@ -1,10 +1,10 @@
 package fr.aresrpg.eratz.domain.io.handler.bot.handler;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
-
 import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.commons.domain.util.Randoms;
-import fr.aresrpg.dofus.protocol.*;
+import fr.aresrpg.dofus.protocol.DofusConnection;
+import fr.aresrpg.dofus.protocol.PacketHandler;
+import fr.aresrpg.dofus.protocol.ProtocolRegistry;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
@@ -25,6 +25,8 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 /**
  * 
@@ -108,14 +110,14 @@ public class BotAccountServerHandler extends BotHandlerAbstract implements Accou
 				LOGGER.warning(format + retry + " ~20s");
 				ms = unit.convert(Randoms.nextBetween(15, 28), TimeUnit.SECONDS);
 				break;
-			case KICKED:
 			case SERVER_FULL:
 				LOGGER.warning(format + retry + " ~10min");
 				ms = unit.convert(Randoms.nextBetween(8, 15), TimeUnit.MINUTES);
 				break;
+			case KICKED:
 			case BANNED:
-				LOGGER.warning("The bot was banned " + minutes + "min :( ! " + retry + " ~" + (minutes + 5) + "min");
-				ms = unit.convert(Randoms.nextBetween(minutes, minutes + Randoms.nextInt(10)), TimeUnit.MINUTES);
+				LOGGER.warning("The bot was banned " + minutes + "min :( ! " + retry + " " + (minutes + 1) + "min");
+				ms = unit.convert(Randoms.nextBetween(minutes, minutes + 1), TimeUnit.MINUTES);
 				break;
 			default:
 				LOGGER.error(format);

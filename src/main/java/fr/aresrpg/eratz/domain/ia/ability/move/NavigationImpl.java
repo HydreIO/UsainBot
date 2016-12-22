@@ -1,7 +1,5 @@
 package fr.aresrpg.eratz.domain.ia.ability.move;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
-
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.GameActionACKPacket;
 import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
@@ -15,11 +13,13 @@ import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
-import java.awt.Point;
+import java.awt.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 /**
  *
@@ -89,6 +89,14 @@ public class NavigationImpl implements Navigation {
 				return this;
 			}
 		}
+		System.out.println("Current :" + getCurrentPos());
+		float time = Pathfinding.getPathTime(
+				p,
+				getMap().getCells(),
+				getMap().getWidth(),
+				false
+		);
+		System.out.println("TIME: " + time);
 		getPerso().getDebugView().setPath(p);
 		teleporting = teleport;
 		try {
@@ -101,7 +109,7 @@ public class NavigationImpl implements Navigation {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			} , 5, TimeUnit.SECONDS);
+			} , (long) (time * 30), TimeUnit.MILLISECONDS);
 			getBotThread().pause(Thread.currentThread());
 		} catch (IOException e) {
 			e.printStackTrace();
