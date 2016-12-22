@@ -7,8 +7,10 @@ import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility.BuyResult;
 import fr.aresrpg.eratz.domain.std.exchange.ExchangeServerHandler;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -44,6 +46,7 @@ public class BotExchangeServerHandler extends BotHandlerAbstract implements Exch
 	@Override
 	public void onExchangeRequestOk(int playerId, int targetId, Exchange exchange) {
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
+		Executors.SCHEDULED.schedule(() -> getPerso().getAbilities().getBaseAbility().acceptEchangeRequest(true), 3, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -66,7 +69,7 @@ public class BotExchangeServerHandler extends BotHandlerAbstract implements Exch
 	@Override
 	public void onDistantMove(Item moved, boolean added, int kamas, int remainingHours) {
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
-		getPerso().getAbilities().getBaseAbility().confirmExchange();
+		Executors.SCHEDULED.schedule(getPerso().getAbilities().getBaseAbility()::confirmExchange, 2, TimeUnit.SECONDS);
 	}
 
 	@Override

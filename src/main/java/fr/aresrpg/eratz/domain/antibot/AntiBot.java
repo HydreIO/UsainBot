@@ -19,9 +19,10 @@ import java.util.concurrent.TimeUnit;
 public class AntiBot implements Scheduled {
 
 	private static final AntiBot INSTANCE = new AntiBot();
+	public static final boolean ENABLED = false;
 
 	private AntiBot() {
-		Executors.SCHEDULER.register(this);
+		if (ENABLED) Executors.SCHEDULER.register(this);
 	}
 
 	/**

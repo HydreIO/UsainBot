@@ -28,7 +28,7 @@ public class BotFriendServerHandler extends BotHandlerAbstract implements Friend
 
 	@Override
 	public void onOnlineFriends(List<Friend> friends) {
-		if (getPerso().getBotInfos().getBotJob() == BotJob.CRASHER) friends.forEach(f -> AntiBot.getInstance().notifyCrash(getPerso(), f.getName()));
+		if (AntiBot.ENABLED) if (getPerso().getBotInfos().getBotJob() == BotJob.CRASHER) friends.forEach(f -> AntiBot.getInstance().notifyCrash(getPerso(), f.getName()));
 	}
 
 }
