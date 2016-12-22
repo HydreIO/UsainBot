@@ -10,10 +10,10 @@ package fr.aresrpg.eratz.domain.ia.behavior.move;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
+import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.ExchangeMove;
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.eratz.domain.data.ItemsData;
-import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
@@ -57,7 +57,7 @@ public class BankDepositPath extends Behavior {
 		MovedItem[] array = inv.stream().map(it -> new MovedItem(ExchangeMove.ADD, it.getUid(), it.getQuantity())).toArray(MovedItem[]::new);
 		ability.moveItem(array);
 		waitLitle();
-		ability.speak(Channel.ADMIN, "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",", "[", "]")) + " en banque !");
+		ability.speak(Chat.ADMIN, "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",", "[", "]")) + " en banque !");
 		return BehaviorStopReason.FINISHED;
 	}
 

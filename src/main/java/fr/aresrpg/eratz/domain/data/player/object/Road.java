@@ -1,10 +1,10 @@
 package fr.aresrpg.eratz.domain.data.player.object;
 
+import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.PathDirection;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
-import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 
 import java.awt.Point;
@@ -71,7 +71,7 @@ public class Road {
 				if (!perso.getMapInfos().getMap().equals(newmap)) break val; // changement map réussi, on sort pour recalculer un chemin
 			}
 			if (perso.getMapInfos().getMap().equals(newmap)) { // si tjr pas changé de map on abandonne
-				perso.getAbilities().getBaseAbility().speak(Channel.ADMIN, "Imposible de rejoindre la route " + label + " ! Blocké en %pos%");
+				perso.getAbilities().getBaseAbility().speak(Chat.ADMIN, "Imposible de rejoindre la route " + label + " ! Blocké en %pos%");
 				perso.crashReport("Imposible de rejoindre la route désignée ! Blocké en [" + p.getX() + "," + p.getY() + "]");
 			}
 		}

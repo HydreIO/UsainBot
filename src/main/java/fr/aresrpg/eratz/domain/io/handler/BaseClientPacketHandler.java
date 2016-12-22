@@ -14,8 +14,9 @@ import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
+import fr.aresrpg.dofus.protocol.basic.client.BasicChatMessageSendPacket;
+import fr.aresrpg.dofus.protocol.basic.client.BasicUseSmileyPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
-import fr.aresrpg.dofus.protocol.chat.client.BasicUseSmileyPacket;
 import fr.aresrpg.dofus.protocol.conquest.client.WorldInfosJoinPacket;
 import fr.aresrpg.dofus.protocol.conquest.client.WorldInfosLeavePacket;
 import fr.aresrpg.dofus.protocol.dialog.DialogLeavePacket;
@@ -505,6 +506,11 @@ public class BaseClientPacketHandler implements ClientPacketHandler {
 
 	@Override
 	public void handle(FriendRemovePacket pkt) {
+		log(pkt);
+	}
+
+	@Override
+	public void handle(BasicChatMessageSendPacket pkt) {
 		log(pkt);
 	}
 

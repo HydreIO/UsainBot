@@ -1,6 +1,8 @@
 package fr.aresrpg.eratz.domain.ia.ability;
 
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
+import fr.aresrpg.dofus.protocol.basic.client.BasicChatMessageSendPacket;
+import fr.aresrpg.dofus.protocol.basic.client.BasicUseSmileyPacket;
 import fr.aresrpg.dofus.protocol.dialog.DialogLeavePacket;
 import fr.aresrpg.dofus.protocol.dialog.client.DialogCreatePacket;
 import fr.aresrpg.dofus.protocol.dialog.client.DialogResponsePacket;
@@ -9,19 +11,20 @@ import fr.aresrpg.dofus.protocol.exchange.ExchangeLeavePacket;
 import fr.aresrpg.dofus.protocol.exchange.client.*;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
 import fr.aresrpg.dofus.protocol.friend.client.*;
+import fr.aresrpg.dofus.protocol.game.actions.GameAction;
 import fr.aresrpg.dofus.protocol.game.actions.GameActions;
 import fr.aresrpg.dofus.protocol.game.actions.client.*;
 import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
-import fr.aresrpg.dofus.protocol.game.server.GameServerActionPacket;
+import fr.aresrpg.dofus.protocol.item.client.ItemMovementPacket;
 import fr.aresrpg.dofus.protocol.item.client.ItemUsePacket;
+import fr.aresrpg.dofus.protocol.party.PartyAcceptPacket;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.client.PartyInvitePacket;
 import fr.aresrpg.dofus.protocol.waypoint.client.ZaapUsePacket;
 import fr.aresrpg.dofus.structures.*;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaapi;
-import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
-import fr.aresrpg.eratz.domain.data.dofus.player.Emot;
+import fr.aresrpg.eratz.domain.data.dofus.player.Smiley;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.util.BotThread;
@@ -107,7 +110,7 @@ public class BaseAbilityImpl implements BaseAbility {
 	@Override
 	public void useZaap(Zaap current, Zaap destination) throws ZaapException {
 		GameInteractionAction action = new GameInteractionAction(current.getCellId(), Skills.UTILISER);
-		getPerso().sendPacketToServer(new GameServerActionPacket(GameActions.INTERRACT, action, getPerso().getId()));
+		getPerso().sendPacketToServer(new GameClientActionPacket(GameActions.INTERRACT, action));
 		getBotThread().pause();
 		ZaapUsePacket pkt = new ZaapUsePacket();
 		pkt.setWaypointId(destination.getZaapId());
@@ -167,75 +170,89 @@ public class BaseAbilityImpl implements BaseAbility {
 	}
 
 	@Override
-	public void useCraftingMachine(int choice) {
-		// TODO
-
+	public void interract(Skills s, int cell) {
+		GameInteractionAction action = new GameInteractionAction(cell, s);
+		getPerso().sendPacketToServer(new GameClientActionPacket(GameActions.INTERRACT, action));
+		getBotThread().pause();
 	}
 
 	@Override
-	public void speak(Channel canal, String msg) {
-		// TODO
-
+	public void speak(Chat canal, String msg) {
+		BasicChatMessageSendPacket pkt = new BasicChatMessageSendPacket();
+		pkt.setChat(canal);
+		pkt.setMsg(msg);
+		getPerso().sendPacketToServer(pkt);
 	}
 
 	@Override
 	public void sendPm(String playername, String msg) {
-		// TODO
-
+		BasicChatMessageSendPacket pkt = new BasicChatMessageSendPacket();
+		pkt.setDest(playername);
+		pkt.setMsg(msg);
+		getPerso().sendPacketToServer(pkt);
 	}
 
 	@Override
-	public void equip(int itemId) {
-		// TODO
-
+	public void equip(EquipmentPosition pos, int itemId) {
+		ItemMovementPacket pkt = new ItemMovementPacket();
+		pkt.setItemid(itemId);
+		pkt.setPosition(pos.getPosition());
+		pkt.setQuantity(1);
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause();
 	}
 
 	@Override
-	public void dismantle(int slot) {
-		// TODO
-
+	public void dismantle(EquipmentPosition pos) {
+		ItemMovementPacket pkt = new ItemMovementPacket();
+		pkt.setItemid(getPerso().getInventory().getEquiped().get(pos));
+		pkt.setPosition(EquipmentPosition.NO_EQUIPED.getPosition());
+		pkt.setQuantity(1);
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause();
 	}
 
 	@Override
 	public void acceptGroupInvitation(boolean accept) {
-		// TODO
-
+		if (accept) getPerso().sendPacketToServer(new PartyAcceptPacket());
+		else getPerso().sendPacketToServer(new PartyRefusePacket());
 	}
 
 	@Override
-	public void acceptDefiRequest(boolean accept) {
-		// TODO
-
+	public void acceptDefiRequest(int player, boolean accept) {
+		GameAction a = accept ? new GameAcceptDuelAction(player) : new GameRefuseDuelAction(player);
+		GameActions ac = accept ? GameActions.ACCEPT_DUEL : GameActions.REFUSE_DUEL;
+		getPerso().sendPacketToServer(new GameClientActionPacket(ac, a));
 	}
 
 	@Override
 	public void echangeWith(int id) {
-		// TODO
-
+		ExchangeRequestPacket pkt = new ExchangeRequestPacket(Exchange.EXCHANGE, id);
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause();
 	}
 
 	@Override
 	public void acceptEchangeRequest(boolean accept) {
-		// TODO
-
+		getPerso().sendPacketToServer(new ExchangeAcceptPacket());
 	}
 
 	@Override
 	public void acceptGuildInvitation(boolean accept) {
-		// TODO
+		throw new NotImplementedException();
 
 	}
 
 	@Override
 	public void setItemInHotBar(int itemId, int slot) {
-		// TODO
-
+		throw new NotImplementedException();
 	}
 
 	@Override
-	public void sendEmot(Emot emot) {
-		// TODO
-
+	public void sendSmiley(Smiley emot) {
+		BasicUseSmileyPacket pkt = new BasicUseSmileyPacket();
+		pkt.setSmileyId(emot.getId());
+		getPerso().sendPacketToServer(pkt);
 	}
 
 	@Override

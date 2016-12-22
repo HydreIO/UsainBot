@@ -12,8 +12,8 @@ import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
+import fr.aresrpg.dofus.protocol.basic.client.BasicUseSmileyPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
-import fr.aresrpg.dofus.protocol.chat.client.BasicUseSmileyPacket;
 import fr.aresrpg.dofus.protocol.conquest.client.WorldInfosJoinPacket;
 import fr.aresrpg.dofus.protocol.conquest.client.WorldInfosLeavePacket;
 import fr.aresrpg.dofus.protocol.dialog.DialogLeavePacket;
@@ -32,6 +32,7 @@ import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.client.*;
 import fr.aresrpg.dofus.protocol.waypoint.ZaapLeavePacket;
 import fr.aresrpg.dofus.protocol.waypoint.client.ZaapUsePacket;
+import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.data.AccountsManager;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.io.handler.BaseClientPacketHandler;
@@ -73,6 +74,8 @@ public class LocalHandler extends BaseClientPacketHandler {
 			getProxy().getRemoteConnection().send(pkt);
 		} catch (IOException e) {
 			e.printStackTrace();
+			TheBotFather.LOGGER.error("Client disconnected");
+			getPerso().getAccount().getCurrentPlayed().shutdown();
 		}
 	}
 
@@ -113,6 +116,8 @@ public class LocalHandler extends BaseClientPacketHandler {
 				((SocketChannel) getProxy().getRemoteConnection().getChannel()).write(ByteBuffer.wrap(packet.getBytes()));
 			} catch (IOException e) {
 				e.printStackTrace();
+				TheBotFather.LOGGER.error("Client disconnected");
+				getPerso().getAccount().getCurrentPlayed().shutdown();
 			}
 			return true;
 		}

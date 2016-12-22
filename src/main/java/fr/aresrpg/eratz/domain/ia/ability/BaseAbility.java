@@ -1,10 +1,12 @@
 package fr.aresrpg.eratz.domain.ia.ability;
 
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
+import fr.aresrpg.dofus.structures.*;
 import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems;
 import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.map.*;
-import fr.aresrpg.eratz.domain.data.dofus.player.*;
+import fr.aresrpg.eratz.domain.data.dofus.player.BotPopo;
+import fr.aresrpg.eratz.domain.data.dofus.player.Smiley;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.util.BotThread;
@@ -108,12 +110,7 @@ public interface BaseAbility extends Closeable {
 		return useItem(item.getId());
 	}
 
-	/**
-	 * Juste une interraction je pense
-	 * 
-	 * @param choice
-	 */
-	void useCraftingMachine(int choice);
+	void interract(Skills s, int cell);
 
 	void dialogLeave();
 
@@ -121,13 +118,13 @@ public interface BaseAbility extends Closeable {
 
 	void confirmExchange();
 
-	void speak(Channel canal, String msg); // Impl note: si msg trop long split en plusieurs msg;
+	void speak(Chat canal, String msg); // Impl note: si msg trop long split en plusieurs msg;
 
 	void sendPm(String playername, String msg); // Impl note: si msg trop long split en plusieurs msg;
 
-	void equip(int itemId); // equip un item
+	void equip(EquipmentPosition pos, int itemId); // equip un item
 
-	void dismantle(int slot); // déséquiper
+	void dismantle(EquipmentPosition pos); // déséquiper
 
 	/**
 	 * Invite un joueur dans un groupe et attend une réponse
@@ -146,7 +143,7 @@ public interface BaseAbility extends Closeable {
 
 	InvitationState defiPlayerAndCancel(int id, long cancelAfter, TimeUnit unit);
 
-	void acceptDefiRequest(boolean accept);
+	void acceptDefiRequest(int playerid, boolean accept);
 
 	void echangeWith(int id); // doit être blockant jusqu'a ce qu'un packet accept ou cancel arrive
 
@@ -156,7 +153,7 @@ public interface BaseAbility extends Closeable {
 
 	void setItemInHotBar(int itemId, int slot); // peut etre useless je sais pas comment ça fonctionne, a suprimer si le packet use item est le meme !
 
-	void sendEmot(Emot emot);
+	void sendSmiley(Smiley emot);
 
 	// DEFAULT UTIL
 

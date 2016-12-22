@@ -14,6 +14,8 @@ public interface GameActionServerHandler {
 
 	void onActionStart(int charactereId);
 
+	void onActionError();
+
 	void onActionFinish(int ackId, int characterId);
 
 	void onEntityLifeChange(int entityId, int life);

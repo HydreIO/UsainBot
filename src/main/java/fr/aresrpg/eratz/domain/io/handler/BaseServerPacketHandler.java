@@ -17,9 +17,9 @@ import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.aks.Aks0MessagePacket;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
+import fr.aresrpg.dofus.protocol.chat.server.ChatMessageOkPacket;
 import fr.aresrpg.dofus.protocol.dialog.DialogLeavePacket;
 import fr.aresrpg.dofus.protocol.dialog.server.*;
-import fr.aresrpg.dofus.protocol.exchange.client.ExchangeRequestPacket;
 import fr.aresrpg.dofus.protocol.exchange.server.*;
 import fr.aresrpg.dofus.protocol.fight.server.*;
 import fr.aresrpg.dofus.protocol.friend.server.FriendListPacket;
@@ -397,6 +397,12 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	}
 
 	@Override
+	public void handle(ChatMessageOkPacket pkt) {
+		log(pkt);
+		getChatHandler().forEach(h -> h.onMsg(pkt.getChat(), pkt.getPlayerId(), pkt.getPseudo(), pkt.getMsg()));
+	}
+
+	@Override
 	public void handle(ChatSubscribeChannelPacket pkt) {
 		log(pkt);
 		if (pkt.isAdd()) getChatHandler().forEach(h -> h.onSubscribeChannel(pkt.getChannels()));
@@ -522,12 +528,6 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	public void handle(ExchangeListPacket pkt) {
 		log(pkt);
 		getExchangeHandler().forEach(h -> h.onInventoryList(pkt.getInvType(), pkt.getItems(), pkt.getKamas()));
-	}
-
-	@Override
-	public void handle(ExchangeRequestPacket pkt) {
-		log(pkt);
-		getExchangeHandler().forEach(h -> h.onExchangeRequest(pkt.getTargetId(), pkt.getExchange(), pkt.getCellid()));
 	}
 
 	@Override
@@ -744,7 +744,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 		log(pkt);
 		switch (pkt.getType()) {
 			case ERROR:
-				getGameHandler().forEach(GameServerHandler::onActionError);
+				getGameActionHandler().forEach(GameActionServerHandler::onActionError);
 				break;
 			case LIFE_CHANGE:
 				GameLifeChangeAction actionl = (GameLifeChangeAction) pkt.getAction();

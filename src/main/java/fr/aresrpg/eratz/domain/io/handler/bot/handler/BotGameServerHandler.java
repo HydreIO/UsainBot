@@ -103,12 +103,6 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 	}
 
 	@Override
-	public void onActionError() {
-		// TODO
-
-	}
-
-	@Override
 	public void onEntityFightPositionChange(int entityId, int position) {
 		// TODO
 

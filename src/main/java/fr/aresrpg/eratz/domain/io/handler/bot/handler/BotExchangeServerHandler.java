@@ -27,9 +27,9 @@ public class BotExchangeServerHandler extends BotHandlerAbstract implements Exch
 	public void onCreate(Exchange type, ExchangeData datas) {
 		switch (type) {
 			case NPC_SHOP:
+			case EXCHANGE:
 				getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 				break;
-
 			default:
 				break;
 		}
@@ -42,15 +42,8 @@ public class BotExchangeServerHandler extends BotHandlerAbstract implements Exch
 	}
 
 	@Override
-	public void onExchangeRequest(int targetId, Exchange exchange, int cell) {
-		// TODO
-
-	}
-
-	@Override
 	public void onExchangeRequestOk(int playerId, int targetId, Exchange exchange) {
-		// TODO
-
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}
 
 	@Override
@@ -74,13 +67,11 @@ public class BotExchangeServerHandler extends BotHandlerAbstract implements Exch
 	public void onDistantMove(Item moved, boolean added, int kamas, int remainingHours) {
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		getPerso().getAbilities().getBaseAbility().confirmExchange();
-
 	}
 
 	@Override
 	public void onCoopMove(Item moved, int kamas, boolean added) {
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
-
 	}
 
 	@Override
@@ -115,13 +106,11 @@ public class BotExchangeServerHandler extends BotHandlerAbstract implements Exch
 	@Override
 	public void onCraftLoop(int index) {
 		// TODO
-
 	}
 
 	@Override
 	public void onCraftLoopEnd(CraftLoopEndResult result) {
 		// TODO
-
 	}
 
 	@Override

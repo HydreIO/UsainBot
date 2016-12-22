@@ -13,6 +13,7 @@ import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.Packet;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
+import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.dofus.structures.server.DofusServer;
 import fr.aresrpg.dofus.structures.server.Server;
@@ -22,7 +23,6 @@ import fr.aresrpg.eratz.domain.data.AccountsManager;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.player.*;
 import fr.aresrpg.eratz.domain.data.player.info.*;
-import fr.aresrpg.eratz.domain.data.player.inventory.Inventory;
 import fr.aresrpg.eratz.domain.data.player.inventory.PlayerInventory;
 import fr.aresrpg.eratz.domain.data.player.object.Group;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
@@ -60,7 +60,7 @@ public class Perso implements Closeable {
 	private final PvpInfo pvpInfos = new PvpInfo(this);
 
 	private final Server server;
-	private final Inventory inventory = new PlayerInventory(this);
+	private final PlayerInventory inventory = new PlayerInventory(this);
 
 	private Group group;
 	private Behavior currentBehavior;
@@ -207,7 +207,7 @@ public class Perso implements Closeable {
 	/**
 	 * @return the inventory
 	 */
-	public Inventory getInventory() {
+	public PlayerInventory getInventory() {
 		return inventory;
 	}
 
@@ -293,7 +293,7 @@ public class Perso implements Closeable {
 	}
 
 	public void crashReport(String msg) {
-		getAbilities().getBaseAbility().speak(Channel.ADMIN, msg);
+		getAbilities().getBaseAbility().speak(Chat.ADMIN, msg);
 		disconnect(msg);
 	}
 

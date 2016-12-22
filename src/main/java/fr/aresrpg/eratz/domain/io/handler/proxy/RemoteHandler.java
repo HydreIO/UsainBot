@@ -18,7 +18,6 @@ import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.protocol.dialog.DialogLeavePacket;
 import fr.aresrpg.dofus.protocol.dialog.server.*;
-import fr.aresrpg.dofus.protocol.exchange.client.ExchangeRequestPacket;
 import fr.aresrpg.dofus.protocol.exchange.server.*;
 import fr.aresrpg.dofus.protocol.fight.server.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
@@ -85,6 +84,8 @@ public class RemoteHandler extends BaseServerPacketHandler {
 			getProxy().getLocalConnection().send(pkt);
 		} catch (IOException e) {
 			e.printStackTrace();
+			TheBotFather.LOGGER.error("Client disconnected");
+			getPerso().getAccount().getCurrentPlayed().shutdown();
 		}
 	}
 
@@ -103,7 +104,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 			} catch (IOException e) {
 				e.printStackTrace();
 				TheBotFather.LOGGER.error("Client disconnected");
-				//getPerso().getAccount().
+				getPerso().getAccount().getCurrentPlayed().shutdown();
 			}
 			return true;
 		}
@@ -311,13 +312,6 @@ public class RemoteHandler extends BaseServerPacketHandler {
 
 	@Override
 	public void handle(ExchangeListPacket pkt) {
-		super.handle(pkt);
-		transmit(pkt);
-
-	}
-
-	@Override
-	public void handle(ExchangeRequestPacket pkt) {
 		super.handle(pkt);
 		transmit(pkt);
 

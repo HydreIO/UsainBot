@@ -4,11 +4,13 @@ import fr.aresrpg.dofus.structures.Chat;
 
 /**
  * 
- * @since 
+ * @since
  */
 public interface ChatServerHandler {
 
 	void onSubscribeChannel(Chat[] added);
-	
+
 	void onUnsubscribe(Chat[] removed);
+
+	void onMsg(Chat chat, int player, String pseudo, String msg);
 }

@@ -39,8 +39,6 @@ public interface GameServerHandler {
 
 	void onMobGroupMove(MovementMonsterGroup mobs);
 
-	void onActionError();
-
 	void onEntityFightPositionChange(int entityId, int position);
 
 	void onPlayerReadyToFight(int entityId, boolean ready);

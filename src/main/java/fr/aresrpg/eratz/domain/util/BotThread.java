@@ -9,8 +9,11 @@ import java.util.concurrent.locks.LockSupport;
 public class BotThread {
 
 	private Thread thread;
+	private boolean paused;
 
 	public void pause(Thread thread) {
+		if (paused) return;
+		paused = true;
 		this.thread = thread;
 		LockSupport.park();
 	}
@@ -20,7 +23,11 @@ public class BotThread {
 	}
 
 	public void unpause() {
-		if (thread != null) LockSupport.unpark(thread);
+		if (!paused) return;
+		if (thread != null) {
+			paused = false;
+			LockSupport.unpark(thread);
+		}
 	}
 
 }

@@ -116,4 +116,9 @@ public class BotGameActionServerHandler extends BotHandlerAbstract implements Ga
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}
 
+	@Override
+	public void onActionError() {
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
+	}
+
 }

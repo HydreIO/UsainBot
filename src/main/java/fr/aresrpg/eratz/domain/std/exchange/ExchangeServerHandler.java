@@ -16,8 +16,6 @@ public interface ExchangeServerHandler {
 
 	void onInventoryList(Exchange type, Collection<Item> items, int kamas);
 
-	void onExchangeRequest(int targetId, Exchange exchange, int cell);
-
 	void onExchangeRequestOk(int playerId, int targetId, Exchange exchange);
 
 	void onExchangeReady(int datas);

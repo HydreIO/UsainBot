@@ -3,8 +3,8 @@ package fr.aresrpg.eratz.domain.ia.mind;
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.functional.suplier.Supplier;
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
+import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
-import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
@@ -51,7 +51,7 @@ public class BaseMind implements Mind {
 			Supplier<BehaviorStopReason> next = getActions().poll();
 			switch (next.get()) { // possibilité d'effectuer des actions selon le type de retour
 				case QUANTITY_REACHED:
-					getPerso().getAbilities().getBaseAbility().speak(Channel.ADMIN, "Récolte terminée.");
+					getPerso().getAbilities().getBaseAbility().speak(Chat.ADMIN, "Récolte terminée.");
 					break;
 			}
 			if (infinite) getActions().add(next); // si infinite loop ajout a la queue
