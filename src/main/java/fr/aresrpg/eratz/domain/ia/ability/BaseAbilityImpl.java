@@ -1,15 +1,23 @@
 package fr.aresrpg.eratz.domain.ia.ability;
 
+import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
+import fr.aresrpg.dofus.protocol.dialog.DialogLeavePacket;
 import fr.aresrpg.dofus.protocol.dialog.client.DialogCreatePacket;
+import fr.aresrpg.dofus.protocol.dialog.client.DialogResponsePacket;
 import fr.aresrpg.dofus.protocol.emote.client.EmoteUsePacket;
+import fr.aresrpg.dofus.protocol.exchange.ExchangeLeavePacket;
+import fr.aresrpg.dofus.protocol.exchange.client.*;
+import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
 import fr.aresrpg.dofus.protocol.friend.client.*;
 import fr.aresrpg.dofus.protocol.game.actions.GameActions;
-import fr.aresrpg.dofus.protocol.game.actions.client.GameDuelAction;
-import fr.aresrpg.dofus.protocol.game.actions.client.GameRefuseDuelAction;
+import fr.aresrpg.dofus.protocol.game.actions.client.*;
 import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
+import fr.aresrpg.dofus.protocol.game.server.GameServerActionPacket;
+import fr.aresrpg.dofus.protocol.item.client.ItemUsePacket;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.client.PartyInvitePacket;
-import fr.aresrpg.dofus.structures.Emotes;
+import fr.aresrpg.dofus.protocol.waypoint.client.ZaapUsePacket;
+import fr.aresrpg.dofus.structures.*;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaapi;
 import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
@@ -20,7 +28,10 @@ import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.exception.ZaapException;
 
+import java.util.Arrays;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -74,59 +85,89 @@ public class BaseAbilityImpl implements BaseAbility {
 
 	@Override
 	public void buyToNpc(int npcid) {
-
+		ExchangeRequestPacket pkt = new ExchangeRequestPacket(Exchange.NPC_SHOP, npcid);
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause(Thread.currentThread());
 	}
 
 	@Override
 	public void npcTalkChoice(int questionId, int responseId) {
-		// TODO
-
+		getPerso().sendPacketToServer(new DialogResponsePacket(questionId, responseId));
+		getBotThread().pause();
 	}
 
 	@Override
 	public BuyResult npcBuyChoice(int itemId, int quantity) {
-		// TODO
-		return null;
+		ExchangeBuyToNpcPacket pkt = new ExchangeBuyToNpcPacket(itemId, quantity);
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause();
+		return getStates().buyResult;
 	}
 
 	@Override
-	public BaseAbility useZaap(Zaap current, Zaap destination) throws ZaapException {
-		// TODO
-		return null;
+	public void useZaap(Zaap current, Zaap destination) throws ZaapException {
+		GameInteractionAction action = new GameInteractionAction(current.getCellId(), Skills.UTILISER);
+		getPerso().sendPacketToServer(new GameServerActionPacket(GameActions.INTERRACT, action, getPerso().getId()));
+		getBotThread().pause();
+		ZaapUsePacket pkt = new ZaapUsePacket();
+		pkt.setWaypointId(destination.getZaapId());
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause();
 	}
 
 	@Override
 	public boolean useZaapi(Zaapi current, Zaapi destination) {
-		// TODO
-		return false;
+		throw new NotImplementedException();
 	}
 
 	@Override
-	public void moveItem(int itemId, int amount) {
-		// TODO
-
+	public void moveItem(MovedItem... items) {
+		ExchangeMoveItemsPacket pkt = new ExchangeMoveItemsPacket();
+		Set<MovedItem> it = Arrays.stream(items).collect(Collectors.toSet());
+		pkt.setItems(it);
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause();
 	}
 
 	@Override
 	public void moveKama(int amount) {
-		// TODO
-
+		ExchangeMoveKamasPacket pkt = new ExchangeMoveKamasPacket(amount);
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause();
 	}
 
 	@Override
 	public boolean useItem(int itemuid) {
-		// TODO
-		return false;
+		ItemUsePacket pkt = new ItemUsePacket();
+		pkt.setItemId(itemuid);
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause();
+		return getStates().itemUsed;
+	}
+
+	@Override
+	public void dialogLeave() {
+		DialogLeavePacket pkt = new DialogLeavePacket();
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause();
+	}
+
+	@Override
+	public void exchangeLeave() {
+		ExchangeLeavePacket pkt = new ExchangeLeavePacket();
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause();
+	}
+
+	@Override
+	public void confirmExchange() {
+		ExchangeSendReadyPacket pkt = new ExchangeSendReadyPacket();
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause();
 	}
 
 	@Override
 	public void useCraftingMachine(int choice) {
-		// TODO
-
-	}
-
-	@Override
-	public void closeGui() {
 		// TODO
 
 	}

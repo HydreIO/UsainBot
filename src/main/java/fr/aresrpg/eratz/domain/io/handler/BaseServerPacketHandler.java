@@ -17,6 +17,7 @@ import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.aks.Aks0MessagePacket;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
+import fr.aresrpg.dofus.protocol.dialog.DialogLeavePacket;
 import fr.aresrpg.dofus.protocol.dialog.server.*;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeRequestPacket;
 import fr.aresrpg.dofus.protocol.exchange.server.*;
@@ -172,12 +173,12 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 		Arrays.stream(handlers).forEach(guildHandler::add);
 	}
 
-	public void addExchangeHandlers(FightServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(fightHandler::add);
+	public void addExchangeHandlers(ExchangeServerHandler... handlers) {
+		Arrays.stream(handlers).forEach(exchangeHandler::add);
 	}
 
-	public void addFightHandlers(ExchangeServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(exchangeHandler::add);
+	public void addFightHandlers(FightServerHandler... handlers) {
+		Arrays.stream(handlers).forEach(fightHandler::add);
 	}
 
 	public void addZaapHandlers(ZaapServerHandler... handlers) {
@@ -650,7 +651,10 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 			if (Interractable.isInterractable(cell.getLayerObject2Num())) // add ressource
 				bm.getRessources().add(new Ressource(cell, Interractable.fromId(cell.getLayerObject2Num()))); // interractable peut etre null dans le cas des zaapi porte coffre etc
 		}
-		getPerso().getMapInfos().setMap(bm);
+		getPerso()
+				.getMapInfos()
+				.setMap(
+						bm);
 		MapView.setTitle(getPerso().getPseudo() + " | " + bm.getInfos());
 		getGameHandler().forEach(h -> h.onMap(bm));
 	}
@@ -833,6 +837,12 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	public void handle(ExchangeRequestOkPacket pkt) {
 		log(pkt);
 		getExchangeHandler().forEach(h -> h.onExchangeRequestOk(pkt.getPlayerId(), pkt.getTargetId(), pkt.getExchange()));
+	}
+
+	@Override
+	public void handle(DialogLeavePacket pkt) {
+		log(pkt);
+		getDialogHandler().forEach(DialogServerHandler::onDialogLeave);
 	}
 
 	@Override

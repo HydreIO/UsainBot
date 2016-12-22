@@ -122,6 +122,12 @@ public class BotMap {
 		return "notFound";
 	}
 
+	public int getIdOf(String name) {
+		for (MovementPlayer p : getPlayers())
+			if (p.getPseudo().equalsIgnoreCase(name)) return p.getId();
+		return 0;
+	}
+
 	public void removeActor(int id) {
 		if (id > 1000) removePlayer(id);
 		else {

@@ -12,4 +12,6 @@ public interface DialogServerHandler {
 
 	void onDialogPause(); // ??
 
+	void onDialogLeave();
+
 }

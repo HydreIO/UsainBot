@@ -29,6 +29,8 @@ public class BotPacketHandler extends BaseServerPacketHandler {
 		addInfoHandlers(new BotInfoServerHandler(perso));
 		addPartyHandlers(new BotPartyServerHandler(perso));
 		addFriendHandlers(new BotFriendServerHandler(perso));
+		addDialogHandlers(new BotDialogServerHandler(perso));
+		addExchangeHandlers(new BotExchangeServerHandler(perso));
 	}
 
 }

@@ -15,6 +15,10 @@ public class BotThread {
 		LockSupport.park();
 	}
 
+	public void pause() {
+		pause(thread.currentThread());
+	}
+
 	public void unpause() {
 		if (thread != null) LockSupport.unpark(thread);
 	}

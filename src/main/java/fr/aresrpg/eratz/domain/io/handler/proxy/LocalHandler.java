@@ -8,9 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.io.handler.proxy;
 
-import fr.aresrpg.dofus.protocol.DofusConnection;
-import fr.aresrpg.dofus.protocol.Packet;
-import fr.aresrpg.dofus.protocol.ProtocolRegistry;
+import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
@@ -19,16 +17,11 @@ import fr.aresrpg.dofus.protocol.chat.client.BasicUseSmileyPacket;
 import fr.aresrpg.dofus.protocol.conquest.client.WorldInfosJoinPacket;
 import fr.aresrpg.dofus.protocol.conquest.client.WorldInfosLeavePacket;
 import fr.aresrpg.dofus.protocol.dialog.DialogLeavePacket;
-import fr.aresrpg.dofus.protocol.dialog.client.DialogBeginPacket;
-import fr.aresrpg.dofus.protocol.dialog.client.DialogCreatePacket;
-import fr.aresrpg.dofus.protocol.dialog.client.DialogResponsePacket;
+import fr.aresrpg.dofus.protocol.dialog.client.*;
 import fr.aresrpg.dofus.protocol.emote.client.EmoteUsePacket;
 import fr.aresrpg.dofus.protocol.exchange.ExchangeLeavePacket;
 import fr.aresrpg.dofus.protocol.exchange.client.*;
-import fr.aresrpg.dofus.protocol.fight.client.FightBlockAllPacket;
-import fr.aresrpg.dofus.protocol.fight.client.FightBlockSpectatePacket;
-import fr.aresrpg.dofus.protocol.fight.client.FightNeedHelpPacket;
-import fr.aresrpg.dofus.protocol.fight.client.FightRestrictGroupPacket;
+import fr.aresrpg.dofus.protocol.fight.client.*;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.info.client.InfoMapPacket;
 import fr.aresrpg.dofus.protocol.item.client.*;
@@ -142,9 +135,6 @@ public class LocalHandler extends BaseClientPacketHandler {
 	@Override
 	public void handle(AccountSelectCharacterPacket pkt) {
 		super.handle(pkt);
-		getAccount().getPersos().stream()
-				.filter(p -> p.getId() == pkt.getCharacterId())
-				.forEach(getAccount()::setCurrentPlayed);
 		transmit(pkt);
 	}
 

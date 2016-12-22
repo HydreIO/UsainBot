@@ -9,6 +9,8 @@
 package fr.aresrpg.eratz.domain.ia.behavior.move;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
+import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
+import fr.aresrpg.dofus.structures.ExchangeMove;
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.eratz.domain.data.ItemsData;
 import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
@@ -50,10 +52,10 @@ public class BankDepositPath extends Behavior {
 	@Override
 	public BehaviorStopReason start() {
 		BaseAbility ability = getPerso().getAbilities().getBaseAbility();
-		ability.closeGui();
 		if (!ability.goAndOpenBank()) return BehaviorStopReason.PATH_ERROR;
 		Set<Item> inv = getPerso().getInventory().getContents().entrySet().stream().filter(e -> ArrayUtils.contains(e, items)).map(e -> e.getValue()).collect(Collectors.toSet());
-		inv.stream().forEach(i -> ability.moveItem(i.getUid(), i.getQuantity()));
+		MovedItem[] array = inv.stream().map(it -> new MovedItem(ExchangeMove.ADD, it.getUid(), it.getQuantity())).toArray(MovedItem[]::new);
+		ability.moveItem(array);
 		waitLitle();
 		ability.speak(Channel.ADMIN, "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",", "[", "]")) + " en banque !");
 		return BehaviorStopReason.FINISHED;

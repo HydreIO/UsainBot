@@ -4,7 +4,6 @@ import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.client.PartyInvitePacket;
 import fr.aresrpg.eratz.domain.data.player.Perso;
-import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 
@@ -48,7 +47,6 @@ public class GroupCrashBehavior extends Behavior {
 
 	@Override
 	public BehaviorStopReason start() {
-		BaseAbility ab = getPerso().getAbilities().getBaseAbility();
 		for (int a = 0; a < 50; a++) {
 			Threads.uSleep(3, TimeUnit.MILLISECONDS);
 			PartyInvitePacket pkt = new PartyInvitePacket();

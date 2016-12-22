@@ -63,6 +63,7 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 		getPerso().getDebugView().setPath(null);
 		getPerso().getDebugView().setMap(map.getDofusMap());
 		getPerso().getAccount().notifyBotOnline(); // pour autoriser les actions qui onts besoin que le bot soit bien en jeux
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}
 
 	@Override

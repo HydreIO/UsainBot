@@ -13,8 +13,11 @@ import fr.aresrpg.commons.domain.log.Logger;
 import fr.aresrpg.commons.domain.log.LoggerBuilder;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.dofus.util.Lang;
-import fr.aresrpg.eratz.domain.antibot.behavior.*;
+import fr.aresrpg.eratz.domain.antibot.AntiBot;
+import fr.aresrpg.eratz.domain.antibot.behavior.DuelCrashBehavior;
+import fr.aresrpg.eratz.domain.antibot.behavior.GroupCrashBehavior;
 import fr.aresrpg.eratz.domain.data.*;
+import fr.aresrpg.eratz.domain.data.dofus.player.BotJob;
 import fr.aresrpg.eratz.domain.data.dofus.player.Classe;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.Perso;
@@ -66,7 +69,7 @@ public class TheBotFather {
 			LOGGER.info("CONFIGURATION JUST CREATED PLEASE RESTART !");
 			System.exit(0);
 		}), Optional.of(() -> {
-			Variables.ACCOUNTS.add(new PlayerBean("Exemple1", "password", new PersoBean("Jowed", null, Server.ERATZ, Classe.ENUTROF.name(), true),
+			Variables.ACCOUNTS.add(new PlayerBean("Exemple1", "password", new PersoBean("Jowed", BotJob.CRASHER.name(), Server.ERATZ, Classe.ENUTROF.name(), true),
 					new PersoBean("Joe-larecolte", "bread_provider", Server.ERATZ, Classe.SRAM.name(), true)));
 			Variables.ACCOUNTS.add(new PlayerBean("Exemple2", "password"));
 			Variables.GROUPS.add(new GroupBean("Testgroup", "Jowed", "Jawad"));
@@ -84,6 +87,7 @@ public class TheBotFather {
 		botSocket.bind(addr);
 		botSocket.configureBlocking(false);
 		botSocket.register(selector, botSocket.validOps());
+		AntiBot.getInstance();
 		Executors.FIXED.execute(() -> startServer(botSocket));
 		Executors.FIXED.execute(this::startScanner);
 	}
@@ -148,23 +152,20 @@ public class TheBotFather {
 					break;
 				case "crash":
 					LOGGER.severe("Starting crash session !");
-					int id = Integer.parseInt(nextLine[1]);
 					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
 						if (a.isClientOnline() || a.isBotOnline()) {
 							Perso p = a.getCurrentPlayed();
-							DuelCrashBehavior b = new DuelCrashBehavior(p, id);
-							b.start();
-						}
-					});
-					break;
-				case "ech":
-					LOGGER.severe("Starting crash session !");
-					int idz = Integer.parseInt(nextLine[1]);
-					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
-						if (a.isClientOnline() || a.isBotOnline()) {
-							Perso p = a.getCurrentPlayed();
-							ExchangeCrashBehavior b = new ExchangeCrashBehavior(p, idz);
-							b.start();
+							int id = 0;
+							try {
+								id = Integer.parseInt(nextLine[1]);
+							} catch (Exception e) {
+								id = p.getMapInfos().getMap().getIdOf(nextLine[1]);
+							}
+							if (id == 0) LOGGER.error(nextLine[1] + " not found !");
+							else {
+								DuelCrashBehavior b = new DuelCrashBehavior(p, id);
+								b.start();
+							}
 						}
 					});
 					break;
@@ -197,7 +198,7 @@ public class TheBotFather {
 							.getAccounts().values().stream().map(Account::getUsername)
 							.collect(Collectors.joining(", ")));
 					break;
-				case "selectaccount":
+				case "connect":
 					String perso = nextLine.length == 3 ? nextLine[2] : AccountsManager.getInstance().getAccounts().get(nextLine[1]).getPersos().get(0).getPseudo();
 					if (perso == null) {
 						LOGGER.info("Perso introuvable");

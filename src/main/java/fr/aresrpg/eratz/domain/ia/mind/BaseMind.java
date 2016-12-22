@@ -11,8 +11,7 @@ import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.ia.behavior.move.BankDepositPath;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Predicate;
 
 /**
@@ -25,7 +24,7 @@ public class BaseMind implements Mind {
 	private Queue<Supplier<BehaviorStopReason>> actions = new LinkedList<>();
 	private boolean infinite;
 	private Set<Integer> itemsToKeep = new HashSet<>();
-	private Queue<Runnable> forceds = new LinkedList<>();
+	private ConcurrentLinkedQueue<Runnable> forceds = new ConcurrentLinkedQueue<>();
 	private static boolean running;
 
 	public BaseMind(Perso perso) {
@@ -42,16 +41,10 @@ public class BaseMind implements Mind {
 	public void process() throws InterruptedException, ExecutionException {
 		if (running) return;
 		running = true;
-		int count = 0;
 		do {
-			if (++count > 500000000) {
-				System.out.println("MIND " + forceds.isEmpty());
-				count = 0;
-			}
 			if (!forceds.isEmpty()) { // forced en prio
-				System.out.println("PUT 3");
+				System.out.println("START CRASH ====================");
 				forceds.poll().run();
-				System.out.println("FINISH CRASH");
 				continue;
 			}
 			if (getActions().isEmpty()) continue;
@@ -73,7 +66,6 @@ public class BaseMind implements Mind {
 
 	@Override
 	public void forceBehavior(Behavior b) {
-		System.out.println("PUT 2");
 		forceds.add(b::start);
 	}
 

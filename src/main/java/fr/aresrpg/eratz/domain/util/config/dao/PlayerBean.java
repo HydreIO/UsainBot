@@ -78,14 +78,14 @@ public class PlayerBean {
 
 	public static class PersoBean {
 		private String pseudo;
-		private String botJob;
 		private String server;
 		private String classe;
+		private String job;
 		private boolean male;
 
 		public PersoBean(String pseudo, String botJob, String server, String classe, boolean male) {
 			this.pseudo = pseudo;
-			this.botJob = botJob;
+			this.job = botJob;
 			this.server = server;
 			this.classe = classe;
 			this.male = male;
@@ -96,6 +96,21 @@ public class PlayerBean {
 		}
 
 		public PersoBean() {
+		}
+
+		/**
+		 * @return the pseudo
+		 */
+		public String getPseudo() {
+			return pseudo;
+		}
+
+		/**
+		 * @param pseudo
+		 *            the pseudo to set
+		 */
+		public void setPseudo(String pseudo) {
+			this.pseudo = pseudo;
 		}
 
 		/**
@@ -114,14 +129,6 @@ public class PlayerBean {
 		}
 
 		/**
-		 * @param pseudo
-		 *            the pseudo to set
-		 */
-		public void setPseudo(String pseudo) {
-			this.pseudo = pseudo;
-		}
-
-		/**
 		 * @return the classe
 		 */
 		public String getClasse() {
@@ -134,6 +141,21 @@ public class PlayerBean {
 		 */
 		public void setClasse(String classe) {
 			this.classe = classe;
+		}
+
+		/**
+		 * @return the job
+		 */
+		public String getJob() {
+			return job;
+		}
+
+		/**
+		 * @param job
+		 *            the job to set
+		 */
+		public void setJob(String job) {
+			this.job = job;
 		}
 
 		/**
@@ -151,32 +173,17 @@ public class PlayerBean {
 			this.male = male;
 		}
 
-		/**
-		 * @param botJob
-		 *            the botJob to set
-		 */
-		public void setBotJob(String botJob) {
-			this.botJob = botJob;
-		}
-
-		/**
-		 * @return the pseudo
-		 */
-		public String getPseudo() {
-			return pseudo;
-		}
-
 		public Server getDofusServer() {
 			return Server.valueOf(getServer());
 		}
 
 		public BotJob getBotJob() {
-			return botJob == null ? BotJob.NONE : BotJob.valueOf(botJob.toUpperCase());
+			return job == null ? BotJob.NONE : BotJob.valueOf(job.toUpperCase());
 		}
 
 		@Override
 		public String toString() {
-			return "PersoBean [pseudo=" + pseudo + ", botJob=" + botJob + ", server=" + server + ", classe=" + classe + ", male=" + male + "]";
+			return "PersoBean [pseudo=" + pseudo + ", botJob=" + job + ", server=" + server + ", classe=" + classe + ", male=" + male + "]";
 		}
 
 	}

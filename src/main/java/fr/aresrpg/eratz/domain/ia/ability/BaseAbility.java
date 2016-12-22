@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.ability;
 
+import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
 import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems;
 import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.map.*;
@@ -73,9 +74,8 @@ public interface BaseAbility extends Closeable {
 	 * @throws ZaapException
 	 *             si le bot n'a pas assez de kamas ou si la destination est
 	 *             inconnue
-	 * @return l'ability
 	 */
-	BaseAbility useZaap(Zaap current, Zaap destination) throws ZaapException;
+	void useZaap(Zaap current, Zaap destination) throws ZaapException;
 
 	/**
 	 * Utilise un zaapi
@@ -88,7 +88,7 @@ public interface BaseAbility extends Closeable {
 	 */
 	boolean useZaapi(Zaapi current, Zaapi destination);
 
-	void moveItem(int itemId, int amount);
+	void moveItem(MovedItem... items);
 
 	void moveKama(int amount);
 
@@ -115,7 +115,11 @@ public interface BaseAbility extends Closeable {
 	 */
 	void useCraftingMachine(int choice);
 
-	void closeGui();
+	void dialogLeave();
+
+	void exchangeLeave();
+
+	void confirmExchange();
 
 	void speak(Channel canal, String msg); // Impl note: si msg trop long split en plusieurs msg;
 

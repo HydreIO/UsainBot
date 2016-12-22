@@ -156,6 +156,7 @@ public class Perso implements Closeable {
 			getAccount().getRemoteConnection().send(pkt);
 		} catch (IOException e) {
 			e.printStackTrace();
+			shutdown();
 		}
 	}
 

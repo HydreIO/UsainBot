@@ -8,9 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.io.handler.proxy;
 
-import fr.aresrpg.dofus.protocol.DofusConnection;
-import fr.aresrpg.dofus.protocol.Packet;
-import fr.aresrpg.dofus.protocol.ProtocolRegistry;
+import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
@@ -18,25 +16,18 @@ import fr.aresrpg.dofus.protocol.account.server.*;
 import fr.aresrpg.dofus.protocol.aks.Aks0MessagePacket;
 import fr.aresrpg.dofus.protocol.basic.server.BasicConfirmPacket;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
-import fr.aresrpg.dofus.protocol.dialog.server.DialogCreateOkPacket;
-import fr.aresrpg.dofus.protocol.dialog.server.DialogPausePacket;
-import fr.aresrpg.dofus.protocol.dialog.server.DialogQuestionPacket;
+import fr.aresrpg.dofus.protocol.dialog.DialogLeavePacket;
+import fr.aresrpg.dofus.protocol.dialog.server.*;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeRequestPacket;
 import fr.aresrpg.dofus.protocol.exchange.server.*;
-import fr.aresrpg.dofus.protocol.fight.server.FightCountPacket;
-import fr.aresrpg.dofus.protocol.fight.server.FightDetailsPacket;
-import fr.aresrpg.dofus.protocol.fight.server.FightListPacket;
+import fr.aresrpg.dofus.protocol.fight.server.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloGamePacket;
-import fr.aresrpg.dofus.protocol.info.server.InfoCompassPacket;
-import fr.aresrpg.dofus.protocol.info.server.InfoCoordinatePacket;
-import fr.aresrpg.dofus.protocol.info.server.InfoMessagePacket;
+import fr.aresrpg.dofus.protocol.info.server.*;
 import fr.aresrpg.dofus.protocol.item.server.*;
-import fr.aresrpg.dofus.protocol.job.server.JobLevelPacket;
-import fr.aresrpg.dofus.protocol.job.server.JobSkillsPacket;
-import fr.aresrpg.dofus.protocol.job.server.JobXpPacket;
+import fr.aresrpg.dofus.protocol.job.server.*;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
 import fr.aresrpg.dofus.protocol.party.PartyAcceptPacket;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
@@ -49,6 +40,7 @@ import fr.aresrpg.dofus.protocol.waypoint.ZaapLeavePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapCreatePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapUseErrorPacket;
 import fr.aresrpg.dofus.structures.Chat;
+import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
 import fr.aresrpg.eratz.domain.io.handler.BaseServerPacketHandler;
@@ -110,6 +102,8 @@ public class RemoteHandler extends BaseServerPacketHandler {
 				((SocketChannel) getProxy().getLocalConnection().getChannel()).write(ByteBuffer.wrap(packet.getBytes()));
 			} catch (IOException e) {
 				e.printStackTrace();
+				TheBotFather.LOGGER.error("Client disconnected");
+				//getPerso().getAccount().
 			}
 			return true;
 		}
@@ -119,6 +113,9 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(AccountSelectCharacterOkPacket pkt) {
 		super.handle(pkt);
+		getAccount().getPersos().stream()
+				.filter(p -> p.getId() == pkt.getCharacter().getId())
+				.forEach(getAccount()::setCurrentPlayed);
 		transmit(pkt);
 	}
 
@@ -846,6 +843,13 @@ public class RemoteHandler extends BaseServerPacketHandler {
 
 	@Override
 	public void handle(Aks0MessagePacket pkt) {
+		super.handle(pkt);
+		transmit(pkt);
+
+	}
+
+	@Override
+	public void handle(DialogLeavePacket pkt) {
 		super.handle(pkt);
 		transmit(pkt);
 
