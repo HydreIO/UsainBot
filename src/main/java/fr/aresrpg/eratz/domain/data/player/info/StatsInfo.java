@@ -34,6 +34,11 @@ public class StatsInfo extends Info {
 	private int maxPods;
 	private final java.util.Map<Spells, Spell> spells = new HashMap<>();
 
+	@Override
+	public void shutdown() {
+
+	}
+
 	/**
 	 * @param perso
 	 */

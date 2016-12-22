@@ -24,4 +24,10 @@ public class LogInfo extends Info {
 		return fight;
 	}
 
+	@Override
+	public void shutdown() {
+		fight.shutdown();
+
+	}
+
 }

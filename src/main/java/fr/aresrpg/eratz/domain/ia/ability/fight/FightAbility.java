@@ -1,12 +1,13 @@
 package fr.aresrpg.eratz.domain.ia.ability.fight;
 
 import fr.aresrpg.eratz.domain.data.player.object.Spell;
+import fr.aresrpg.eratz.domain.util.Closeable;
 
 /**
  * 
  * @since
  */
-public interface FightAbility {
+public interface FightAbility extends Closeable {
 
 	void launchSpell(Spell spell, int cellid);
 

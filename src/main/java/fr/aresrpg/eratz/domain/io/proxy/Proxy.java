@@ -9,8 +9,8 @@
 package fr.aresrpg.eratz.domain.io.proxy;
 
 import fr.aresrpg.dofus.protocol.DofusConnection;
-import fr.aresrpg.eratz.domain.io.handler.impl.proxy.LocalHandler;
-import fr.aresrpg.eratz.domain.io.handler.impl.proxy.RemoteHandler;
+import fr.aresrpg.eratz.domain.io.handler.proxy.LocalHandler;
+import fr.aresrpg.eratz.domain.io.handler.proxy.RemoteHandler;
 
 public interface Proxy {
 

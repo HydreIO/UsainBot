@@ -6,10 +6,12 @@ package fr.aresrpg.eratz.domain.ia.ability;
  */
 public class BaseAbilityState {
 
-	public InvitationState partyInvit;
-	public InvitationState defiInvit;
-	public String currentInvited;
-	public int currentDefied;
+	public volatile InvitationState partyInvit;
+	public volatile InvitationState defiInvit;
+	public volatile int currentToExchange;
+	public volatile String currentToInvite;
+	public volatile int currentToDefie;
+	public volatile int currentToCrash;
 
 	public static enum InvitationState {
 		ACCEPTED,

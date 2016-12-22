@@ -1,10 +1,12 @@
 package fr.aresrpg.eratz.domain.data.player.info;
 
+import fr.aresrpg.eratz.domain.util.Closeable;
+
 /**
  * 
  * @since
  */
-public class LogFightInfo {
+public class LogFightInfo implements Closeable {
 
 	private int totalFight;
 
@@ -23,6 +25,11 @@ public class LogFightInfo {
 	 */
 	public LogFightInfo() {
 		restartLog();
+	}
+
+	@Override
+	public void shutdown() {
+
 	}
 
 	public void endFight(int fightTime, int kamaDrop) {

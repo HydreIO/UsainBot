@@ -7,6 +7,7 @@ import fr.aresrpg.eratz.domain.data.dofus.player.*;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.util.BotThread;
+import fr.aresrpg.eratz.domain.util.Closeable;
 import fr.aresrpg.eratz.domain.util.exception.ZaapException;
 
 import java.util.concurrent.TimeUnit;
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @since
  */
-public interface BaseAbility {
+public interface BaseAbility extends Closeable {
 
 	void sit(boolean sit); // s'assoir
 
@@ -44,6 +45,12 @@ public interface BaseAbility {
 	 * @return
 	 */
 	void npcTalkChoice(int questionId, int responseId);
+
+	void addFriend(String name);
+
+	void removeFriend(String name);
+
+	void getFriendList();
 
 	/**
 	 * Achete un item à un pnj

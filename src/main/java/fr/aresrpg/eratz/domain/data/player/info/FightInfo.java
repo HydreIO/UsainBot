@@ -19,6 +19,12 @@ public class FightInfo extends Info {
 		super(perso);
 	}
 
+	@Override
+	public void shutdown() {
+		currentFight = null;
+		currentFightBehavior = null;
+	}
+
 	/**
 	 * @return the currentFight
 	 */

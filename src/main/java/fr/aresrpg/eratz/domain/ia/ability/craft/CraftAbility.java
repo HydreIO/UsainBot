@@ -1,10 +1,12 @@
 package fr.aresrpg.eratz.domain.ia.ability.craft;
 
+import fr.aresrpg.eratz.domain.util.Closeable;
+
 /**
  * 
  * @since
  */
-public interface CraftAbility {
+public interface CraftAbility extends Closeable {
 
 	void placeItem(int id, int quantity);
 

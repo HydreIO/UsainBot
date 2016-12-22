@@ -31,7 +31,8 @@ import fr.aresrpg.eratz.domain.ia.ability.move.NavigationImpl;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.mind.BaseMind;
 import fr.aresrpg.eratz.domain.ia.mind.Mind;
-import fr.aresrpg.eratz.domain.io.handler.impl.bot.BotPacketHandler;
+import fr.aresrpg.eratz.domain.io.handler.bot.BotPacketHandler;
+import fr.aresrpg.eratz.domain.util.Closeable;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
@@ -40,7 +41,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class Perso {
+public class Perso implements Closeable {
 
 	private final Account account;
 	private int id;
@@ -74,6 +75,19 @@ public class Perso {
 
 	public Perso(int id, String pseudo, Account account, Classe classe, Genre sexe, Server srv) {
 		this(id, pseudo, account, null, classe, sexe, srv);
+	}
+
+	@Override
+	public void shutdown() {
+		getAccount().setState(AccountState.OFFLINE);
+		mind.shutdown();
+		abilities.shutdown();
+		logInfos.shutdown();
+		botInfos.shutdown();
+		mapInfos.shutdown();
+		fightInfos.shutdown();
+		statsInfos.shutdown();
+		pvpInfos.shutdown();
 	}
 
 	/**
@@ -225,6 +239,8 @@ public class Perso {
 
 	public void connect() {
 		Account a = getAccount();
+		if (a.getState() == AccountState.CONNECTING) return;
+		a.setState(AccountState.CONNECTING);
 		LOGGER.info("Connecting " + getPseudo());
 		if (a.isClientOnline()) {
 			LOGGER.error("The account of " + getPseudo() + " is already online | No need to connect the bot");
@@ -237,12 +253,13 @@ public class Perso {
 		try {
 			SocketChannel channel = SocketChannel.open(TheBotFather.SERVER_ADRESS);
 			a.setCurrentPlayed(this);
-			a.setRemoteConnection(new DofusConnection<>(getPseudo(), channel, new BotPacketHandler(this), Bound.SERVER));
+			BotPacketHandler han = new BotPacketHandler(this);
+			han.setAccount(getAccount());
+			a.setRemoteConnection(new DofusConnection<>(getPseudo(), channel, han, Bound.SERVER));
 			Executors.FIXED.execute(a::readRemote);
 		} catch (IOException e) {
-			a.setState(AccountState.OFFLINE);
-			LOGGER.info("Bot crash."); // test debug
 			e.printStackTrace(); // test debug
+			shutdown();
 		}
 		a.setLastConnection(System.currentTimeMillis());
 	}

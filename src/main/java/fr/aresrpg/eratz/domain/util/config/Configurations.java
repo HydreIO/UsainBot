@@ -61,7 +61,7 @@ public class Configurations {
 			pull();
 		}
 
-		protected void pull() {
+		public void pull() {
 			LOGGER.info("Pulling configuration file...");
 			Arrays.stream(getBundle().getFields()).filter(f -> {
 				f.setAccessible(true);

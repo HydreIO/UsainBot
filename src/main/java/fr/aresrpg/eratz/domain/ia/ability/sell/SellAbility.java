@@ -1,9 +1,11 @@
 package fr.aresrpg.eratz.domain.ia.ability.sell;
 
+import fr.aresrpg.eratz.domain.util.Closeable;
+
 /**
  * 
- * @since 
+ * @since
  */
-public interface SellAbility {
+public interface SellAbility extends Closeable {
 
 }

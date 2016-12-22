@@ -4,7 +4,10 @@ import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems;
 import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
+import fr.aresrpg.eratz.domain.util.Closeable;
 
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -14,7 +17,16 @@ import java.util.function.Predicate;
  * 
  * @since
  */
-public interface Mind {
+public interface Mind extends Closeable {
+
+	/**
+	 * Execute the behavior asap
+	 * 
+	 * @param b
+	 */
+	void forceBehavior(Behavior b);
+
+	Queue<Runnable> getForcedActions(); // pour que le autre behavior execute ça asap
 
 	/**
 	 * Harvest a ressource
@@ -187,5 +199,7 @@ public interface Mind {
 	 * @throws ExecutionException
 	 */
 	void process() throws InterruptedException, ExecutionException;
+
+	boolean isRunning();
 
 }

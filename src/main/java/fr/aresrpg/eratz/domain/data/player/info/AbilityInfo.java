@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.data.player.info;
 
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
+import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityImpl;
 import fr.aresrpg.eratz.domain.ia.ability.craft.CraftAbility;
 import fr.aresrpg.eratz.domain.ia.ability.craft.CraftAbilityImpl;
 import fr.aresrpg.eratz.domain.ia.ability.fight.FightAbility;
@@ -17,11 +18,20 @@ import fr.aresrpg.eratz.domain.ia.ability.sell.SellAbilityImpl;
  */
 public class AbilityInfo extends Info {
 
-	private final BaseAbility baseAbility = null;
+	private final BaseAbility baseAbility = new BaseAbilityImpl(getPerso());
 	private final HarvestAbility harvestAbility = new HarvestAbilityImpl(getPerso());
 	private final CraftAbility craftAbility = new CraftAbilityImpl(getPerso());
 	private final FightAbility fightAbility = new FightAbilityImpl(getPerso());
 	private final SellAbility sellAbility = new SellAbilityImpl(getPerso());
+
+	@Override
+	public void shutdown() {
+		baseAbility.shutdown();
+		harvestAbility.shutdown();
+		craftAbility.shutdown();
+		fightAbility.shutdown();
+		sellAbility.shutdown();
+	}
 
 	/**
 	 * @param perso

@@ -14,6 +14,10 @@ public class SellAbilityImpl implements SellAbility {
 		this.perso = perso;
 	}
 
+	@Override
+	public void shutdown() {
+	}
+
 	/**
 	 * @return the perso
 	 */

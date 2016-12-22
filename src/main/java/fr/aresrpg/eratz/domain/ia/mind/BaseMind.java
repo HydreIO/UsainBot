@@ -6,6 +6,7 @@ import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.ia.behavior.move.BankDepositPath;
 
@@ -24,23 +25,61 @@ public class BaseMind implements Mind {
 	private Queue<Supplier<BehaviorStopReason>> actions = new LinkedList<>();
 	private boolean infinite;
 	private Set<Integer> itemsToKeep = new HashSet<>();
+	private Queue<Runnable> forceds = new LinkedList<>();
+	private static boolean running;
 
 	public BaseMind(Perso perso) {
 		this.perso = perso;
 	}
 
+	public void shutdown() {
+		running = false;
+		actions.clear();
+		forceds.clear();
+	}
+
 	@Override
 	public void process() throws InterruptedException, ExecutionException {
-		while (getPerso().getAccount().isActive()) {
+		if (running) return;
+		running = true;
+		int count = 0;
+		do {
+			if (++count > 500000000) {
+				System.out.println("MIND " + forceds.isEmpty());
+				count = 0;
+			}
+			if (!forceds.isEmpty()) { // forced en prio
+				System.out.println("PUT 3");
+				forceds.poll().run();
+				System.out.println("FINISH CRASH");
+				continue;
+			}
+			if (getActions().isEmpty()) continue;
 			Supplier<BehaviorStopReason> next = getActions().poll();
-			if (next == null) break;
 			switch (next.get()) { // possibilité d'effectuer des actions selon le type de retour
 				case QUANTITY_REACHED:
 					getPerso().getAbilities().getBaseAbility().speak(Channel.ADMIN, "Récolte terminée.");
 					break;
 			}
 			if (infinite) getActions().add(next); // si infinite loop ajout a la queue
-		}
+		} while (getPerso().getAccount().isActive());
+		running = false;
+	}
+
+	@Override
+	public boolean isRunning() {
+		return running;
+	}
+
+	@Override
+	public void forceBehavior(Behavior b) {
+		System.out.println("PUT 2");
+		forceds.add(b::start);
+	}
+
+	@Override
+	public Queue<Runnable> getForcedActions() {
+		return forceds;
 	}
 
 	/**

@@ -20,6 +20,11 @@ public class PvpInfo extends Info {
 		super(perso);
 	}
 
+	@Override
+	public void shutdown() {
+
+	}
+
 	/**
 	 * @return the alignment
 	 */

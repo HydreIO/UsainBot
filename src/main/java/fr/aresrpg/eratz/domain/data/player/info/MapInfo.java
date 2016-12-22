@@ -16,6 +16,11 @@ public class MapInfo extends Info {
 		super(perso);
 	}
 
+	@Override
+	public void shutdown() {
+		map = null;
+	}
+
 	/**
 	 * @return the map
 	 */

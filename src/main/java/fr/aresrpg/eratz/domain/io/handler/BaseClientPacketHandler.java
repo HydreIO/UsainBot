@@ -24,6 +24,7 @@ import fr.aresrpg.dofus.protocol.emote.client.EmoteUsePacket;
 import fr.aresrpg.dofus.protocol.exchange.ExchangeLeavePacket;
 import fr.aresrpg.dofus.protocol.exchange.client.*;
 import fr.aresrpg.dofus.protocol.fight.client.*;
+import fr.aresrpg.dofus.protocol.friend.client.*;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.info.client.InfoMapPacket;
 import fr.aresrpg.dofus.protocol.item.client.*;
@@ -490,6 +491,21 @@ public class BaseClientPacketHandler implements ClientPacketHandler {
 	public void handle(ItemSkinPacket pkt) {
 		log(pkt);
 
+	}
+
+	@Override
+	public void handle(FriendGetListPacket pkt) {
+		log(pkt);
+	}
+
+	@Override
+	public void handle(FriendAddPacket pkt) {
+		log(pkt);
+	}
+
+	@Override
+	public void handle(FriendRemovePacket pkt) {
+		log(pkt);
 	}
 
 }

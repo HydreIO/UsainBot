@@ -19,6 +19,11 @@ public class BotInfo extends Info {
 		super(perso);
 	}
 
+	@Override
+	public void shutdown() {
+		sit = false;
+	}
+
 	/**
 	 * @return the sit
 	 */

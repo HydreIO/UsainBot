@@ -57,6 +57,12 @@ public class BotMap {
 			}
 	}
 
+	public boolean isOnMap(int id) {
+		for (MovementPlayer p : players)
+			if (p.getId() == id) return true;
+		return false;
+	}
+
 	public void monsterMove(int id, int cellid) {
 		for (MovementMonsterGroup i : mobs)
 			if (i.getId() == id) i.setCellid(cellid);
@@ -108,6 +114,12 @@ public class BotMap {
 	 */
 	public Set<MovementPlayer> getPlayers() {
 		return players;
+	}
+
+	public String getNameOf(int playerId) {
+		for (MovementPlayer p : getPlayers())
+			if (p.getId() == playerId) return p.getPseudo();
+		return "notFound";
 	}
 
 	public void removeActor(int id) {

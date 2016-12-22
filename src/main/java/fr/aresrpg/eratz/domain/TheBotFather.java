@@ -13,16 +13,17 @@ import fr.aresrpg.commons.domain.log.Logger;
 import fr.aresrpg.commons.domain.log.LoggerBuilder;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.dofus.util.Lang;
+import fr.aresrpg.eratz.domain.antibot.behavior.*;
 import fr.aresrpg.eratz.domain.data.*;
 import fr.aresrpg.eratz.domain.data.dofus.player.Classe;
 import fr.aresrpg.eratz.domain.data.player.Account;
+import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.gui.MapView;
 import fr.aresrpg.eratz.domain.io.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.util.*;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
-import fr.aresrpg.eratz.domain.util.config.Configurations;
+import fr.aresrpg.eratz.domain.util.config.*;
 import fr.aresrpg.eratz.domain.util.config.Configurations.Config;
-import fr.aresrpg.eratz.domain.util.config.Variables;
 import fr.aresrpg.eratz.domain.util.config.dao.GroupBean;
 import fr.aresrpg.eratz.domain.util.config.dao.PlayerBean;
 import fr.aresrpg.eratz.domain.util.config.dao.PlayerBean.PersoBean;
@@ -41,6 +42,7 @@ public class TheBotFather {
 	private Selector selector;
 	private boolean running;
 	private Config config;
+	private Config botBlackList;
 
 	public TheBotFather() throws IOException {
 		instance = this;
@@ -68,6 +70,13 @@ public class TheBotFather {
 					new PersoBean("Joe-larecolte", "bread_provider", Server.ERATZ, Classe.SRAM.name(), true)));
 			Variables.ACCOUNTS.add(new PlayerBean("Exemple2", "password"));
 			Variables.GROUPS.add(new GroupBean("Testgroup", "Jowed", "Jawad"));
+		}));
+		this.botBlackList = Configurations.generate("blacklist.yml", BlackList.class, Optional.of(() -> {
+			LOGGER.info("BlackList created !");
+		}), Optional.of(() -> {
+			BlackList.BOTS.add("Lor_hoth");
+			BlackList.BOTS.add("Smero-Badaa");
+			BlackList.BOTS.add("Mariad");
 		}));
 		this.selector = Selector.open();
 		ServerSocketChannel botSocket = ServerSocketChannel.open();
@@ -126,8 +135,52 @@ public class TheBotFather {
 			if (!sc.hasNext()) continue;
 			String[] nextLine = sc.nextLine().split(" ");
 			switch (nextLine[0].toLowerCase()) {
+				case "removebot":
+					String na = nextLine[1];
+					if (BlackList.BOTS.remove(na)) LOGGER.info("Removing " + na + " as bot !");
+					botBlackList.apply();
+					break;
+				case "addbot":
+					String name = nextLine[1];
+					LOGGER.info("Adding " + name + " as bot !");
+					BlackList.BOTS.add(name);
+					botBlackList.apply();
+					break;
 				case "crash":
-
+					LOGGER.severe("Starting crash session !");
+					int id = Integer.parseInt(nextLine[1]);
+					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+						if (a.isClientOnline() || a.isBotOnline()) {
+							Perso p = a.getCurrentPlayed();
+							DuelCrashBehavior b = new DuelCrashBehavior(p, id);
+							b.start();
+						}
+					});
+					break;
+				case "ech":
+					LOGGER.severe("Starting crash session !");
+					int idz = Integer.parseInt(nextLine[1]);
+					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+						if (a.isClientOnline() || a.isBotOnline()) {
+							Perso p = a.getCurrentPlayed();
+							ExchangeCrashBehavior b = new ExchangeCrashBehavior(p, idz);
+							b.start();
+						}
+					});
+					break;
+				case "party":
+					LOGGER.severe("Starting crash session !");
+					String naa = nextLine[1];
+					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+						if (a.isClientOnline() || a.isBotOnline()) {
+							Perso p = a.getCurrentPlayed();
+							GroupCrashBehavior b = new GroupCrashBehavior(p, naa);
+							b.start();
+						}
+					});
+					break;
+				case "reload":
+					botBlackList.pull();
 					break;
 				case "view":
 					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {

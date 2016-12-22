@@ -14,6 +14,11 @@ public class CraftAbilityImpl implements CraftAbility {
 		this.perso = perso;
 	}
 
+	@Override
+	public void shutdown() {
+
+	}
+
 	/**
 	 * @return the perso
 	 */

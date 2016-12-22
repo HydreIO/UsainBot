@@ -2,12 +2,14 @@ package fr.aresrpg.eratz.domain.ia.ability;
 
 import fr.aresrpg.dofus.protocol.dialog.client.DialogCreatePacket;
 import fr.aresrpg.dofus.protocol.emote.client.EmoteUsePacket;
+import fr.aresrpg.dofus.protocol.friend.client.*;
 import fr.aresrpg.dofus.protocol.game.actions.GameActions;
 import fr.aresrpg.dofus.protocol.game.actions.client.GameDuelAction;
 import fr.aresrpg.dofus.protocol.game.actions.client.GameRefuseDuelAction;
 import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.client.PartyInvitePacket;
+import fr.aresrpg.dofus.structures.Emotes;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaapi;
 import fr.aresrpg.eratz.domain.data.dofus.player.Channel;
@@ -35,8 +37,19 @@ public class BaseAbilityImpl implements BaseAbility {
 	}
 
 	@Override
+	public void shutdown() {
+		states.currentToCrash = 0;
+		states.currentToDefie = 0;
+		states.currentToExchange = 0;
+		states.currentToInvite = null;
+		states.defiInvit = null;
+		states.partyInvit = null;
+		botThread = new BotThread();
+	}
+
+	@Override
 	public void sit(boolean sit) {
-		if ((getPerso().getBotInfos().isSit() && !sit) || (!getPerso().getBotInfos().isSit() && sit)) getPerso().sendPacketToServer(new EmoteUsePacket().setEmoteId(1));
+		if ((getPerso().getBotInfos().isSit() && !sit) || (!getPerso().getBotInfos().isSit() && sit)) getPerso().sendPacketToServer(new EmoteUsePacket().setEmot(Emotes.SIT));
 	}
 
 	@Override
@@ -188,8 +201,9 @@ public class BaseAbilityImpl implements BaseAbility {
 	public InvitationState invitPlayerToGroup(String pname) {
 		PartyInvitePacket pkt = new PartyInvitePacket();
 		pkt.setPname(pname);
-		getStates().currentInvited = pname;
+		getStates().currentToInvite = pname;
 		getPerso().sendPacketToServer(pkt);
+		getPerso().getAbilities().getBaseAbility().getStates().partyInvit = InvitationState.AWAITING;
 		getBotThread().pause(Thread.currentThread());
 		return getStates().partyInvit;
 	}
@@ -198,8 +212,9 @@ public class BaseAbilityImpl implements BaseAbility {
 	public InvitationState invitPlayerToGroupAndCancel(String name, long cancelAfter, TimeUnit unit) {
 		PartyInvitePacket pkt = new PartyInvitePacket();
 		pkt.setPname(name);
-		getStates().currentInvited = name;
+		getStates().currentToInvite = name;
 		getPerso().sendPacketToServer(pkt);
+		getPerso().getAbilities().getBaseAbility().getStates().partyInvit = InvitationState.AWAITING;
 		if (cancelAfter != 0) {
 			Executors.SCHEDULED.schedule(getBotThread()::unpause, cancelAfter, unit);
 			getBotThread().pause(Thread.currentThread());
@@ -215,9 +230,11 @@ public class BaseAbilityImpl implements BaseAbility {
 	@Override
 	public InvitationState defiPlayer(int id) {
 		GameDuelAction action = new GameDuelAction(id);
-		getPerso().getAbilities().getBaseAbility().getStates().currentDefied = id;
+		getPerso().getAbilities().getBaseAbility().getStates().currentToDefie = id;
 		GameClientActionPacket ga = new GameClientActionPacket(GameActions.DUEL, action);
 		getPerso().sendPacketToServer(ga);
+		while (getPerso().getAbilities().getBaseAbility().getStates().defiInvit == null)
+			;
 		getBotThread().pause(Thread.currentThread());
 		return getStates().defiInvit;
 	}
@@ -225,9 +242,11 @@ public class BaseAbilityImpl implements BaseAbility {
 	@Override
 	public InvitationState defiPlayerAndCancel(int id, long cancelAfter, TimeUnit unit) {
 		GameDuelAction action = new GameDuelAction(id);
-		getPerso().getAbilities().getBaseAbility().getStates().currentDefied = id;
+		getPerso().getAbilities().getBaseAbility().getStates().currentToDefie = id;
 		GameClientActionPacket ga = new GameClientActionPacket(GameActions.DUEL, action);
 		getPerso().sendPacketToServer(ga);
+		while (getPerso().getAbilities().getBaseAbility().getStates().defiInvit == null)
+			;
 		if (cancelAfter != 0) {
 			Executors.SCHEDULED.schedule(getBotThread()::unpause, cancelAfter, unit);
 			getBotThread().pause(Thread.currentThread());
@@ -235,7 +254,7 @@ public class BaseAbilityImpl implements BaseAbility {
 		InvitationState duelInvit = getPerso().getAbilities().getBaseAbility().getStates().defiInvit;
 		if (duelInvit == InvitationState.AWAITING) {
 			GameRefuseDuelAction actionr = new GameRefuseDuelAction();
-			actionr.setTargetId(getStates().currentDefied);
+			actionr.setTargetId(getPerso().getId());
 			getPerso().sendPacketToServer(new GameClientActionPacket(GameActions.REFUSE_DUEL, actionr));
 		}
 		return getStates().defiInvit;
@@ -244,6 +263,25 @@ public class BaseAbilityImpl implements BaseAbility {
 	@Override
 	public BaseAbilityState getStates() {
 		return this.states;
+	}
+
+	@Override
+	public void addFriend(String name) {
+		FriendAddPacket pkt = new FriendAddPacket();
+		pkt.setName(name);
+		getPerso().sendPacketToServer(pkt);
+	}
+
+	@Override
+	public void removeFriend(String name) {
+		FriendRemovePacket pkt = new FriendRemovePacket();
+		pkt.setName(name);
+		getPerso().sendPacketToServer(pkt);
+	}
+
+	@Override
+	public void getFriendList() {
+		getPerso().sendPacketToServer(new FriendGetListPacket());
 	}
 
 }

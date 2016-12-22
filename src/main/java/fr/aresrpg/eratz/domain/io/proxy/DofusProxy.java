@@ -14,8 +14,8 @@ import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
-import fr.aresrpg.eratz.domain.io.handler.impl.proxy.LocalHandler;
-import fr.aresrpg.eratz.domain.io.handler.impl.proxy.RemoteHandler;
+import fr.aresrpg.eratz.domain.io.handler.proxy.LocalHandler;
+import fr.aresrpg.eratz.domain.io.handler.proxy.RemoteHandler;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
@@ -95,7 +95,8 @@ public class DofusProxy implements Proxy {
 				} catch (Exception e) {
 					e.printStackTrace();
 					connection.closeConnection(); // on close le server socket
-					if (account != null) account.notifyDisconnect(); // on notify que le client n'est plus la pour possiblement connecter le bot
+					if (account != null) account.setState(AccountState.OFFLINE); // on notify que le client n'est plus la pour possiblement connecter le bot
+
 				}
 			});
 		} catch (Exception e2) {

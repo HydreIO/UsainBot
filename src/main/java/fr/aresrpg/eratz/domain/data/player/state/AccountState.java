@@ -6,6 +6,7 @@ package fr.aresrpg.eratz.domain.data.player.state;
  */
 public enum AccountState {
 
+	CONNECTING,
 	OFFLINE,
 	CLIENT_IN_REALM,
 	CLIENT_IN_GAME,

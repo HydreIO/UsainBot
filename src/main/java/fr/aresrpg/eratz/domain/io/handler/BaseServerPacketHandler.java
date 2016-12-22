@@ -21,7 +21,10 @@ import fr.aresrpg.dofus.protocol.dialog.server.*;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeRequestPacket;
 import fr.aresrpg.dofus.protocol.exchange.server.*;
 import fr.aresrpg.dofus.protocol.fight.server.*;
+import fr.aresrpg.dofus.protocol.friend.server.FriendListPacket;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
+import fr.aresrpg.dofus.protocol.game.actions.client.GameAcceptDuelAction;
+import fr.aresrpg.dofus.protocol.game.actions.client.GameRefuseDuelAction;
 import fr.aresrpg.dofus.protocol.game.actions.server.*;
 import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.protocol.game.server.*;
@@ -44,6 +47,7 @@ import fr.aresrpg.dofus.protocol.waypoint.server.ZaapCreatePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapUseErrorPacket;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
 import fr.aresrpg.dofus.structures.game.GameMovementType;
+import fr.aresrpg.dofus.structures.game.GameType;
 import fr.aresrpg.dofus.structures.map.*;
 import fr.aresrpg.dofus.structures.server.DofusServer;
 import fr.aresrpg.dofus.structures.server.Server;
@@ -59,23 +63,24 @@ import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.info.StatsInfo;
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
 import fr.aresrpg.eratz.domain.gui.MapView;
-import fr.aresrpg.eratz.domain.io.handler.std.aproach.AccountServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.area.SubareaServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.chat.ChatServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.dialog.DialogServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.exchange.ExchangeServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.fight.FightServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.game.GameServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.game.action.GameActionServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.guild.GuildServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.info.InfoServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.item.ItemServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.job.JobServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.mount.MountServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.party.PartyServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.specialization.SpecializationServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.spell.SpellServerHandler;
-import fr.aresrpg.eratz.domain.io.handler.std.zaap.ZaapServerHandler;
+import fr.aresrpg.eratz.domain.std.aproach.AccountServerHandler;
+import fr.aresrpg.eratz.domain.std.area.SubareaServerHandler;
+import fr.aresrpg.eratz.domain.std.chat.ChatServerHandler;
+import fr.aresrpg.eratz.domain.std.dialog.DialogServerHandler;
+import fr.aresrpg.eratz.domain.std.exchange.ExchangeServerHandler;
+import fr.aresrpg.eratz.domain.std.fight.FightServerHandler;
+import fr.aresrpg.eratz.domain.std.friend.FriendServerHandler;
+import fr.aresrpg.eratz.domain.std.game.GameServerHandler;
+import fr.aresrpg.eratz.domain.std.game.action.GameActionServerHandler;
+import fr.aresrpg.eratz.domain.std.guild.GuildServerHandler;
+import fr.aresrpg.eratz.domain.std.info.InfoServerHandler;
+import fr.aresrpg.eratz.domain.std.item.ItemServerHandler;
+import fr.aresrpg.eratz.domain.std.job.JobServerHandler;
+import fr.aresrpg.eratz.domain.std.mount.MountServerHandler;
+import fr.aresrpg.eratz.domain.std.party.PartyServerHandler;
+import fr.aresrpg.eratz.domain.std.specialization.SpecializationServerHandler;
+import fr.aresrpg.eratz.domain.std.spell.SpellServerHandler;
+import fr.aresrpg.eratz.domain.std.zaap.ZaapServerHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -109,9 +114,14 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	private Set<ItemServerHandler> itemHandler = new HashSet<>();
 	private Set<PartyServerHandler> partyHandler = new HashSet<>();
 	private Set<JobServerHandler> jobHandler = new HashSet<>();
+	private Set<FriendServerHandler> friendHandler = new HashSet<>();
 
 	public BaseServerPacketHandler(Perso perso) {
 		this.perso = perso;
+	}
+
+	public void addFriendHandlers(FriendServerHandler... handlers) {
+		Arrays.stream(handlers).forEach(friendHandler::add);
 	}
 
 	public void addJobHandlers(JobServerHandler... handlers) {
@@ -162,7 +172,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 		Arrays.stream(handlers).forEach(guildHandler::add);
 	}
 
-	public void addFightHandlers(FightServerHandler... handlers) {
+	public void addExchangeHandlers(FightServerHandler... handlers) {
 		Arrays.stream(handlers).forEach(fightHandler::add);
 	}
 
@@ -227,6 +237,13 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	 */
 	public Set<PartyServerHandler> getPartyHandler() {
 		return partyHandler;
+	}
+
+	/**
+	 * @return the friendHandler
+	 */
+	public Set<FriendServerHandler> getFriendHandler() {
+		return friendHandler;
 	}
 
 	/**
@@ -363,6 +380,13 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	public void handle(AccountKeyPacket pkt) {
 		log(pkt);
 		forEachAccountHandlers(h -> h.onKey(pkt.getKey(), pkt.getData()));
+	}
+
+	@Override
+	public void handle(FriendListPacket pkt) {
+		log(pkt);
+		if (!pkt.getOfflineFriends().isEmpty()) getFriendHandler().forEach(h -> h.onOfflineFriends(pkt.getOfflineFriends()));
+		if (!pkt.getOnlineFriends().isEmpty()) getFriendHandler().forEach(h -> h.onOnlineFriends(pkt.getOnlineFriends()));
 	}
 
 	@Override
@@ -604,6 +628,8 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(GameJoinPacket pkt) {
 		log(pkt);
+		if (pkt.getState() == GameType.FIGHT)
+			getPerso().getFightInfos().setCurrentFight(Fight.fromGame(pkt.getFightType(), pkt.isSpectator(), pkt.getStartTimer(), pkt.isDuel()));
 		getGameHandler().forEach(h -> h.onFightJoin(pkt.getState(), pkt.getFightType(), pkt.isSpectator(), pkt.getStartTimer(), pkt.isCancelButton(), pkt.isDuel()));
 	}
 
@@ -641,6 +667,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 
 	@Override
 	public void handle(GameMovementPacket gameMovementPacket) {
+		log(gameMovementPacket);
 		if (gameMovementPacket.getType() == GameMovementType.REMOVE) {
 			gameMovementPacket.getActors().forEach(v -> {
 				MovementRemoveActor actor = (MovementRemoveActor) (Object) v.getSecond();
@@ -742,6 +769,18 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 			case MOVE:
 				GameMoveAction actionm = (GameMoveAction) pkt.getAction();
 				getGameActionHandler().forEach(h -> h.onEntityMove(pkt.getEntityId(), actionm.getPath()));
+				break;
+			case DUEL_SERVER_ASK:
+				GameDuelServerAction actiond = (GameDuelServerAction) pkt.getAction();
+				getGameActionHandler().forEach(h -> h.onDuel(pkt.getEntityId(), actiond.getTargetId()));
+				break;
+			case ACCEPT_DUEL:
+				GameAcceptDuelAction actionda = (GameAcceptDuelAction) pkt.getAction();
+				getGameActionHandler().forEach(h -> h.onPlayerAcceptDuel(pkt.getEntityId(), actionda.getTargetId()));
+				break;
+			case REFUSE_DUEL:
+				GameRefuseDuelAction actiondr = (GameRefuseDuelAction) pkt.getAction();
+				getGameActionHandler().forEach(h -> h.onPlayerRefuseDuel(pkt.getEntityId(), actiondr.getTargetId()));
 				break;
 			default:
 				break;

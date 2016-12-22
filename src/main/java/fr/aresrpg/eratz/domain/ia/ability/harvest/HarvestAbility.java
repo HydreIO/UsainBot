@@ -9,12 +9,13 @@
 package fr.aresrpg.eratz.domain.ia.ability.harvest;
 
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
+import fr.aresrpg.eratz.domain.util.Closeable;
 
 /**
  * 
  * @since
  */
-public interface HarvestAbility {
+public interface HarvestAbility extends Closeable {
 
 	void harvest(Ressource r);
 

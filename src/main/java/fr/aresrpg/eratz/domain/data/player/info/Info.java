@@ -1,12 +1,13 @@
 package fr.aresrpg.eratz.domain.data.player.info;
 
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.util.Closeable;
 
 /**
  * 
  * @since
  */
-public abstract class Info {
+public abstract class Info implements Closeable {
 
 	private Perso perso;
 

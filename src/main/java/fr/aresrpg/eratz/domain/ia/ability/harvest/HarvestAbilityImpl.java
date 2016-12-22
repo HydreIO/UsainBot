@@ -15,6 +15,11 @@ public class HarvestAbilityImpl implements HarvestAbility {
 		this.perso = perso;
 	}
 
+	@Override
+	public void shutdown() {
+
+	}
+
 	/**
 	 * @return the perso
 	 */

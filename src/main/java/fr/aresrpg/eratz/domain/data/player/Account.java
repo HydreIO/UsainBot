@@ -10,18 +10,18 @@ package fr.aresrpg.eratz.domain.data.player;
 
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.eratz.domain.data.player.inventory.Banque;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy;
-import fr.aresrpg.eratz.domain.util.Threads;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
-import fr.aresrpg.eratz.domain.util.config.Variables;
+import fr.aresrpg.eratz.domain.util.config.BlackList;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class Account {
@@ -30,6 +30,7 @@ public class Account {
 	private String username;
 	private String pass;
 	private List<Perso> persos = new ArrayList<>();
+	private Set<String> friends = new HashSet();
 	private Perso currentPlayed;
 	private Perso defaultBot;
 	private AccountState state = AccountState.OFFLINE;
@@ -52,6 +53,25 @@ public class Account {
 
 	public void notifyBotOnline() { // pour confirmer que le bot est bien en jeux
 		setState(AccountState.BOT_ONLINE);
+		Executors.FIXED.execute(() -> {
+			for (String s : BlackList.BOTS) {
+				if (friends.contains(s)) continue;
+				friends.add(s);
+				LOGGER.info("Ajout de '" + s + "' dans les amis !");
+				getCurrentPlayed().getAbilities().getBaseAbility().addFriend(s);
+				Threads.uSleep(500, TimeUnit.MILLISECONDS);
+			}
+		});
+		if (getCurrentPlayed().getMind().isRunning()) System.out.println("Mind already running");
+		else
+			Executors.FIXED.execute(() -> {
+				try {
+					getCurrentPlayed().getMind().process();
+				} catch (InterruptedException | ExecutionException e) {
+					e.printStackTrace();
+				}
+			});
+
 	}
 
 	/**
@@ -77,20 +97,6 @@ public class Account {
 	}
 
 	/**
-	 * Called when the client close the connection or crash
-	 */
-	public void notifyDisconnect() {
-		LOGGER.info("Client disconnected !");
-		setState(AccountState.OFFLINE);
-		if (!Variables.CONNECT_BOT_ON_CLIENT_DECONNECTION || getDefaultBot() == null) return;
-		Executors.FIXED.execute(() -> {
-			LOGGER.info("Connecting bot on " + getDefaultBot().getPseudo() + " in " + Variables.SEC_AFTER_CRASH + "s !");
-			Threads.sleep(Variables.SEC_AFTER_CRASH, TimeUnit.SECONDS);
-			getDefaultBot().connect();
-		});
-	}
-
-	/**
 	 * Disconnect the current perso if there is one and connect the new<br>
 	 * If there is a connected perso then the method wait the minimum configured time before connection to avoid auto ban
 	 * 
@@ -100,7 +106,7 @@ public class Account {
 	public void switchPerso(Perso perso) {
 		if (getCurrentPlayed() != null) getCurrentPlayed().disconnect("Switching to " + perso.getPseudo());
 		LOGGER.info("Switching to " + perso.getPseudo() + " in ~5s");
-		perso.connectIn(Randoms.nextBetween(3, 7), TimeUnit.SECONDS);
+		perso.connectIn(Randoms.nextBetween(4, 7), TimeUnit.SECONDS);
 	}
 
 	public void addPerso(Perso p) {
@@ -121,6 +127,8 @@ public class Account {
 			getRemoteConnection().start();
 		} catch (IOException e) {
 			e.printStackTrace();
+			setState(AccountState.OFFLINE);
+			if (getCurrentPlayed() != null) getCurrentPlayed().connectIn(10, TimeUnit.SECONDS);
 		}
 	}
 

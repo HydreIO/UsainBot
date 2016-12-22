@@ -34,6 +34,12 @@ public class Fight {
 		this.swordCell2 = swordCell2;
 	}
 
+	public static Fight fromGame(FightType type, boolean isSpec, int timer, boolean duel) {
+		Fight f = new Fight(-1, -1);
+		f.type = type;
+		return f;
+	}
+
 	public void entityMove(int id, int cellid) {
 		if (id > 1000) playerMove(id, cellid);
 		else {

@@ -15,6 +15,11 @@ public class FightAbilityImpl implements FightAbility {
 		this.perso = perso;
 	}
 
+	@Override
+	public void shutdown() {
+
+	}
+
 	/**
 	 * @return the perso
 	 */
