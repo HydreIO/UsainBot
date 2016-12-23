@@ -1,6 +1,10 @@
 package fr.aresrpg.eratz.domain.ia.ability.move;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
+import fr.aresrpg.dofus.protocol.game.actions.GameActions;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
+import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
 import fr.aresrpg.dofus.protocol.game.client.GameActionACKPacket;
 import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
 import fr.aresrpg.dofus.structures.map.Cell;
@@ -13,13 +17,11 @@ import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
-import java.awt.*;
+import java.awt.Point;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 /**
  *
@@ -72,7 +74,8 @@ public class NavigationImpl implements Navigation {
 
 	private List<Point> searchPath(int cellid) {
 		return Pathfinding.getPath(
-				Maps.getX(getCurrentPos(), getMap().getWidth()), Maps.getY(getCurrentPos(), getMap().getWidth()),
+				Maps.getX(getCurrentPos(), getMap().getWidth()),
+				Maps.getY(getCurrentPos(), getMap().getWidth()),
 				Maps.getX(cellid, getMap().getWidth()),
 				Maps.getY(cellid, getMap().getWidth()), getMap().getCells(), getMap().getWidth(), true);
 	}
@@ -83,33 +86,21 @@ public class NavigationImpl implements Navigation {
 		if (p == null) {
 			LOGGER.info("Le chemin est introuvable ! nouvel éssai..");
 			LOGGER.info("Position = " + getCurrentPos());
-			p = searchPath(cellid);
-			if (p == null) {
-				LOGGER.info("Impossible de trouver un chemin malgré tout mes éffort jte jure wallah jariv ap");
-				return this;
-			}
+			getPerso().getBotInfos().setBlockedOn(getCurrentPos());
+			return this;
 		}
-		System.out.println("Current :" + getCurrentPos());
-		float time = Pathfinding.getPathTime(
-				p,
-				getMap().getCells(),
-				getMap().getWidth(),
-				false
-		);
-		System.out.println("TIME: " + time);
+		getPerso().getBotInfos().setBlockedOn(-1);
+		float time = Pathfinding.getPathTime(p, getMap().getCells(), getMap().getWidth(), false);
 		getPerso().getDebugView().setPath(p);
 		teleporting = teleport;
 		try {
-			getPerso().getAccount().getRemoteConnection().send(new GameClientActionPacket(null, null).setAction(new GameMoveAction().setPath(Pathfinding.makeShortPath(p, getMap().getWidth()))));
+			List<PathFragment> shortpath = Pathfinding.makeShortPath(p, getMap().getWidth());
+			getPerso().getAccount().getRemoteConnection().send(new GameClientActionPacket(GameActions.MOVE, new GameMoveAction().setPath(shortpath)));
 			Executors.SCHEDULED.schedule(() -> {
-				try {
-					getPerso().getAccount().getRemoteConnection().send(new GameActionACKPacket().setActionId(0));
-					if (!teleporting)
-						getBotThread().unpause();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			} , (long) (time * 30), TimeUnit.MILLISECONDS);
+				getPerso().sendPacketToServer(new GameActionACKPacket().setActionId(0));
+				if (!teleporting)
+					getBotThread().unpause();
+			} , (long) (time * 60), TimeUnit.MILLISECONDS);
 			getBotThread().pause(Thread.currentThread());
 		} catch (IOException e) {
 			e.printStackTrace();

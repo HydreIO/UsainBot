@@ -20,7 +20,7 @@ import java.util.List;
 public class FightAbilityImpl implements FightAbility {
 
 	private Perso perso;
-	private BotThread botThread;
+	private BotThread botThread = new BotThread();
 
 	public FightAbilityImpl(Perso perso) {
 		this.perso = perso;

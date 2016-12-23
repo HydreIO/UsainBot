@@ -87,11 +87,9 @@ public class BotGameActionServerHandler extends BotHandlerAbstract implements Ga
 	@Override
 	public void onEntityMove(int entityId, List<PathFragment> path) {
 		int id = path.get(path.size() - 1).getCellId();
-		if (entityId == getPerso().getId()) {
-			getPerso().getMapInfos().setCellId(id);
-			getPerso().getNavigation().notifyMovementEnd();
+		if (entityId == getPerso().getId())
 			getPerso().getAbilities().getFightAbility().getBotThread().unpause();
-		} else {
+		else {
 			getPerso().getMapInfos().getMap().entityMove(entityId, id);
 			//	getPerso().getDebugView().addMob(entityId, id);
 		}

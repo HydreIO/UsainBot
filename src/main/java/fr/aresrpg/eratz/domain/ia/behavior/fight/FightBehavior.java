@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.behavior.fight;
 
+import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.structures.map.*;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
@@ -18,7 +19,6 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class FightBehavior extends Behavior {
 
-	private static Random r = new Random();
 	private Fight fight;
 	private Humeur humeur;
 
@@ -152,7 +152,7 @@ public abstract class FightBehavior extends Behavior {
 	public abstract void playTurn();
 
 	public void tryHuman() {
-		if (humanFight()) botWait(r.nextInt(3000) + 1000, TimeUnit.MILLISECONDS);
+		if (humanFight()) botWait(Randoms.nextBetween(2, 4), TimeUnit.SECONDS);
 	}
 
 	protected void waitCanStartFight() {

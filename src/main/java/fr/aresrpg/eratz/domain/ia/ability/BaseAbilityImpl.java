@@ -63,7 +63,10 @@ public class BaseAbilityImpl implements BaseAbility {
 
 	@Override
 	public void sit(boolean sit) {
-		if ((getPerso().getBotInfos().isSit() && !sit) || (!getPerso().getBotInfos().isSit() && sit)) getPerso().sendPacketToServer(new EmoteUsePacket().setEmot(Emotes.SIT));
+		if (getPerso().getBotInfos().isSit() != sit) {
+			getPerso().sendPacketToServer(new EmoteUsePacket().setEmot(Emotes.SIT));
+			getPerso().getBotInfos().setSit(sit);
+		}
 	}
 
 	@Override

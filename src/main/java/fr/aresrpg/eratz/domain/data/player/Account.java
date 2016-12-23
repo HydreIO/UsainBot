@@ -10,14 +10,16 @@ package fr.aresrpg.eratz.domain.data.player;
 
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
-import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.protocol.DofusConnection;
+import fr.aresrpg.dofus.protocol.mount.client.MountPlayerPacket;
+import fr.aresrpg.eratz.domain.data.GroupsManager;
 import fr.aresrpg.eratz.domain.data.player.inventory.Banque;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
+import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
+import fr.aresrpg.eratz.domain.ia.behavior.AntiAfkBehavior;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
-import fr.aresrpg.eratz.domain.util.config.BlackList;
 
 import java.io.IOException;
 import java.util.*;
@@ -53,15 +55,6 @@ public class Account {
 
 	public void notifyBotOnline() { // pour confirmer que le bot est bien en jeux
 		setState(AccountState.BOT_ONLINE);
-		Executors.FIXED.execute(() -> {
-			for (String s : BlackList.BOTS) {
-				if (friends.contains(s)) continue;
-				friends.add(s);
-				LOGGER.info("Ajout de '" + s + "' dans les amis !");
-				getCurrentPlayed().getAbilities().getBaseAbility().addFriend(s);
-				Threads.uSleep(500, TimeUnit.MILLISECONDS);
-			}
-		});
 		if (getCurrentPlayed().getMind().isRunning()) System.out.println("Mind already running");
 		else
 			Executors.FIXED.execute(() -> {
@@ -71,7 +64,22 @@ public class Account {
 					e.printStackTrace();
 				}
 			});
+	}
 
+	public void notifyMitmOnline() {
+		if (!getCurrentPlayed().getMind().isRunning()) {
+			Executors.FIXED.execute(() -> {
+				try {
+					getCurrentPlayed().getMind().process();
+				} catch (InterruptedException | ExecutionException e) {
+					e.printStackTrace();
+				}
+			});
+			getCurrentPlayed().getMind().getForcedActions().add(() -> new AntiAfkBehavior(currentPlayed, true));
+			getCurrentPlayed().sendPacketToServer(new MountPlayerPacket());
+		}
+		getCurrentPlayed().setState(PlayerState.IDLE);
+		GroupsManager.getInstance().updateGroups(getCurrentPlayed());
 	}
 
 	/**

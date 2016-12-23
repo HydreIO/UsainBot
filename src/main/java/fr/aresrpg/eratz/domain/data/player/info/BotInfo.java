@@ -3,6 +3,8 @@ package fr.aresrpg.eratz.domain.data.player.info;
 import fr.aresrpg.eratz.domain.data.dofus.player.BotJob;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 
+import java.awt.Point;
+
 /**
  * 
  * @since
@@ -11,6 +13,8 @@ public class BotInfo extends Info {
 
 	private BotJob botJob;
 	private boolean sit;
+	private Point followedCoords;
+	private int blockedOn; //(cellid) dans le pathfinder quand le chemin n'est pas trouvé la pos est stockée içi, si le chemin est trouvé alors elle est mis a -1
 
 	/**
 	 * @param perso
@@ -22,6 +26,40 @@ public class BotInfo extends Info {
 	@Override
 	public void shutdown() {
 		sit = false;
+	}
+
+	/**
+	 * @return the blockedOn
+	 */
+	public int getBlockedOn() {
+		return blockedOn;
+	}
+
+	/**
+	 * @param blockedOn
+	 *            the blockedOn to set
+	 */
+	public void setBlockedOn(int blockedOn) {
+		this.blockedOn = blockedOn;
+	}
+
+	public boolean isBlockedOnACell() {
+		return blockedOn != -1;
+	}
+
+	/**
+	 * @return the followedCoords
+	 */
+	public Point getFollowedCoords() {
+		return followedCoords;
+	}
+
+	/**
+	 * @param followedCoords
+	 *            the followedCoords to set
+	 */
+	public void setFollowedCoords(Point followedCoords) {
+		this.followedCoords = followedCoords;
 	}
 
 	/**

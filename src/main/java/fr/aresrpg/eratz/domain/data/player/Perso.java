@@ -26,6 +26,7 @@ import fr.aresrpg.eratz.domain.data.player.info.*;
 import fr.aresrpg.eratz.domain.data.player.inventory.PlayerInventory;
 import fr.aresrpg.eratz.domain.data.player.object.Group;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
+import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.ia.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.ia.ability.move.NavigationImpl;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
@@ -58,12 +59,14 @@ public class Perso implements Closeable {
 	private final StatsInfo statsInfos = new StatsInfo(this);
 	private final DofusMapView debugView = new DofusMapView();
 	private final PvpInfo pvpInfos = new PvpInfo(this);
+	private final ChatInfo chatInfos = new ChatInfo(this);
 
 	private final Server server;
 	private final PlayerInventory inventory = new PlayerInventory(this);
 
 	private Group group;
 	private Behavior currentBehavior;
+	private PlayerState state;
 
 	public Perso(int id, String pseudo, Account account, BotJob job, Classe classe, Genre sexe, Server srv) {
 		this.id = id;
@@ -98,10 +101,32 @@ public class Perso implements Closeable {
 	}
 
 	/**
+	 * @return the state
+	 */
+	public PlayerState getState() {
+		return state;
+	}
+
+	/**
+	 * @param state
+	 *            the state to set
+	 */
+	public void setState(PlayerState state) {
+		this.state = state;
+	}
+
+	/**
 	 * @return the currentBehavior
 	 */
 	public Behavior getCurrentBehavior() {
 		return currentBehavior;
+	}
+
+	/**
+	 * @return the chatInfos
+	 */
+	public ChatInfo getChatInfos() {
+		return chatInfos;
 	}
 
 	/**
@@ -355,18 +380,15 @@ public class Perso implements Closeable {
 		return account;
 	}
 
+	public boolean isIdling() {
+		return getState() == PlayerState.IDLE;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
 		if (obj == this) return true;
 		return obj instanceof Perso && ((Perso) obj).getId() == getId();
-	}
-
-	@Override
-	public String toString() {
-		return "Perso [account=" + account + ", id=" + id + ", pseudo=" + pseudo + ", navigation=" + navigation + ", mind=" + mind + ", abilities=" + abilities + ", logInfos=" + logInfos
-				+ ", botInfos=" + botInfos + ", mapInfos=" + mapInfos + ", fightInfos=" + fightInfos + ", statsInfos=" + statsInfos + ", debugView=" + debugView + ", pvpInfos=" + pvpInfos
-				+ ", server=" + server + ", inventory=" + inventory + ", group=" + group + "]";
 	}
 
 }

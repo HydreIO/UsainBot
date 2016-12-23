@@ -18,7 +18,7 @@ public class PassTurnBehavior extends FightBehavior {
 
 	@Override
 	public int getBeginCellId() {
-		return 0;
+		return -1;
 	}
 
 	@Override

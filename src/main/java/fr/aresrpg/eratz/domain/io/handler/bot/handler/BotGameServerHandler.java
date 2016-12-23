@@ -8,8 +8,8 @@ import fr.aresrpg.dofus.structures.game.*;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.ia.behavior.fight.type.PassTurnBehavior;
 import fr.aresrpg.eratz.domain.std.game.GameServerHandler;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 /**
  * 
@@ -45,6 +45,7 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 	@Override
 	public void onFightJoin(GameType state, FightType fightType, boolean isSpectator, int startTimer, boolean cancelButton, boolean isDuel) {
 		getPerso().getAbilities().getFightAbility().getBotThread().unpause();
+		getPerso().getFightInfos().setCurrentFightBehavior(new PassTurnBehavior(getPerso()));
 	}
 
 	@Override
@@ -55,12 +56,6 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 	@Override
 	public void onMap(BotMap map) {
 		getPerso().sendPacketToServer(new GameExtraInformationPacket());
-		getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> {
-			System.out.println(map.getDofusMap().getCell(a));
-			getPerso().getNavigation().moveToCell(a);
-		}));
-		getPerso().getDebugView().setPath(null);
-		getPerso().getDebugView().setMap(map.getDofusMap());
 		getPerso().getAccount().notifyBotOnline(); // pour autoriser les actions qui onts besoin que le bot soit bien en jeux
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}
@@ -77,7 +72,6 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 	@Override
 	public void onPlayerMove(MovementPlayer player) {
 		// AntiBot.getInstance().notifyMove(getPerso());
-		if (player.getId() != getPerso().getId()) getPerso().getDebugView().addPlayer(player.getId(), player.getCell());
 	}
 
 	@Override
@@ -87,18 +81,15 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 
 	@Override
 	public void onMobMove(MovementMonster mob) {
-		getPerso().getDebugView().addMob(mob.getId(), mob.getCellId());
 
 	}
 
 	@Override
 	public void onNpcMove(MovementNpc npc) {
-		getPerso().getDebugView().addNpc(npc.getId(), npc.getCellid());
 	}
 
 	@Override
 	public void onMobGroupMove(MovementMonsterGroup mobs) {
-		getPerso().getDebugView().addMob(mobs.getId(), mobs.getCellid());
 	}
 
 	@Override

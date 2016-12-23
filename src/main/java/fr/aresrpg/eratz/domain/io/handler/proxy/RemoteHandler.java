@@ -63,7 +63,7 @@ import java.util.Objects;
  */
 public class RemoteHandler extends BaseServerPacketHandler {
 
-	static final ProtocolRegistry[] toSkip = { ProtocolRegistry.GAME_MOVEMENT };
+	static final ProtocolRegistry[] toSkip = {};
 	private Proxy proxy;
 
 	/**
@@ -185,6 +185,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	public void handle(GameMapDataPacket pkt) {
 		super.handle(pkt);
 		transmit(pkt);
+		getPerso().getAccount().notifyMitmOnline();
 	}
 
 	@Override

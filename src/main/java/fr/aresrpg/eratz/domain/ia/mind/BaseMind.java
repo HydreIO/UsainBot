@@ -6,8 +6,7 @@ import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.player.Perso;
-import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
-import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
+import fr.aresrpg.eratz.domain.ia.behavior.*;
 import fr.aresrpg.eratz.domain.ia.behavior.move.BankDepositPath;
 
 import java.util.*;
@@ -25,7 +24,7 @@ public class BaseMind implements Mind {
 	private boolean infinite;
 	private Set<Integer> itemsToKeep = new HashSet<>();
 	private ConcurrentLinkedQueue<Runnable> forceds = new ConcurrentLinkedQueue<>();
-	private static boolean running;
+	private boolean running;
 
 	public BaseMind(Perso perso) {
 		this.perso = perso;
@@ -43,7 +42,6 @@ public class BaseMind implements Mind {
 		running = true;
 		do {
 			if (!forceds.isEmpty()) { // forced en prio
-				System.out.println("START CRASH ====================");
 				forceds.poll().run();
 				continue;
 			}
@@ -158,19 +156,25 @@ public class BaseMind implements Mind {
 
 	@Override
 	public Mind thenReconnect() {
-		getPerso().connect();
+		getActions().add(() -> {
+			getPerso().connect();
+			return BehaviorStopReason.FINISHED;
+		});
 		return this;
 	}
 
 	@Override
 	public Mind thenWait(long time, TimeUnit unit) {
-		Threads.uSleep(time, unit);
+		getActions().add(() -> {
+			Threads.uSleep(time, unit);
+			return BehaviorStopReason.FINISHED;
+		});
 		return this;
 	}
 
 	@Override
 	public Mind thenIdle() {
-		// TODO
+		getActions().add(new AntiAfkBehavior(getPerso(), false)); // pour cancel juste changer la state du perso
 		return this;
 	}
 

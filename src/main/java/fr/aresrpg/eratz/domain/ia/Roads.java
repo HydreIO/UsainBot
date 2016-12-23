@@ -8,13 +8,19 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.ia;
 
+import fr.aresrpg.dofus.structures.PathDirection;
+import fr.aresrpg.dofus.structures.map.DofusMap;
+import fr.aresrpg.dofus.util.Lang;
+import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
+import fr.aresrpg.eratz.domain.data.MapsData;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.object.Road;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.awt.Point;
+import java.io.IOException;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -51,8 +57,50 @@ public class Roads {
 
 	public static final Road[] ALL = { PLAINE_ROCHEUSE, CHAMPS_ASTRUB, AMAKNA };
 
+	private static Map<Point, MapRestriction> mapRestrictions = new HashMap<>();
+
 	public static RoadBuilder builder() {
 		return new RoadBuilder();
+	}
+
+	/**
+	 * @return the mapRestrictions
+	 */
+	public static Map<Point, MapRestriction> getMapRestrictions() {
+		return mapRestrictions;
+	}
+
+	public static MapRestriction getRestriction(Point p) {
+		MapRestriction r = getMapRestrictions().get(p);
+		if (r == null) getMapRestrictions().put(p, r = new MapRestriction(p.x, p.y));
+		return r;
+	}
+
+	public static boolean canMove(Point from, Point to) {
+		MapRestriction r = getRestriction(from);
+		PathDirection dir = Pathfinding.getDirectionForMap(from.x, from.y, to.x, to.y);
+		return r.canMove(dir);
+	}
+
+	public static Road nearestRoad(BotMap map) {
+		Road near = null;
+		int dist = Integer.MAX_VALUE;
+		for (Road r : ALL) {
+			Node no = r.getNearest(map);
+			int di = no.distanceManathan(map.getX(), map.getY());
+			if (near == null || di < dist) {
+				dist = di;
+				near = r;
+			}
+		}
+		return near;
+	}
+
+	public static void main(String[] args) throws IOException {
+		DofusMap dofusMap = new DofusMap(3250, 15, 17, 0, 0, false, 0, null);
+		MapsData.getInstance().init(Lang.getDatas("fr", "maps"));
+		BotMap m = new BotMap(dofusMap);
+		System.out.println(nearestRoad(m).getLabel());
 	}
 
 	public static Road nearestRoad(Perso perso) {
@@ -97,6 +145,166 @@ public class Roads {
 		public Road build() {
 			return new Road(path);
 		}
+	}
+
+	public static class MapRestriction {
+		private int x, y;
+		private boolean moveUp = true, moveDown = true, moveLeft = true, moveRight = true;
+
+		public MapRestriction(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+
+		public static MapRestriction fromPoint(Point p) {
+			return new MapRestriction(p.x, p.y);
+		}
+
+		public boolean canMove(PathDirection dir) { // return true si le chemin n'est pas bloqué
+			switch (dir) {
+				case DOWN:
+				case DOWN_LEFT:
+				case DOWN_RIGHT:
+					return canMoveDown();
+				case LEFT:
+					return canMoveLeft();
+				case RIGHT:
+					return canMoveRight();
+				case UP:
+				case UP_LEFT:
+				case UP_RIGHT:
+					return canMoveUp();
+			}
+			return true;
+		}
+
+		public void setCantMove(PathDirection dir) { // indique qu'on ne peut pas aller dans cette direction depuis la case actuelle
+			switch (dir) {
+				case DOWN:
+				case DOWN_LEFT:
+				case DOWN_RIGHT:
+					moveDown = false;
+					return;
+				case LEFT:
+					moveLeft = false;
+					return;
+				case RIGHT:
+					moveRight = false;
+					return;
+				case UP:
+				case UP_LEFT:
+				case UP_RIGHT:
+					moveUp = false;
+					return;
+			}
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == null) return false;
+			if (obj == this) return true;
+			return obj instanceof MapRestriction && ((MapRestriction) obj).posEquals(this);
+		}
+
+		public boolean posEquals(MapRestriction m) {
+			return m.x == x && m.y == y;
+		}
+
+		/**
+		 * @return the x
+		 */
+		public int getX() {
+			return x;
+		}
+
+		/**
+		 * @param x
+		 *            the x to set
+		 */
+		public void setX(int x) {
+			this.x = x;
+		}
+
+		/**
+		 * @return the y
+		 */
+		public int getY() {
+			return y;
+		}
+
+		/**
+		 * @param y
+		 *            the y to set
+		 */
+		public void setY(int y) {
+			this.y = y;
+		}
+
+		/**
+		 * @return the moveUp
+		 */
+		public boolean canMoveUp() {
+			return moveUp;
+		}
+
+		/**
+		 * @param moveUp
+		 *            the moveUp to set
+		 */
+		public void setMoveUp(boolean moveUp) {
+			this.moveUp = moveUp;
+		}
+
+		/**
+		 * @return the moveDown
+		 */
+		public boolean canMoveDown() {
+			return moveDown;
+		}
+
+		/**
+		 * @param moveDown
+		 *            the moveDown to set
+		 */
+		public void setMoveDown(boolean moveDown) {
+			this.moveDown = moveDown;
+		}
+
+		/**
+		 * @return the moveLeft
+		 */
+		public boolean canMoveLeft() {
+			return moveLeft;
+		}
+
+		/**
+		 * @param moveLeft
+		 *            the moveLeft to set
+		 */
+		public void setMoveLeft(boolean moveLeft) {
+			this.moveLeft = moveLeft;
+		}
+
+		/**
+		 * @return the moveRight
+		 */
+		public boolean canMoveRight() {
+			return moveRight;
+		}
+
+		/**
+		 * @param moveRight
+		 *            the moveRight to set
+		 */
+		public void setMoveRight(boolean moveRight) {
+			this.moveRight = moveRight;
+		}
+
+		@Override
+		public String toString() {
+			return "MapRestriction [x=" + x + ", y=" + y + ", moveUp=" + moveUp + ", moveDown=" + moveDown + ", moveLeft=" + moveLeft + ", moveRight=" + moveRight + "]";
+		}
+
 	}
 
 }

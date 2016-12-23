@@ -1,11 +1,14 @@
 package fr.aresrpg.eratz.domain.data.player.object;
 
+import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.PathDirection;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.ia.Roads;
+import fr.aresrpg.eratz.domain.ia.Roads.MapRestriction;
 
 import java.awt.Point;
 import java.util.*;
@@ -33,8 +36,13 @@ public class Road {
 	public Node getNearest(BotMap map) {
 		Node near = null;
 		int dist = Integer.MAX_VALUE;
-		for (Node n : maps.keySet())
-			if (near == null || n.distanceManathan(map.getX(), map.getY()) < dist) near = n;
+		for (Node n : maps.keySet()) {
+			int di = n.distanceManathan(map.getX(), map.getY());
+			if (near == null || di < dist) {
+				dist = di;
+				near = n;
+			}
+		}
 		return near;
 	}
 
@@ -57,28 +65,72 @@ public class Road {
 		}
 	}
 
+	/**
+	 * @return the maps
+	 */
+	public Map<Node, Consumer<Perso>> getMaps() {
+		return maps;
+	}
+
+	/**
+	 * @return the label
+	 */
+	public String getLabel() {
+		return label;
+	}
+
 	private void joinNearest(Perso perso) {
 		BotMap map = perso.getMapInfos().getMap();
 		Node nearest = getNearest(map);
-		List<Point> path = Pathfinding.getPath(map.getX(), map.getY(), nearest.getX(), nearest.getY(), false);
-		val: for (Point p : path) {
+		List<Point> path = Pathfinding.getPathForCarte(map.getX(), map.getY(), nearest.getX(), nearest.getY(), Roads::canMove);
+		if (path == null) {
+			perso.getAbilities().getBaseAbility().speak(Chat.ADMIN, "Impossible de rejoindre la route " + label + " ! Blocké en %pos%");
+			perso.crashReport("Impossible de rejoindre la route désignée ! Blocké en [" + map.getX() + "," + map.getY() + "]");
+			return;
+		}
+		path.remove(0);
+		for (Point p : path) {
 			BotMap newmap = perso.getMapInfos().getMap();
-			PathDirection dir = Pathfinding.getDirection(newmap.getX(), newmap.getY(), (int) p.getX(), (int) p.getY());
-			moveWithDirection(perso, dir);
-			for (int i = 0; i < 3; i++) {
-				if (!perso.getMapInfos().getMap().equals(newmap)) break; // test pour savoir si le bot n'a pas réussi à changer de map
-				tryUnblock(perso, dir); // on essaye une autre direction
-				if (!perso.getMapInfos().getMap().equals(newmap)) break val; // changement map réussi, on sort pour recalculer un chemin
+			PathDirection dir = Pathfinding.getDirectionForMap(newmap.getX(), newmap.getY(), (int) p.getX(), (int) p.getY());
+			if (dir == null) {
+				perso.crashReport("Impossible de trouver la direction pour aller de [" + newmap.getX() + "," + newmap.getY() + "] vers [" + p.x + "," + p.y + "]");
+				return;
 			}
-			if (perso.getMapInfos().getMap().equals(newmap)) { // si tjr pas changé de map on abandonne
-				perso.getAbilities().getBaseAbility().speak(Chat.ADMIN, "Imposible de rejoindre la route " + label + " ! Blocké en %pos%");
-				perso.crashReport("Imposible de rejoindre la route désignée ! Blocké en [" + p.getX() + "," + p.getY() + "]");
+			moveWithDirection(perso, dir);
+			if (perso.getBotInfos().isBlockedOnACell()) {
+				MapRestriction res = Roads.getRestriction(new Point(newmap.getX(), newmap.getY()));
+				res.setCantMove(dir);
+				joinNearest(perso);
+				return;
 			}
 		}
 	}
 
-	private void tryUnblock(Perso perso, PathDirection lastDir) {
+	private PathDirection getDifferentDir(PathDirection base) {
+		PathDirection dir = base;
+		do {
+			dir = PathDirection.values()[Randoms.nextInt(PathDirection.values().length - 1)];
+		} while (isSame(dir, base));
+		return dir;
+	}
 
+	private boolean isSame(PathDirection dir, PathDirection other) {
+		if (dir == null || other == null) return false;
+		switch (dir) {
+			case DOWN:
+			case DOWN_LEFT:
+			case DOWN_RIGHT:
+				return other == PathDirection.DOWN || other == PathDirection.DOWN_LEFT || other == PathDirection.DOWN_RIGHT;
+			case LEFT:
+				return other == PathDirection.LEFT;
+			case RIGHT:
+				return other == PathDirection.RIGHT;
+			case UP:
+			case UP_LEFT:
+			case UP_RIGHT:
+				return other == PathDirection.UP || other == PathDirection.UP_LEFT || other == PathDirection.UP_RIGHT;
+		}
+		return false;
 	}
 
 	private void moveWithDirection(Perso perso, PathDirection dir) {

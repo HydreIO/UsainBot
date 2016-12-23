@@ -82,6 +82,7 @@ import fr.aresrpg.eratz.domain.std.party.PartyServerHandler;
 import fr.aresrpg.eratz.domain.std.specialization.SpecializationServerHandler;
 import fr.aresrpg.eratz.domain.std.spell.SpellServerHandler;
 import fr.aresrpg.eratz.domain.std.zaap.ZaapServerHandler;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -405,6 +406,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(ChatSubscribeChannelPacket pkt) {
 		log(pkt);
+		Arrays.stream(pkt.getChannels()).forEach(c -> getPerso().getChatInfos().getChats().put(c, pkt.isAdd()));
 		if (pkt.isAdd()) getChatHandler().forEach(h -> h.onSubscribeChannel(pkt.getChannels()));
 		else getChatHandler().forEach(h -> h.onUnsubscribe(pkt.getChannels()));
 	}
@@ -552,11 +554,32 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	public void handle(InfoMessagePacket pkt) {
 		log(pkt);
 		if (pkt.getMessage() == null) return;
+		Fight fight = getPerso().getFightInfos().getCurrentFight();
 		switch (pkt.getMessage()) {
 			case FIGHT_ATTRIBUTE_ALLOW_GROUP_ACTIVE:
-
+				fight.setGroupBlocked(true);
 				break;
-
+			case FIGHT_ATTRIBUTE_ALLOW_GROUP_NOT_ACTIVE:
+				fight.setGroupBlocked(false);
+				break;
+			case FIGHT_ATTRIBUTE_DENY_ACTIVE:
+				fight.setBlocked(true);
+				break;
+			case FIGHT_ATTRIBUTE_DENY_NOT_ACTIVE:
+				fight.setBlocked(false);
+				break;
+			case FIGHT_ATTRIBUTE_DENY_SPECTATE_ACTIVE:
+				fight.setSpecBlocked(true);
+				break;
+			case FIGHT_ATTRIBUTE_DENY_SPECTATE_NOT_ACTIVE:
+				fight.setSpecBlocked(false);
+				break;
+			case FIGHT_ATTRIBUTE_NEED_HELP_ACTIVE:
+				fight.setHelpNeeded(true);
+				break;
+			case FIGHT_ATTRIBUTE_NEED_HELP_NOT_ACTIVE:
+				fight.setHelpNeeded(false);
+				break;
 			default:
 				break;
 		}
@@ -626,6 +649,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(GameEndPacket pkt) {
 		log(pkt);
+		getPerso().getFightInfos().getCurrentFight().setEnded(true);
 		getGameHandler().forEach(h -> h.onFightEnd(pkt));
 	}
 
@@ -660,11 +684,14 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 			if (Interractable.isInterractable(cell.getLayerObject2Num())) // add ressource
 				bm.getRessources().add(new Ressource(cell, Interractable.fromId(cell.getLayerObject2Num()))); // interractable peut etre null dans le cas des zaapi porte coffre etc
 		}
-		getPerso()
-				.getMapInfos()
-				.setMap(
-						bm);
+		getPerso().getMapInfos().setMap(bm);
 		MapView.setTitle(getPerso().getPseudo() + " | " + bm.getInfos());
+		getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> {
+			System.out.println(bm.getDofusMap().getCell(a));
+			getPerso().getNavigation().moveToCell(a);
+		}));
+		getPerso().getDebugView().setPath(null);
+		getPerso().getDebugView().setMap(bm.getDofusMap());
 		getGameHandler().forEach(h -> h.onMap(bm));
 	}
 
@@ -701,6 +728,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 						if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(player);
 						else getPerso().getMapInfos().getMap().entityUpdate(player);
 					}
+					getPerso().getDebugView().addPlayer(player.getId(), player.getCell());
 					getGameHandler().forEach(h -> h.onPlayerMove(player));
 					return;
 				case CREATE_INVOCATION:
@@ -713,18 +741,21 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 					MovementMonster mob = (MovementMonster) (Object) e.getSecond();
 					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(mob);
 					else getPerso().getMapInfos().getMap().entityUpdate(mob);
+					getPerso().getDebugView().addMob(mob.getId(), mob.getCellId());
 					getGameHandler().forEach(h -> h.onMobMove(mob));
 					return;
 				case CREATE_MONSTER_GROUP:
 					MovementMonsterGroup mobs = (MovementMonsterGroup) (Object) e.getSecond();
 					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(mobs);
 					else getPerso().getMapInfos().getMap().entityUpdate(mobs);
+					getPerso().getDebugView().addMob(mobs.getId(), mobs.getCellid());
 					getGameHandler().forEach(h -> h.onMobGroupMove(mobs));
 					return;
 				case CREATE_NPC:
 					MovementNpc npc = (MovementNpc) (Object) e.getSecond();
 					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(npc);
 					else getPerso().getMapInfos().getMap().entityUpdate(npc);
+					getPerso().getDebugView().addNpc(npc.getId(), npc.getCellid());
 					getGameHandler().forEach(h -> h.onNpcMove(npc));
 					return;
 				default:
@@ -781,6 +812,10 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 				break;
 			case MOVE:
 				GameMoveAction actionm = (GameMoveAction) pkt.getAction();
+				int cell = actionm.getPath().get(actionm.getPath().size() - 1).getCellId();
+				getPerso().getDebugView().addEntity(pkt.getEntityId(), cell);
+				if (pkt.getEntityId() == getPerso().getId())
+					getPerso().getMapInfos().setCellId(cell);
 				getGameActionHandler().forEach(h -> h.onEntityMove(pkt.getEntityId(), actionm.getPath()));
 				break;
 			case DUEL_SERVER_ASK:
@@ -843,6 +878,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(GameTurnStartPacket pkt) {
 		log(pkt);
+		getPerso().getFightInfos().getCurrentFight().setCurrentTurn(pkt.getCharacterId());
 		getGameHandler().forEach(h -> h.onEntityTurnStart(pkt.getCharacterId(), pkt.getTime()));
 	}
 

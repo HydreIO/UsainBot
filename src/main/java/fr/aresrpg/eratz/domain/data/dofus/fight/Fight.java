@@ -48,6 +48,38 @@ public class Fight {
 		}
 	}
 
+	public MovementAction findEntity(int id) {
+		MovementAction a = findTeam0(id);
+		if (a == null) a = findTeam1(id);
+		if (a == null) a = findMobs(id);
+		if (a == null) a = findInvocs(id);
+		return a;
+	}
+
+	private MovementAction findTeam0(int id) {
+		for (MovementPlayer a : team0)
+			if (a.getId() == id) return a;
+		return null;
+	}
+
+	private MovementAction findTeam1(int id) {
+		for (MovementPlayer a : team1)
+			if (a.getId() == id) return a;
+		return null;
+	}
+
+	private MovementAction findInvocs(int id) {
+		for (MovementInvocation a : invocs)
+			if (a.getId() == id) return a;
+		return null;
+	}
+
+	private MovementAction findMobs(int id) {
+		for (MovementMonster a : mobs)
+			if (a.getId() == id) return a;
+		return null;
+	}
+
 	public void playerMove(int id, int cellid) {
 		for (MovementPlayer i : team0)
 			if (i.getId() == id) {
@@ -316,8 +348,8 @@ public class Fight {
 	 * @param currentTurn
 	 *            the currentTurn to set
 	 */
-	public void setCurrentTurn(MovementAction currentTurn) {
-		this.currentTurn = currentTurn;
+	public void setCurrentTurn(int entityId) {
+		this.currentTurn = findEntity(entityId);
 	}
 
 	/**

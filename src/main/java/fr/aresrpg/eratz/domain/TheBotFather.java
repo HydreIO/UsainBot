@@ -21,7 +21,10 @@ import fr.aresrpg.eratz.domain.data.dofus.player.BotJob;
 import fr.aresrpg.eratz.domain.data.dofus.player.Classe;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.object.Road;
+import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.gui.MapView;
+import fr.aresrpg.eratz.domain.ia.Roads;
 import fr.aresrpg.eratz.domain.io.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.util.*;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -139,6 +142,31 @@ public class TheBotFather {
 			if (!sc.hasNext()) continue;
 			String[] nextLine = sc.nextLine().split(" ");
 			switch (nextLine[0].toLowerCase()) {
+				case "whereami":
+					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+						if (a.isClientOnline() || a.isBotOnline()) {
+							Perso p = a.getCurrentPlayed();
+							LOGGER.debug("Map = " + p.getMapInfos().getMap());
+							LOGGER.debug("CellId = " + p.getMapInfos().getCellId());
+							System.out.println("CellId = " + p.getMapInfos().getCellId());
+						}
+					});
+					break;
+				case "road":
+					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+						if (a.isClientOnline() || a.isBotOnline()) {
+							Perso p = a.getCurrentPlayed();
+							p.setState(PlayerState.RUNNING);
+							Road r = Roads.nearestRoad(p);
+							LOGGER.success(p.getPseudo() + " va éssayer de rejoindre " + r.getLabel());
+							r.takeRoad(p);
+						}
+					});
+					break;
+				case "humanfight":
+					Variables.HUMAN_FIGHT = !Variables.HUMAN_FIGHT;
+					LOGGER.success("Human Fights = " + Variables.HUMAN_FIGHT);
+					break;
 				case "removebot":
 					String na = nextLine[1];
 					if (BlackList.BOTS.remove(na)) LOGGER.info("Removing " + na + " as bot !");

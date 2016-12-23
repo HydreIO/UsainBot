@@ -22,6 +22,17 @@ public class GroupsManager {
 		fetchGroup();
 	}
 
+	public void updateGroups(Perso p) {
+		Variables.GROUPS.forEach(g -> {
+			for (String s : g.getMembers()) {
+				if (s.equalsIgnoreCase(p.getPseudo())) {
+					Group group = groups.get(g.getLabel());
+					group.getMembers().add(p);
+				}
+			}
+		});
+	}
+
 	/**
 	 * Permet d'update les groupes en fonction des comptes initialisés
 	 */

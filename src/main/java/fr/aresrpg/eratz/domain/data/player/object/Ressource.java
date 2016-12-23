@@ -43,4 +43,9 @@ public class Ressource {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "Ressource [type=" + type + "]";
+	}
+
 }
