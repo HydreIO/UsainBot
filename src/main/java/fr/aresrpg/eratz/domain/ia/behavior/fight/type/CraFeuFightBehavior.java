@@ -43,8 +43,8 @@ public class CraFeuFightBehavior extends FightBehavior {
 	private void playTurn90() {
 		FightAbility fa = getPerso().getAbilities().getFightAbility();
 		Spells boost = getPerso().getStatsInfos().getLvl() > 99 ? Spells.MAITRISE_ARC : Spells.TIR_ELOIGNEE;
-		fa.launchSpell(boost.get(getPerso()), getPerso().getMapInfos().getCellId());
-		fa.launchSpell(Spells.TIR_PUISSANT.get(getPerso()), getPerso().getMapInfos().getCellId());
+		fa.launchSpell(boost, getPerso().getMapInfos().getCellId());
+		fa.launchSpell(Spells.TIR_PUISSANT, getPerso().getMapInfos().getCellId());
 
 	}
 

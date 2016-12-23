@@ -141,7 +141,7 @@ public abstract class FightBehavior extends Behavior {
 	@Override
 	public BehaviorStopReason start() {
 		if (getPerso().getFightInfos().getCurrentFight() == null) throw new IllegalStateException("Le combat est null");
-		if (getBeginCellId() != -1) getPerso().getAbilities().getFightAbility().goToCellBeforeStart(getBeginCellId());
+		if (getBeginCellId() != -1) getPerso().getAbilities().getFightAbility().setPosition(getBeginCellId());
 		waitCanStartFight();
 		getPerso().getAbilities().getFightAbility().beReady(true);
 		while (!getPerso().getFightInfos().getCurrentFight().isEnded())

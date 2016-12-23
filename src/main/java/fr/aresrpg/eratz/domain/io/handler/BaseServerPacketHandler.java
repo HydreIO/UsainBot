@@ -551,6 +551,15 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(InfoMessagePacket pkt) {
 		log(pkt);
+		if (pkt.getMessage() == null) return;
+		switch (pkt.getMessage()) {
+			case FIGHT_ATTRIBUTE_ALLOW_GROUP_ACTIVE:
+
+				break;
+
+			default:
+				break;
+		}
 		getInfoHandler().forEach(h -> h.onInfos(pkt.getMessage(), pkt.getExtraDatas()));
 	}
 
@@ -785,6 +794,10 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 			case REFUSE_DUEL:
 				GameRefuseDuelAction actiondr = (GameRefuseDuelAction) pkt.getAction();
 				getGameActionHandler().forEach(h -> h.onPlayerRefuseDuel(pkt.getEntityId(), actiondr.getTargetId()));
+				break;
+			case SPELL_LAUNCHED:
+				GameSpellLaunchedAction actionsp = (GameSpellLaunchedAction) pkt.getAction();
+				getGameActionHandler().forEach(h -> h.onSpellLaunched(actionsp.getSpellId(), actionsp.getCellId(), actionsp.getLvl()));
 				break;
 			default:
 				break;

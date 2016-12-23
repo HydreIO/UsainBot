@@ -38,4 +38,6 @@ public interface GameActionServerHandler {
 
 	void onPlayerAcceptDuel(int entityId, int whoAcceptedId);
 
+	void onSpellLaunched(int spellId, int cell, int spellLvl);
+
 }

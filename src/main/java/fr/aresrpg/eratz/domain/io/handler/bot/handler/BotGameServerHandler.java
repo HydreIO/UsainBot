@@ -44,8 +44,7 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 
 	@Override
 	public void onFightJoin(GameType state, FightType fightType, boolean isSpectator, int startTimer, boolean cancelButton, boolean isDuel) {
-		// TODO
-
+		getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 	}
 
 	@Override
@@ -104,14 +103,12 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 
 	@Override
 	public void onEntityFightPositionChange(int entityId, int position) {
-		// TODO
-
+		if (entityId == getPerso().getId()) getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 	}
 
 	@Override
 	public void onPlayerReadyToFight(int entityId, boolean ready) {
-		// TODO
-
+		if (entityId == getPerso().getId()) getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 	}
 
 	@Override
@@ -122,8 +119,7 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 
 	@Override
 	public void onEntityTurnEnd(int entityId) {
-		// TODO
-
+		if (entityId == getPerso().getId()) getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 	}
 
 	@Override

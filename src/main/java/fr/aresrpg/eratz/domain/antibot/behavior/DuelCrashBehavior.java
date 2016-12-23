@@ -1,7 +1,5 @@
 package fr.aresrpg.eratz.domain.antibot.behavior;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
-
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.protocol.game.actions.GameActions;
 import fr.aresrpg.dofus.protocol.game.actions.client.GameDuelAction;
@@ -55,9 +53,7 @@ public class DuelCrashBehavior extends Behavior {
 	public BehaviorStopReason start() {
 		BaseAbility ab = getPerso().getAbilities().getBaseAbility();
 		count = 0;
-		LOGGER.success("STARTING CRASH");
-		if (!getPerso().getMapInfos().getMap().isOnMap(getTarget())) return BehaviorStopReason.FINISHED;
-		while (isRunning() && getPerso().getAccount().isBotOnline()) {
+		while (isRunning()) {
 			if (++count > 120) break;
 			Threads.uSleep(2, TimeUnit.MILLISECONDS);
 			GameDuelAction action = new GameDuelAction(getTarget());

@@ -95,7 +95,10 @@ public class DofusProxy implements Proxy {
 				} catch (Exception e) {
 					e.printStackTrace();
 					connection.closeConnection(); // on close le server socket
-					if (account != null) account.setState(AccountState.OFFLINE); // on notify que le client n'est plus la pour possiblement connecter le bot
+					if (account != null) {
+						if (account.getCurrentPlayed() != null) account.getCurrentPlayed().shutdown();
+						account.setState(AccountState.OFFLINE); // on notify que le client n'est plus la pour possiblement connecter le bot
+					}
 
 				}
 			});

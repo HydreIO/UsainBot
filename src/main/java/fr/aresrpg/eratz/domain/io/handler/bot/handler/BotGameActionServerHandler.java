@@ -81,6 +81,7 @@ public class BotGameActionServerHandler extends BotHandlerAbstract implements Ga
 		}
 		getPerso().getAbilities().getBaseAbility().getStates().defiInvit = InvitationState.REFUSED;
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
+		getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 	}
 
 	@Override
@@ -89,6 +90,7 @@ public class BotGameActionServerHandler extends BotHandlerAbstract implements Ga
 		if (entityId == getPerso().getId()) {
 			getPerso().getMapInfos().setCellId(id);
 			getPerso().getNavigation().notifyMovementEnd();
+			getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 		} else {
 			getPerso().getMapInfos().getMap().entityMove(entityId, id);
 			//	getPerso().getDebugView().addMob(entityId, id);
@@ -119,6 +121,11 @@ public class BotGameActionServerHandler extends BotHandlerAbstract implements Ga
 	@Override
 	public void onActionError() {
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
+	}
+
+	@Override
+	public void onSpellLaunched(int spellId, int cell, int spellLvl) {
+		getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 	}
 
 }

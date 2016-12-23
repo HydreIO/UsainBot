@@ -1,7 +1,11 @@
 package fr.aresrpg.eratz.domain.ia.ability.fight;
 
-import fr.aresrpg.eratz.domain.data.player.object.Spell;
+import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
+import fr.aresrpg.eratz.domain.data.dofus.player.Spells;
+import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.Closeable;
+
+import java.util.List;
 
 /**
  * 
@@ -9,15 +13,15 @@ import fr.aresrpg.eratz.domain.util.Closeable;
  */
 public interface FightAbility extends Closeable {
 
-	void launchSpell(Spell spell, int cellid);
+	void launchSpell(Spells spell, int cellid);
 
-	void move(int... cellIds); // array pour choisir exactement le chemin a suivre
+	void setPosition(int pos);
 
-	void goToCellBeforeStart(int cellid);
+	void move(List<PathFragment> path); // array pour choisir exactement le chemin a suivre
 
 	void endTurn();
 
-	void beReady(boolean block);
+	void beReady(boolean ready);
 
 	void blockSpec(boolean block);
 
@@ -25,6 +29,8 @@ public interface FightAbility extends Closeable {
 
 	void blockToGroup(boolean block);
 
-	int getSafeCellAwayFromMobs();
+	void joinFight(int fightId);
+
+	BotThread getBotThread();
 
 }
