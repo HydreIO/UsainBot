@@ -36,7 +36,6 @@ import fr.aresrpg.dofus.protocol.info.server.*;
 import fr.aresrpg.dofus.protocol.item.server.*;
 import fr.aresrpg.dofus.protocol.job.server.*;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
-import fr.aresrpg.dofus.protocol.party.PartyAcceptPacket;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.server.*;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
@@ -422,7 +421,10 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 		log(pkt);
 		for (AvailableCharacter c : pkt.getCharacters())
 			for (Perso p : getAccount().getPersos())
-				if (p.getPseudo().equals(c.getPseudo())) p.setId(c.getId());
+				if (p.getPseudo().equals(c.getPseudo())) {
+					p.setId(c.getId());
+					p.getStatsInfos().setLvl(c.getLevel());
+				}
 		forEachAccountHandlers(h -> h.onCharacterList(pkt.getSubscriptionTime(), pkt.getCharacters()));
 	}
 
@@ -714,6 +716,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 				if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().removeActor(actor.getId());
 				else getPerso().getMapInfos().getMap().removeActor(actor.getId());
 				getGameHandler().forEach(h -> h.onEntityLeave(actor.getId()));
+				getPerso().getDebugView().removeActor(actor.getId());
 			});
 			return;
 		}
@@ -722,6 +725,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 				case DEFAULT:
 					MovementPlayer player = (MovementPlayer) (Object) e.getSecond();
 					if (player.getId() == getPerso().getId()) {
+						if (player.isFight()) getPerso().getStatsInfos().setLvl(player.getPlayerInFight().getLvl());
 						getPerso().getMapInfos().setCellId(player.getCell());
 						getPerso().getNavigation().notifyMovementEnd();
 					} else {
@@ -814,8 +818,10 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 				GameMoveAction actionm = (GameMoveAction) pkt.getAction();
 				int cell = actionm.getPath().get(actionm.getPath().size() - 1).getCellId();
 				getPerso().getDebugView().addEntity(pkt.getEntityId(), cell);
-				if (pkt.getEntityId() == getPerso().getId())
+				if (pkt.getEntityId() == getPerso().getId()) {
 					getPerso().getMapInfos().setCellId(cell);
+					getPerso().getBotInfos().setLastMove(System.currentTimeMillis());
+				}
 				getGameActionHandler().forEach(h -> h.onEntityMove(pkt.getEntityId(), actionm.getPath()));
 				break;
 			case DUEL_SERVER_ASK:
@@ -964,6 +970,8 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(ItemWeightPacket pkt) {
 		log(pkt);
+		getPerso().getStatsInfos().setPods(pkt.getCurrentWeight());
+		getPerso().getStatsInfos().setMaxPods(pkt.getMaxWeight());
 		getItemHandler().forEach(h -> h.onPodsUpdate(pkt.getCurrentWeight(), pkt.getMaxWeight()));
 	}
 
@@ -1075,12 +1083,6 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	}
 
 	@Override
-	public void handle(PartyAcceptPacket pkt) {
-		log(pkt);
-		getPartyHandler().forEach(PartyServerHandler::onPlayerAccept);
-	}
-
-	@Override
 	public void handle(PartyRefusePacket pkt) {
 		log(pkt);
 		getPartyHandler().forEach(PartyServerHandler::onPlayerRefuse);
@@ -1163,8 +1165,13 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(GameSpawnPacket pkt) {
 		log(pkt);
-		if (pkt.isCreated()) getGameHandler().forEach(h -> h.onFightSpawn(pkt.getFight()));
-		else getGameHandler().forEach(h -> h.onFightRemoved(pkt.getFight()));
+		if (pkt.isCreated()) {
+			getPerso().getFightInfos().getFightsOnMap().add(pkt.getFight());
+			getGameHandler().forEach(h -> h.onFightSpawn(pkt.getFight()));
+		} else {
+			getPerso().getFightInfos().getFightsOnMap().remove(pkt.getFight());
+			getGameHandler().forEach(h -> h.onFightRemoved(pkt.getFight()));
+		}
 	}
 
 	@Override

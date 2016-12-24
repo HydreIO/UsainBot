@@ -57,7 +57,7 @@ public class Perso implements Closeable {
 	private final MapInfo mapInfos = new MapInfo(this);
 	private final FightInfo fightInfos = new FightInfo(this);
 	private final StatsInfo statsInfos = new StatsInfo(this);
-	private final DofusMapView debugView = new DofusMapView();
+	private DofusMapView debugView = new DofusMapView();
 	private final PvpInfo pvpInfos = new PvpInfo(this);
 	private final ChatInfo chatInfos = new ChatInfo(this);
 
@@ -84,6 +84,7 @@ public class Perso implements Closeable {
 	public void shutdown() {
 		getAccount().setState(AccountState.OFFLINE);
 		mind.shutdown();
+		navigation.shutdown();
 		abilities.shutdown();
 		logInfos.shutdown();
 		botInfos.shutdown();
@@ -127,6 +128,14 @@ public class Perso implements Closeable {
 	 */
 	public ChatInfo getChatInfos() {
 		return chatInfos;
+	}
+
+	/**
+	 * @param debugView
+	 *            the debugView to set
+	 */
+	public void setDebugView(DofusMapView debugView) {
+		this.debugView = debugView;
 	}
 
 	/**
@@ -295,7 +304,8 @@ public class Perso implements Closeable {
 	}
 
 	public boolean isInFight() {
-		return getFightInfos().getCurrentFight() != null;
+		if (getFightInfos().getCurrentFight() == null) return false;
+		return !getFightInfos().getCurrentFight().isEnded();
 	}
 
 	public boolean hasGroup() {
@@ -389,6 +399,11 @@ public class Perso implements Closeable {
 		if (obj == null) return false;
 		if (obj == this) return true;
 		return obj instanceof Perso && ((Perso) obj).getId() == getId();
+	}
+
+	@Override
+	public String toString() {
+		return "Perso [id=" + id + ", pseudo=" + pseudo + ", server=" + server + ", state=" + state + "]";
 	}
 
 }

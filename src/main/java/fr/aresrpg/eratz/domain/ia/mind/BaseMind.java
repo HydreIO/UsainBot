@@ -6,11 +6,13 @@ import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.player.Perso;
-import fr.aresrpg.eratz.domain.ia.behavior.*;
+import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.ia.behavior.move.BankDepositPath;
+import fr.aresrpg.eratz.domain.ia.behavior.move.FollowPlayerBehavior;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 /**
@@ -23,7 +25,6 @@ public class BaseMind implements Mind {
 	private Queue<Supplier<BehaviorStopReason>> actions = new LinkedList<>();
 	private boolean infinite;
 	private Set<Integer> itemsToKeep = new HashSet<>();
-	private ConcurrentLinkedQueue<Runnable> forceds = new ConcurrentLinkedQueue<>();
 	private boolean running;
 
 	public BaseMind(Perso perso) {
@@ -33,20 +34,15 @@ public class BaseMind implements Mind {
 	public void shutdown() {
 		running = false;
 		actions.clear();
-		forceds.clear();
 	}
 
 	@Override
 	public void process() throws InterruptedException, ExecutionException {
 		if (running) return;
 		running = true;
-		do {
+		while (getPerso().getAccount().isActive()) {
 			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
-			if (!forceds.isEmpty()) { // forced en prio
-				forceds.poll().run();
-				continue;
-			}
-			if (getActions().isEmpty()) continue;
+			if (getPerso().isInFight() || getActions().isEmpty()) continue;
 			Supplier<BehaviorStopReason> next = getActions().poll();
 			switch (next.get()) { // possibilité d'effectuer des actions selon le type de retour
 				case QUANTITY_REACHED:
@@ -54,23 +50,19 @@ public class BaseMind implements Mind {
 					break;
 			}
 			if (infinite) getActions().add(next); // si infinite loop ajout a la queue
-		} while (getPerso().getAccount().isActive());
+		}
 		running = false;
+	}
+
+	@Override
+	public Mind thenFollow(String toFollow) {
+		getActions().add(new FollowPlayerBehavior(getPerso(), toFollow));
+		return this;
 	}
 
 	@Override
 	public boolean isRunning() {
 		return running;
-	}
-
-	@Override
-	public void forceBehavior(Behavior b) {
-		forceds.add(b::start);
-	}
-
-	@Override
-	public Queue<Runnable> getForcedActions() {
-		return forceds;
 	}
 
 	/**
@@ -170,12 +162,6 @@ public class BaseMind implements Mind {
 			Threads.uSleep(time, unit);
 			return BehaviorStopReason.FINISHED;
 		});
-		return this;
-	}
-
-	@Override
-	public Mind thenIdle() {
-		getActions().add(new AntiAfkBehavior(getPerso(), false)); // pour cancel juste changer la state du perso
 		return this;
 	}
 

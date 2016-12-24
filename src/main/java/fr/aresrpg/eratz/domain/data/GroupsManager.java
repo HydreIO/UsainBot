@@ -24,10 +24,13 @@ public class GroupsManager {
 
 	public void updateGroups(Perso p) {
 		Variables.GROUPS.forEach(g -> {
-			for (String s : g.getMembers()) {
+			if (g.getChef().equalsIgnoreCase(p.getPseudo())) p.setGroup(groups.get(g.getLabel()));
+			else
+				for (String s : g.getMembers()) {
 				if (s.equalsIgnoreCase(p.getPseudo())) {
 					Group group = groups.get(g.getLabel());
 					group.getMembers().add(p);
+					p.setGroup(group);
 				}
 			}
 		});

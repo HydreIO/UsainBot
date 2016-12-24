@@ -33,14 +33,6 @@ public class MapView extends Application {
 	}
 
 	/**
-	 * @param stage
-	 *            the stage to set
-	 */
-	public static void setStage(Stage stage) {
-		MapView.stage = stage;
-	}
-
-	/**
 	 * @return the iNSTANCE
 	 */
 	public static MapView getInstance() {
@@ -49,8 +41,8 @@ public class MapView extends Application {
 
 	public void startView(Parent parent, String name) {
 		Platform.runLater(() -> {
-			Stage stage = new Stage();
-			setStage(stage);
+			if (stage != null) stage.close();
+			stage = new Stage();
 			stage.setTitle(name);
 			stage.setScene(new Scene(parent));
 			stage.show();

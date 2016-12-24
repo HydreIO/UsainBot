@@ -30,7 +30,6 @@ import fr.aresrpg.dofus.protocol.info.server.*;
 import fr.aresrpg.dofus.protocol.item.server.*;
 import fr.aresrpg.dofus.protocol.job.server.*;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
-import fr.aresrpg.dofus.protocol.party.PartyAcceptPacket;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.server.*;
 import fr.aresrpg.dofus.protocol.specialization.server.SpecializationSetPacket;
@@ -222,13 +221,6 @@ public class RemoteHandler extends BaseServerPacketHandler {
 
 	@Override
 	public void handle(ZaapLeavePacket pkt) {
-		super.handle(pkt);
-		transmit(pkt);
-
-	}
-
-	@Override
-	public void handle(PartyAcceptPacket pkt) {
 		super.handle(pkt);
 		transmit(pkt);
 

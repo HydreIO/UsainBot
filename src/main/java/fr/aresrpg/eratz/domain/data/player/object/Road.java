@@ -82,7 +82,7 @@ public class Road {
 	private void joinNearest(Perso perso) {
 		BotMap map = perso.getMapInfos().getMap();
 		Node nearest = getNearest(map);
-		List<Point> path = Pathfinding.getPathForCarte(map.getX(), map.getY(), nearest.getX(), nearest.getY(), Roads::canMove);
+		List<Point> path = Pathfinding.getMapPath(map.getX(), map.getY(), nearest.getX(), nearest.getY(), Roads::canMove);
 		if (path == null) {
 			perso.getAbilities().getBaseAbility().speak(Chat.ADMIN, "Impossible de rejoindre la route " + label + " ! Blocké en %pos%");
 			perso.crashReport("Impossible de rejoindre la route désignée ! Blocké en [" + map.getX() + "," + map.getY() + "]");

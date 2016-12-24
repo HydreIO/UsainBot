@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.data.dofus.map;
 
 import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.structures.map.DofusMap;
+import fr.aresrpg.dofus.util.StringJoiner;
 import fr.aresrpg.eratz.domain.data.MapsData;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
@@ -39,6 +40,10 @@ public class BotMap {
 
 	public String getInfos() {
 		return area + " (" + subarea + ")[" + x + "," + y + "]";
+	}
+
+	public String getCoordsInfos() {
+		return new StringJoiner(",", "[", "]").add(x).add(y).toString();
 	}
 
 	public void entityMove(int id, int cellid) {
@@ -93,6 +98,102 @@ public class BotMap {
 	public void updateNpc(MovementNpc npc) {
 		npcs.remove(npc);
 		npcs.add(npc);
+	}
+
+	public boolean isOnPoint(Point p) {
+		return p.x == x && p.y == y;
+	}
+
+	/**
+	 * @return the area
+	 */
+	public String getArea() {
+		return area;
+	}
+
+	/**
+	 * @param area
+	 *            the area to set
+	 */
+	public void setArea(String area) {
+		this.area = area;
+	}
+
+	/**
+	 * @return the subarea
+	 */
+	public String getSubarea() {
+		return subarea;
+	}
+
+	/**
+	 * @param subarea
+	 *            the subarea to set
+	 */
+	public void setSubarea(String subarea) {
+		this.subarea = subarea;
+	}
+
+	/**
+	 * @return the mobs
+	 */
+	public CopyOnWriteArraySet<MovementMonsterGroup> getMobs() {
+		return mobs;
+	}
+
+	/**
+	 * @param mobs
+	 *            the mobs to set
+	 */
+	public void setMobs(CopyOnWriteArraySet<MovementMonsterGroup> mobs) {
+		this.mobs = mobs;
+	}
+
+	/**
+	 * @return the npcs
+	 */
+	public CopyOnWriteArraySet<MovementNpc> getNpcs() {
+		return npcs;
+	}
+
+	/**
+	 * @param npcs
+	 *            the npcs to set
+	 */
+	public void setNpcs(CopyOnWriteArraySet<MovementNpc> npcs) {
+		this.npcs = npcs;
+	}
+
+	/**
+	 * @param dofusMap
+	 *            the dofusMap to set
+	 */
+	public void setDofusMap(DofusMap dofusMap) {
+		this.dofusMap = dofusMap;
+	}
+
+	/**
+	 * @param x
+	 *            the x to set
+	 */
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	/**
+	 * @param y
+	 *            the y to set
+	 */
+	public void setY(int y) {
+		this.y = y;
+	}
+
+	/**
+	 * @param players
+	 *            the players to set
+	 */
+	public void setPlayers(CopyOnWriteArraySet<MovementPlayer> players) {
+		this.players = players;
 	}
 
 	/**

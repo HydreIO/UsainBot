@@ -18,9 +18,8 @@ import fr.aresrpg.dofus.protocol.game.actions.client.*;
 import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
 import fr.aresrpg.dofus.protocol.item.client.ItemMovementPacket;
 import fr.aresrpg.dofus.protocol.item.client.ItemUsePacket;
-import fr.aresrpg.dofus.protocol.party.PartyAcceptPacket;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
-import fr.aresrpg.dofus.protocol.party.client.PartyInvitePacket;
+import fr.aresrpg.dofus.protocol.party.client.*;
 import fr.aresrpg.dofus.protocol.waypoint.client.ZaapUsePacket;
 import fr.aresrpg.dofus.structures.*;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
@@ -287,6 +286,15 @@ public class BaseAbilityImpl implements BaseAbility {
 			getStates().partyInvit = InvitationState.REFUSED;
 		}
 		return partyInvit;
+	}
+
+	@Override
+	public void followGroupMember(String name) {
+		PartyFollowPacket pkt = new PartyFollowPacket();
+		pkt.setFollow(true);
+		pkt.setPname(name);
+		getPerso().sendPacketToServer(pkt);
+		getBotThread().pause();
 	}
 
 	@Override

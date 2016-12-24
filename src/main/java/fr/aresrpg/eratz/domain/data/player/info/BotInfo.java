@@ -15,6 +15,7 @@ public class BotInfo extends Info {
 	private boolean sit;
 	private Point followedCoords;
 	private int blockedOn; //(cellid) dans le pathfinder quand le chemin n'est pas trouvé la pos est stockée içi, si le chemin est trouvé alors elle est mis a -1
+	private long lastMove; // ms de la derniere fois ou le bot a bougé, utile pour detecter si il est blocké
 
 	/**
 	 * @param perso
@@ -26,6 +27,36 @@ public class BotInfo extends Info {
 	@Override
 	public void shutdown() {
 		sit = false;
+	}
+
+	/**
+	 * @return the lastMove
+	 */
+	public long getLastMove() {
+		return lastMove;
+	}
+
+	/**
+	 * @return the followedCoords
+	 */
+	public Point getFollowedCoords() {
+		return followedCoords;
+	}
+
+	/**
+	 * @param followedCoords
+	 *            the followedCoords to set
+	 */
+	public void setFollowedCoords(Point followedCoords) {
+		this.followedCoords = followedCoords;
+	}
+
+	/**
+	 * @param lastMove
+	 *            the lastMove to set
+	 */
+	public void setLastMove(long lastMove) {
+		this.lastMove = lastMove;
 	}
 
 	/**
@@ -45,21 +76,6 @@ public class BotInfo extends Info {
 
 	public boolean isBlockedOnACell() {
 		return blockedOn != -1;
-	}
-
-	/**
-	 * @return the followedCoords
-	 */
-	public Point getFollowedCoords() {
-		return followedCoords;
-	}
-
-	/**
-	 * @param followedCoords
-	 *            the followedCoords to set
-	 */
-	public void setFollowedCoords(Point followedCoords) {
-		this.followedCoords = followedCoords;
 	}
 
 	/**

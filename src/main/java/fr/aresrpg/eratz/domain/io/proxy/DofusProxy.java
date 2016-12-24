@@ -10,6 +10,7 @@ package fr.aresrpg.eratz.domain.io.proxy;
 
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
+import fr.aresrpg.commons.domain.log.AnsiColors.AnsiColor;
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.eratz.domain.data.player.Account;
@@ -93,7 +94,7 @@ public class DofusProxy implements Proxy {
 				try {
 					connection.start();
 				} catch (Exception e) {
-					e.printStackTrace();
+					LOGGER.info(AnsiColor.CYAN + "Client déconnecté !");
 					connection.closeConnection(); // on close le server socket
 					if (account != null) {
 						if (account.getCurrentPlayed() != null) account.getCurrentPlayed().shutdown();

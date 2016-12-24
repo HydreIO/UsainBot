@@ -1,8 +1,12 @@
 package fr.aresrpg.eratz.domain.data.player.info;
 
+import fr.aresrpg.dofus.structures.game.FightSpawn;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.FightBehavior;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -11,6 +15,7 @@ import fr.aresrpg.eratz.domain.ia.behavior.fight.FightBehavior;
 public class FightInfo extends Info {
 
 	private Fight currentFight;
+	private List<FightSpawn> fightsOnMap = new ArrayList<>();
 	private FightBehavior currentFightBehavior;
 	private boolean waitForGroup;
 	private int currentFightTeam;
@@ -23,6 +28,28 @@ public class FightInfo extends Info {
 	public void shutdown() {
 		currentFight = null;
 		currentFightBehavior = null;
+	}
+
+	/**
+	 * @return the fightsOnMap
+	 */
+	public List<FightSpawn> getFightsOnMap() {
+		return fightsOnMap;
+	}
+
+	/**
+	 * @param fightsOnMap
+	 *            the fightsOnMap to set
+	 */
+	public void setFightsOnMap(List<FightSpawn> fightsOnMap) {
+		this.fightsOnMap = fightsOnMap;
+	}
+
+	/**
+	 * @return the waitForGroup
+	 */
+	public boolean isWaitForGroup() {
+		return waitForGroup;
 	}
 
 	/**

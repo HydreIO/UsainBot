@@ -10,7 +10,6 @@ package fr.aresrpg.eratz.domain.ia.behavior;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.eratz.domain.data.player.Perso;
-import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.util.concurrent.ScheduledFuture;
@@ -41,8 +40,7 @@ public class AntiAfkBehavior extends Behavior {
 	public BehaviorStopReason start() {
 		do {
 			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
-			getPerso().setState(PlayerState.IDLE);
-			ScheduledFuture ftr = Executors.SCHEDULER.register(this::run, 8, TimeUnit.MINUTES);
+			ScheduledFuture ftr = Executors.SCHEDULER.register(this::run, 4, TimeUnit.MINUTES);
 			while (getPerso().isIdling())
 				Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
 			ftr.cancel(true);

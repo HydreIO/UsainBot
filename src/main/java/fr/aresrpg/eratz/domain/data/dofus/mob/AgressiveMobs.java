@@ -3,8 +3,8 @@
  * This class is part of an AresRPG Project.
  *
  * @author Sceat {@literal <sceat@aresrpg.fr>}
- *  
- * Created 2016
+ * 
+ *         Created 2016
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.data.dofus.mob;
 
@@ -214,6 +214,15 @@ public enum AgressiveMobs {
 	 */
 	public DofusMobs[] getIds() {
 		return ids;
+	}
+
+	public static int getDistanceAgro(int mobtype) {
+		for (AgressiveMobs a : values()) {
+			for (DofusMobs m : a.getIds()) {
+				if (m.getId() == mobtype) return a.getDistanceAgro();
+			}
+		}
+		return -1;
 	}
 
 	public static AgressiveMobs byId(int id) {

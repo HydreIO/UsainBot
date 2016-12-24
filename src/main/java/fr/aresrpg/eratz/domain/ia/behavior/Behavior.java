@@ -96,20 +96,10 @@ public abstract class Behavior implements Supplier<BehaviorStopReason> {
 	}
 
 	protected Runnable nextZoneMove() {
-		if (!getPerso().getMind().getForcedActions().isEmpty()) return () -> {
-			for (int i = 0; i < getPerso().getMind().getForcedActions().size(); i++)
-				getPerso().getMind().getForcedActions().poll().run();
-			moves.poll();
-		};
 		return moves.poll();
 	}
 
 	protected Runnable nextPathMove() {
-		if (!getPerso().getMind().getForcedActions().isEmpty()) return () -> {
-			for (int i = 0; i < getPerso().getMind().getForcedActions().size(); i++)
-				getPerso().getMind().getForcedActions().poll().run();
-			path.poll();
-		};
 		return path.poll();
 	}
 

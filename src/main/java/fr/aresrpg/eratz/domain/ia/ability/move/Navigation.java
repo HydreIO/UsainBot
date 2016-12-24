@@ -11,11 +11,16 @@ package fr.aresrpg.eratz.domain.ia.ability.move;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaapi;
 
+import java.awt.Point;
+import java.util.List;
+
 /**
  * 
  * @since
  */
 public interface Navigation {
+
+	void shutdown();
 
 	Navigation moveUp();
 
@@ -50,6 +55,8 @@ public interface Navigation {
 	}
 
 	Navigation moveToCell(int cellid, boolean teleport);
+
+	Navigation moveToCell(List<Point> p, int cellid, boolean teleport);
 
 	default Navigation moveToCell(int cellid) {
 		return moveToCell(cellid, false);

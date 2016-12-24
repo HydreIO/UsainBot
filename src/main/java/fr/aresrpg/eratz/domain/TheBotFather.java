@@ -8,11 +8,11 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain;
 
-import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.condition.Option;
 import fr.aresrpg.commons.domain.log.Logger;
 import fr.aresrpg.commons.domain.log.LoggerBuilder;
 import fr.aresrpg.dofus.structures.server.Server;
+import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.dofus.util.Lang;
 import fr.aresrpg.eratz.domain.antibot.AntiBot;
 import fr.aresrpg.eratz.domain.antibot.behavior.DuelCrashBehavior;
@@ -38,8 +38,9 @@ import fr.aresrpg.eratz.domain.util.config.dao.PlayerBean.PersoBean;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class TheBotFather {
@@ -141,17 +142,48 @@ public class TheBotFather {
 	public void startScanner() {
 		Scanner sc = new Scanner(System.in);
 		while (isRunning()) {
-			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
 			if (!sc.hasNext()) continue;
 			String[] nextLine = sc.nextLine().split(" ");
 			switch (nextLine[0].toLowerCase()) {
+				case "goto":
+					Executors.FIXED.execute(() -> {
+						Instant now = Instant.now();
+						AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+							if (a.isClientOnline() || a.isBotOnline()) {
+								Perso p = a.getCurrentPlayed();
+								String[] coords = nextLine[1].split(",");
+								int x = Integer.parseInt(coords[0]);
+								int y = Integer.parseInt(coords[1]);
+								p.getNavigation().joinCoords(x, y);
+								LOGGER.success(p.getPseudo() + " est arrivé à destination ! (" + Duration.ofMillis(Instant.now().minusMillis(now.toEpochMilli()).toEpochMilli()).toMinutes() + "m)");
+							}
+						});
+					});
+					break;
+				case "whoami":
+					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+						if (a.isClientOnline() || a.isBotOnline()) {
+							Perso p = a.getCurrentPlayed();
+							LOGGER.debug("Ndc = " + p.getAccount().getUsername());
+							LOGGER.debug("Account State = " + p.getAccount().getState());
+							LOGGER.debug("State = " + p.getState());
+							LOGGER.debug("Id = " + p.getId());
+							LOGGER.debug("Pseudo = " + p.getPseudo());
+							LOGGER.debug("Lvl = " + p.getStatsInfos().getLvl());
+							LOGGER.debug("Energie = " + p.getStatsInfos().getEnergy());
+							LOGGER.debug("Pods libre = " + p.getStatsInfos().getFreePods());
+							LOGGER.debug("Vie = " + p.getStatsInfos().getLife());
+							LOGGER.debug("Xp restant = " + (p.getStatsInfos().getMaxXp() - p.getStatsInfos().getXp()));
+							LOGGER.debug("Grp = " + p.getGroup());
+						}
+					});
+					break;
 				case "whereami":
 					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
 						if (a.isClientOnline() || a.isBotOnline()) {
 							Perso p = a.getCurrentPlayed();
-							LOGGER.debug("Map = " + p.getMapInfos().getMap());
+							LOGGER.debug("Map = " + p.getMapInfos().getMap().getInfos());
 							LOGGER.debug("CellId = " + p.getMapInfos().getCellId());
-							System.out.println("CellId = " + p.getMapInfos().getCellId());
 						}
 					});
 					break;
@@ -161,8 +193,12 @@ public class TheBotFather {
 							Perso p = a.getCurrentPlayed();
 							p.setState(PlayerState.RUNNING);
 							Road r = Roads.nearestRoad(p.getMapInfos().getMap());
-							LOGGER.success(p.getPseudo() + " va éssayer de rejoindre " + r.getLabel());
-							r.takeRoad(p);
+							if (r == null) {
+								LOGGER.error("Route introuvable !");
+							} else {
+								LOGGER.success(p.getPseudo() + " va éssayer de rejoindre " + r.getLabel());
+								r.takeRoad(p);
+							}
 						}
 					});
 					break;
@@ -216,8 +252,12 @@ public class TheBotFather {
 					break;
 				case "view":
 					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
-						if (a.isClientOnline() || a.isBotOnline())
-							MapView.getInstance().startView(a.getCurrentPlayed().getDebugView(), a.getCurrentPlayed().getPseudo());
+						if (a.isClientOnline() || a.isBotOnline()) {
+							a.getCurrentPlayed().setDebugView(new DofusMapView());
+							a.getCurrentPlayed().getDebugView().setMap(a.getCurrentPlayed().getMapInfos().getMap().getDofusMap());
+							a.getCurrentPlayed().getDebugView().setCurrentPosition(a.getCurrentPlayed().getMapInfos().getCellId());
+							MapView.getInstance().startView(a.getCurrentPlayed().getDebugView(), a.getCurrentPlayed().getPseudo() + " | " + a.getCurrentPlayed().getMapInfos().getMap().getInfos());
+						}
 					});
 					break;
 				case "exit":

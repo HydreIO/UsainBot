@@ -29,7 +29,6 @@ import fr.aresrpg.dofus.protocol.info.client.InfoMapPacket;
 import fr.aresrpg.dofus.protocol.item.client.*;
 import fr.aresrpg.dofus.protocol.job.client.JobChangeStatsPacket;
 import fr.aresrpg.dofus.protocol.mount.client.MountPlayerPacket;
-import fr.aresrpg.dofus.protocol.party.PartyAcceptPacket;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.client.*;
 import fr.aresrpg.dofus.protocol.waypoint.ZaapLeavePacket;

@@ -7,6 +7,8 @@ import fr.aresrpg.dofus.structures.game.GameType;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.std.info.InfoServerHandler;
 
+import java.awt.Point;
+
 /**
  * 
  * @since
@@ -34,14 +36,11 @@ public class BotInfoServerHandler extends BotHandlerAbstract implements InfoServ
 
 	@Override
 	public void onCompass(int x, int y) {
-		// TODO
-
+		getPerso().getBotInfos().setFollowedCoords(new Point(x, y));
 	}
 
 	@Override
 	public void onFollowedPlayerMove(MovingPlayer player) {
-		// TODO
-
 	}
 
 }

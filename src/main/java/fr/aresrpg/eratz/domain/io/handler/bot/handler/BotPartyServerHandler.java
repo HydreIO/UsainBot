@@ -93,14 +93,12 @@ public class BotPartyServerHandler extends BotHandlerAbstract implements PartySe
 
 	@Override
 	public void onFollow(String followed) {
-		// TODO
-
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}
 
 	@Override
 	public void onStopFollow() {
-		// TODO
-
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}
 
 	@Override
