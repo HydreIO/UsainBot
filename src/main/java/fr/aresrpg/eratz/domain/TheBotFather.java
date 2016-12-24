@@ -157,7 +157,7 @@ public class TheBotFather {
 						if (a.isClientOnline() || a.isBotOnline()) {
 							Perso p = a.getCurrentPlayed();
 							p.setState(PlayerState.RUNNING);
-							Road r = Roads.nearestRoad(p);
+							Road r = Roads.nearestRoad(p.getMapInfos().getMap());
 							LOGGER.success(p.getPseudo() + " va éssayer de rejoindre " + r.getLabel());
 							r.takeRoad(p);
 						}

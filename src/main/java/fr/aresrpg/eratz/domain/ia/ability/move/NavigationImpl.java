@@ -84,7 +84,7 @@ public class NavigationImpl implements Navigation {
 	public Navigation moveToCell(int cellid, boolean teleport) {
 		List<Point> p = searchPath(cellid);
 		if (p == null) {
-			LOGGER.info("Le chemin est introuvable ! nouvel éssai..");
+			LOGGER.info("Le chemin est introuvable !");
 			LOGGER.info("Position = " + getCurrentPos());
 			getPerso().getBotInfos().setBlockedOn(getCurrentPos());
 			return this;
@@ -97,7 +97,7 @@ public class NavigationImpl implements Navigation {
 			List<PathFragment> shortpath = Pathfinding.makeShortPath(p, getMap().getWidth());
 			getPerso().getAccount().getRemoteConnection().send(new GameClientActionPacket(GameActions.MOVE, new GameMoveAction().setPath(shortpath)));
 			Executors.SCHEDULED.schedule(() -> {
-				getPerso().sendPacketToServer(new GameActionACKPacket().setActionId(0));
+				if (getPerso().getAccount().isBotOnline()) getPerso().sendPacketToServer(new GameActionACKPacket().setActionId(0)); // pour eviter de se faire ban en MITM on envoi rien si c pas le bot seul
 				if (!teleporting)
 					getBotThread().unpause();
 			} , (long) (time * 60), TimeUnit.MILLISECONDS);

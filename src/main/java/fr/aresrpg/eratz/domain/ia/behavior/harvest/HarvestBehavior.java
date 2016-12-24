@@ -35,7 +35,7 @@ public abstract class HarvestBehavior extends Behavior {
 	public BehaviorStopReason start() {
 		BaseAbility ab = getPerso().getAbilities().getBaseAbility();
 		BehaviorStopReason reason = BehaviorStopReason.FINISHED;
-		if (!ab.useItem(DofusItems2.POTION_DE_RAPPEL)) Roads.nearestRoad(getPerso()).takeRoad(getPerso()); // go to zaap astrub
+		if (!ab.useItem(DofusItems2.POTION_DE_RAPPEL)) Roads.nearestRoad(getPerso().getMapInfos().getMap()).takeRoad(getPerso()); // go to zaap astrub
 		IntStream.range(0, pathMoveCount()).forEach(i -> nextPathMove().run()); // go to zone
 		for (int i = 0; i < zoneMoveCount(); i++) { // start behavior
 			reason = harvestMap();

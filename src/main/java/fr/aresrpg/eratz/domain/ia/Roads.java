@@ -51,7 +51,7 @@ public class Roads {
 			.withMap(3, 24, up()).withMap(3, 23, toCell(19)).withMap(3, 22, up()).withMap(3, 21, up()).withMap(3, 20, up()).withMap(3, 19, up()).withMap(3, 18, up()).withMap(3, 17, up())
 			.withMap(3, 16, up()).withMap(3, 15, up()).withMap(3, 14, up()).withMap(3, 13, up()).withMap(3, 12, up()).withMap(3, 11, up()).withMap(3, 10, up()).withMap(3, 9, up()).withMap(3, 8, up())
 			.withMap(3, 7, up()).withMap(3, 6, up()).withMap(3, 5, up()).withMap(3, 4, up()).withMap(3, 3, up()).withMap(3, 2, up()).withMap(3, 1, up()).withMap(3, 0, up()).withMap(3, -1, up())
-			.withMap(3, -2, up()).withMap(3, -3, right()).withMap(4, -3, up()).withMap(4, -4, up()).withMap(4, -5, up()).withMap(4, -6, up()).withMap(4, -7, up()).withMap(4, -8, up())
+			.withMap(3, -2, up()).withMap(3, -3, right()).withMap(4, -3, up()).withMap(4, -4, up()).withMap(4, -5, up()).withMap(4, -6, up()).withMap(4, -7, up()).withMap(4, -8, toCell(22))
 			.withMap(4, -9, up()).withMap(4, -10, up()).withMap(4, -11, up()).withMap(4, -12, up()).withMap(4, -13, up()).withMap(4, -14, toCell(23)).withMap(4, -15, up()).withMap(4, -17, up())
 			.withMap(4, -18, up()).build().setLabel("Amakna");
 
@@ -101,17 +101,6 @@ public class Roads {
 		MapsData.getInstance().init(Lang.getDatas("fr", "maps"));
 		BotMap m = new BotMap(dofusMap);
 		System.out.println(nearestRoad(m).getLabel());
-	}
-
-	public static Road nearestRoad(Perso perso) {
-		Road near = null;
-		int dist = Integer.MAX_VALUE;
-		BotMap map = perso.getMapInfos().getMap();
-		for (Road r : ALL) {
-			Node no = r.getNearest(map);
-			if (near == null || no.distanceManathan(map.getX(), map.getY()) < dist) near = r;
-		}
-		return near;
 	}
 
 	private static Consumer<Perso> up() {
