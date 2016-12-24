@@ -23,7 +23,7 @@ public class MindManager {
 		return INSTANCE;
 	}
 
-	public void followPlayer(Perso p, String tofollow) {
+	public void followPlayer(Perso p, int tofollow) {
 		LOGGER.success(p.getPseudo() + " va suivre " + tofollow + " !");
 		p.getFightInfos().setCurrentFightBehavior(new PassTurnBehavior(p));
 		p.getAbilities().getBaseAbility().followGroupMember(tofollow);

@@ -17,7 +17,7 @@ import java.util.function.Predicate;
  */
 public interface Mind extends Closeable {
 
-	Mind thenFollow(String toFollow);
+	Mind thenFollow(int toFollow);
 
 	/**
 	 * Harvest a ressource

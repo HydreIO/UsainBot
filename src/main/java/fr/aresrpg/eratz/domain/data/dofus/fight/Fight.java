@@ -1,11 +1,16 @@
 package fr.aresrpg.eratz.domain.data.dofus.fight;
 
-import fr.aresrpg.dofus.protocol.game.movement.*;
+import fr.aresrpg.commons.domain.util.ArrayUtils;
+import fr.aresrpg.dofus.protocol.game.movement.MovementAction;
+import fr.aresrpg.dofus.structures.game.FightEntity;
 import fr.aresrpg.dofus.structures.game.FightType;
+import fr.aresrpg.dofus.util.Pair;
+import fr.aresrpg.eratz.domain.data.AccountsManager;
+import fr.aresrpg.eratz.domain.data.player.Perso;
 
 import java.util.Arrays;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 
@@ -18,16 +23,14 @@ public class Fight {
 	private FightType type;
 	private int[] placeTeam0;
 	private int[] placeTeam1;
-	private CopyOnWriteArraySet<MovementPlayer> team0 = new CopyOnWriteArraySet<>();
-	private CopyOnWriteArraySet<MovementPlayer> team1 = new CopyOnWriteArraySet<>();
-	private CopyOnWriteArraySet<MovementMonster> mobs = new CopyOnWriteArraySet<>();
-	private CopyOnWriteArraySet<MovementInvocation> invocs = new CopyOnWriteArraySet<>();
+	private ConcurrentMap<Integer, Pair<MovementAction, FightEntity>> team0 = new ConcurrentHashMap<>();
+	private ConcurrentMap<Integer, Pair<MovementAction, FightEntity>> team1 = new ConcurrentHashMap<>();
 	private boolean isBlocked;
 	private boolean isSpecBlocked;
 	private boolean isGroupBlocked;
 	private boolean isHelpNeeded;
 	private boolean ended;
-	private MovementAction currentTurn;
+	private Pair<MovementAction, FightEntity> currentTurn;
 
 	public Fight(int swordCell1, int swordCell2) {
 		this.swordCell1 = swordCell1;
@@ -40,115 +43,39 @@ public class Fight {
 		return f;
 	}
 
-	public void entityMove(int id, int cellid) {
-		if (id > 1000) playerMove(id, cellid);
-		else {
-			monsterMove(id, cellid);
-			invocMove(id, cellid);
-		}
-	}
-
-	public MovementAction findEntity(int id) {
-		MovementAction a = findTeam0(id);
-		if (a == null) a = findTeam1(id);
-		if (a == null) a = findMobs(id);
-		if (a == null) a = findInvocs(id);
+	public Pair<MovementAction, FightEntity> findEntity(int id) {
+		Pair<MovementAction, FightEntity> a = team0.get(id);
+		if (a == null) a = team1.get(id);
 		return a;
 	}
 
-	private MovementAction findTeam0(int id) {
-		for (MovementPlayer a : team0)
-			if (a.getId() == id) return a;
-		return null;
+	public void entityMove(int id, int cellid) {
+		findEntity(id).getFirst().setCellId(cellid);
 	}
 
-	private MovementAction findTeam1(int id) {
-		for (MovementPlayer a : team1)
-			if (a.getId() == id) return a;
-		return null;
+	public void removeEntity(int id) {
+		team0.remove(id);
+		team1.remove(id);
 	}
 
-	private MovementAction findInvocs(int id) {
-		for (MovementInvocation a : invocs)
-			if (a.getId() == id) return a;
-		return null;
+	public void addEntity(MovementAction ent) {
+		int findTeam = findTeam(ent.getCellId());
+		Perso perso = AccountsManager.getInstance().getPerso(ent.getId());
+		if (perso != null) perso.getFightInfos().setCurrentFightTeam(findTeam);
+		ConcurrentMap<Integer, Pair<MovementAction, FightEntity>> team = getTeam(findTeam);
+		Pair<MovementAction, FightEntity> entity = new Pair<MovementAction, FightEntity>(ent, null);
+		team.put(ent.getId(), entity);
 	}
 
-	private MovementAction findMobs(int id) {
-		for (MovementMonster a : mobs)
-			if (a.getId() == id) return a;
-		return null;
+	public void addEntity(FightEntity ent) {
+		Pair<MovementAction, FightEntity> findEntity = findEntity(ent.getId());
+		findEntity.setSecond(ent);
 	}
 
-	public void playerMove(int id, int cellid) {
-		for (MovementPlayer i : team0)
-			if (i.getId() == id) {
-				i.setCellid(cellid);
-				return;
-			}
-		for (MovementPlayer i : team1)
-			if (i.getId() == id) {
-				i.setCellid(cellid);
-				return;
-			}
-	}
-
-	public void monsterMove(int id, int cellid) {
-		for (MovementMonster i : mobs)
-			if (i.getId() == id) i.setCellId(cellid);
-	}
-
-	public void invocMove(int id, int cellid) {
-		for (MovementInvocation i : invocs)
-			if (i.getId() == id) i.setCellId(cellid);
-	}
-
-	public void entityUpdate(MovementAction action) {
-		if (action instanceof MovementPlayer) updatePlayer((MovementPlayer) action);
-		else if (action instanceof MovementMonster) updateMonster((MovementMonster) action);
-		else if (action instanceof MovementInvocation) updateInvoc((MovementInvocation) action);
-		else throw new IllegalArgumentException(action + " has not a valid type");
-	}
-
-	public void removeActor(int id) {
-		if (id > 1000) removePlayer(id);
-		else {
-			removeMob(id);
-			removeInvoc(id);
-		}
-	}
-
-	public void removePlayer(int id) {
-		team0.removeIf(p -> p.getId() == id);
-		team1.removeIf(p -> p.getId() == id);
-	}
-
-	public void removeMob(int id) {
-		mobs.removeIf(p -> p.getId() == id);
-	}
-
-	public void removeInvoc(int id) {
-		invocs.removeIf(p -> p.getId() == id);
-	}
-
-	private void updatePlayer(MovementPlayer player) {
-		if (team0.contains(player)) {
-			team0.remove(player);
-			team0.add(player);
-		} else if (team1.contains(player)) {
-			team1.remove(player);
-			team1.add(player);
-		}
-	}
-
-	public void updateMonster(MovementMonster mob) {
-		mobs.remove(mob);
-		mobs.add(mob);
-	}
-
-	public void updateInvoc(MovementInvocation npc) {
-		invocs.remove(npc);
-		invocs.add(npc);
+	private int findTeam(int cellid) {
+		if (ArrayUtils.contains(cellid, placeTeam0)) return 0;
+		if (ArrayUtils.contains(cellid, placeTeam1)) return 1;
+		throw new IllegalArgumentException("The cell " + cellid + " is not a valid place !");
 	}
 
 	/**
@@ -159,6 +86,21 @@ public class Fight {
 	}
 
 	/**
+	 * @return the currentTurn
+	 */
+	public Pair<MovementAction, FightEntity> getCurrentTurn() {
+		return currentTurn;
+	}
+
+	/**
+	 * @param currentTurn
+	 *            the currentTurn to set
+	 */
+	public void setCurrentTurn(Pair<MovementAction, FightEntity> currentTurn) {
+		this.currentTurn = currentTurn;
+	}
+
+	/**
 	 * @param type
 	 *            the type to set
 	 */
@@ -166,7 +108,7 @@ public class Fight {
 		this.type = type;
 	}
 
-	public Set<MovementPlayer> getTeam(int index) {
+	public ConcurrentMap<Integer, Pair<MovementAction, FightEntity>> getTeam(int index) {
 		if (index == 0) return getTeam0();
 		else if (index == 1) return getTeam1();
 		throw new IllegalArgumentException("Il n'y a que 2 teams !");
@@ -205,7 +147,7 @@ public class Fight {
 	/**
 	 * @return the team0
 	 */
-	public CopyOnWriteArraySet<MovementPlayer> getTeam0() {
+	public ConcurrentMap<Integer, Pair<MovementAction, FightEntity>> getTeam0() {
 		return team0;
 	}
 
@@ -213,14 +155,14 @@ public class Fight {
 	 * @param team0
 	 *            the team0 to set
 	 */
-	public void setTeam0(CopyOnWriteArraySet<MovementPlayer> team0) {
+	public void setTeam0(ConcurrentMap<Integer, Pair<MovementAction, FightEntity>> team0) {
 		this.team0 = team0;
 	}
 
 	/**
 	 * @return the team1
 	 */
-	public CopyOnWriteArraySet<MovementPlayer> getTeam1() {
+	public ConcurrentMap<Integer, Pair<MovementAction, FightEntity>> getTeam1() {
 		return team1;
 	}
 
@@ -228,38 +170,8 @@ public class Fight {
 	 * @param team1
 	 *            the team1 to set
 	 */
-	public void setTeam1(CopyOnWriteArraySet<MovementPlayer> team1) {
+	public void setTeam1(ConcurrentMap<Integer, Pair<MovementAction, FightEntity>> team1) {
 		this.team1 = team1;
-	}
-
-	/**
-	 * @return the mobs
-	 */
-	public CopyOnWriteArraySet<MovementMonster> getMobs() {
-		return mobs;
-	}
-
-	/**
-	 * @param mobs
-	 *            the mobs to set
-	 */
-	public void setMobs(CopyOnWriteArraySet<MovementMonster> mobs) {
-		this.mobs = mobs;
-	}
-
-	/**
-	 * @return the invocs
-	 */
-	public CopyOnWriteArraySet<MovementInvocation> getInvocs() {
-		return invocs;
-	}
-
-	/**
-	 * @param invocs
-	 *            the invocs to set
-	 */
-	public void setInvocs(CopyOnWriteArraySet<MovementInvocation> invocs) {
-		this.invocs = invocs;
 	}
 
 	/**
@@ -338,13 +250,6 @@ public class Fight {
 	}
 
 	/**
-	 * @return the currentTurn
-	 */
-	public MovementAction getCurrentTurn() {
-		return currentTurn;
-	}
-
-	/**
 	 * @param currentTurn
 	 *            the currentTurn to set
 	 */
@@ -369,8 +274,8 @@ public class Fight {
 	@Override
 	public String toString() {
 		return "Fight [swordCell1=" + swordCell1 + ", swordCell2=" + swordCell2 + ", type=" + type + ", placeTeam0=" + Arrays.toString(placeTeam0) + ", placeTeam1=" + Arrays.toString(placeTeam1)
-				+ ", team0=" + team0 + ", team1=" + team1 + ", mobs=" + mobs + ", invocs=" + invocs + ", isBlocked=" + isBlocked + ", isSpecBlocked=" + isSpecBlocked + ", isGroupBlocked="
-				+ isGroupBlocked + ", isHelpNeeded=" + isHelpNeeded + ", ended=" + ended + ", currentTurn=" + currentTurn + "]";
+				+ ", team0=" + team0 + ", team1=" + team1 + ", isBlocked=" + isBlocked + ", isSpecBlocked=" + isSpecBlocked + ", isGroupBlocked=" + isGroupBlocked + ", isHelpNeeded=" + isHelpNeeded
+				+ ", ended=" + ended + ", currentTurn=" + currentTurn + "]";
 	}
 
 }

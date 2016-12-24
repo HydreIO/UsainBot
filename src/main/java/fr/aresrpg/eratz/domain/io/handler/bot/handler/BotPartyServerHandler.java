@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.io.handler.bot.handler;
 
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
+import fr.aresrpg.dofus.structures.ExchangeMove;
 import fr.aresrpg.dofus.structures.PartyErrorReason;
 import fr.aresrpg.dofus.structures.character.PartyMember;
 import fr.aresrpg.eratz.domain.antibot.behavior.GroupCrashBehavior;
@@ -20,18 +21,6 @@ public class BotPartyServerHandler extends BotHandlerAbstract implements PartySe
 	 */
 	public BotPartyServerHandler(Perso perso) {
 		super(perso);
-	}
-
-	@Override
-	public void onPlayerAccept() {
-		LOGGER.success(getPerso().getAbilities().getBaseAbility().getStates().currentToInvite + " has joined the group '" + getPerso().getGroup().getLabel() + "' !");
-		getPerso().getAbilities().getBaseAbility().getStates().partyInvit = InvitationState.ACCEPTED;
-		getPerso().getAbilities().getBaseAbility().getStates().currentToInvite = null;
-		if (getPerso().getCurrentBehavior() != null && getPerso().getCurrentBehavior() instanceof GroupCrashBehavior) {
-			GroupCrashBehavior ba = (GroupCrashBehavior) getPerso().getCurrentBehavior();
-			ba.stop();
-		}
-		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}
 
 	@Override
@@ -69,14 +58,10 @@ public class BotPartyServerHandler extends BotHandlerAbstract implements PartySe
 
 	@Override
 	public void onGroupLeaderUpdate(int leaderId) {
-		// TODO
-
 	}
 
 	@Override
 	public void onJoinGroupOk() {
-		// TODO
-
 	}
 
 	@Override
@@ -102,9 +87,21 @@ public class BotPartyServerHandler extends BotHandlerAbstract implements PartySe
 	}
 
 	@Override
-	public void onPartyMemberUpdate(PartyMember member) {
-		// TODO
+	public void onPartyMemberUpdate(ExchangeMove move, PartyMember member) {
+		switch (move) {
+			case ADD:
+				getPerso().getAbilities().getBaseAbility().getStates().partyInvit = InvitationState.ACCEPTED;
+				getPerso().getAbilities().getBaseAbility().getStates().currentToInvite = null;
+				if (getPerso().getCurrentBehavior() != null && getPerso().getCurrentBehavior() instanceof GroupCrashBehavior) {
+					GroupCrashBehavior ba = (GroupCrashBehavior) getPerso().getCurrentBehavior();
+					ba.stop();
+				}
+				break;
 
+			default:
+				break;
+		}
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}
 
 }

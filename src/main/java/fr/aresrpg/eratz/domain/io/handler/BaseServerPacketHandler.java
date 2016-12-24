@@ -46,8 +46,7 @@ import fr.aresrpg.dofus.protocol.waypoint.ZaapLeavePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapCreatePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapUseErrorPacket;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
-import fr.aresrpg.dofus.structures.game.GameMovementType;
-import fr.aresrpg.dofus.structures.game.GameType;
+import fr.aresrpg.dofus.structures.game.*;
 import fr.aresrpg.dofus.structures.map.*;
 import fr.aresrpg.dofus.structures.server.DofusServer;
 import fr.aresrpg.dofus.structures.server.Server;
@@ -358,7 +357,8 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	}
 
 	protected void log(Packet pkt) {
-		LOGGER.info("[RCV:]< " + pkt);
+		if (getPerso() == null) LOGGER.info("[RCV:]< " + pkt);
+		else LOGGER.info("[" + getPerso().getPseudo() + ":RCV:]< " + pkt);
 	}
 
 	@Override
@@ -713,7 +713,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 		if (gameMovementPacket.getType() == GameMovementType.REMOVE) {
 			gameMovementPacket.getActors().forEach(v -> {
 				MovementRemoveActor actor = (MovementRemoveActor) (Object) v.getSecond();
-				if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().removeActor(actor.getId());
+				if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().removeEntity(actor.getId());
 				else getPerso().getMapInfos().getMap().removeActor(actor.getId());
 				getGameHandler().forEach(h -> h.onEntityLeave(actor.getId()));
 				getPerso().getDebugView().removeActor(actor.getId());
@@ -726,40 +726,40 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 					MovementPlayer player = (MovementPlayer) (Object) e.getSecond();
 					if (player.getId() == getPerso().getId()) {
 						if (player.isFight()) getPerso().getStatsInfos().setLvl(player.getPlayerInFight().getLvl());
-						getPerso().getMapInfos().setCellId(player.getCell());
+						getPerso().getMapInfos().setCellId(player.getCellId());
 						getPerso().getNavigation().notifyMovementEnd();
 					} else {
-						if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(player);
+						if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(player);
 						else getPerso().getMapInfos().getMap().entityUpdate(player);
 					}
-					getPerso().getDebugView().addPlayer(player.getId(), player.getCell());
+					getPerso().getDebugView().addPlayer(player.getId(), player.getCellId());
 					getGameHandler().forEach(h -> h.onPlayerMove(player));
 					return;
 				case CREATE_INVOCATION:
 					MovementInvocation invoc = (MovementInvocation) (Object) e.getSecond();
-					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(invoc);
+					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(invoc);
 					else getPerso().getMapInfos().getMap().entityUpdate(invoc);
 					getGameHandler().forEach(h -> h.onInvocMove(invoc));
 					return;
 				case CREATE_MONSTER:
 					MovementMonster mob = (MovementMonster) (Object) e.getSecond();
-					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(mob);
+					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(mob);
 					else getPerso().getMapInfos().getMap().entityUpdate(mob);
 					getPerso().getDebugView().addMob(mob.getId(), mob.getCellId());
 					getGameHandler().forEach(h -> h.onMobMove(mob));
 					return;
 				case CREATE_MONSTER_GROUP:
 					MovementMonsterGroup mobs = (MovementMonsterGroup) (Object) e.getSecond();
-					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(mobs);
+					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(mobs);
 					else getPerso().getMapInfos().getMap().entityUpdate(mobs);
-					getPerso().getDebugView().addMob(mobs.getId(), mobs.getCellid());
+					getPerso().getDebugView().addMob(mobs.getId(), mobs.getCellId());
 					getGameHandler().forEach(h -> h.onMobGroupMove(mobs));
 					return;
 				case CREATE_NPC:
 					MovementNpc npc = (MovementNpc) (Object) e.getSecond();
-					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityUpdate(npc);
+					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(npc);
 					else getPerso().getMapInfos().getMap().entityUpdate(npc);
-					getPerso().getDebugView().addNpc(npc.getId(), npc.getCellid());
+					getPerso().getDebugView().addNpc(npc.getId(), npc.getCellId());
 					getGameHandler().forEach(h -> h.onNpcMove(npc));
 					return;
 				default:
@@ -771,6 +771,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(GamePositionsPacket pkt) {
 		log(pkt);
+		pkt.getPositions().forEach(p -> getPerso().getFightInfos().getCurrentFight().entityMove(p.getEntityId(), p.getPosition()));
 		getGameHandler().forEach(h -> pkt.getPositions().forEach(p -> h.onEntityFightPositionChange(p.getEntityId(), p.getPosition())));
 	}
 
@@ -780,7 +781,6 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 		Fight f = getPerso().getFightInfos().getCurrentFight();
 		f.setPlaceTeam0(pkt.getPlacesTeam0());
 		f.setPlaceTeam1(pkt.getPlacesTeam1());
-		getGameHandler().forEach(h -> h.onTeamAssign(pkt.getCurrentTeam()));
 	}
 
 	@Override
@@ -822,6 +822,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 					getPerso().getMapInfos().setCellId(cell);
 					getPerso().getBotInfos().setLastMove(System.currentTimeMillis());
 				}
+
 				getGameActionHandler().forEach(h -> h.onEntityMove(pkt.getEntityId(), actionm.getPath()));
 				break;
 			case DUEL_SERVER_ASK:
@@ -872,6 +873,9 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(GameTurnMiddlePacket pkt) {
 		log(pkt);
+		Fight fight = getPerso().getFightInfos().getCurrentFight();
+		for (FightEntity e : pkt.getEntities())
+			fight.addEntity(e);
 		getGameHandler().forEach(h -> h.onFighterInfos(pkt.getEntities()));
 	}
 
@@ -1135,7 +1139,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(PartyMovementPacket pkt) {
 		log(pkt);
-		getPartyHandler().forEach(h -> Arrays.stream(pkt.getMembers()).forEach(h::onPartyMemberUpdate));
+		getPartyHandler().forEach(h -> Arrays.stream(pkt.getMembers()).forEach(m -> h.onPartyMemberUpdate(pkt.getMove(), m)));
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.std.party;
 
+import fr.aresrpg.dofus.structures.ExchangeMove;
 import fr.aresrpg.dofus.structures.PartyErrorReason;
 import fr.aresrpg.dofus.structures.character.PartyMember;
 
@@ -8,8 +9,6 @@ import fr.aresrpg.dofus.structures.character.PartyMember;
  * @since
  */
 public interface PartyServerHandler {
-
-	void onPlayerAccept();
 
 	void onPlayerRefuse();
 
@@ -29,6 +28,6 @@ public interface PartyServerHandler {
 
 	void onStopFollow();
 
-	void onPartyMemberUpdate(PartyMember member);
+	void onPartyMemberUpdate(ExchangeMove move, PartyMember member);
 
 }

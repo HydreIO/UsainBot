@@ -20,12 +20,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class FollowPlayerBehavior extends Behavior {
 
-	private String toFollow;
+	private int toFollow;
 
 	/**
 	 * @param perso
 	 */
-	public FollowPlayerBehavior(Perso perso, String toFollow) {
+	public FollowPlayerBehavior(Perso perso, int toFollow) {
 		super(perso);
 		this.toFollow = toFollow;
 	}
@@ -36,7 +36,7 @@ public class FollowPlayerBehavior extends Behavior {
 
 	public void startFollow() {
 		PartyFollowPacket pkt = new PartyFollowPacket();
-		pkt.setPname(toFollow);
+		pkt.setPlayerId(0);
 		pkt.setFollow(true);
 		getPerso().sendPacketToServer(pkt);
 	}
@@ -44,6 +44,7 @@ public class FollowPlayerBehavior extends Behavior {
 	public boolean isOnSameMap() {
 		BotMap map = getPerso().getMapInfos().getMap();
 		Point ff = getPerso().getBotInfos().getFollowedCoords();
+		if (map == null || ff == null) return true;
 		return map.getX() == ff.x && map.getY() == ff.y;
 	}
 

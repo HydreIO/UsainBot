@@ -111,7 +111,7 @@ public class NavigationImpl implements Navigation {
 				int distanceAgro = AgressiveMobs.getDistanceAgro(type);
 				if (distanceAgro == -1) continue;
 				distanceAgro++; // increment car la distance manathan par de 0
-				if (Maps.distanceManathan(grp.getCellid(), cell, getPerso().getMapInfos().getMap().getDofusMap().getWidth()) <= distanceAgro) return false;
+				if (Maps.distanceManathan(grp.getCellId(), cell, getPerso().getMapInfos().getMap().getDofusMap().getWidth()) <= distanceAgro) return false;
 			}
 		}
 		return true;

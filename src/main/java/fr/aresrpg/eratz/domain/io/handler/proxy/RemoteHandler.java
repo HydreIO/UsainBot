@@ -177,6 +177,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	}
 
 	public Perso getPerso() {
+		if (getAccount() == null) return null;
 		return getAccount().getCurrentPlayed();
 	}
 

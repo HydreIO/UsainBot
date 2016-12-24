@@ -33,7 +33,7 @@ public interface BaseAbility extends Closeable {
 	 */
 	void speakToNpc(int npcid);
 
-	void followGroupMember(String name);
+	void followGroupMember(int player);
 
 	/**
 	 * achetter vendre au npc

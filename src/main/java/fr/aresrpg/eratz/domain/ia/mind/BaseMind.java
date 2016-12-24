@@ -55,7 +55,7 @@ public class BaseMind implements Mind {
 	}
 
 	@Override
-	public Mind thenFollow(String toFollow) {
+	public Mind thenFollow(int toFollow) {
 		getActions().add(new FollowPlayerBehavior(getPerso(), toFollow));
 		return this;
 	}

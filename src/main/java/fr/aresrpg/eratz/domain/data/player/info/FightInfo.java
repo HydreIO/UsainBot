@@ -4,6 +4,7 @@ import fr.aresrpg.dofus.structures.game.FightSpawn;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.FightBehavior;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,11 @@ public class FightInfo extends Info {
 	 */
 	public void setCurrentFight(Fight currentFight) {
 		this.currentFight = currentFight;
+	}
+
+	public void notifyFightStart() {
+		if (getCurrentFightBehavior() == null) throw new NullPointerException("Le behavior est null");
+		Executors.FIXED.execute(getCurrentFightBehavior()::start);
 	}
 
 	/**

@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.io.handler.bot.handler;
 
-import fr.aresrpg.dofus.protocol.game.client.GameExtraInformationPacket;
+import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.protocol.game.server.GameEndPacket;
 import fr.aresrpg.dofus.protocol.game.server.GameTeamPacket.TeamEntity;
@@ -32,7 +32,9 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 
 	@Override
 	public void onFightEnd(GameEndPacket pkt) {
-		// TODO
+		GameCreatePacket pktc = new GameCreatePacket();
+		pktc.setGameType(GameType.SOLO);
+		getPerso().sendPacketToServer(pktc);
 
 	}
 
@@ -46,11 +48,11 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 	public void onFightJoin(GameType state, FightType fightType, boolean isSpectator, int startTimer, boolean cancelButton, boolean isDuel) {
 		getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 		getPerso().getFightInfos().setCurrentFightBehavior(new PassTurnBehavior(getPerso()));
+		getPerso().getFightInfos().notifyFightStart();
 	}
 
 	@Override
 	public void onTeamAssign(int team) {
-		getPerso().getFightInfos().setCurrentFightTeam(team);
 	}
 
 	@Override
@@ -127,14 +129,11 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 
 	@Override
 	public void onEntityTurnReady(int entityId) {
-		// TODO
-
+		getPerso().sendPacketToServer(new GameTurnOkPacket());
 	}
 
 	@Override
 	public void onEntityTurnStart(int entityId, int time) {
-		// TODO
-
 	}
 
 	@Override

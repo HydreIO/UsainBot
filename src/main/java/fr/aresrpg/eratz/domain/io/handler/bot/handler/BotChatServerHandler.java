@@ -7,6 +7,7 @@ import fr.aresrpg.eratz.domain.data.AccountsManager;
 import fr.aresrpg.eratz.domain.data.MindManager;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.std.chat.ChatServerHandler;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 /**
  * 
@@ -47,8 +48,10 @@ public class BotChatServerHandler extends BotHandlerAbstract implements ChatServ
 				String[] cmd = msg.split(" ");
 				switch (cmd[0]) {
 					case "follow":
-						getPerso().getGroup().formGroup();
-						MindManager.getInstance().followPlayer(getPerso(), pseudo);
+						Executors.FIXED.execute(() -> {
+							getPerso().getGroup().formGroup();
+							MindManager.getInstance().followPlayer(getPerso(), player);
+						});
 						break;
 				}
 				break;

@@ -110,8 +110,9 @@ public abstract class FightBehavior extends Behavior {
 		Set<Cell> aroundP = getCellsAroundPlayer(distToPlayer);
 		Map<Cell, Integer> cellWithDistance = new HashMap<>();
 		DofusMap map = getPerso().getMapInfos().getMap().getDofusMap();
-		getFight().getMobs().forEach(m -> aroundP.forEach(cell -> {
-			int dist = cell.distanceManathan(m.getCellId());
+		int team = getPerso().getFightInfos().getCurrentFightTeam();
+		getFight().getTeam(team).values().forEach(m -> aroundP.forEach(cell -> {
+			int dist = cell.distanceManathan(m.getFirst().getCellId());
 			Integer in = cellWithDistance.get(cell);
 			if (in == null || dist < in) cellWithDistance.put(cell, dist);
 		}));
@@ -145,9 +146,10 @@ public abstract class FightBehavior extends Behavior {
 		if (getBeginCellId() != -1) getPerso().getAbilities().getFightAbility().setPosition(getBeginCellId());
 		waitCanStartFight();
 		getPerso().getAbilities().getFightAbility().beReady(true);
-		while (!getPerso().getFightInfos().getCurrentFight().isEnded()){
+		Fight f = getPerso().getFightInfos().getCurrentFight();
+		while (!getPerso().getFightInfos().getCurrentFight().isEnded()) {
 			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
-			if (getPerso().getFightInfos().getCurrentFight().getCurrentTurn() == getPerso()) playTurn();
+			if (f.getCurrentTurn() != null && f.getCurrentTurn().getFirst().getId() == getPerso().getId()) playTurn();
 		}
 		return BehaviorStopReason.FINISHED;
 	}

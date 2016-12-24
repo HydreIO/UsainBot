@@ -57,7 +57,7 @@ public class BotMap {
 	public void playerMove(int id, int cellid) {
 		for (MovementPlayer i : players)
 			if (i.getId() == id) {
-				i.setCellid(cellid);
+				i.setCellId(cellid);
 				return;
 			}
 	}
@@ -70,12 +70,12 @@ public class BotMap {
 
 	public void monsterMove(int id, int cellid) {
 		for (MovementMonsterGroup i : mobs)
-			if (i.getId() == id) i.setCellid(cellid);
+			if (i.getId() == id) i.setCellId(cellid);
 	}
 
 	public void npcMove(int id, int cellid) {
 		for (MovementNpc i : npcs)
-			if (i.getId() == id) i.setCellid(cellid);
+			if (i.getId() == id) i.setCellId(cellid);
 	}
 
 	public void entityUpdate(MovementAction action) {

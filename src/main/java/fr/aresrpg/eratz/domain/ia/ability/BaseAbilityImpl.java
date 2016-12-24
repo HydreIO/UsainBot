@@ -259,17 +259,6 @@ public class BaseAbilityImpl implements BaseAbility {
 	}
 
 	@Override
-	public InvitationState invitPlayerToGroup(String pname) {
-		PartyInvitePacket pkt = new PartyInvitePacket();
-		pkt.setPname(pname);
-		getStates().currentToInvite = pname;
-		getPerso().sendPacketToServer(pkt);
-		getPerso().getAbilities().getBaseAbility().getStates().partyInvit = InvitationState.AWAITING;
-		getBotThread().pause(Thread.currentThread());
-		return getStates().partyInvit;
-	}
-
-	@Override
 	public InvitationState invitPlayerToGroupAndCancel(String name, long cancelAfter, TimeUnit unit) {
 		PartyInvitePacket pkt = new PartyInvitePacket();
 		pkt.setPname(name);
@@ -289,10 +278,21 @@ public class BaseAbilityImpl implements BaseAbility {
 	}
 
 	@Override
-	public void followGroupMember(String name) {
+	public InvitationState invitPlayerToGroup(String pname) {
+		PartyInvitePacket pkt = new PartyInvitePacket();
+		pkt.setPname(pname);
+		getStates().currentToInvite = pname;
+		getPerso().sendPacketToServer(pkt);
+		getPerso().getAbilities().getBaseAbility().getStates().partyInvit = InvitationState.AWAITING;
+		getBotThread().pause();
+		return getStates().partyInvit;
+	}
+
+	@Override
+	public void followGroupMember(int player) {
 		PartyFollowPacket pkt = new PartyFollowPacket();
 		pkt.setFollow(true);
-		pkt.setPname(name);
+		pkt.setPlayerId(player);
 		getPerso().sendPacketToServer(pkt);
 		getBotThread().pause();
 	}

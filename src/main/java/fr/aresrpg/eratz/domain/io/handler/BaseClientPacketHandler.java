@@ -65,7 +65,8 @@ public class BaseClientPacketHandler implements ClientPacketHandler {
 	}
 
 	protected void log(Packet pkt) {
-		LOGGER.info("[SND]> " + pkt);
+		if (getPerso() == null) LOGGER.info("[[SND]> " + pkt);
+		else LOGGER.info("[" + getPerso().getPseudo() + ":[SND]> " + pkt);
 	}
 
 	@Override

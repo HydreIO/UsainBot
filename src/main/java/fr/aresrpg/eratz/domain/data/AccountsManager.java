@@ -94,6 +94,13 @@ public class AccountsManager {
 		return null;
 	}
 
+	public Perso getPerso(int id) {
+		for (Account a : getAccounts().values())
+			for (Perso p : a.getPersos())
+				if (p.getId() == id) return p;
+		return null;
+	}
+
 	/**
 	 * @return the accounts
 	 */
