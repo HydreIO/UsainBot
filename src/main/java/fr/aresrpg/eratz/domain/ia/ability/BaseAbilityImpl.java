@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.ability;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
 import fr.aresrpg.dofus.protocol.basic.client.BasicChatMessageSendPacket;
 import fr.aresrpg.dofus.protocol.basic.client.BasicUseSmileyPacket;
@@ -295,7 +296,8 @@ public class BaseAbilityImpl implements BaseAbility {
 		GameClientActionPacket ga = new GameClientActionPacket(GameActions.DUEL, action);
 		getPerso().sendPacketToServer(ga);
 		while (getPerso().getAbilities().getBaseAbility().getStates().defiInvit == null)
-			;
+			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
+
 		getBotThread().pause(Thread.currentThread());
 		return getStates().defiInvit;
 	}
@@ -307,7 +309,8 @@ public class BaseAbilityImpl implements BaseAbility {
 		GameClientActionPacket ga = new GameClientActionPacket(GameActions.DUEL, action);
 		getPerso().sendPacketToServer(ga);
 		while (getPerso().getAbilities().getBaseAbility().getStates().defiInvit == null)
-			;
+			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
+
 		if (cancelAfter != 0) {
 			Executors.SCHEDULED.schedule(getBotThread()::unpause, cancelAfter, unit);
 			getBotThread().pause(Thread.currentThread());

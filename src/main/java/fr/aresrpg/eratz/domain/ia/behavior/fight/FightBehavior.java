@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.behavior.fight;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.structures.map.*;
 import fr.aresrpg.dofus.util.Maps;
@@ -144,8 +145,10 @@ public abstract class FightBehavior extends Behavior {
 		if (getBeginCellId() != -1) getPerso().getAbilities().getFightAbility().setPosition(getBeginCellId());
 		waitCanStartFight();
 		getPerso().getAbilities().getFightAbility().beReady(true);
-		while (!getPerso().getFightInfos().getCurrentFight().isEnded())
+		while (!getPerso().getFightInfos().getCurrentFight().isEnded()){
+			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
 			if (getPerso().getFightInfos().getCurrentFight().getCurrentTurn() == getPerso()) playTurn();
+		}
 		return BehaviorStopReason.FINISHED;
 	}
 
@@ -157,7 +160,7 @@ public abstract class FightBehavior extends Behavior {
 
 	protected void waitCanStartFight() {
 		while (!getPerso().getFightInfos().canStartCombat()) // attente de pouvoir start le combat
-			;
+			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
 	}
 
 	public static enum Humeur {

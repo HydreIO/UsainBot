@@ -8,6 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.condition.Option;
 import fr.aresrpg.commons.domain.log.Logger;
 import fr.aresrpg.commons.domain.log.LoggerBuilder;
@@ -38,6 +39,7 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class TheBotFather {
@@ -139,6 +141,7 @@ public class TheBotFather {
 	public void startScanner() {
 		Scanner sc = new Scanner(System.in);
 		while (isRunning()) {
+			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
 			if (!sc.hasNext()) continue;
 			String[] nextLine = sc.nextLine().split(" ");
 			switch (nextLine[0].toLowerCase()) {

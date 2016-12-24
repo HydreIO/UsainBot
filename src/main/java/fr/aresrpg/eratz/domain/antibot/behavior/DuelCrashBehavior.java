@@ -54,6 +54,7 @@ public class DuelCrashBehavior extends Behavior {
 		BaseAbility ab = getPerso().getAbilities().getBaseAbility();
 		count = 0;
 		while (isRunning()) {
+			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
 			if (++count > 120) break;
 			Threads.uSleep(2, TimeUnit.MILLISECONDS);
 			GameDuelAction action = new GameDuelAction(getTarget());

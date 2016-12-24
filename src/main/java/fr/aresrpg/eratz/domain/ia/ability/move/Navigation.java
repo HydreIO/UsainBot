@@ -59,6 +59,8 @@ public interface Navigation {
 
 	Navigation takeZaapi(Zaapi destination);
 
+	void joinCoords(int x, int y);
+
 	void notifyMovementEnd();
 
 }

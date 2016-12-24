@@ -41,6 +41,7 @@ public class BaseMind implements Mind {
 		if (running) return;
 		running = true;
 		do {
+			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
 			if (!forceds.isEmpty()) { // forced en prio
 				forceds.poll().run();
 				continue;
@@ -134,7 +135,7 @@ public class BaseMind implements Mind {
 		getActions().add(() -> {
 			if (condition.test(getPerso())) getPerso().disconnect(reason);
 			while (!getPerso().getAccount().isOffline())
-				;
+				Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
 			return BehaviorStopReason.FINISHED;
 		});
 		return this;

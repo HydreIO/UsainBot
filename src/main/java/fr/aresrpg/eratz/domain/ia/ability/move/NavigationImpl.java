@@ -2,18 +2,23 @@ package fr.aresrpg.eratz.domain.ia.ability.move;
 
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.protocol.game.actions.GameActions;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
 import fr.aresrpg.dofus.protocol.game.client.GameActionACKPacket;
 import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
+import fr.aresrpg.dofus.structures.Chat;
+import fr.aresrpg.dofus.structures.PathDirection;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.Pathfinding;
-import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
-import fr.aresrpg.eratz.domain.data.dofus.map.Zaapi;
+import fr.aresrpg.dofus.util.Pathfinding.Node;
+import fr.aresrpg.eratz.domain.data.dofus.map.*;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.ia.Roads;
+import fr.aresrpg.eratz.domain.ia.Roads.MapRestriction;
 import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
@@ -82,6 +87,7 @@ public class NavigationImpl implements Navigation {
 
 	@Override
 	public Navigation moveToCell(int cellid, boolean teleport) {
+		if (teleport) Threads.uSleep(500, TimeUnit.MILLISECONDS); // antiban
 		List<Point> p = searchPath(cellid);
 		if (p == null) {
 			LOGGER.info("Le chemin est introuvable !");
@@ -170,5 +176,54 @@ public class NavigationImpl implements Navigation {
 					return id;
 			}
 		return -1;
+	}
+
+	@Override
+	public void joinCoords(int x, int y) {
+		BotMap map = perso.getMapInfos().getMap();
+		Node coords = new Node(x, y);
+		List<Point> path = Pathfinding.getPathForCarte(map.getX(), map.getY(), coords.getX(), coords.getY(), Roads::canMove);
+		if (path == null) {
+			perso.getAbilities().getBaseAbility().speak(Chat.ADMIN, "Impossible de rejoindre la pos " + coords + " ! Blocké en %pos%");
+			perso.crashReport("Impossible de rejoindre la pos désignée ! Blocké en [" + map.getX() + "," + map.getY() + "]");
+			return;
+		}
+		path.remove(0);
+		for (Point p : path) {
+			BotMap newmap = perso.getMapInfos().getMap();
+			PathDirection dir = Pathfinding.getDirectionForMap(newmap.getX(), newmap.getY(), (int) p.getX(), (int) p.getY());
+			if (dir == null) {
+				perso.crashReport("Impossible de trouver la direction pour aller de [" + newmap.getX() + "," + newmap.getY() + "] vers [" + p.x + "," + p.y + "]");
+				return;
+			}
+			moveWithDirection(perso, dir);
+			if (perso.getBotInfos().isBlockedOnACell()) {
+				MapRestriction res = Roads.getRestriction(new Point(newmap.getX(), newmap.getY()));
+				res.setCantMove(dir);
+				joinCoords(x, y);
+				return;
+			}
+		}
+	}
+
+	public void moveWithDirection(Perso perso, PathDirection dir) {
+		switch (dir) {
+			case DOWN:
+			case DOWN_LEFT:
+			case DOWN_RIGHT:
+				perso.getNavigation().moveDown();
+				return;
+			case LEFT:
+				perso.getNavigation().moveLeft();
+				return;
+			case RIGHT:
+				perso.getNavigation().moveRight();
+				return;
+			case UP:
+			case UP_LEFT:
+			case UP_RIGHT:
+				perso.getNavigation().moveUp();
+				return;
+		}
 	}
 }
