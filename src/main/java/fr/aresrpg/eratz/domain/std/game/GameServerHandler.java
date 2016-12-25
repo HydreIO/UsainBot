@@ -31,8 +31,6 @@ public interface GameServerHandler {
 
 	void onPlayerMove(MovementPlayer player);
 
-	void onInvocMove(MovementInvocation invoc);
-
 	void onMobMove(MovementMonster mob);
 
 	void onNpcMove(MovementNpc npc);

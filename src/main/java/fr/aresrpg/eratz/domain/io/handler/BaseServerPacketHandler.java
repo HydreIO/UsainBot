@@ -736,11 +736,6 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 					getGameHandler().forEach(h -> h.onPlayerMove(player));
 					return;
 				case CREATE_INVOCATION:
-					MovementInvocation invoc = (MovementInvocation) (Object) e.getSecond();
-					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(invoc);
-					else getPerso().getMapInfos().getMap().entityUpdate(invoc);
-					getGameHandler().forEach(h -> h.onInvocMove(invoc));
-					return;
 				case CREATE_MONSTER:
 					MovementMonster mob = (MovementMonster) (Object) e.getSecond();
 					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(mob);

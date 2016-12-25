@@ -3,7 +3,7 @@ package fr.aresrpg.eratz.domain.io.handler.bot.handler;
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
-import fr.aresrpg.dofus.protocol.game.movement.MovementInvocation;
+import fr.aresrpg.dofus.protocol.game.movement.MovementMonster;
 import fr.aresrpg.dofus.structures.game.JoinError;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
@@ -61,7 +61,7 @@ public class BotGameActionServerHandler extends BotHandlerAbstract implements Ga
 	}
 
 	@Override
-	public void onEntitySummoned(MovementInvocation invoc) {
+	public void onEntitySummoned(MovementMonster invoc) {
 		// TODO
 
 	}

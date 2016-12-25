@@ -77,11 +77,6 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 	}
 
 	@Override
-	public void onInvocMove(MovementInvocation invoc) {
-
-	}
-
-	@Override
 	public void onMobMove(MovementMonster mob) {
 
 	}
