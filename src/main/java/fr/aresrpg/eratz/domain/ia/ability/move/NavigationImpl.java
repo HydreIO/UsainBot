@@ -104,6 +104,9 @@ public class NavigationImpl implements Navigation {
 
 	private boolean canGoOnCellAvoidingMobs(int cell) {
 		CopyOnWriteArraySet<MovementMonsterGroup> mobs = getPerso().getMapInfos().getMap().getMobs();
+		Cell c = getPerso().getMapInfos().getMap().getDofusMap().getCell(cell);
+		if (c.isTeleporter()) return true;
+		if (getPerso().getMapInfos().getMap().hasMobOn(cell)) return false;
 		for (MovementMonsterGroup grp : mobs) {
 			for (int type : grp.getEntitytype()) {
 				int distanceAgro = AgressiveMobs.getDistanceAgro(type);
@@ -145,7 +148,7 @@ public class NavigationImpl implements Navigation {
 				if (!teleporting)
 					getBotThread().unpause();
 			} , (long) (time * 30), TimeUnit.MILLISECONDS);
-			getBotThread().pause(Thread.currentThread());
+			getBotThread().pause();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

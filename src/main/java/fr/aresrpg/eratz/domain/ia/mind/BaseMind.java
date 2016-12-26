@@ -9,6 +9,7 @@ import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.ia.behavior.move.BankDepositPath;
 import fr.aresrpg.eratz.domain.ia.behavior.move.FollowPlayerBehavior;
+import fr.aresrpg.eratz.domain.util.ThreadBlocker;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -26,9 +27,11 @@ public class BaseMind implements Mind {
 	private boolean infinite;
 	private Set<Integer> itemsToKeep = new HashSet<>();
 	private boolean running;
+	private ThreadBlocker blocker;
 
 	public BaseMind(Perso perso) {
 		this.perso = perso;
+
 	}
 
 	public void shutdown() {
@@ -40,9 +43,10 @@ public class BaseMind implements Mind {
 	public void process() throws InterruptedException, ExecutionException {
 		if (running) return;
 		running = true;
+		this.blocker = new ThreadBlocker(Thread.currentThread());// on set le thread comme ça on pourra pause le behavior a n'importe quel moment
 		while (getPerso().getAccount().isActive()) {
 			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
-			if (getPerso().isInFight() || getActions().isEmpty()) continue;
+			if (getActions().isEmpty()) continue;
 			Supplier<BehaviorStopReason> next = getActions().poll();
 			switch (next.get()) { // possibilité d'effectuer des actions selon le type de retour
 				case QUANTITY_REACHED:
@@ -52,6 +56,17 @@ public class BaseMind implements Mind {
 			if (infinite) getActions().add(next); // si infinite loop ajout a la queue
 		}
 		running = false;
+	}
+
+	@Override
+	public ThreadBlocker getBlocker() {
+		return this.blocker;
+	}
+
+	@Override
+	public Mind keepItems(int... itemsType) {
+		Arrays.stream(itemsType).forEach(itemsToKeep::add);
+		return this;
 	}
 
 	@Override

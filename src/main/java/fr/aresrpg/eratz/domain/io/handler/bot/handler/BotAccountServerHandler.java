@@ -150,8 +150,7 @@ public class BotAccountServerHandler extends BotHandlerAbstract implements Accou
 
 	@Override
 	public void onCharacterSelect(Character p) {
-		// TODO
-
+		getPerso().getAccount().notifyBotOnline(); // pour autoriser les actions qui onts besoin que le bot soit bien en jeux
 	}
 
 	@Override

@@ -1,9 +1,11 @@
 package fr.aresrpg.eratz.domain.data.player.info;
 
 import fr.aresrpg.dofus.structures.game.FightSpawn;
+import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.FightBehavior;
+import fr.aresrpg.eratz.domain.ia.behavior.fight.type.PassTurnBehavior;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.util.ArrayList;
@@ -17,7 +19,7 @@ public class FightInfo extends Info {
 
 	private Fight currentFight;
 	private List<FightSpawn> fightsOnMap = new ArrayList<>();
-	private FightBehavior currentFightBehavior;
+	private FightBehavior currentFightBehavior = new PassTurnBehavior(getPerso());
 	private boolean waitForGroup;
 	private int currentFightTeam;
 
@@ -76,8 +78,9 @@ public class FightInfo extends Info {
 	}
 
 	public void notifyFightStart() {
-		if (getCurrentFightBehavior() == null) throw new NullPointerException("Le behavior est null");
-		Executors.FIXED.execute(getCurrentFightBehavior()::start);
+		getPerso().getMind().getBlocker().pause();
+		TheBotFather.LOGGER.success("Switch en mode combat !");
+		if (getPerso().getAccount().isBotOnline()) Executors.FIXED.execute(getCurrentFightBehavior()::start);
 	}
 
 	/**

@@ -6,7 +6,7 @@
  * 
  *         Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.ia.behavior.harvest.type;
+package fr.aresrpg.eratz.domain.ia.behavior.harvest.type.paysan;
 
 import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
@@ -27,12 +27,12 @@ public class WheatHarvestBehavior extends HarvestBehavior {
 	}
 
 	@Override
-	public Interractable getTypesToHarvest() {
-		return Interractable.BLE;
+	public Interractable[] getTypesToHarvest() {
+		return new Interractable[] { Interractable.BLE };
 	}
 
 	@Override
-	public Skills getSkill() {
+	public Skills getSkill(Interractable type) {
 		return Skills.FAUCHER_BLE;
 	}
 

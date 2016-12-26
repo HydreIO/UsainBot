@@ -55,6 +55,7 @@ import fr.aresrpg.dofus.structures.server.DofusServer;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.SwfVariableExtractor;
+import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.data.AccountsManager;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
@@ -657,6 +658,8 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	public void handle(GameEndPacket pkt) {
 		log(pkt);
 		getPerso().getFightInfos().getCurrentFight().setEnded(true);
+		TheBotFather.LOGGER.success("Switch en mode normal !");
+		getPerso().getMind().getBlocker().resume();
 		getGameHandler().forEach(h -> h.onFightEnd(pkt));
 	}
 
@@ -669,8 +672,10 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(GameJoinPacket pkt) {
 		log(pkt);
+		TheBotFather.LOGGER.debug("Current receive thread = " + Thread.currentThread().getName());
 		if (pkt.getState() == GameType.FIGHT) {
 			getPerso().getFightInfos().setCurrentFight(Fight.fromGame(pkt.getFightType(), pkt.isSpectator(), pkt.getStartTimer(), pkt.isDuel()));
+			getPerso().getFightInfos().notifyFightStart();
 			getGameHandler().forEach(h -> getPerso().getFightInfos().getFightsOnMap().forEach(h::onFightRemoved));
 			getPerso().getFightInfos().getFightsOnMap().clear();
 		}
@@ -684,18 +689,19 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 		try {
 			InputStream downloadMap = Maps.downloadMap(pkt.getMapId(), pkt.getSubid());
 			Map<String, Object> extractVariable = SwfVariableExtractor.extractVariable(downloadMap);
-			m = Maps.loadMap(extractVariable, pkt.getDecryptKey());
+			m = Maps.loadMap(extractVariable, pkt.getDecryptKey(), c -> {
+				if (Interractable.isInterractable(c.getLayerObject2Num())) return new Ressource(Interractable.fromId(c.getLayerObject2Num()), c);
+				return c;
+			});
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;
 		}
 		BotMap bm = MapsManager.getOrCreate(m);
 		bm.getRessources().clear();
-		for (Cell cell : bm.getDofusMap().getCells()) {
-			if (Interractable.isInterractable(cell.getLayerObject2Num())) // add ressource
-				bm.getRessources().add(new Ressource(cell, Interractable.fromId(cell.getLayerObject2Num()))); // interractable peut etre null dans le cas des zaapi porte coffre etc
-		}
 		getPerso().getMapInfos().setMap(bm);
+		for (Cell c : bm.getDofusMap().getCells())
+			if (c instanceof Ressource) bm.getRessources().add((Ressource) c);
 		MapView.setTitle(getPerso().getPseudo() + " | " + bm.getInfos());
 		getPerso().getDebugView().setOnCellClick(a -> Executors.FIXED.execute(() -> {
 			System.out.println(bm.getDofusMap().getCell(a));
@@ -853,7 +859,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 				break;
 			case HARVEST_TIME:
 				GameHarvestTimeAction actionh = (GameHarvestTimeAction) pkt.getAction();
-				getGameActionHandler().forEach(h -> h.onHarvestTime(actionh.getTime()));
+				getGameActionHandler().forEach(h -> h.onHarvestTime(actionh.getTime(), pkt.getEntityId()));
 				break;
 			default:
 				break;

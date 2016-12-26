@@ -73,7 +73,7 @@ public class BaseAbilityImpl implements BaseAbility {
 		DialogCreatePacket pkt = new DialogCreatePacket();
 		pkt.setNpcId(npcid);
 		getPerso().sendPacketToServer(pkt);
-		getBotThread().pause(Thread.currentThread());
+		getBotThread().pause();
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public class BaseAbilityImpl implements BaseAbility {
 	public void buyToNpc(int npcid) {
 		ExchangeRequestPacket pkt = new ExchangeRequestPacket(Exchange.NPC_SHOP, npcid);
 		getPerso().sendPacketToServer(pkt);
-		getBotThread().pause(Thread.currentThread());
+		getBotThread().pause();
 	}
 
 	@Override
@@ -276,7 +276,7 @@ public class BaseAbilityImpl implements BaseAbility {
 		getPerso().getAbilities().getBaseAbility().getStates().partyInvit = InvitationState.AWAITING;
 		if (cancelAfter != 0) {
 			Executors.SCHEDULED.schedule(getBotThread()::unpause, cancelAfter, unit);
-			getBotThread().pause(Thread.currentThread());
+			getBotThread().pause();
 		}
 		InvitationState partyInvit = getStates().partyInvit;
 		if (partyInvit == InvitationState.AWAITING) {
@@ -315,7 +315,7 @@ public class BaseAbilityImpl implements BaseAbility {
 		while (getPerso().getAbilities().getBaseAbility().getStates().defiInvit == null)
 			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
 
-		getBotThread().pause(Thread.currentThread());
+		getBotThread().pause();
 		return getStates().defiInvit;
 	}
 
@@ -330,7 +330,7 @@ public class BaseAbilityImpl implements BaseAbility {
 
 		if (cancelAfter != 0) {
 			Executors.SCHEDULED.schedule(getBotThread()::unpause, cancelAfter, unit);
-			getBotThread().pause(Thread.currentThread());
+			getBotThread().pause();
 		}
 		InvitationState duelInvit = getPerso().getAbilities().getBaseAbility().getStates().defiInvit;
 		if (duelInvit == InvitationState.AWAITING) {

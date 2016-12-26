@@ -1,7 +1,5 @@
 package fr.aresrpg.eratz.domain.data.player.inventory;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
-
 import fr.aresrpg.dofus.structures.EquipmentPosition;
 import fr.aresrpg.dofus.structures.character.Character;
 import fr.aresrpg.dofus.structures.item.Item;
@@ -33,7 +31,7 @@ public class PlayerInventory extends Inventory {
 	}
 
 	public void parseCharacter(Character c) {
-		LOGGER.debug("ADD " + c.getItems().length + " ITEMS");
+		if (c.getItems() == null) return;
 		Arrays.stream(c.getItems()).forEach(i -> getContents().put(i.getUid(), i));
 	}
 

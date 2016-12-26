@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.data.dofus.player;
 
+import fr.aresrpg.commons.domain.util.Randoms;
+
 /**
  * 
  * @since
@@ -27,6 +29,15 @@ public enum Smiley {
 	 */
 	public int getId() {
 		return ordinal() + 1;
+	}
+
+	public static Smiley getRandomSmiley() {
+		return values()[Randoms.nextInt(values().length)];
+	}
+
+	public static Smiley getRandomTrollSmiley() {
+		Smiley[] s = { TIRE_LANQUE, Smiley.PLEURE_RIRE, ETONE, AMOUREUX, MOQUEUR };
+		return s[Randoms.nextInt(s.length)];
 	}
 
 	public static Smiley valueOf(int code) {

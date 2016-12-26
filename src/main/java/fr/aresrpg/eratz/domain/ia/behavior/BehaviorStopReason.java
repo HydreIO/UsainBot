@@ -10,6 +10,7 @@ public enum BehaviorStopReason {
 	QUANTITY_REACHED,
 	DEATH,
 	FINISHED,
-	PATH_ERROR
+	PATH_ERROR,
+	FIGHT
 
 }

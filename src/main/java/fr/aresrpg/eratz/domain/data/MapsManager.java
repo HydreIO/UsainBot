@@ -36,6 +36,7 @@ public class MapsManager {
 	public static BotMap getOrCreate(DofusMap defaultMap) {
 		BotMap map = getMap(defaultMap.getId());
 		if (map == null) map = BotMap.fromDofusMap(defaultMap);
+		else map.getDofusMap().setCells(defaultMap.getCells());
 		updateMap(map);
 		return map;
 	}

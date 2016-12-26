@@ -57,7 +57,6 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 	@Override
 	public void onMap(BotMap map) {
 		getPerso().sendPacketToServer(new GameExtraInformationPacket());
-		getPerso().getAccount().notifyBotOnline(); // pour autoriser les actions qui onts besoin que le bot soit bien en jeux
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}
 

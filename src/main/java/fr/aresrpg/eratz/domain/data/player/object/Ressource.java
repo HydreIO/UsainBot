@@ -7,25 +7,23 @@ import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 
-public class Ressource {
-	private Cell cell;
+public class Ressource extends Cell {
+
 	private Interractable type;
 
-	public Ressource(Cell cell, Interractable type) {
-		this.cell = cell;
+	public Ressource(Interractable type, int id, int mapWidth, boolean lineOfSight, int layerGroundRot, int groundLevel, int movement, int layerGroundNum, int groundSlope, int x, int y,
+		boolean layerGroundFlip,
+		int layerObject1Num, int layerObject1Rot, boolean layerObject1Flip, boolean layerObject2Flip, boolean layerObject2Interactive, int layerObject2Num) {
+		super(id, mapWidth, lineOfSight, layerGroundRot, groundLevel, movement, layerGroundNum, groundSlope, x, y, layerGroundFlip, layerObject1Num, layerObject1Rot, layerObject1Flip,
+				layerObject2Flip,
+				layerObject2Interactive, layerObject2Num);
 		this.type = type;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		return obj == null ? false : obj == this || (obj instanceof Cell && getCell().equals(obj));
-	}
-
-	/**
-	 * @return the cell
-	 */
-	public Cell getCell() {
-		return cell;
+	public Ressource(Interractable type, Cell c) {
+		this(type, c.getId(), c.getMapWidth(), c.isLineOfSight(), c.getLayerGroundRot(), c.getGroundLevel(), c.getMovement(), c.getLayerGroundNum(), c.getGroundSlope(), c.getX(), c.getY(),
+				c.isLayerGroundFlip(), c.getLayerObject1Num(), c.getLayerObject1Rot(),
+				c.isLayerObject1Flip(), c.isLayerObject2Flip(), c.isLayerObject2Interactive(), c.getLayerObject2Num());
 	}
 
 	/** * @return the type */
@@ -33,11 +31,16 @@ public class Ressource {
 		return type;
 	}
 
-	public int getNeighborCell(BotMap map) {
-		Node[] neighbors = Pathfinding.getNeighbors(new Node(getCell().getX(), getCell().getY()));
+	public int getNeighborCell(BotMap map, boolean diagonale) {
+		Node[] neighbors = diagonale ? Pathfinding.getNeighbors(new Node(getX(), getY())) : Pathfinding.getNeighborsWithoutDiagonals(new Node(getX(), getY()));
 		for (Node n : neighbors) {
 			int id = Maps.getId(n.getX(), n.getY(), map.getDofusMap().getWidth());
-			Cell cell = map.getDofusMap().getCell(id);
+			Cell cell = null;
+			try {
+				cell = map.getDofusMap().getCell(id);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				continue;
+			}
 			if (cell.isWalkeable(i -> !map.hasMobOn(i))) return id;
 		}
 		return -1;
@@ -45,18 +48,12 @@ public class Ressource {
 
 	/** * @return the spawned */
 	public boolean isSpawned() {
-		switch (getType()) {
-			case BLE:
-				return getCell().getLayerObject2Num() == 7511 && (getCell().getFrame() == 0 || getCell().getFrame() == 5);
-
-			default:
-				return false;
-		}
+		return getFrame() == 0 || getFrame() == 5;
 	}
 
 	@Override
 	public String toString() {
-		return "Ressource [cell=" + cell + ", type=" + type + "]";
+		return "Ressource [type=" + type + "]" + super.toString();
 	}
 
 }

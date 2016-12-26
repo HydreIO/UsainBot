@@ -80,7 +80,7 @@ public enum Interractable {
 	BAUXITE(7528, Jobs.JOB_MINEUR),
 	OR(313, Jobs.JOB_MINEUR), // ID
 	DOLOMITE(7555, Jobs.JOB_MINEUR),
-	BLE(7511, 1, 2000, Jobs.JOB_PAYSAN),
+	BLE(7511, Jobs.JOB_PAYSAN),
 	ORGE(7515, Jobs.JOB_PAYSAN),
 	AVOINE(7517, Jobs.JOB_PAYSAN),
 	HOUBLON(7512, Jobs.JOB_PAYSAN),
@@ -100,8 +100,6 @@ public enum Interractable {
 
 	private int id;
 	private Jobs[] requiredJob;
-	private long minTimeToHarvest = 10000;
-	private int minLvlToHarvest = 100;
 	public static final int ENCLOS[] = { 6766, 6767, 6763, 6772 };
 	public static final int ZAAP[] = { 7000, 7026, 7029, 4287 };
 	public static final int ATELIER[] = { 7008, 7009, 7010 };
@@ -118,37 +116,6 @@ public enum Interractable {
 	private Interractable(int id, Jobs... job) {
 		this.requiredJob = job;
 		this.id = id;
-	}
-
-	private Interractable(int id, int minLvlToHarvest, long minTimeToHarvest, Jobs... job) {
-		this.requiredJob = job;
-		this.id = id;
-		this.minTimeToHarvest = minTimeToHarvest;
-		this.minLvlToHarvest = minLvlToHarvest;
-	}
-
-	/**
-	 * @return the minLvlToHarvest
-	 */
-	public int getMinLvlToHarvest() {
-		return minLvlToHarvest;
-	}
-
-	/**
-	 * @return the minTimeToHarvest
-	 */
-	public long getMinTimeToHarvest() {
-		return minTimeToHarvest;
-	}
-
-	public long getTimeToHarvest(int jobLvl) {
-		int ll = 100 - jobLvl;
-		int add = 100 * ll;
-		return getMinTimeToHarvest() + add;
-	}
-
-	public static long getTimeToHarvest(int jobLvl, Interractable type) {
-		return type.getTimeToHarvest(jobLvl);
 	}
 
 	public static Interractable fromId(int id) {
@@ -201,6 +168,10 @@ public enum Interractable {
 		for (int i : array)
 			if (i == id) return true;
 		return false;
+	}
+
+	private boolean is(Interractable i) {
+		return i == this;
 	}
 
 	/**

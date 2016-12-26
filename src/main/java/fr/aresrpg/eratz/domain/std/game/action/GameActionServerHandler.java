@@ -40,6 +40,6 @@ public interface GameActionServerHandler {
 
 	void onSpellLaunched(int spellId, int cell, int spellLvl);
 
-	void onHarvestTime(long time);
+	void onHarvestTime(long time, int entity);
 
 }

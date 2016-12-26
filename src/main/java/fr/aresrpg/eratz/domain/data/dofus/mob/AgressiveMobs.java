@@ -222,7 +222,7 @@ public enum AgressiveMobs {
 				if (m.getId() == mobtype) return a.getDistanceAgro();
 			}
 		}
-		return -1;
+		return 0;
 	}
 
 	public static AgressiveMobs byId(int id) {

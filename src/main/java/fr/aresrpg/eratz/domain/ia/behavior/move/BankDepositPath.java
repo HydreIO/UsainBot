@@ -58,7 +58,7 @@ public class BankDepositPath extends Behavior {
 		BaseAbility ability = getPerso().getAbilities().getBaseAbility();
 		ability.goAndOpenBank();
 		waitLitle();
-		Set<Item> inv = getPerso().getInventory().getContents().entrySet().stream().filter(e -> !ArrayUtils.contains(e, items)).map(e -> e.getValue()).collect(Collectors.toSet());
+		Set<Item> inv = getPerso().getInventory().getContents().values().stream().filter(e -> !ArrayUtils.contains(e.getItemTypeId(), items)).collect(Collectors.toSet());
 		MovedItem[] array = inv.stream().map(it -> new MovedItem(ExchangeMove.ADD, it.getUid(), it.getQuantity())).toArray(MovedItem[]::new);
 		Arrays.stream(array).forEach(i -> {
 			ability.moveItem(i);

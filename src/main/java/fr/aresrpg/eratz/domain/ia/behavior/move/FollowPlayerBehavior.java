@@ -85,7 +85,7 @@ public class FollowPlayerBehavior extends Behavior implements Listener {
 			if (hasFight(s.getId())) fightId = s.getId();
 		if (fightId == -1) return;
 		getPerso().getAbilities().getFightAbility().joinFight(fightId);
-		waitUntilFightEnd();
+		Threads.uSleep(2, TimeUnit.SECONDS);
 	}
 
 	public boolean hasFight(int id) {
@@ -101,11 +101,6 @@ public class FollowPlayerBehavior extends Behavior implements Listener {
 			Threads.uSleep(250, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
 		}
 		getPerso().setState(PlayerState.FOLLOWING);
-	}
-
-	public void waitUntilFightEnd() {
-		while (getPerso().isInFight())
-			Threads.uSleep(250, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
 	}
 
 	@Override

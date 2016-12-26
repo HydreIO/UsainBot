@@ -17,6 +17,7 @@ import fr.aresrpg.eratz.domain.antibot.AntiBot;
 import fr.aresrpg.eratz.domain.antibot.behavior.DuelCrashBehavior;
 import fr.aresrpg.eratz.domain.antibot.behavior.GroupCrashBehavior;
 import fr.aresrpg.eratz.domain.data.*;
+import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.player.BotJob;
 import fr.aresrpg.eratz.domain.data.dofus.player.Classe;
 import fr.aresrpg.eratz.domain.data.player.Account;
@@ -148,6 +149,16 @@ public class TheBotFather {
 			if (!sc.hasNext()) continue;
 			String[] nextLine = sc.nextLine().split(" ");
 			switch (nextLine[0].toLowerCase()) {
+				case "bucheron":
+					Executors.FIXED.execute(() -> {
+						AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+							if (a.isClientOnline() || a.isBotOnline()) {
+								Perso p = a.getCurrentPlayed();
+								MindManager.getInstance().lvlUpBucheron(p);
+							}
+						});
+					});
+					break;
 				case "ble":
 					Executors.FIXED.execute(() -> {
 						AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
@@ -164,7 +175,7 @@ public class TheBotFather {
 							if (a.isClientOnline() || a.isBotOnline()) {
 								Perso p = a.getCurrentPlayed();
 								LOGGER.debug(p.getPseudo() + " va vider son inventaire !");
-								new BankDepositPath(p).start();
+								new BankDepositPath(p, DofusItems2.HACHE_DE_L_APPRENTI_BÛCHERON.getId()).start();
 								LOGGER.success("Inventaire vidé !");
 							}
 						});

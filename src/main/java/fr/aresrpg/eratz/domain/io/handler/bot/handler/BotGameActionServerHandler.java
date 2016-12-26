@@ -131,9 +131,23 @@ public class BotGameActionServerHandler extends BotHandlerAbstract implements Ga
 	}
 
 	@Override
-	public void onHarvestTime(long time) {
+	public void onHarvestTime(long time, int entity) {
+		if (entity != getPerso().getId()) {
+			getPerso().setState(PlayerState.IDLE);
+			getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
+			return;
+		}
 		Executors.SCHEDULED.schedule(() -> {
-			getPerso().sendPacketToServer(new GameActionACKPacket().setActionId(0));
+			int action = 0;
+			switch (getPerso().getBotInfos().getCurrentJob().getType()) {
+				case JOB_BUCHERON:
+					action = 1;
+					break;
+
+				default:
+					break;
+			}
+			getPerso().sendPacketToServer(new GameActionACKPacket().setActionId(action));
 			getPerso().setState(PlayerState.IDLE);
 		} , time, TimeUnit.MILLISECONDS);
 	}

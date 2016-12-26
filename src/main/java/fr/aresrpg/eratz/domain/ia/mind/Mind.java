@@ -5,7 +5,9 @@ import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.util.Closeable;
+import fr.aresrpg.eratz.domain.util.ThreadBlocker;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +34,16 @@ public interface Mind extends Closeable {
 
 	default Mind thenHarvest(Path path) {
 		return thenHarvest(path, Integer.MAX_VALUE);
+	}
+
+	Mind keepItems(int... itemsType);
+
+	default Mind keepItems(DofusItems... items) {
+		return keepItems(Arrays.stream(items).mapToInt(DofusItems::getId).toArray());
+	}
+
+	default Mind keepItems(DofusItems2[] items) {
+		return keepItems(Arrays.stream(items).mapToInt(DofusItems2::getId).toArray());
 	}
 
 	/**
@@ -186,4 +198,5 @@ public interface Mind extends Closeable {
 
 	boolean isRunning();
 
+	ThreadBlocker getBlocker();
 }

@@ -124,8 +124,9 @@ public class RemoteHandler extends BaseServerPacketHandler {
 				.forEach(getAccount()::setCurrentPlayed);
 		setPerso(getAccount().getCurrentPlayed());
 		getProxy().getLocalHandler().setPerso(getPerso());
-		super.handle(pkt); // on handle apres car on a besoin du perso 
+		super.handle(pkt); // on handle apres car on a besoin du perso
 		transmit(pkt);
+		getPerso().getAccount().notifyMitmOnline();
 	}
 
 	@Override
@@ -192,15 +193,19 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	public void handle(GameMapDataPacket pkt) {
 		super.handle(pkt);
 		transmit(pkt);
-		getPerso().getAccount().notifyMitmOnline();
 	}
 
 	@Override
 	public void handle(GameServerActionPacket pkt) {
 		super.handle(pkt);
 		if (pkt.getType() == GameActions.HARVEST_TIME) {
-			GameHarvestTimeAction actionh = (GameHarvestTimeAction) pkt.getAction();
-			Executors.SCHEDULED.schedule(() -> getPerso().setState(PlayerState.IDLE), actionh.getTime(), TimeUnit.MILLISECONDS);
+			if (pkt.getEntityId() != getPerso().getId()) {
+				getPerso().setState(PlayerState.IDLE);
+				getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
+			} else {
+				GameHarvestTimeAction actionh = (GameHarvestTimeAction) pkt.getAction();
+				Executors.SCHEDULED.schedule(() -> getPerso().setState(PlayerState.IDLE), actionh.getTime(), TimeUnit.MILLISECONDS);
+			}
 		}
 		transmit(pkt);
 	}

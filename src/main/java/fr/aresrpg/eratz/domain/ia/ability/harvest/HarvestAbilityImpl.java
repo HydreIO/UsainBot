@@ -1,12 +1,18 @@
 package fr.aresrpg.eratz.domain.ia.ability.harvest;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
+import fr.aresrpg.commons.domain.util.Randoms;
+import fr.aresrpg.dofus.protocol.basic.client.BasicUseSmileyPacket;
 import fr.aresrpg.dofus.structures.Skills;
+import fr.aresrpg.dofus.structures.job.Jobs;
 import fr.aresrpg.eratz.domain.TheBotFather;
+import fr.aresrpg.eratz.domain.data.dofus.player.Smiley;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
 import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -16,14 +22,29 @@ import java.util.concurrent.TimeUnit;
 public class HarvestAbilityImpl implements HarvestAbility {
 
 	private Perso perso;
+	private Ressource lastRess;
+	private long lastHarvest;
+	private int lastCellToHarvest;
+	private final ScheduledFuture unblocker;
 
 	public HarvestAbilityImpl(Perso perso) {
 		this.perso = perso;
+		this.unblocker = Executors.SCHEDULER.register(this::unblock, 3, TimeUnit.SECONDS);
 	}
 
 	@Override
 	public void shutdown() {
+		unblocker.cancel(true);
+	}
 
+	public void unblock() {
+		if (getPerso().isInFight()) return;
+		if (lastHarvest + 15000 > System.currentTimeMillis()) return;
+		if (lastCellToHarvest == getPerso().getMapInfos().getCellId() && lastRess != null) {
+			TheBotFather.LOGGER.error("Le bot était bloqué sur la ressource [" + lastRess.getType() + "][" + lastRess + "] ! | Débloquage");
+			getPerso().setState(PlayerState.IDLE);
+			getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
+		}
 	}
 
 	/**
@@ -37,7 +58,9 @@ public class HarvestAbilityImpl implements HarvestAbility {
 	public void harvest(Ressource r, Skills skill) {
 		while (getPerso().getState() == PlayerState.HARVESTING)
 			Threads.uSleep(50, TimeUnit.MILLISECONDS);
-		int cl = r.getNeighborCell(getPerso().getMapInfos().getMap());
+		Jobs[] rj = r.getType().getRequiredJob();
+		boolean useDiagonale = true; // ArrayUtils.contains(Jobs.JOB_PAYSAN, rj) || ArrayUtils.contains(Jobs.JOB_ALCHIMISTE, rj);
+		int cl = r.getNeighborCell(getPerso().getMapInfos().getMap(), useDiagonale);
 		if (cl == -1) {
 			TheBotFather.LOGGER.severe("Impossible de trouver une cellule pour la ressource " + r);
 			return;
@@ -47,7 +70,13 @@ public class HarvestAbilityImpl implements HarvestAbility {
 			if (getPerso().getMapInfos().getCellId() != cl) return; // path non trouvé (par exemple a cause de mob agressifs)
 		}
 		getPerso().setState(PlayerState.HARVESTING);
-		getPerso().getAbilities().getBaseAbility().interract(skill, r.getCell().getId());
+		if (getPerso().getMapInfos().getMap().getPlayers().size() > 1 && Randoms.nextBool())
+			getPerso().sendPacketToServer(new BasicUseSmileyPacket().setSmileyId(Smiley.getRandomTrollSmiley().getId()));
+		this.lastRess = r;
+		this.lastCellToHarvest = getPerso().getMapInfos().getCellId();
+		this.lastHarvest = System.currentTimeMillis();
+		getPerso().getAbilities().getBaseAbility().interract(skill, r.getId());
+		this.lastRess = null;
 	}
 
 }
