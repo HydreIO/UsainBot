@@ -1,17 +1,15 @@
 package fr.aresrpg.eratz.domain.data.player.object;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
 import fr.aresrpg.commons.domain.util.Randoms;
-import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.PathDirection;
-import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.Perso;
-import fr.aresrpg.eratz.domain.ia.Roads;
-import fr.aresrpg.eratz.domain.ia.Roads.MapRestriction;
 
-import java.awt.Point;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
@@ -54,7 +52,11 @@ public class Road {
 	}
 
 	public void takeRoad(Perso perso) {
-		if (!isOnRoad(perso)) joinNearest(perso);
+		if (!isOnRoad(perso)) {
+			Node nearest = getNearest(perso.getMapInfos().getMap());
+			perso.getNavigation().joinCoords(nearest.getX(), nearest.getY());
+		}
+		LOGGER.success(perso.getPseudo() + " à rejoint la route !");
 		boolean pos = false;
 		BotMap map = perso.getMapInfos().getMap();
 		for (Entry<Node, Consumer<Perso>> entry : maps.entrySet()) {
@@ -77,33 +79,6 @@ public class Road {
 	 */
 	public String getLabel() {
 		return label;
-	}
-
-	private void joinNearest(Perso perso) {
-		BotMap map = perso.getMapInfos().getMap();
-		Node nearest = getNearest(map);
-		List<Point> path = Pathfinding.getMapPath(map.getX(), map.getY(), nearest.getX(), nearest.getY(), Roads::canMove);
-		if (path == null) {
-			perso.getAbilities().getBaseAbility().speak(Chat.ADMIN, "Impossible de rejoindre la route " + label + " ! Blocké en %pos%");
-			perso.crashReport("Impossible de rejoindre la route désignée ! Blocké en [" + map.getX() + "," + map.getY() + "]");
-			return;
-		}
-		path.remove(0);
-		for (Point p : path) {
-			BotMap newmap = perso.getMapInfos().getMap();
-			PathDirection dir = Pathfinding.getDirectionForMap(newmap.getX(), newmap.getY(), (int) p.getX(), (int) p.getY());
-			if (dir == null) {
-				perso.crashReport("Impossible de trouver la direction pour aller de [" + newmap.getX() + "," + newmap.getY() + "] vers [" + p.x + "," + p.y + "]");
-				return;
-			}
-			moveWithDirection(perso, dir);
-			if (perso.getBotInfos().isBlockedOnACell()) {
-				MapRestriction res = Roads.getRestriction(new Point(newmap.getX(), newmap.getY()));
-				res.setCantMove(dir);
-				joinNearest(perso);
-				return;
-			}
-		}
 	}
 
 	private PathDirection getDifferentDir(PathDirection base) {

@@ -22,6 +22,8 @@ import fr.aresrpg.dofus.protocol.dialog.server.*;
 import fr.aresrpg.dofus.protocol.exchange.server.*;
 import fr.aresrpg.dofus.protocol.fight.server.*;
 import fr.aresrpg.dofus.protocol.friend.server.FriendListPacket;
+import fr.aresrpg.dofus.protocol.game.actions.GameActions;
+import fr.aresrpg.dofus.protocol.game.actions.server.GameHarvestTimeAction;
 import fr.aresrpg.dofus.protocol.game.server.*;
 import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
@@ -43,9 +45,11 @@ import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
+import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.io.handler.BaseServerPacketHandler;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy.ProxyConnectionType;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Variables;
 
 import java.io.IOException;
@@ -55,6 +59,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -114,10 +119,12 @@ public class RemoteHandler extends BaseServerPacketHandler {
 
 	@Override
 	public void handle(AccountSelectCharacterOkPacket pkt) {
-		super.handle(pkt);
 		getAccount().getPersos().stream()
 				.filter(p -> p.getId() == pkt.getCharacter().getId())
 				.forEach(getAccount()::setCurrentPlayed);
+		setPerso(getAccount().getCurrentPlayed());
+		getProxy().getLocalHandler().setPerso(getPerso());
+		super.handle(pkt); // on handle apres car on a besoin du perso 
 		transmit(pkt);
 	}
 
@@ -191,6 +198,10 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(GameServerActionPacket pkt) {
 		super.handle(pkt);
+		if (pkt.getType() == GameActions.HARVEST_TIME) {
+			GameHarvestTimeAction actionh = (GameHarvestTimeAction) pkt.getAction();
+			Executors.SCHEDULED.schedule(() -> getPerso().setState(PlayerState.IDLE), actionh.getTime(), TimeUnit.MILLISECONDS);
+		}
 		transmit(pkt);
 	}
 
@@ -314,6 +325,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(ExchangeCreatePacket pkt) {
 		super.handle(pkt);
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}
@@ -643,6 +655,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(ExchangeLocalMovePacket pkt) {
 		super.handle(pkt);
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}
@@ -650,6 +663,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(ExchangeDistantMovePacket pkt) {
 		super.handle(pkt);
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}
@@ -657,6 +671,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(ExchangeCoopMovePacket pkt) {
 		super.handle(pkt);
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}
@@ -665,12 +680,13 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	public void handle(ExchangeStorageMovePacket pkt) {
 		super.handle(pkt);
 		transmit(pkt);
-
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}
 
 	@Override
 	public void handle(ExchangeShopMovePacket pkt) {
 		super.handle(pkt);
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}
@@ -678,6 +694,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(ExchangeCraftPublicPacket pkt) {
 		super.handle(pkt);
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}
@@ -685,6 +702,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(ExchangeSellToNpcResultPacket pkt) {
 		super.handle(pkt);
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}
@@ -692,6 +710,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(ExchangeBuyToNpcResultPacket pkt) {
 		super.handle(pkt);
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}
@@ -699,6 +718,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(ExchangeCraftLoopPacket pkt) {
 		super.handle(pkt);
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}
@@ -706,6 +726,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(ExchangeCraftLoopEndPacket pkt) {
 		super.handle(pkt);
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}
@@ -713,6 +734,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(ExchangeLeaveResultPacket pkt) {
 		super.handle(pkt);
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}

@@ -24,7 +24,8 @@ public class MapsData {
 		coords.put(5867, new Pair<>(new Point(-27, -50), 44));
 	}
 
-	public void init(Map<String, Object> datas) {
+	public void init() throws IOException {
+		Map<String, Object> datas = Lang.getDatas("fr", "maps");
 		for (Entry<String, Object> d : datas.entrySet()) {
 			if (d.getKey().startsWith("MA.m.")) parseCoords(d);
 			else if (d.getKey().startsWith("MA.a.")) parseArea(d);

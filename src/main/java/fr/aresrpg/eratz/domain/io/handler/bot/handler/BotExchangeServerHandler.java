@@ -30,6 +30,7 @@ public class BotExchangeServerHandler extends BotHandlerAbstract implements Exch
 		switch (type) {
 			case NPC_SHOP:
 			case EXCHANGE:
+			case BANK:
 				getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 				break;
 			default:
@@ -121,6 +122,11 @@ public class BotExchangeServerHandler extends BotHandlerAbstract implements Exch
 		BaseAbility ab = getPerso().getAbilities().getBaseAbility();
 		ab.getStates().exchangeSuccess = success;
 		ab.getBotThread().unpause();
+	}
+
+	@Override
+	public String toString() {
+		return "BotExchangeServerHandler []";
 	}
 
 }

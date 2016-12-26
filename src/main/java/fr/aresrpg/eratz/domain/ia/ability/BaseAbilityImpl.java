@@ -22,6 +22,7 @@ import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.client.*;
 import fr.aresrpg.dofus.protocol.waypoint.client.ZaapUsePacket;
 import fr.aresrpg.dofus.structures.*;
+import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
 import fr.aresrpg.eratz.domain.data.dofus.map.Zaapi;
 import fr.aresrpg.eratz.domain.data.dofus.player.Smiley;
@@ -31,10 +32,8 @@ import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.exception.ZaapException;
 
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 
@@ -127,23 +126,33 @@ public class BaseAbilityImpl implements BaseAbility {
 	}
 
 	@Override
-	public void moveItem(MovedItem... items) {
+	public void moveItem(MovedItem item) {
+		Map<Long, Item> inv = getPerso().getInventory().getContents();
+		if (item.getType() == ExchangeMove.ADD) {
+			if (!inv.containsKey(item.getItemUid())) throw new IllegalArgumentException("Can't move item " + item + " | The inventory of the player doesn't contain it");
+			Item mov = inv.get(item.getItemUid());
+			if (item.getAmount() > mov.getQuantity()) throw new IllegalArgumentException("Can't move item " + item + " | There are not as many item in the inventory ! (" + mov.getQuantity() + ")");
+			if (item.getAmount() < 0) throw new IllegalArgumentException("Unable to move " + item.getAmount() + " of " + item);
+			if (item.getAmount() == mov.getQuantity()) inv.remove(item.getItemUid());
+			else mov.setQuantity(mov.getQuantity() - item.getAmount());
+		}
 		ExchangeMoveItemsPacket pkt = new ExchangeMoveItemsPacket();
-		Set<MovedItem> it = Arrays.stream(items).collect(Collectors.toSet());
+		Set<MovedItem> it = new HashSet<>();
+		it.add(item);
 		pkt.setItems(it);
 		getPerso().sendPacketToServer(pkt);
-		getBotThread().pause();
 	}
 
 	@Override
 	public void moveKama(int amount) {
+		getPerso().getInventory().removeKamas(amount);
 		ExchangeMoveKamasPacket pkt = new ExchangeMoveKamasPacket(amount);
 		getPerso().sendPacketToServer(pkt);
 		getBotThread().pause();
 	}
 
 	@Override
-	public boolean useItem(int itemuid) {
+	public boolean useItem(long itemuid) {
 		ItemUsePacket pkt = new ItemUsePacket();
 		pkt.setItemId(itemuid);
 		getPerso().sendPacketToServer(pkt);
@@ -208,7 +217,7 @@ public class BaseAbilityImpl implements BaseAbility {
 	@Override
 	public void dismantle(EquipmentPosition pos) {
 		ItemMovementPacket pkt = new ItemMovementPacket();
-		pkt.setItemid(getPerso().getInventory().getEquiped().get(pos));
+		pkt.setItemid(getPerso().getInventory().getItemAtPos(pos).getUid());
 		pkt.setPosition(EquipmentPosition.NO_EQUIPED.getPosition());
 		pkt.setQuantity(1);
 		getPerso().sendPacketToServer(pkt);

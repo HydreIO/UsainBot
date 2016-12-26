@@ -23,7 +23,7 @@ public interface ItemServerHandler {
 
 	void onItemQuantityUpdate(int itemUid, int quantity);
 
-	void onItemMove(int itemUid, int position); // la pos n'est pas forcément un equipmentPosition si c'est dans l'inv rapide
+	void onItemMove(long itemUid, int position); // la pos n'est pas forcément un equipmentPosition si c'est dans l'inv rapide
 
 	void onItemToolEquip(Jobs job);
 

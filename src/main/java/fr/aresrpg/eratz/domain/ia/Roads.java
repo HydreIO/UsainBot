@@ -51,7 +51,8 @@ public class Roads {
 			.withMap(3, 16, up()).withMap(3, 15, up()).withMap(3, 14, up()).withMap(3, 13, up()).withMap(3, 12, up()).withMap(3, 11, up()).withMap(3, 10, up()).withMap(3, 9, up()).withMap(3, 8, up())
 			.withMap(3, 7, up()).withMap(3, 6, up()).withMap(3, 5, up()).withMap(3, 4, up()).withMap(3, 3, up()).withMap(3, 2, up()).withMap(3, 1, up()).withMap(3, 0, up()).withMap(3, -1, up())
 			.withMap(3, -2, up()).withMap(3, -3, right()).withMap(4, -3, up()).withMap(4, -4, up()).withMap(4, -5, up()).withMap(4, -6, up()).withMap(4, -7, up()).withMap(4, -8, toCell(22))
-			.withMap(4, -9, up()).withMap(4, -10, up()).withMap(4, -11, up()).withMap(4, -12, up()).withMap(4, -13, up()).withMap(4, -14, toCell(23)).withMap(4, -15, up()).withMap(4, -17, up())
+			.withMap(4, -9, up()).withMap(4, -10, up()).withMap(4, -11, up()).withMap(4, -12, up()).withMap(4, -13, up()).withMap(4, -14, toCell(23)).withMap(4, -15, up()).withMap(4, -16, up())
+			.withMap(4, -17, up())
 			.withMap(4, -18, up()).withMap(4, -19, finish()).build().setLabel("Amakna");
 
 	public static final Road[] ALL = { PLAINE_ROCHEUSE, CHAMPS_ASTRUB, AMAKNA };

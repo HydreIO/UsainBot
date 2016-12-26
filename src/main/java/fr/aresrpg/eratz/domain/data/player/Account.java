@@ -55,9 +55,7 @@ public class Account {
 
 	public void notifyBotOnline() { // pour confirmer que le bot est bien en jeux
 		setState(AccountState.BOT_ONLINE);
-		getCurrentPlayed().setState(PlayerState.IDLE);
-		if (getCurrentPlayed().getMind().isRunning()) System.out.println("Mind already running");
-		else {
+		if (!getCurrentPlayed().getMind().isRunning()) {
 			Executors.FIXED.execute(() -> {
 				try {
 					getCurrentPlayed().getMind().process();
@@ -65,6 +63,7 @@ public class Account {
 					e.printStackTrace();
 				}
 			});
+			getCurrentPlayed().setState(PlayerState.IDLE);
 			Executors.FIXED.execute(new AntiAfkBehavior(currentPlayed, true)::start);
 			GroupsManager.getInstance().updateGroups(currentPlayed);
 		}

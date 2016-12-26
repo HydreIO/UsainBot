@@ -3,13 +3,17 @@ package fr.aresrpg.eratz.domain.io.handler.bot.handler;
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
-import fr.aresrpg.dofus.protocol.game.movement.MovementMonster;
+import fr.aresrpg.dofus.protocol.game.client.GameActionACKPacket;
+import fr.aresrpg.dofus.protocol.game.movement.MovementAction;
 import fr.aresrpg.dofus.structures.game.JoinError;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.std.game.action.GameActionServerHandler;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -61,7 +65,7 @@ public class BotGameActionServerHandler extends BotHandlerAbstract implements Ga
 	}
 
 	@Override
-	public void onEntitySummoned(MovementMonster invoc) {
+	public void onEntitySummoned(MovementAction invoc) {
 		// TODO
 
 	}
@@ -124,6 +128,14 @@ public class BotGameActionServerHandler extends BotHandlerAbstract implements Ga
 	@Override
 	public void onSpellLaunched(int spellId, int cell, int spellLvl) {
 		getPerso().getAbilities().getFightAbility().getBotThread().unpause();
+	}
+
+	@Override
+	public void onHarvestTime(long time) {
+		Executors.SCHEDULED.schedule(() -> {
+			getPerso().sendPacketToServer(new GameActionACKPacket().setActionId(0));
+			getPerso().setState(PlayerState.IDLE);
+		} , time, TimeUnit.MILLISECONDS);
 	}
 
 }

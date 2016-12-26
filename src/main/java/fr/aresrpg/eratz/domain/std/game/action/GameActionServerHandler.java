@@ -1,7 +1,7 @@
 package fr.aresrpg.eratz.domain.std.game.action;
 
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
-import fr.aresrpg.dofus.protocol.game.movement.MovementMonster;
+import fr.aresrpg.dofus.protocol.game.movement.MovementAction;
 import fr.aresrpg.dofus.structures.game.JoinError;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public interface GameActionServerHandler {
 
 	void onEntityKilled(int entityId);
 
-	void onEntitySummoned(MovementMonster invoc);
+	void onEntitySummoned(MovementAction invoc);
 
 	void onFightJoinError(JoinError error);
 
@@ -39,5 +39,7 @@ public interface GameActionServerHandler {
 	void onPlayerAcceptDuel(int entityId, int whoAcceptedId);
 
 	void onSpellLaunched(int spellId, int cell, int spellLvl);
+
+	void onHarvestTime(long time);
 
 }

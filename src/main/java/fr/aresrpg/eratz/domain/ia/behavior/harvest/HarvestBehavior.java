@@ -1,15 +1,16 @@
 package fr.aresrpg.eratz.domain.ia.behavior.harvest;
 
 import fr.aresrpg.dofus.structures.Skills;
-import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
+import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
-import fr.aresrpg.eratz.domain.ia.Roads;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -35,7 +36,6 @@ public abstract class HarvestBehavior extends Behavior {
 	public BehaviorStopReason start() {
 		BaseAbility ab = getPerso().getAbilities().getBaseAbility();
 		BehaviorStopReason reason = BehaviorStopReason.FINISHED;
-		if (!ab.useItem(DofusItems2.POTION_DE_RAPPEL)) Roads.nearestRoad(getPerso().getMapInfos().getMap()).takeRoad(getPerso()); // go to zaap astrub
 		IntStream.range(0, pathMoveCount()).forEach(i -> nextPathMove().run()); // go to zone
 		for (int i = 0; i < zoneMoveCount(); i++) { // start behavior
 			reason = harvestMap();
@@ -91,9 +91,19 @@ public abstract class HarvestBehavior extends Behavior {
 	 * @return a spawned ressource on the map
 	 */
 	protected Ressource nextRessource() {
-		for (Ressource r : getPerso().getMapInfos().getMap().getRessources())
-			if (getTypesToHarvest() == r.getType() && r.isSpawned()) return r;
-		return null;
+		Set<Ressource> collect = getPerso().getMapInfos().getMap().getRessources().stream().filter(r -> getTypesToHarvest() == r.getType() && r.isSpawned()).collect(Collectors.toSet());
+		Ressource r = null;
+		int dist = Integer.MAX_VALUE;
+		for (Ressource re : collect) {
+			if (r == null) r = re;
+			int di = re.getCell().distance(getPerso().getMapInfos().getCellId());
+			if (di < dist) {
+				r = re;
+				dist = di;
+			}
+		}
+		TheBotFather.LOGGER.debug("Récolte de " + r);
+		return r;
 	}
 
 	public abstract Interractable getTypesToHarvest();

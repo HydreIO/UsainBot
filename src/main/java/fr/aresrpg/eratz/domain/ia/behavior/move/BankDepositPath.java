@@ -8,9 +8,13 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.ia.behavior.move;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
+import fr.aresrpg.commons.domain.concurrent.Threads;
+import fr.aresrpg.commons.domain.log.AnsiColors.AnsiColor;
 import fr.aresrpg.commons.domain.util.ArrayUtils;
+import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
-import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.ExchangeMove;
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.eratz.domain.data.ItemsData;
@@ -19,8 +23,9 @@ import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 
-import java.util.Random;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -29,7 +34,6 @@ import java.util.stream.Collectors;
  */
 public class BankDepositPath extends Behavior {
 
-	private Random humanRandomizer = new Random();
 	private int[] items;
 
 	public BankDepositPath(Perso perso, int... itemsToKeep) {
@@ -46,18 +50,28 @@ public class BankDepositPath extends Behavior {
 	}
 
 	private void waitLitle() { // zone peuplé mieux vaut ne pas se déplacer trop vite
-		waitSec(humanRandomizer.nextInt(6));
+		Threads.uSleep(Randoms.nextBetween(1, 3), TimeUnit.SECONDS);
 	}
 
 	@Override
 	public BehaviorStopReason start() {
 		BaseAbility ability = getPerso().getAbilities().getBaseAbility();
-		if (!ability.goAndOpenBank()) return BehaviorStopReason.PATH_ERROR;
-		Set<Item> inv = getPerso().getInventory().getContents().entrySet().stream().filter(e -> ArrayUtils.contains(e, items)).map(e -> e.getValue()).collect(Collectors.toSet());
-		MovedItem[] array = inv.stream().map(it -> new MovedItem(ExchangeMove.ADD, it.getUid(), it.getQuantity())).toArray(MovedItem[]::new);
-		ability.moveItem(array);
+		ability.goAndOpenBank();
 		waitLitle();
-		ability.speak(Chat.ADMIN, "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",", "[", "]")) + " en banque !");
+		Set<Item> inv = getPerso().getInventory().getContents().entrySet().stream().filter(e -> !ArrayUtils.contains(e, items)).map(e -> e.getValue()).collect(Collectors.toSet());
+		MovedItem[] array = inv.stream().map(it -> new MovedItem(ExchangeMove.ADD, it.getUid(), it.getQuantity())).toArray(MovedItem[]::new);
+		Arrays.stream(array).forEach(i -> {
+			ability.moveItem(i);
+			Threads.uSleep(250, TimeUnit.MILLISECONDS);
+		});
+		waitLitle();
+		LOGGER.info(AnsiColor.GREEN + "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",", "[", "]")) + " en banque !");
+		Threads.uSleep(1, TimeUnit.SECONDS);
+		int kamas = getPerso().getInventory().getKamas() - 5000;
+		if (kamas > 0) ability.moveKama(kamas);
+		ability.exchangeLeave();
+		Threads.uSleep(1, TimeUnit.SECONDS);
+		getPerso().getNavigation().moveToCell(381, true);
 		return BehaviorStopReason.FINISHED;
 	}
 

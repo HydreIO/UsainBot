@@ -1,6 +1,7 @@
 package fr.aresrpg.eratz.domain.data;
 
 import fr.aresrpg.dofus.structures.map.DofusMap;
+import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,9 +15,14 @@ public class MapsManager {
 
 	private static MapsManager INSTANCE = new MapsManager();
 	private ConcurrentMap<Integer, BotMap> maps = new ConcurrentHashMap<>();
+	private ConcurrentMap<Integer, Fight> fights = new ConcurrentHashMap<>();
 
 	private MapsManager() {
 
+	}
+
+	public static Fight getFight(int fightId) {
+		return INSTANCE.fights.get(fightId);
 	}
 
 	public static BotMap getMap(int mapid) {

@@ -20,7 +20,8 @@ public class ItemsData {
 		names.put(39, "Petite Amulette du Hibou");
 	}
 
-	public void init(Map<String, Object> datas) {
+	public void init() throws IOException {
+		Map<String, Object> datas = Lang.getDatas("fr", "items");
 		for (Entry<String, Object> d : datas.entrySet()) {
 			if (d.getKey().length() < 5 || d.getKey().charAt(4) == 'u' || !d.getKey().startsWith("I.u.")) continue;
 			names.put(parseId(d.getKey()), parseName(d.getValue().toString()));
@@ -50,7 +51,6 @@ public class ItemsData {
 	}
 
 	public static void main(String[] args) throws IOException {
-		instance.init(Lang.getDatas("fr", "items"));
 		System.out.println(instance.getName(449));
 	}
 

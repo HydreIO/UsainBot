@@ -13,7 +13,6 @@ import fr.aresrpg.commons.domain.log.Logger;
 import fr.aresrpg.commons.domain.log.LoggerBuilder;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.dofus.util.DofusMapView;
-import fr.aresrpg.dofus.util.Lang;
 import fr.aresrpg.eratz.domain.antibot.AntiBot;
 import fr.aresrpg.eratz.domain.antibot.behavior.DuelCrashBehavior;
 import fr.aresrpg.eratz.domain.antibot.behavior.GroupCrashBehavior;
@@ -26,6 +25,7 @@ import fr.aresrpg.eratz.domain.data.player.object.Road;
 import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.gui.MapView;
 import fr.aresrpg.eratz.domain.ia.Roads;
+import fr.aresrpg.eratz.domain.ia.behavior.move.BankDepositPath;
 import fr.aresrpg.eratz.domain.io.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.util.*;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -60,13 +60,16 @@ public class TheBotFather {
 			try {
 				LOGGER.info("Initialisating items..");
 				BenchTime t = new BenchTime();
-				ItemsData.getInstance().init(Lang.getDatas("fr", "items"));
+				ItemsData.getInstance().init();
 				LOGGER.info("Items initialized ! (" + t.getAsLong() + "ms)");
 				LOGGER.info("Initialisating maps..");
 				BenchTime t2 = new BenchTime();
-				MapsData.getInstance().init(Lang.getDatas("fr", "maps"));
+				MapsData.getInstance().init();
 				LOGGER.info("Maps initialized ! (" + t2.getAsLong() + "ms)");
-
+				LOGGER.info("Initialisating langs..");
+				BenchTime t3 = new BenchTime();
+				InfosData.getInstance().init();
+				LOGGER.info("Langs initialized ! (" + t3.getAsLong() + "ms)");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -145,6 +148,29 @@ public class TheBotFather {
 			if (!sc.hasNext()) continue;
 			String[] nextLine = sc.nextLine().split(" ");
 			switch (nextLine[0].toLowerCase()) {
+				case "ble":
+					Executors.FIXED.execute(() -> {
+						AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+							if (a.isClientOnline() || a.isBotOnline()) {
+								Perso p = a.getCurrentPlayed();
+								MindManager.getInstance().lvlUpPaysan(p);
+							}
+						});
+					});
+					break;
+				case "bank":
+					Executors.FIXED.execute(() -> {
+						AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+							if (a.isClientOnline() || a.isBotOnline()) {
+								Perso p = a.getCurrentPlayed();
+								LOGGER.debug(p.getPseudo() + " va vider son inventaire !");
+								new BankDepositPath(p).start();
+								LOGGER.success("Inventaire vidé !");
+							}
+						});
+
+					});
+					break;
 				case "goto":
 					Executors.FIXED.execute(() -> {
 						Instant now = Instant.now();
@@ -175,6 +201,8 @@ public class TheBotFather {
 							LOGGER.debug("Vie = " + p.getStatsInfos().getLife());
 							LOGGER.debug("Xp restant = " + (p.getStatsInfos().getMaxXp() - p.getStatsInfos().getXp()));
 							LOGGER.debug("Grp = " + p.getGroup());
+							LOGGER.debug("Fight = " + p.getFightInfos().getCurrentFight());
+							LOGGER.debug("Inv = " + p.getInventory().showContent());
 						}
 					});
 					break;
@@ -256,6 +284,10 @@ public class TheBotFather {
 							a.getCurrentPlayed().setDebugView(new DofusMapView());
 							a.getCurrentPlayed().getDebugView().setMap(a.getCurrentPlayed().getMapInfos().getMap().getDofusMap());
 							a.getCurrentPlayed().getDebugView().setCurrentPosition(a.getCurrentPlayed().getMapInfos().getCellId());
+							a.getCurrentPlayed().getDebugView().setOnCellClick(cell -> Executors.FIXED.execute(() -> {
+								System.out.println(a.getCurrentPlayed().getMapInfos().getMap().getDofusMap().getCell(cell));
+								a.getCurrentPlayed().getNavigation().moveToCell(cell);
+							}));
 							MapView.getInstance().startView(a.getCurrentPlayed().getDebugView(), a.getCurrentPlayed().getPseudo() + " | " + a.getCurrentPlayed().getMapInfos().getMap().getInfos());
 						}
 					});

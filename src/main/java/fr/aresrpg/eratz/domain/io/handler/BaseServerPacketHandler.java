@@ -47,6 +47,9 @@ import fr.aresrpg.dofus.protocol.waypoint.server.ZaapCreatePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapUseErrorPacket;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
 import fr.aresrpg.dofus.structures.game.*;
+import fr.aresrpg.dofus.structures.item.Item;
+import fr.aresrpg.dofus.structures.job.Job;
+import fr.aresrpg.dofus.structures.job.JobInfo;
 import fr.aresrpg.dofus.structures.map.*;
 import fr.aresrpg.dofus.structures.server.DofusServer;
 import fr.aresrpg.dofus.structures.server.Server;
@@ -56,6 +59,7 @@ import fr.aresrpg.eratz.domain.data.AccountsManager;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
+import fr.aresrpg.eratz.domain.data.dofus.player.DofusJob;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.Perso;
@@ -487,6 +491,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(AccountSelectCharacterOkPacket pkt) {
 		log(pkt);
+		getPerso().getInventory().parseCharacter(pkt.getCharacter());
 		forEachAccountHandlers(h -> h.onCharacterSelect(pkt.getCharacter()));
 	}
 
@@ -585,7 +590,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 			default:
 				break;
 		}
-		getInfoHandler().forEach(h -> h.onInfos(pkt.getMessage(), pkt.getExtraDatas()));
+		getInfoHandler().forEach(h -> h.onInfos(pkt.getType(), pkt.getMessageId(), pkt.getExtraDatas()));
 	}
 
 	@Override
@@ -664,8 +669,11 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(GameJoinPacket pkt) {
 		log(pkt);
-		if (pkt.getState() == GameType.FIGHT)
+		if (pkt.getState() == GameType.FIGHT) {
 			getPerso().getFightInfos().setCurrentFight(Fight.fromGame(pkt.getFightType(), pkt.isSpectator(), pkt.getStartTimer(), pkt.isDuel()));
+			getGameHandler().forEach(h -> getPerso().getFightInfos().getFightsOnMap().forEach(h::onFightRemoved));
+			getPerso().getFightInfos().getFightsOnMap().clear();
+		}
 		getGameHandler().forEach(h -> h.onFightJoin(pkt.getState(), pkt.getFightType(), pkt.isSpectator(), pkt.getStartTimer(), pkt.isCancelButton(), pkt.isDuel()));
 	}
 
@@ -682,7 +690,8 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 			return;
 		}
 		BotMap bm = MapsManager.getOrCreate(m);
-		for (Cell cell : m.getCells()) {
+		bm.getRessources().clear();
+		for (Cell cell : bm.getDofusMap().getCells()) {
 			if (Interractable.isInterractable(cell.getLayerObject2Num())) // add ressource
 				bm.getRessources().add(new Ressource(cell, Interractable.fromId(cell.getLayerObject2Num()))); // interractable peut etre null dans le cas des zaapi porte coffre etc
 		}
@@ -728,32 +737,29 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 						if (player.isFight()) getPerso().getStatsInfos().setLvl(player.getPlayerInFight().getLvl());
 						getPerso().getMapInfos().setCellId(player.getCellId());
 						getPerso().getNavigation().notifyMovementEnd();
-					} else {
-						if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(player);
-						else getPerso().getMapInfos().getMap().entityUpdate(player);
 					}
+					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(player, player.getPlayerInFight().getTeam());
+					else getPerso().getMapInfos().getMap().entityUpdate(player);
 					getPerso().getDebugView().addPlayer(player.getId(), player.getCellId());
 					getGameHandler().forEach(h -> h.onPlayerMove(player));
 					return;
 				case CREATE_INVOCATION:
 				case CREATE_MONSTER:
 					MovementMonster mob = (MovementMonster) (Object) e.getSecond();
-					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(mob);
+					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(mob, mob.getTeam());
 					else getPerso().getMapInfos().getMap().entityUpdate(mob);
 					getPerso().getDebugView().addMob(mob.getId(), mob.getCellId());
 					getGameHandler().forEach(h -> h.onMobMove(mob));
 					return;
 				case CREATE_MONSTER_GROUP:
 					MovementMonsterGroup mobs = (MovementMonsterGroup) (Object) e.getSecond();
-					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(mobs);
-					else getPerso().getMapInfos().getMap().entityUpdate(mobs);
+					getPerso().getMapInfos().getMap().entityUpdate(mobs);
 					getPerso().getDebugView().addMob(mobs.getId(), mobs.getCellId());
 					getGameHandler().forEach(h -> h.onMobGroupMove(mobs));
 					return;
 				case CREATE_NPC:
 					MovementNpc npc = (MovementNpc) (Object) e.getSecond();
-					if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().addEntity(npc);
-					else getPerso().getMapInfos().getMap().entityUpdate(npc);
+					getPerso().getMapInfos().getMap().entityUpdate(npc);
 					getPerso().getDebugView().addNpc(npc.getId(), npc.getCellId());
 					getGameHandler().forEach(h -> h.onNpcMove(npc));
 					return;
@@ -803,6 +809,15 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 				break;
 			case SUMMON:
 				GameSummonAction actions = (GameSummonAction) pkt.getAction();
+				actions.getSummoned().forEach(s -> {
+					if (s instanceof MovementPlayer) {
+						MovementPlayer pl = (MovementPlayer) s;
+						getPerso().getFightInfos().getCurrentFight().addEntity(pl, pl.getPlayerInFight().getTeam());
+					} else if (s instanceof MovementMonster) {
+						MovementMonster mo = (MovementMonster) s;
+						getPerso().getFightInfos().getCurrentFight().addEntity(mo, mo.getTeam());
+					}
+				});
 				getGameActionHandler().forEach(h -> actions.getSummoned().forEach(h::onEntitySummoned));
 				break;
 			case FIGHT_JOIN_ERROR:
@@ -817,7 +832,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 					getPerso().getMapInfos().setCellId(cell);
 					getPerso().getBotInfos().setLastMove(System.currentTimeMillis());
 				}
-
+				if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().entityMove(pkt.getEntityId(), cell);
 				getGameActionHandler().forEach(h -> h.onEntityMove(pkt.getEntityId(), actionm.getPath()));
 				break;
 			case DUEL_SERVER_ASK:
@@ -835,6 +850,10 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 			case SPELL_LAUNCHED:
 				GameSpellLaunchedAction actionsp = (GameSpellLaunchedAction) pkt.getAction();
 				getGameActionHandler().forEach(h -> h.onSpellLaunched(actionsp.getSpellId(), actionsp.getCellId(), actionsp.getLvl()));
+				break;
+			case HARVEST_TIME:
+				GameHarvestTimeAction actionh = (GameHarvestTimeAction) pkt.getAction();
+				getGameActionHandler().forEach(h -> h.onHarvestTime(actionh.getTime()));
 				break;
 			default:
 				break;
@@ -856,12 +875,24 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(GameTurnFinishPacket pkt) {
 		log(pkt);
+		Fight fight = getPerso().getFightInfos().getCurrentFight();
+		if (fight == null) {
+			LOGGER.severe(
+					"TurnFinishPacket received before fight initialisation ! skiping.. | No worries the server will send all infos again, this appen sometimes when you keep reconnecting in a fight");
+			return;
+		}
 		getGameHandler().forEach(h -> h.onEntityTurnEnd(pkt.getEntityId()));
 	}
 
 	@Override
 	public void handle(GameTurnListPacket pkt) {
 		log(pkt);
+		Fight fight = getPerso().getFightInfos().getCurrentFight();
+		if (fight == null) {
+			LOGGER.severe(
+					"TurnListPacket received before fight initialisation ! skiping.. | No worries the server will send all infos again, this appen sometimes when you keep reconnecting in a fight");
+			return;
+		}
 		getGameHandler().forEach(h -> h.onFightTurnInfos(pkt.getTurns()));
 	}
 
@@ -869,6 +900,11 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	public void handle(GameTurnMiddlePacket pkt) {
 		log(pkt);
 		Fight fight = getPerso().getFightInfos().getCurrentFight();
+		if (fight == null) {
+			LOGGER.severe(
+					"TurnMiddlePacket received before fight initialisation ! skiping.. | No worries the server will send all infos again, this appen sometimes when you keep reconnecting in a fight");
+			return;
+		}
 		for (FightEntity e : pkt.getEntities())
 			fight.addEntity(e);
 		getGameHandler().forEach(h -> h.onFighterInfos(pkt.getEntities()));
@@ -877,13 +913,25 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(GameTurnReadyPacket pkt) {
 		log(pkt);
+		Fight fight = getPerso().getFightInfos().getCurrentFight();
+		if (fight == null) {
+			LOGGER.severe(
+					"TurnReadyPacket received before fight initialisation ! skiping.. | No worries the server will send all infos again, this appen sometimes when you keep reconnecting in a fight");
+			return;
+		}
 		getGameHandler().forEach(h -> h.onEntityTurnReady(pkt.getEntityId()));
 	}
 
 	@Override
 	public void handle(GameTurnStartPacket pkt) {
 		log(pkt);
-		getPerso().getFightInfos().getCurrentFight().setCurrentTurn(pkt.getCharacterId());
+		Fight fight = getPerso().getFightInfos().getCurrentFight();
+		if (fight == null) {
+			LOGGER.severe(
+					"TurnStartPacket received before fight initialisation ! skiping.. | No worries the server will send all infos again, this appen sometimes when you keep reconnecting in a fight");
+			return;
+		}
+		fight.setCurrentTurn(pkt.getCharacterId());
 		getGameHandler().forEach(h -> h.onEntityTurnStart(pkt.getCharacterId(), pkt.getTime()));
 	}
 
@@ -927,6 +975,8 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(ItemAddOkPacket pkt) {
 		log(pkt);
+		for (Item i : pkt.getItems())
+			getPerso().getInventory().getContents().put(i.getUid(), i); // on add direct car quand c juste une update de quantité il y a un autre packet
 		getItemHandler().forEach(h -> h.onItemsAdd(pkt.getItems()));
 	}
 
@@ -945,24 +995,28 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(ItemRemovePacket pkt) {
 		log(pkt);
+		getPerso().getInventory().getContents().remove(pkt.getItemuid());
 		getItemHandler().forEach(h -> h.onItemRemove(pkt.getItemuid()));
 	}
 
 	@Override
 	public void handle(ItemQuantityUpdatePacket pkt) {
 		log(pkt);
+		getPerso().getInventory().getItem(pkt.getItemUid()).setQuantity(pkt.getAmount());
 		getItemHandler().forEach(h -> h.onItemQuantityUpdate(pkt.getItemUid(), pkt.getAmount()));
 	}
 
 	@Override
 	public void handle(ItemMovementConfirmPacket pkt) {
 		log(pkt);
+		getPerso().getInventory().getItem(pkt.getItemUid()).setPosition(pkt.getPosition());
 		getItemHandler().forEach(h -> h.onItemMove(pkt.getItemUid(), pkt.getPosition()));
 	}
 
 	@Override
 	public void handle(ItemToolPacket pkt) {
 		log(pkt);
+		getPerso().getBotInfos().updateCurrentJob(pkt.getJobId());
 		getItemHandler().forEach(h -> h.onItemToolEquip(pkt.getJobId()));
 	}
 
@@ -1146,18 +1200,31 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(JobSkillsPacket pkt) {
 		log(pkt);
+		for (Job j : pkt.getJobs())
+			getPerso().getBotInfos().getJobs().add(new DofusJob(j.getType()));
 		getJobHandler().forEach(h -> Arrays.stream(pkt.getJobs()).forEach(h::onPlayerJobInfo));
 	}
 
 	@Override
 	public void handle(JobXpPacket pkt) {
 		log(pkt);
+		for (JobInfo j : pkt.getInfos())
+			for (DofusJob job : getPerso().getBotInfos().getJobs())
+				if (j.getJob() == job.getType()) {
+					job.setLvl(j.getLvl());
+					job.setMaxXp(j.getXpMax());
+					job.setMinXp(j.getXpMin());
+					job.setXp(j.getXp());
+				}
+		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 		getJobHandler().forEach(h -> Arrays.stream(pkt.getInfos()).forEach(h::onJobXp));
 	}
 
 	@Override
 	public void handle(JobLevelPacket pkt) {
 		log(pkt);
+		for (DofusJob j : getPerso().getBotInfos().getJobs())
+			if (j.getType() == pkt.getJob()) j.setLvl(pkt.getLvl());
 		getJobHandler().forEach(h -> h.onJobLvl(pkt.getJob(), pkt.getLvl()));
 	}
 
@@ -1167,9 +1234,6 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 		if (pkt.isCreated()) {
 			getPerso().getFightInfos().getFightsOnMap().add(pkt.getFight());
 			getGameHandler().forEach(h -> h.onFightSpawn(pkt.getFight()));
-		} else {
-			getPerso().getFightInfos().getFightsOnMap().remove(pkt.getFight());
-			getGameHandler().forEach(h -> h.onFightRemoved(pkt.getFight()));
 		}
 	}
 

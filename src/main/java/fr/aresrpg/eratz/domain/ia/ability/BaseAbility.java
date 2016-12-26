@@ -1,13 +1,17 @@
 package fr.aresrpg.eratz.domain.ia.ability;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
 import fr.aresrpg.dofus.structures.*;
+import fr.aresrpg.dofus.structures.item.Item;
+import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems;
 import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.map.*;
-import fr.aresrpg.eratz.domain.data.dofus.player.BotPopo;
 import fr.aresrpg.eratz.domain.data.dofus.player.Smiley;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.object.Road;
+import fr.aresrpg.eratz.domain.ia.Roads;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.Closeable;
@@ -92,7 +96,7 @@ public interface BaseAbility extends Closeable {
 	 */
 	boolean useZaapi(Zaapi current, Zaapi destination);
 
-	void moveItem(MovedItem... items);
+	void moveItem(MovedItem items);
 
 	void moveKama(int amount);
 
@@ -102,14 +106,20 @@ public interface BaseAbility extends Closeable {
 	 * @param itemuid
 	 * @return true si l'item à été utilisé
 	 */
-	boolean useItem(int itemuid);
+	boolean useItem(long itemuid);
+
+	default boolean useItemWithType(int itemType) {
+		Item itemByType = getPerso().getInventory().getItemByType(itemType);
+		if (itemByType == null) return false;
+		return useItem(itemByType.getUid());
+	}
 
 	default boolean useItem(DofusItems item) {
-		return useItem(item.getId());
+		return useItemWithType(item.getId());
 	}
 
 	default boolean useItem(DofusItems2 item) {
-		return useItem(item.getId());
+		return useItemWithType(item.getId());
 	}
 
 	void interract(Skills s, int cell);
@@ -163,54 +173,22 @@ public interface BaseAbility extends Closeable {
 
 	BaseAbilityState getStates();
 
-	default boolean goAndOpenBank() {
+	default void goAndOpenBank() {
 		if (!isInBankMap()) {
-			if (!goToZaap(Zaap.ASTRUB)) {
-				getPerso().crashReport("n'a pas pu accéder à la banque | Impossible d'aller au zaap Astrub.");
-				return false;
-			}
-			getPerso().getNavigation().moveDown(3).moveToCell(142);
+			Road nearestRoad = Roads.nearestRoad(getPerso().getMapInfos().getMap());
+			nearestRoad.takeRoad(getPerso());
+			getPerso().getNavigation().moveDown(3).moveToCell(142, true);
 		}
+		Threads.uSleep(2, TimeUnit.SECONDS);
 		speakToNpc(-2);
 		npcTalkChoice(318, 259);
-		return true;
 	}
 
 	default boolean isInBankMap() {
-		return getPerso().getMapInfos().getMap().getX() == 4 && getPerso().getMapInfos().getMap().getY() == -16;
-	}
-
-	default boolean goToZaap(Zaap zaap) { // si astrub prendre popo, sinon prendre popo + prendre zaap
-		if (!useItem(BotPopo.RAPPEL.getSlot())) {
-			getPerso().crashReport("n'a pas pu accéder au Zaap " + zaap.name() + " | Popo rappel épuisée.");
-			return false;
-		}
-		if (zaap == Zaap.ASTRUB)
-			return true; // par default la popo rapel renvoi zaap astrub
-		try {
-			useZaap(Zaap.ASTRUB, zaap);
-		} catch (ZaapException e) {
-			getPerso().crashReport(e.getMessage());
-			return false;
-		}
-		return true;
-	}
-
-	default boolean goToZaapi(Zaapi zaapi) { // go ville puis go zaapi
-		Zaapi current = zaapi.getCity() == City.BONTA ? Zaapi.BONTA_MILICE : Zaapi.BRAKMAR_MILICE;
-		if (!useZaapi(current, zaapi)) {
-			getPerso().crashReport("n'a pas pu accéder au Zaapi " + zaapi.name() + " | Kamas insufisant !");
-			return false;
-		}
-		return true;
-	}
-
-	default boolean goToCity(City city) { // prendre popo
-		if (!useItem(BotPopo.byCity(city).getSlot())) {
-			getPerso().crashReport("n'a pas pu accéder à la ville " + city + " | Popo épuisée.");
-			return false;
-		}
-		return true;
+		BotMap map = getPerso().getMapInfos().getMap();
+		if (!map.isOnCoords(4, -16)) return false;
+		Cell c = map.getDofusMap().getCell(322);
+		return c.getMovement() == 0;
 	}
 
 	public static enum BuyResult {

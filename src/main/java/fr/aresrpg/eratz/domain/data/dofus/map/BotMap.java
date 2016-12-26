@@ -42,6 +42,12 @@ public class BotMap {
 		return area + " (" + subarea + ")[" + x + "," + y + "]";
 	}
 
+	public boolean hasMobOn(int cellid) {
+		for (MovementMonsterGroup g : mobs)
+			if (g.getCellId() == cellid) return true;
+		return false;
+	}
+
 	public String getCoordsInfos() {
 		return new StringJoiner(",", "[", "]").add(x).add(y).toString();
 	}
@@ -101,7 +107,11 @@ public class BotMap {
 	}
 
 	public boolean isOnPoint(Point p) {
-		return p.x == x && p.y == y;
+		return isOnCoords(p.x, p.y);
+	}
+
+	public boolean isOnCoords(int x, int y) {
+		return x == this.x && y == this.y;
 	}
 
 	/**

@@ -1,6 +1,8 @@
 package fr.aresrpg.eratz.domain.data.player.inventory;
 
 import fr.aresrpg.dofus.structures.item.Item;
+import fr.aresrpg.dofus.util.StringJoiner;
+import fr.aresrpg.eratz.domain.data.ItemsData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,8 +13,18 @@ import java.util.Map;
  */
 public class Inventory {
 
-	private Map<Integer, Item> contents = new HashMap<>(); // itemtype | item
+	private Map<Long, Item> contents = new HashMap<>(); // itemUid | item
 	private int kamas;
+
+	public String showContent() {
+		StringJoiner joiner = new StringJoiner(",", "[", "]");
+		contents.values().forEach(i -> joiner.add(showItem(i)));
+		return joiner.toString();
+	}
+
+	private String showItem(Item i) {
+		return "{x" + i.getQuantity() + " " + ItemsData.getName(i.getItemTypeId()) + "(" + i.getUid() + ")" + "}";
+	}
 
 	/**
 	 * @param kamas
@@ -37,12 +49,12 @@ public class Inventory {
 	/**
 	 * @return the contents
 	 */
-	public Map<Integer, Item> getContents() {
+	public Map<Long, Item> getContents() {
 		return contents;
 	}
 
-	public Item getItem(int itemtype) {
-		return getContents().get(itemtype);
+	public Item getItem(long itemUid) {
+		return getContents().get(itemUid);
 	}
 
 	/**

@@ -1,9 +1,13 @@
 package fr.aresrpg.eratz.domain.data.player.info;
 
+import fr.aresrpg.dofus.structures.job.Jobs;
 import fr.aresrpg.eratz.domain.data.dofus.player.BotJob;
+import fr.aresrpg.eratz.domain.data.dofus.player.DofusJob;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 
 import java.awt.Point;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 
@@ -13,6 +17,8 @@ public class BotInfo extends Info {
 
 	private BotJob botJob;
 	private boolean sit;
+	private Set<DofusJob> jobs = new HashSet<>();
+	private DofusJob currentJob;
 	private Point followedCoords;
 	private int blockedOn; //(cellid) dans le pathfinder quand le chemin n'est pas trouvé la pos est stockée içi, si le chemin est trouvé alors elle est mis a -1
 	private long lastMove; // ms de la derniere fois ou le bot a bougé, utile pour detecter si il est blocké
@@ -27,6 +33,41 @@ public class BotInfo extends Info {
 	@Override
 	public void shutdown() {
 		sit = false;
+	}
+
+	/**
+	 * @return the jobs
+	 */
+	public Set<DofusJob> getJobs() {
+		return jobs;
+	}
+
+	public void updateCurrentJob(Jobs job) {
+		for (DofusJob j : jobs)
+			if (j.getType() == job) this.currentJob = j;
+	}
+
+	/**
+	 * @param jobs
+	 *            the jobs to set
+	 */
+	public void setJobs(Set<DofusJob> jobs) {
+		this.jobs = jobs;
+	}
+
+	/**
+	 * @return the currentJob
+	 */
+	public DofusJob getCurrentJob() {
+		return currentJob;
+	}
+
+	/**
+	 * @param currentJob
+	 *            the currentJob to set
+	 */
+	public void setCurrentJob(DofusJob currentJob) {
+		this.currentJob = currentJob;
 	}
 
 	/**
@@ -110,7 +151,7 @@ public class BotInfo extends Info {
 
 	@Override
 	public String toString() {
-		return "BotInfo [botJob=" + botJob + super.toString() + "]";
+		return "BotInfo [botJob=" + botJob + ", sit=" + sit + ", job=" + currentJob + ", followedCoords=" + followedCoords + ", blockedOn=" + blockedOn + ", lastMove=" + lastMove + "]";
 	}
 
 }

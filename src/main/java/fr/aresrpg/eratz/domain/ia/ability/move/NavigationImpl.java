@@ -19,6 +19,7 @@ import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.dofus.map.*;
 import fr.aresrpg.eratz.domain.data.dofus.mob.AgressiveMobs;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.event.BotMoveEvent;
 import fr.aresrpg.eratz.domain.ia.Roads;
 import fr.aresrpg.eratz.domain.ia.Roads.MapRestriction;
 import fr.aresrpg.eratz.domain.util.BotThread;
@@ -40,6 +41,7 @@ public class NavigationImpl implements Navigation {
 	private boolean teleporting;
 	private boolean moving;
 	private ScheduledFuture sch;
+	private int trymove = 0;
 
 	public NavigationImpl(Perso perso) {
 		this.perso = perso;
@@ -72,25 +74,21 @@ public class NavigationImpl implements Navigation {
 
 	@Override
 	public Navigation moveUp() {
-		LOGGER.debug("MOVE UP");
 		return moveToCell(getTeleporters(getMap())[0], true);
 	}
 
 	@Override
 	public Navigation moveDown() {
-		LOGGER.debug("MOVE DOWN");
 		return moveToCell(getTeleporters(getMap())[2], true);
 	}
 
 	@Override
 	public Navigation moveLeft() {
-		LOGGER.debug("MOVE LEFT");
 		return moveToCell(getTeleporters(getMap())[1], true);
 	}
 
 	@Override
 	public Navigation moveRight() {
-		LOGGER.debug("MOVE RIGHT");
 		return moveToCell(getTeleporters(getMap())[3], true);
 	}
 
@@ -141,11 +139,12 @@ public class NavigationImpl implements Navigation {
 		try {
 			List<PathFragment> shortpath = Pathfinding.makeShortPath(p, getMap().getWidth());
 			getPerso().getAccount().getRemoteConnection().send(new GameClientActionPacket(GameActions.MOVE, new GameMoveAction().setPath(shortpath)));
+			new BotMoveEvent(getPerso().getId(), cellid, teleport).send();
 			Executors.SCHEDULED.schedule(() -> {
 				if (getPerso().getAccount().isBotOnline()) getPerso().sendPacketToServer(new GameActionACKPacket().setActionId(0)); // pour eviter de se faire ban en MITM on envoi rien si c pas le bot seul
 				if (!teleporting)
 					getBotThread().unpause();
-			} , (long) (time * 60), TimeUnit.MILLISECONDS);
+			} , (long) (time * 30), TimeUnit.MILLISECONDS);
 			getBotThread().pause(Thread.currentThread());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -272,8 +271,14 @@ public class NavigationImpl implements Navigation {
 		List<Point> path = Pathfinding.getMapPath(map.getX(), map.getY(), coords.getX(), coords.getY(), Roads::canMove);
 		LOGGER.debug("path =" + path);
 		if (path == null) {
+			trymove++;
 			LOGGER.severe("Impossible de rejoindre la pos " + coords + " ! Blocké en [" + map.getX() + "," + map.getY() + "]");
-			LOGGER.severe("Nouvel éssai");
+			if (trymove > 4) {
+				LOGGER.severe("Le bot n'a pas réussi à trouver son chemin, abandon.");
+				return;
+			}
+			LOGGER.severe("Nouvel éssai dans 5s..");
+			Threads.uSleep(5, TimeUnit.SECONDS);
 			moveToRandomNeightbourMap();
 			joinCoords(x, y);
 			return;

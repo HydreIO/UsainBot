@@ -33,6 +33,7 @@ public class BotPacketHandler extends BaseServerPacketHandler {
 		addExchangeHandlers(new BotExchangeServerHandler(perso));
 		addItemHandlers(new BotItemServerHandler(perso));
 		addChatHandlers(new BotChatServerHandler(perso));
+		addJobHandlers(new BotJobServerHandler(perso));
 	}
 
 }

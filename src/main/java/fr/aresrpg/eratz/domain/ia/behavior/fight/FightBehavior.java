@@ -157,7 +157,7 @@ public abstract class FightBehavior extends Behavior {
 	public abstract void playTurn();
 
 	public void tryHuman() {
-		if (humanFight()) botWait(Randoms.nextBetween(2, 4), TimeUnit.SECONDS);
+		if (humanFight()) Threads.uSleep(Randoms.nextBetween(2, 4), TimeUnit.SECONDS);
 	}
 
 	protected void waitCanStartFight() {

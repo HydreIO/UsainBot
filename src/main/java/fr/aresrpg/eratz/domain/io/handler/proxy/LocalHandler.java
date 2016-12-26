@@ -24,6 +24,7 @@ import fr.aresrpg.dofus.protocol.exchange.ExchangeLeavePacket;
 import fr.aresrpg.dofus.protocol.exchange.client.*;
 import fr.aresrpg.dofus.protocol.fight.client.*;
 import fr.aresrpg.dofus.protocol.friend.client.*;
+import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction;
 import fr.aresrpg.dofus.protocol.game.client.*;
 import fr.aresrpg.dofus.protocol.info.client.InfoMapPacket;
 import fr.aresrpg.dofus.protocol.item.client.*;
@@ -35,10 +36,13 @@ import fr.aresrpg.dofus.protocol.waypoint.ZaapLeavePacket;
 import fr.aresrpg.dofus.protocol.waypoint.client.ZaapUsePacket;
 import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.data.AccountsManager;
+import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.Account;
+import fr.aresrpg.eratz.domain.event.BotMoveEvent;
 import fr.aresrpg.eratz.domain.io.handler.BaseClientPacketHandler;
 import fr.aresrpg.eratz.domain.io.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.encryption.CryptHelper;
 
 import java.io.IOException;
@@ -54,6 +58,9 @@ public class LocalHandler extends BaseClientPacketHandler {
 	private boolean state_machine = false;
 	private Account account;
 	private Proxy proxy;
+
+	// util ==
+	private BotMap lastmove;
 
 	/**
 	 * @param perso
@@ -147,6 +154,20 @@ public class LocalHandler extends BaseClientPacketHandler {
 	@Override
 	public void handle(GameClientActionPacket pkt) {
 		super.handle(pkt);
+		BotMap map = getPerso().getMapInfos().getMap();
+		if (map != lastmove) {
+			lastmove = map;
+			Executors.FIXED.execute(() -> {
+				switch (pkt.getType()) {
+					case MOVE:
+						GameMoveAction action = (GameMoveAction) pkt.getAction();
+						int cellId = action.getPath().get(action.getPath().size() - 1).getCellId();
+						boolean teleport = map.getDofusMap().getCell(cellId).isTeleporter();
+						new BotMoveEvent(getPerso().getId(), cellId, teleport).send();
+						break;
+				}
+			});
+		}
 		transmit(pkt);
 	}
 

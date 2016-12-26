@@ -11,5 +11,6 @@ public enum PlayerState {
 	USING_ZAAP,
 	FOLLOWING,
 	RUNNING,
+	HARVESTING,
 
 }

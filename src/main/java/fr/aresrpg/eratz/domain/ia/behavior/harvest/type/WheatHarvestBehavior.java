@@ -38,17 +38,9 @@ public class WheatHarvestBehavior extends HarvestBehavior {
 
 	@Override
 	public void initMoves() {
-		moveLeft(5);
-		moveUp();
+		joinCoords(-18, -47);
+		switchMove();
 		moveLeft();
-		moveUp(3);
-		moveLeft(4);
-		moveUp(12);
-		moveLeft(5);
-		moveUp();
-		moveLeft(3);
-		moveUp(11);
-		moveLeft(5);
 		moveUp();
 		moveLeft();
 		moveUp();

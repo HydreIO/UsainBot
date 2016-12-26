@@ -8,7 +8,6 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.ia.behavior;
 
-import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.functional.suplier.Supplier;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 
@@ -53,6 +52,11 @@ public abstract class Behavior implements Supplier<BehaviorStopReason> {
 
 	public boolean isOnZone() {
 		return this.pathEnd;
+	}
+
+	protected void joinCoords(int x, int y) {
+		if (isOnZone()) moves.add(() -> getPerso().getNavigation().joinCoords(x, y));
+		else path.add(() -> getPerso().getNavigation().joinCoords(x, y));
 	}
 
 	protected void moveUp() {
@@ -109,19 +113,6 @@ public abstract class Behavior implements Supplier<BehaviorStopReason> {
 
 	protected int pathMoveCount() {
 		return path.size();
-	}
-
-	public <T extends Behavior> T botWait(int time, TimeUnit unit) {
-		try {
-			Threads.sleep(time, unit);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		return (T) this;
-	}
-
-	public <T extends Behavior> T waitSec(int sec) {
-		return botWait(sec, TimeUnit.SECONDS);
 	}
 
 	public abstract BehaviorStopReason start();

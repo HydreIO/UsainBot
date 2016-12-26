@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.io.handler.bot.handler;
 
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
+import fr.aresrpg.commons.domain.log.AnsiColors.AnsiColor;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.data.AccountsManager;
 import fr.aresrpg.eratz.domain.data.MindManager;
@@ -42,7 +43,7 @@ public class BotChatServerHandler extends BotHandlerAbstract implements ChatServ
 			case PARTY:
 				Perso p = AccountsManager.getInstance().getPerso(pseudo);
 				if (p == null) {
-					LOGGER.warning(pseudo + ": " + msg);
+					LOGGER.warning(AnsiColor.WHITE + pseudo + ": " + msg);
 					break;
 				}
 				String[] cmd = msg.split(" ");
@@ -51,6 +52,11 @@ public class BotChatServerHandler extends BotHandlerAbstract implements ChatServ
 						Executors.FIXED.execute(() -> {
 							getPerso().getGroup().formGroup();
 							MindManager.getInstance().followPlayer(getPerso(), player);
+						});
+						break;
+					case "ble":
+						Executors.FIXED.execute(() -> {
+							MindManager.getInstance().lvlUpPaysan(getPerso());
 						});
 						break;
 				}

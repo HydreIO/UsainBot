@@ -52,7 +52,7 @@ public class BotItemServerHandler extends BotHandlerAbstract implements ItemServ
 	}
 
 	@Override
-	public void onItemMove(int itemUid, int position) {
+	public void onItemMove(long itemUid, int position) {
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 	}
 

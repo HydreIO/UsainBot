@@ -187,6 +187,7 @@ public class Perso implements Closeable {
 
 	public void sendPacketToServer(Packet pkt) {
 		try {
+			LOGGER.info("[" + getPseudo() + ":[SND]> " + pkt);
 			getAccount().getRemoteConnection().send(pkt);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -243,6 +244,10 @@ public class Perso implements Closeable {
 	 */
 	public PlayerInventory getInventory() {
 		return inventory;
+	}
+
+	public boolean isAtAstrubZaap() {
+		return getMapInfos().getMap().isOnCoords(4, -19);
 	}
 
 	/**
@@ -336,17 +341,17 @@ public class Perso implements Closeable {
 		return (int) set.stream().filter(i -> i.getItemTypeId() == id).count();
 	}
 
-	public boolean inventoryContainsItem(int id) {
+	public boolean inventoryContainsItem(int itemUid) {
 		return getInventory().getContents().keySet().contains(id);
 	}
 
-	public int getQuantityInInventoryOf(int itemId) {
-		Item i = getInventory().getItem(itemId);
+	public int getQuantityInInventoryOf(long itemUid) {
+		Item i = getInventory().getItem(itemUid);
 		return i == null ? 0 : i.getQuantity();
 	}
 
-	public int getQuantityInBanqueOf(int itemId) {
-		Item i = getAccount().getBanque().getItem(itemId);
+	public int getQuantityInBanqueOf(long itemUid) {
+		Item i = getAccount().getBanque().getItem(itemUid);
 		return i == null ? 0 : i.getQuantity();
 	}
 

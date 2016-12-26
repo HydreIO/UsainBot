@@ -35,7 +35,6 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 		GameCreatePacket pktc = new GameCreatePacket();
 		pktc.setGameType(GameType.SOLO);
 		getPerso().sendPacketToServer(pktc);
-
 	}
 
 	@Override

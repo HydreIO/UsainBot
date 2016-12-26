@@ -1,10 +1,10 @@
 package fr.aresrpg.eratz.domain.io.handler.bot.handler;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
 import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.commons.domain.util.Randoms;
-import fr.aresrpg.dofus.protocol.DofusConnection;
-import fr.aresrpg.dofus.protocol.PacketHandler;
-import fr.aresrpg.dofus.protocol.ProtocolRegistry;
+import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
 import fr.aresrpg.dofus.protocol.account.AccountRegionalVersionPacket;
 import fr.aresrpg.dofus.protocol.account.client.*;
@@ -25,8 +25,6 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 /**
  * 
@@ -186,8 +184,6 @@ public class BotAccountServerHandler extends BotHandlerAbstract implements Accou
 
 	@Override
 	public void onServerQueue(int currentPos) {
-		// TODO
-
 	}
 
 	@Override

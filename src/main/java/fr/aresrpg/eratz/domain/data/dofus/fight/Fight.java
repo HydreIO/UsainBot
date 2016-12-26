@@ -1,6 +1,7 @@
 package fr.aresrpg.eratz.domain.data.dofus.fight;
 
-import fr.aresrpg.commons.domain.util.ArrayUtils;
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
 import fr.aresrpg.dofus.protocol.game.movement.MovementAction;
 import fr.aresrpg.dofus.structures.game.FightEntity;
 import fr.aresrpg.dofus.structures.game.FightType;
@@ -58,24 +59,25 @@ public class Fight {
 		team1.remove(id);
 	}
 
-	public void addEntity(MovementAction ent) {
-		int findTeam = findTeam(ent.getCellId());
-		Perso perso = AccountsManager.getInstance().getPerso(ent.getId());
-		if (perso != null) perso.getFightInfos().setCurrentFightTeam(findTeam);
-		ConcurrentMap<Integer, Pair<MovementAction, FightEntity>> team = getTeam(findTeam);
-		Pair<MovementAction, FightEntity> entity = new Pair<MovementAction, FightEntity>(ent, null);
-		team.put(ent.getId(), entity);
+	public void addEntity(MovementAction ent, int team) {
+		if (ent.getId() > 1000) {
+			Perso perso = AccountsManager.getInstance().getPerso(ent.getId());
+			System.out.println("perso=" + perso + " \n team=" + team);
+			if (perso != null) perso.getFightInfos().setCurrentFightTeam(team);
+		}
+		System.out.println("AJOUT DE L'ENTITY " + ent.getId() + " DANS LA TEAM " + team);
+		ConcurrentMap<Integer, Pair<MovementAction, FightEntity>> mt = getTeam(team);
+		Pair<MovementAction, FightEntity> entity = new Pair<>(ent, null);
+		mt.put(ent.getId(), entity);
 	}
 
 	public void addEntity(FightEntity ent) {
 		Pair<MovementAction, FightEntity> findEntity = findEntity(ent.getId());
+		if (findEntity == null) {
+			LOGGER.severe("The entity was not found in the fight ! " + ent);
+			return;
+		}
 		findEntity.setSecond(ent);
-	}
-
-	private int findTeam(int cellid) {
-		if (ArrayUtils.contains(cellid, placeTeam0)) return 0;
-		if (ArrayUtils.contains(cellid, placeTeam1)) return 1;
-		throw new IllegalArgumentException("The cell " + cellid + " is not a valid place !");
 	}
 
 	/**

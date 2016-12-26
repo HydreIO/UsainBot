@@ -1,10 +1,15 @@
 package fr.aresrpg.eratz.domain.data.player.inventory;
 
+import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+
 import fr.aresrpg.dofus.structures.EquipmentPosition;
+import fr.aresrpg.dofus.structures.character.Character;
+import fr.aresrpg.dofus.structures.item.Item;
+import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems;
+import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 
 /**
  * 
@@ -13,7 +18,6 @@ import java.util.Map;
 public class PlayerInventory extends Inventory {
 
 	private Perso perso;
-	private Map<EquipmentPosition, Integer> equiped = new HashMap<>();
 
 	/**
 	 * @param perso
@@ -22,11 +26,36 @@ public class PlayerInventory extends Inventory {
 		this.perso = perso;
 	}
 
-	/**
-	 * @return the equiped
-	 */
-	public Map<EquipmentPosition, Integer> getEquiped() {
-		return equiped;
+	public void addItem(Item i) {
+		Item local = getItemByType(i.getItemTypeId());
+		if (local.isStackableWith(i)) local.setQuantity(local.getQuantity() + i.getQuantity());
+		else getContents().put(i.getUid(), i);
+	}
+
+	public void parseCharacter(Character c) {
+		LOGGER.debug("ADD " + c.getItems().length + " ITEMS");
+		Arrays.stream(c.getItems()).forEach(i -> getContents().put(i.getUid(), i));
+	}
+
+	public Item getItemAtPos(EquipmentPosition pos) {
+		Item i = null;
+		for (Item e : getContents().values())
+			if (e.getPosition() == pos.getPosition()) return i;
+		return null;
+	}
+
+	public Item getItemByType(int itemType) {
+		for (Item e : getContents().values())
+			if (e.getItemTypeId() == itemType) return e;
+		return null;
+	}
+
+	public Item getItemByType(DofusItems item) {
+		return getItemByType(item.getId());
+	}
+
+	public Item getItemByType(DofusItems2 item) {
+		return getItemByType(item.getId());
 	}
 
 	@Override

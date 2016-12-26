@@ -1,8 +1,10 @@
 package fr.aresrpg.eratz.domain.data.player.object;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
-
 import fr.aresrpg.dofus.structures.map.Cell;
+import fr.aresrpg.dofus.util.Maps;
+import fr.aresrpg.dofus.util.Pathfinding;
+import fr.aresrpg.dofus.util.Pathfinding.Node;
+import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 
 public class Ressource {
@@ -31,12 +33,21 @@ public class Ressource {
 		return type;
 	}
 
+	public int getNeighborCell(BotMap map) {
+		Node[] neighbors = Pathfinding.getNeighbors(new Node(getCell().getX(), getCell().getY()));
+		for (Node n : neighbors) {
+			int id = Maps.getId(n.getX(), n.getY(), map.getDofusMap().getWidth());
+			Cell cell = map.getDofusMap().getCell(id);
+			if (cell.isWalkeable(i -> !map.hasMobOn(i))) return id;
+		}
+		return -1;
+	}
+
 	/** * @return the spawned */
 	public boolean isSpawned() {
 		switch (getType()) {
 			case BLE:
-				LOGGER.info("Le layer object 2 du blé = " + getCell().getLayerObject2Num());
-				return getCell().getLayerObject2Num() == 2;
+				return getCell().getLayerObject2Num() == 7511 && (getCell().getFrame() == 0 || getCell().getFrame() == 5);
 
 			default:
 				return false;
@@ -45,7 +56,7 @@ public class Ressource {
 
 	@Override
 	public String toString() {
-		return "Ressource [type=" + type + "]";
+		return "Ressource [cell=" + cell + ", type=" + type + "]";
 	}
 
 }
