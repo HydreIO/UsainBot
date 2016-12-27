@@ -8,6 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.io.handler.proxy;
 
+import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
 import fr.aresrpg.dofus.protocol.account.AccountKeyPacket;
@@ -29,6 +30,7 @@ import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloGamePacket;
 import fr.aresrpg.dofus.protocol.info.server.*;
+import fr.aresrpg.dofus.protocol.item.client.ItemDestroyPacket;
 import fr.aresrpg.dofus.protocol.item.server.*;
 import fr.aresrpg.dofus.protocol.job.server.*;
 import fr.aresrpg.dofus.protocol.mount.server.MountXpPacket;
@@ -42,7 +44,11 @@ import fr.aresrpg.dofus.protocol.waypoint.ZaapLeavePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapCreatePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapUseErrorPacket;
 import fr.aresrpg.dofus.structures.Chat;
+import fr.aresrpg.dofus.structures.InfosMsgType;
+import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.eratz.domain.TheBotFather;
+import fr.aresrpg.eratz.domain.data.ItemsData;
+import fr.aresrpg.eratz.domain.data.ItemsData.LangItem;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
 import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
@@ -69,6 +75,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 
 	static final ProtocolRegistry[] toSkip = {};
 	private Proxy proxy;
+	private boolean reconnecting;
 
 	/**
 	 * @param proxy
@@ -90,8 +97,12 @@ public class RemoteHandler extends BaseServerPacketHandler {
 			getProxy().getLocalConnection().send(pkt);
 		} catch (IOException e) {
 			e.printStackTrace();
+			if (this.reconnecting) return;
+			this.reconnecting = true;
 			TheBotFather.LOGGER.error("Client disconnected");
 			getPerso().getAccount().getCurrentPlayed().shutdown();
+			getPerso().connectIn(10, TimeUnit.SECONDS);
+			this.reconnecting = false;
 		}
 	}
 
@@ -109,8 +120,12 @@ public class RemoteHandler extends BaseServerPacketHandler {
 				((SocketChannel) getProxy().getLocalConnection().getChannel()).write(ByteBuffer.wrap(packet.getBytes()));
 			} catch (IOException e) {
 				e.printStackTrace();
+				if (this.reconnecting) return true;
+				this.reconnecting = true;
 				TheBotFather.LOGGER.error("Client disconnected");
 				getPerso().getAccount().getCurrentPlayed().shutdown();
+				getPerso().connectIn(10, TimeUnit.SECONDS);
+				this.reconnecting = false;
 			}
 			return true;
 		}
@@ -228,6 +243,21 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	public void handle(ChatMessageOkPacket pkt) {
 		super.handle(pkt);
 		transmit(pkt);
+		if (pkt.getPlayerId() == getPerso().getId() || !getPerso().canRespond()) return;
+		switch (pkt.getChat()) {
+			case COMMON:
+				if (Randoms.nextInt(5) == 1)
+					getPerso().respondTo(pkt.getMsg(), pkt.getChat());
+				break;
+			case PM_RECEIVE:
+			case PRIVATE:
+				String msg = pkt.getMsg();
+				if (Randoms.nextBool()) Executors.SCHEDULED.schedule(() -> getPerso().getAbilities().getBaseAbility().sendPm(pkt.getPseudo(), getPerso().getChatInfos().getResponse(msg)),
+						Randoms.nextBetween(3, 8), TimeUnit.SECONDS);
+				break;
+			default:
+				break;
+		}
 	}
 
 	@Override
@@ -360,7 +390,26 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	public void handle(InfoMessagePacket pkt) {
 		super.handle(pkt);
 		transmit(pkt);
-
+		if (pkt.getType() == InfosMsgType.ERROR && pkt.getMessageId() == 12 && getPerso().canDestroyItems()) {
+			Item it = getPerso().getInventory().getHeaviestItem();
+			if (it == null) throw new NullPointerException("La ressource la plus lourde est introuvable !");
+			LangItem lit = ItemsData.get(it.getItemTypeId());
+			int maxp = getPerso().getStatsInfos().getMaxPods();
+			int pod = getPerso().getStatsInfos().getPods();
+			int over = pod + 1 - maxp;
+			int poditem = lit.getPod();
+			int fullw = poditem * it.getQuantity();
+			TheBotFather.LOGGER.debug("Pod en trop = " + over);
+			TheBotFather.LOGGER.debug("Poid total de l'item = " + fullw);
+			if (fullw <= over) {
+				TheBotFather.LOGGER.debug("Destruction de x" + it.getQuantity() + " " + lit.getName());
+				getPerso().sendPacketToServer(new ItemDestroyPacket(it.getUid(), it.getQuantity()));
+			} else {
+				int todestroy = over / poditem + (over % poditem == 0 ? 0 : 1);
+				TheBotFather.LOGGER.debug("Destruction de x" + todestroy + " " + lit.getName());
+				getPerso().sendPacketToServer(new ItemDestroyPacket(it.getUid(), todestroy));
+			}
+		}
 	}
 
 	@Override

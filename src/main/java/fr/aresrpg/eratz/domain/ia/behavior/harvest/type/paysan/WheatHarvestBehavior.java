@@ -8,8 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.ia.behavior.harvest.type.paysan;
 
-import fr.aresrpg.dofus.structures.Skills;
-import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
+import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.harvest.HarvestBehavior;
 
@@ -22,22 +21,14 @@ public class WheatHarvestBehavior extends HarvestBehavior {
 	/**
 	 * @param perso
 	 */
-	public WheatHarvestBehavior(Perso perso, int quantity) {
-		super(perso, quantity);
+	public WheatHarvestBehavior(Perso perso) {
+		super(perso);
 	}
 
 	@Override
-	public Interractable[] getTypesToHarvest() {
-		return new Interractable[] { Interractable.BLE };
-	}
+	public void init() {
+		addRessource(Interractable.BLE);
 
-	@Override
-	public Skills getSkill(Interractable type) {
-		return Skills.FAUCHER_BLE;
-	}
-
-	@Override
-	public void initMoves() {
 		joinCoords(-18, -47);
 		switchMove();
 		moveLeft();

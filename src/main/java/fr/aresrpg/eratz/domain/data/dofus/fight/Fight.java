@@ -51,7 +51,9 @@ public class Fight {
 	}
 
 	public void entityMove(int id, int cellid) {
-		findEntity(id).getFirst().setCellId(cellid);
+		Pair<MovementAction, FightEntity> findEntity = findEntity(id);
+		if (findEntity == null) throw new NullPointerException("An unparsed entity juste move ! To avoir this kind of exception just finish the parsing of the GameMovementPacket morray !");
+		findEntity.getFirst().setCellId(cellid);
 	}
 
 	public void removeEntity(int id) {

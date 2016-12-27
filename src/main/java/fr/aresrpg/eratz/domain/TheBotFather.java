@@ -25,8 +25,7 @@ import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.object.Road;
 import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.gui.MapView;
-import fr.aresrpg.eratz.domain.ia.Roads;
-import fr.aresrpg.eratz.domain.ia.behavior.move.BankDepositPath;
+import fr.aresrpg.eratz.domain.ia.behavior.move.BankSufokiaDepositPath;
 import fr.aresrpg.eratz.domain.io.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.util.*;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
@@ -149,6 +148,34 @@ public class TheBotFather {
 			if (!sc.hasNext()) continue;
 			String[] nextLine = sc.nextLine().split(" ");
 			switch (nextLine[0].toLowerCase()) {
+				case "mitmfight":
+					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+						if (a.isClientOnline() || a.isBotOnline()) {
+							Perso p = a.getCurrentPlayed();
+							if (p.canFightInMitm()) {
+								LOGGER.success(p.getPseudo() + " ne va plus se battre seul");
+								p.setCanFightInMitm(false);
+							} else {
+								LOGGER.success(p.getPseudo() + " va maintenant se battre seul !");
+								p.setCanFightInMitm(true);
+							}
+						}
+					});
+					break;
+				case "speak":
+					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
+						if (a.isClientOnline() || a.isBotOnline()) {
+							Perso p = a.getCurrentPlayed();
+							if (p.canRespond()) {
+								LOGGER.success(p.getPseudo() + " va maintenant fermer sa grosse bouche carré");
+								p.setCanRespond(false);
+							} else {
+								LOGGER.success(p.getPseudo() + " va maintenant parler de temps en temps !");
+								p.setCanRespond(true);
+							}
+						}
+					});
+					break;
 				case "bucheron":
 					Executors.FIXED.execute(() -> {
 						AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
@@ -175,7 +202,7 @@ public class TheBotFather {
 							if (a.isClientOnline() || a.isBotOnline()) {
 								Perso p = a.getCurrentPlayed();
 								LOGGER.debug(p.getPseudo() + " va vider son inventaire !");
-								new BankDepositPath(p, DofusItems2.HACHE_DE_L_APPRENTI_BÛCHERON.getId()).start();
+								new BankSufokiaDepositPath(p, DofusItems2.HACHE_DE_L_APPRENTI_BÛCHERON.getId(), DofusItems2.FAUX_DU_PAYSAN.getId()).start();
 								LOGGER.success("Inventaire vidé !");
 							}
 						});
@@ -212,6 +239,8 @@ public class TheBotFather {
 							LOGGER.debug("Vie = " + p.getStatsInfos().getLife());
 							LOGGER.debug("Xp restant = " + (p.getStatsInfos().getMaxXp() - p.getStatsInfos().getXp()));
 							LOGGER.debug("Grp = " + p.getGroup());
+							LOGGER.debug("pos = " + p.getMapInfos().getMap().getCoordsInfos());
+							LOGGER.debug("cell = " + p.getMapInfos().getCellId());
 							LOGGER.debug("Fight = " + p.getFightInfos().getCurrentFight());
 							LOGGER.debug("Inv = " + p.getInventory().showContent());
 						}

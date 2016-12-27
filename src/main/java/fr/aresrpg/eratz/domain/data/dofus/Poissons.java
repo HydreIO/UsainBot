@@ -8,7 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.data.dofus;
 
-import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
+import fr.aresrpg.dofus.structures.item.Interractable;
 
 /**
  * 

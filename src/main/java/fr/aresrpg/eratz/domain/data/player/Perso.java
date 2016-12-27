@@ -67,6 +67,9 @@ public class Perso implements Closeable {
 	private Group group;
 	private Behavior currentBehavior;
 	private PlayerState state;
+	private boolean canRespond;
+	private boolean canDestroyItems;
+	private boolean canFightInMitm;
 
 	public Perso(int id, String pseudo, Account account, BotJob job, Classe classe, Genre sexe, Server srv) {
 		this.id = id;
@@ -92,6 +95,47 @@ public class Perso implements Closeable {
 		fightInfos.shutdown();
 		statsInfos.shutdown();
 		pvpInfos.shutdown();
+	}
+
+	public boolean canFightInMitm() {
+		return this.canFightInMitm;
+	}
+
+	public boolean canDestroyItems() {
+		return this.canDestroyItems;
+	}
+
+	public boolean canRespond() {
+		return this.canRespond;
+	}
+
+	/**
+	 * @param canDestroyItems
+	 *            the canDestroyItems to set
+	 */
+	public void setCanDestroyItems(boolean canDestroyItems) {
+		this.canDestroyItems = canDestroyItems;
+	}
+
+	/**
+	 * @param canFightInMitm
+	 *            the canFightInMitm to set
+	 */
+	public void setCanFightInMitm(boolean canFightInMitm) {
+		this.canFightInMitm = canFightInMitm;
+	}
+
+	/**
+	 * @param canRespond
+	 *            the canRespond to set
+	 */
+	public void setCanRespond(boolean canRespond) {
+		this.canRespond = canRespond;
+	}
+
+	public void respondTo(String msg, Chat c) {
+		String resp = getChatInfos().getResponse(msg);
+		if (resp != null) getAbilities().getBaseAbility().speak(c, resp);
 	}
 
 	/**

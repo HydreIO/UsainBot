@@ -21,6 +21,7 @@ public class BotThread {
 		this.thread = thread.currentThread();
 		if (ThreadBlocker.blockeds.contains(thread)) return;
 		paused = true;
+		TheBotFather.LOGGER.debug("Locking " + thread.getName());
 		LockSupport.park();
 	}
 

@@ -6,7 +6,7 @@
  * 
  *         Created 2016
  *******************************************************************************/
-package fr.aresrpg.eratz.domain.ia;
+package fr.aresrpg.eratz.domain.data;
 
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
@@ -61,14 +61,30 @@ public class Roads {
 	private static final Roads roads = new Roads();
 
 	private Roads() {
-		MapRestriction firefoux = new MapRestriction(27, -45);
-		MapRestriction firefoux2 = new MapRestriction(29, -47);
+		resetRestrictions();
+	}
 
-		firefoux.setMoveUp(false);
-		firefoux2.setMoveRight(false);
+	public static void resetRestrictions() {
+		mapRestrictions.clear();
+		addRestriction(27, -45, false, true, true, true); // grobe
+		addRestriction(29, -47, true, true, true, false); // grobe
+		addRestriction(11, 29, true, true, true, false); // sufokia
+		addRestriction(11, 22, true, false, true, true); // sufokia
+		addRestriction(12, -21, true, true, true, false); // pandala
+		addRestriction(5, 18, true, false, true, true); // noyer
+		addRestriction(5, 7, false, true, true, true); // dj tofu fuck
+		addRestriction(4, 6, true, true, true, false); // dj tofu
+		addRestriction(5, 5, true, false, true, true); // dj tofu
+		addRestriction(6, 6, true, true, false, true); // dj tofu
+	}
 
-		mapRestrictions.put(new Point(27, -45), firefoux);
-		mapRestrictions.put(new Point(29, -47), firefoux2);
+	private static void addRestriction(int x, int y, boolean up, boolean down, boolean left, boolean right) {
+		MapRestriction r = new MapRestriction(x, y);
+		r.setMoveDown(down);
+		r.setMoveLeft(left);
+		r.setMoveRight(right);
+		r.setMoveUp(up);
+		mapRestrictions.put(new Point(x, y), r);
 	}
 
 	public static RoadBuilder builder() {

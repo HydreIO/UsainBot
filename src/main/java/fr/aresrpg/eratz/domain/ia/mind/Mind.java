@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.ia.mind;
 
 import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems;
 import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
+import fr.aresrpg.eratz.domain.data.dofus.map.Bank;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.util.Closeable;
@@ -26,15 +27,9 @@ public interface Mind extends Closeable {
 	 * 
 	 * @param path
 	 *            the path
-	 * @param quantity
-	 *            ressource amount (the bot will not harvest more than his maxpods)
 	 * @return the mind for chaining
 	 */
-	Mind thenHarvest(Path path, int quantity);
-
-	default Mind thenHarvest(Path path) {
-		return thenHarvest(path, Integer.MAX_VALUE);
-	}
+	Mind thenHarvest(Path path);
 
 	Mind keepItems(int... itemsType);
 
@@ -97,7 +92,15 @@ public interface Mind extends Closeable {
 	 * 
 	 * @return the mind for chaining
 	 */
-	Mind thenDepositToBank();
+	Mind thenDepositToBank(Bank bank);
+
+	default Mind thenDepositToNearestBank() {
+		int y = getPerso().getMapInfos().getMap().getY();
+		Bank b = Bank.ASTRUB;
+		if (y > 12) b = Bank.SUFOKIA;
+		else if (y > -7) b = Bank.AMAKNA;
+		return thenDepositToBank(b);
+	}
 
 	/**
 	 * Fight mobs
@@ -199,4 +202,6 @@ public interface Mind extends Closeable {
 	boolean isRunning();
 
 	ThreadBlocker getBlocker();
+
+	Perso getPerso();
 }

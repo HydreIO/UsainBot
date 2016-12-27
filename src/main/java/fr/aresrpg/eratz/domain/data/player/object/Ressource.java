@@ -1,11 +1,14 @@
 package fr.aresrpg.eratz.domain.data.player.object;
 
+import fr.aresrpg.commons.domain.util.ArrayUtils;
+import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
-import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
+
+import java.util.List;
 
 public class Ressource extends Cell {
 
@@ -31,10 +34,22 @@ public class Ressource extends Cell {
 		return type;
 	}
 
-	public int getNeighborCell(BotMap map, boolean diagonale) {
+	/**
+	 * Gat all cells around the ressource
+	 * 
+	 * @param map
+	 *            the map
+	 * @param diagonale
+	 *            use diagonale cells
+	 * @param avoid
+	 *            a list of cell to avoid
+	 * @return
+	 */
+	public int getNeighborCell(BotMap map, boolean diagonale, List<Integer> avoid) {
 		Node[] neighbors = diagonale ? Pathfinding.getNeighbors(new Node(getX(), getY())) : Pathfinding.getNeighborsWithoutDiagonals(new Node(getX(), getY()));
 		for (Node n : neighbors) {
 			int id = Maps.getId(n.getX(), n.getY(), map.getDofusMap().getWidth());
+			if (ArrayUtils.contains(id, avoid)) continue;
 			Cell cell = null;
 			try {
 				cell = map.getDofusMap().getCell(id);

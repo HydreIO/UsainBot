@@ -1,11 +1,11 @@
 package fr.aresrpg.eratz.domain.ia.behavior.harvest;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
-import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.dofus.structures.Skills;
-import fr.aresrpg.dofus.structures.item.Item;
+import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.TheBotFather;
-import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
+import fr.aresrpg.eratz.domain.data.MapsManager;
+import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
@@ -24,19 +24,20 @@ import java.util.stream.IntStream;
  */
 public abstract class HarvestBehavior extends Behavior {
 
-	private int quantity;
 	private boolean quantityHarvested;
 	private boolean fullPod;
 	private List<Point> posRessources = new ArrayList<>();
 	private boolean automate;
+	private long lastHarvest = System.currentTimeMillis();
+	private Set<Interractable> ress = new HashSet<>();
+	private int lastlvl;
 
 	/**
 	 * @param perso
 	 */
-	public HarvestBehavior(Perso perso, int quantity) {
+	public HarvestBehavior(Perso perso) {
 		super(perso);
-		this.quantity = quantity;
-		initMoves();
+		init();
 	}
 
 	protected void experimentPos(int x, int y) {
@@ -45,28 +46,46 @@ public abstract class HarvestBehavior extends Behavior {
 
 	protected void experimentalTrace() {
 		posRessources.sort((a, b) -> Math.abs(b.x - a.x) + Math.abs(b.y - a.y));
+		posRessources.removeIf(p -> !hasLvlToGoHarvestOn(p));
 	}
 
 	protected void useExperimentalIA() {
 		this.automate = true;
 	}
 
+	protected boolean hasLvlToGoHarvestOn(Point p) {
+		BotMap map = MapsManager.getMap(p.x, p.y);
+		if (map == null) return true;
+		int lvlmin = 100;
+		for (Ressource r : map.getRessources()) {
+			Interractable intr = r.getType();
+			if (!ress.contains(intr)) continue;
+			Skills skill = getSkill(r.getType());
+			if (skill == null) continue;
+			int m = skill.getMinLvlToUse();
+			if (m < lvlmin) lvlmin = m;
+		}
+		return getPerso().getBotInfos().getCurrentJob().getLvl() >= lvlmin;
+	}
+
 	@Override
 	public BehaviorStopReason start() {
 		BaseAbility ab = getPerso().getAbilities().getBaseAbility();
 		BehaviorStopReason reason = BehaviorStopReason.FINISHED;
-		if (!automate) {
+		if (!automate) { // ancienne methode de récolte mais peut tjr servir je laisse au cas ou
 			IntStream.range(0, pathMoveCount()).forEach(i -> nextPathMove().run()); // go to zone
 			for (int i = 0; i < zoneMoveCount(); i++) { // start behavior
 				reason = harvestMap();
 				if (reason != BehaviorStopReason.FINISHED) return reason;
 				nextZoneMove().run();
 			}
-		} else {
-			experimentalTrace();
+		} else { // methode de récolte intélligente
+			experimentalTrace(); // calcul du chemin
+			this.lastlvl = getPerso().getBotInfos().getCurrentJob().getLvl();
 			for (Point p : posRessources) {
+				if (getPerso().getBotInfos().getCurrentJob().getLvl() != lastlvl) return start(); // si lvl up on sort pour recalculer
 				getPerso().getNavigation().joinCoords(p.x, p.y);
-				Threads.uSleep(1, TimeUnit.SECONDS); // le temps d'apply frame bordel
+				Threads.uSleep(1, TimeUnit.SECONDS); // le temps d'apply frame bordel thx dofus fdp
 				reason = harvestMap();
 				if (reason != BehaviorStopReason.FINISHED) return reason;
 			}
@@ -92,13 +111,6 @@ public abstract class HarvestBehavior extends Behavior {
 		return quantityHarvested;
 	}
 
-	/**
-	 * @return the quantity
-	 */
-	public int getQuantity() {
-		return quantity;
-	}
-
 	protected boolean podMax() {
 		return getPerso().getStatsInfos().isFullPod();
 	}
@@ -111,30 +123,32 @@ public abstract class HarvestBehavior extends Behavior {
 	protected BehaviorStopReason harvestMap() {
 		Ressource next = null;
 		while ((next = nextRessource()) != null) {
+			if (this.lastHarvest + 1800 > System.currentTimeMillis()) {
+				TheBotFather.LOGGER.severe("Harvest_loop_bug détécté ! Attente et switch vers la prochaine ressource.");
+				Threads.uSleep(2, TimeUnit.SECONDS);
+				continue;
+			}
 			Skills skill = getSkill(next.getType());
 			TheBotFather.LOGGER.debug("Récolte de " + next.getType() + "(" + next + ")");
+			this.lastHarvest = System.currentTimeMillis();
 			getPerso().getAbilities().getHarvestAbility().harvest(next, skill);
 			if (podMax()) return BehaviorStopReason.POD_LIMIT;
-			else if (getQuantityOfHarvestedInInv() >= getQuantity()) return BehaviorStopReason.QUANTITY_REACHED;
 		}
 		return BehaviorStopReason.FINISHED;
 	}
 
-	protected int getQuantityOfHarvestedInInv() {
-		int amount = 0;
-		for (Item i : getPerso().getInventory().getContents().values())
-			if (ArrayUtils.contains(i.getItemTypeId(), getTypesToHarvest())) amount++;
-		return amount;
+	public Skills getSkill(Interractable type) {
+		for (Skills s : Skills.values())
+			if (s.getType() == type) return s;
+		throw new NullPointerException("Skill not found for the type " + type);
 	}
-
-	public abstract Skills getSkill(Interractable type);
 
 	/**
 	 * @return a spawned ressource on the map
 	 */
 	protected Ressource nextRessource() {
 		Set<Ressource> collect = getPerso().getMapInfos().getMap().getRessources().stream().filter(r -> {
-			if (!ArrayUtils.contains(r.getType(), getTypesToHarvest())) return false;
+			if (!ress.contains(r.getType())) return false;
 			Skills skill = getSkill(r.getType());
 			if (getPerso().getBotInfos().getCurrentJob().getLvl() < skill.getMinLvlToUse()) return false;
 			return r.isSpawned();
@@ -152,8 +166,17 @@ public abstract class HarvestBehavior extends Behavior {
 		return r;
 	}
 
-	public abstract Interractable[] getTypesToHarvest();
+	/**
+	 * @return the ress
+	 */
+	protected Set<Interractable> getRess() {
+		return ress;
+	}
 
-	public abstract void initMoves();
+	public abstract void init();
+
+	protected void addRessource(Interractable type) {
+		ress.add(type);
+	}
 
 }

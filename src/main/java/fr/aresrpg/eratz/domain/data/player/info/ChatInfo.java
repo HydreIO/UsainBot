@@ -3,6 +3,7 @@ package fr.aresrpg.eratz.domain.data.player.info;
 import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.util.chat.*;
 
 import java.util.*;
 
@@ -13,12 +14,30 @@ import java.util.*;
 public class ChatInfo extends Info {
 
 	private Map<Chat, Boolean> chats = new HashMap<>();
+	private final ChatterBotFactory factory = new ChatterBotFactory();
+	private ChatterBot voice;
+	private ChatterBotSession session;
 
 	/**
 	 * @param perso
 	 */
 	public ChatInfo(Perso perso) {
 		super(perso);
+		try {
+			this.voice = factory.create(ChatterBotType.CLEVERBOT);
+			this.session = voice.createSession(Locale.FRANCE);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String getResponse(String s) {
+		try {
+			return session.think(s);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override

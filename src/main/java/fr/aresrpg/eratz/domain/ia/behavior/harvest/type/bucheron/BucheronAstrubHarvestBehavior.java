@@ -1,7 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron;
 
-import fr.aresrpg.dofus.structures.Skills;
-import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
+import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.harvest.HarvestBehavior;
 
@@ -15,12 +14,12 @@ public class BucheronAstrubHarvestBehavior extends HarvestBehavior {
 	 * @param perso
 	 * @param quantity
 	 */
-	public BucheronAstrubHarvestBehavior(Perso perso, int quantity) {
-		super(perso, quantity);
+	public BucheronAstrubHarvestBehavior(Perso perso) {
+		super(perso);
 	}
 
 	@Override
-	public void initMoves() {
+	public void init() {
 		useExperimentalIA();
 		experimentPos(3, -24);
 		experimentPos(3, -25);
@@ -54,29 +53,12 @@ public class BucheronAstrubHarvestBehavior extends HarvestBehavior {
 		experimentPos(-2, -26);
 		experimentPos(-2, -25);
 		experimentPos(-2, -24);
-	}
 
-	@Override
-	public Skills getSkill(Interractable type) {
-		switch (type) {
-			case FRENE:
-				return Skills.COUPER_FRENE;
-			case CHATAIGNIER:
-				return Skills.COUPER_CHATAIGNIER;
-			case NOYER:
-				return Skills.COUPER_NOYER;
-			case ERABLE:
-				return Skills.COUPER_ERABLE;
-			case CHENE:
-				return Skills.COUPER_CHENE;
-			default:
-				return null;
-		}
-	}
-
-	@Override
-	public Interractable[] getTypesToHarvest() {
-		return new Interractable[] { Interractable.FRENE, Interractable.CHATAIGNIER, Interractable.NOYER, Interractable.ERABLE, Interractable.CHENE };
+		addRessource(Interractable.FRENE);
+		addRessource(Interractable.CHATAIGNIER);
+		addRessource(Interractable.NOYER);
+		addRessource(Interractable.ERABLE);
+		addRessource(Interractable.CHENE);
 	}
 
 }

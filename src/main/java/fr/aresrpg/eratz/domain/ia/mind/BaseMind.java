@@ -4,11 +4,12 @@ import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.functional.suplier.Supplier;
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
 import fr.aresrpg.dofus.structures.Chat;
+import fr.aresrpg.eratz.domain.data.dofus.map.Bank;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
-import fr.aresrpg.eratz.domain.ia.behavior.move.BankDepositPath;
-import fr.aresrpg.eratz.domain.ia.behavior.move.FollowPlayerBehavior;
+import fr.aresrpg.eratz.domain.ia.behavior.move.*;
 import fr.aresrpg.eratz.domain.util.ThreadBlocker;
 
 import java.util.*;
@@ -95,8 +96,8 @@ public class BaseMind implements Mind {
 	}
 
 	@Override
-	public Mind thenHarvest(Path path, int quantity) {
-		getActions().add(path.getHarvestBehavior(getPerso(), quantity));
+	public Mind thenHarvest(Path path) {
+		getActions().add(path.getHarvestBehavior(getPerso()));
 		return this;
 	}
 
@@ -112,8 +113,19 @@ public class BaseMind implements Mind {
 	}
 
 	@Override
-	public Mind thenDepositToBank() {
-		getActions().add(new BankDepositPath(getPerso(), getItemToKeep().stream().mapToInt(Integer::intValue).toArray()));
+	public Mind thenDepositToBank(Bank bank) {
+		Behavior b = null;
+		switch (bank) {
+			case ASTRUB:
+				b = new BankAstrubDepositPath(getPerso(), getItemToKeep().stream().mapToInt(Integer::intValue).toArray());
+				break;
+			case SUFOKIA:
+				b = new BankSufokiaDepositPath(getPerso(), getItemToKeep().stream().mapToInt(Integer::intValue).toArray());
+			case AMAKNA:
+				b = new BankAmaknaDepositPath(getPerso(), getItemToKeep().stream().mapToInt(Integer::intValue).toArray());
+				break;
+		}
+		getActions().add(b);
 		return this;
 	}
 

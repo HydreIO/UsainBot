@@ -4,8 +4,7 @@ import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.craft.CraftBehavior;
 import fr.aresrpg.eratz.domain.ia.behavior.craft.type.WheatFlourCraftBehavior;
 import fr.aresrpg.eratz.domain.ia.behavior.harvest.HarvestBehavior;
-import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron.BucheronAstrubHarvestBehavior;
-import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron.FreneHarvestBehavior;
+import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron.*;
 import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.paysan.WheatHarvestBehavior;
 
 /**
@@ -17,16 +16,22 @@ public enum Path {
 	BLE,
 	FARINE_BLE,
 	FRENE,
-	BUCHERON_ASTRUB;
+	BUCHERON_ASTRUB,
+	BUCHERON_AMAKNA,
+	NOYER,;
 
-	public HarvestBehavior getHarvestBehavior(Perso perso, int quantiy) {
+	public HarvestBehavior getHarvestBehavior(Perso perso) {
 		switch (this) {
 			case BLE:
-				return new WheatHarvestBehavior(perso, quantiy);
+				return new WheatHarvestBehavior(perso);
 			case FRENE:
-				return new FreneHarvestBehavior(perso, quantiy);
+				return new FreneHarvestBehavior(perso);
 			case BUCHERON_ASTRUB:
-				return new BucheronAstrubHarvestBehavior(perso, quantiy);
+				return new BucheronAstrubHarvestBehavior(perso);
+			case NOYER:
+				return new NoyerHarvestBehavior(perso);
+			case BUCHERON_AMAKNA:
+				return new BucheronAmaknaHarvestBehavior(perso);
 			default:
 				return null;
 		}

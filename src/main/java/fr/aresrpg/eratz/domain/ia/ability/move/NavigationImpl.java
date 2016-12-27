@@ -16,12 +16,12 @@ import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
+import fr.aresrpg.eratz.domain.data.Roads;
+import fr.aresrpg.eratz.domain.data.Roads.MapRestriction;
 import fr.aresrpg.eratz.domain.data.dofus.map.*;
 import fr.aresrpg.eratz.domain.data.dofus.mob.AgressiveMobs;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.event.BotMoveEvent;
-import fr.aresrpg.eratz.domain.ia.Roads;
-import fr.aresrpg.eratz.domain.ia.Roads.MapRestriction;
 import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
@@ -141,6 +141,11 @@ public class NavigationImpl implements Navigation {
 		teleporting = teleport;
 		try {
 			List<PathFragment> shortpath = Pathfinding.makeShortPath(p, getMap().getWidth());
+			if (shortpath == null) {
+				getPerso().getBotInfos().setBlockedOn(getCurrentPos());
+				moving = false;
+				return this;
+			}
 			getPerso().getAccount().getRemoteConnection().send(new GameClientActionPacket(GameActions.MOVE, new GameMoveAction().setPath(shortpath)));
 			new BotMoveEvent(getPerso().getId(), cellid, teleport).send();
 			Executors.SCHEDULED.schedule(() -> {
@@ -280,6 +285,7 @@ public class NavigationImpl implements Navigation {
 				LOGGER.severe("Le bot n'a pas réussi à trouver son chemin, abandon.");
 				return;
 			}
+			Roads.resetRestrictions();
 			LOGGER.severe("Nouvel éssai dans 5s..");
 			Threads.uSleep(5, TimeUnit.SECONDS);
 			moveToRandomNeightbourMap();
@@ -316,8 +322,8 @@ public class NavigationImpl implements Navigation {
 	}
 
 	private void unblockBot() {
-		if (!moving) return; // on déblock uniquement si le bot était en train de bouger
-		if (getPerso().getBotInfos().getLastMove() + 10000 < System.currentTimeMillis()) { // bot blocké depuis + de 10s
+		if (!moving || getPerso().isInFight()) return; // on déblock uniquement si le bot était en train de bouger
+		if (getPerso().getBotInfos().getLastMove() + 15000 < System.currentTimeMillis()) { // bot blocké depuis + de 10s
 			LOGGER.success("Le bot était bloqué ! déblocage..");
 			getPerso().getBotInfos().setBlockedOn(getPerso().getMapInfos().getCellId()); // pour dire que le bot est bloqué
 			getPerso().getNavigation().notifyMovementEnd(); // pour le laisser finir les actions qui attendait la fin du movement

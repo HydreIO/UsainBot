@@ -29,6 +29,12 @@ public class MapsManager {
 		return INSTANCE.getMaps().get(mapid);
 	}
 
+	public static BotMap getMap(int x, int y) {
+		for (BotMap m : INSTANCE.maps.values())
+			if (m.getX() == x && m.getY() == y) return m;
+		return null;
+	}
+
 	public static void updateMap(BotMap map) {
 		INSTANCE.getMaps().put(map.getDofusMap().getId(), map);
 	}

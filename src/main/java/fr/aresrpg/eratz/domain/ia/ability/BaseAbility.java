@@ -4,14 +4,16 @@ import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
 import fr.aresrpg.dofus.structures.*;
 import fr.aresrpg.dofus.structures.item.Item;
+import fr.aresrpg.dofus.structures.item.ItemCategory;
 import fr.aresrpg.dofus.structures.map.Cell;
+import fr.aresrpg.eratz.domain.data.Roads;
 import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems;
 import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.map.*;
 import fr.aresrpg.eratz.domain.data.dofus.player.Smiley;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.inventory.PlayerInventory;
 import fr.aresrpg.eratz.domain.data.player.object.Road;
-import fr.aresrpg.eratz.domain.ia.Roads;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.Closeable;
@@ -100,6 +102,8 @@ public interface BaseAbility extends Closeable {
 
 	void moveKama(int amount);
 
+	void destroyItem(int uid, int amount);
+
 	/**
 	 * Utilise un item
 	 * 
@@ -107,6 +111,11 @@ public interface BaseAbility extends Closeable {
 	 * @return true si l'item à été utilisé
 	 */
 	boolean useItem(long itemuid);
+
+	default void useRessourceBags() {
+		PlayerInventory inv = getPerso().getInventory();
+		inv.getItemsByCategory(ItemCategory.RESOURCEBAG).forEach(i -> useItem(i.getUid()));
+	}
 
 	default boolean useItemWithType(int itemType) {
 		Item itemByType = getPerso().getInventory().getItemByType(itemType);
@@ -173,8 +182,24 @@ public interface BaseAbility extends Closeable {
 
 	BaseAbilityState getStates();
 
-	default void goAndOpenBank() {
-		if (!isInBankMap()) {
+	default void goAndOpenBank(Bank bank) {
+		switch (bank) {
+			case ASTRUB:
+				goAndOpenAstrubBank();
+				return;
+			case SUFOKIA:
+				goAndOpenBankSufokia();
+				return;
+			case AMAKNA:
+				goAndOpenAmaknaBank();
+				return;
+			default:
+				break;
+		}
+	}
+
+	default void goAndOpenAstrubBank() {
+		if (!isInAstrubBankMap()) {
 			Road nearestRoad = Roads.nearestRoad(getPerso().getMapInfos().getMap());
 			nearestRoad.takeRoad(getPerso());
 			getPerso().getNavigation().moveDown(3).moveToCell(142, true);
@@ -184,10 +209,57 @@ public interface BaseAbility extends Closeable {
 		npcTalkChoice(318, 259);
 	}
 
-	default boolean isInBankMap() {
+	default void goAndOpenAmaknaBank() {
+		if (!isInAmaknaBankMap()) {
+			getPerso().getNavigation().joinCoords(2, -2);
+			getPerso().getNavigation().moveToCell(238, true);
+		}
+		Threads.uSleep(2, TimeUnit.SECONDS);
+		speakToNpc(-3);
+		npcTalkChoice(318, 259);
+	}
+
+	default void goAndOpenBankSufokia() {
+		if (!isInSufokiaBankMap()) {
+			getPerso().getNavigation().joinCoords(11, 22);
+			getPerso().getNavigation().moveToCell(462, true).moveToCell(376, true).moveToCell(463, true).moveToCell(269, true);
+		}
+		Threads.uSleep(2, TimeUnit.SECONDS);
+		speakToNpc(-2);
+		npcTalkChoice(318, 259);
+	}
+
+	default boolean isInBankMap(Bank bank) {
+		switch (bank) {
+			case ASTRUB:
+				return isInAstrubBankMap();
+			case SUFOKIA:
+				return isInSufokiaBankMap();
+			case AMAKNA:
+				return isInAmaknaBankMap();
+			default:
+				return false;
+		}
+	}
+
+	default boolean isInAstrubBankMap() {
 		BotMap map = getPerso().getMapInfos().getMap();
 		if (!map.isOnCoords(4, -16)) return false;
 		Cell c = map.getDofusMap().getCell(322);
+		return c.getMovement() == 0;
+	}
+
+	default boolean isInAmaknaBankMap() {
+		BotMap map = getPerso().getMapInfos().getMap();
+		if (!map.isOnCoords(2, -2)) return false;
+		Cell c = map.getDofusMap().getCell(235);
+		return c.getMovement() == 0;
+	}
+
+	default boolean isInSufokiaBankMap() {
+		BotMap map = getPerso().getMapInfos().getMap();
+		if (!map.isOnCoords(14, 25)) return false;
+		Cell c = map.getDofusMap().getCell(142);
 		return c.getMovement() == 0;
 	}
 

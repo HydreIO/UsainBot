@@ -12,6 +12,8 @@ import fr.aresrpg.eratz.domain.data.player.object.Ressource;
 import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -60,15 +62,20 @@ public class HarvestAbilityImpl implements HarvestAbility {
 			Threads.uSleep(50, TimeUnit.MILLISECONDS);
 		Jobs[] rj = r.getType().getRequiredJob();
 		boolean useDiagonale = true; // ArrayUtils.contains(Jobs.JOB_PAYSAN, rj) || ArrayUtils.contains(Jobs.JOB_ALCHIMISTE, rj);
-		int cl = r.getNeighborCell(getPerso().getMapInfos().getMap(), useDiagonale);
-		if (cl == -1) {
-			TheBotFather.LOGGER.severe("Impossible de trouver une cellule pour la ressource " + r);
-			return;
-		}
-		if (getPerso().getMapInfos().getCellId() != cl) {
-			getPerso().getNavigation().moveToCell(cl);
-			if (getPerso().getMapInfos().getCellId() != cl) return; // path non trouvé (par exemple a cause de mob agressifs)
-		}
+		int cl = -1;
+		List<Integer> tested = new ArrayList<>();
+		do {
+			cl = r.getNeighborCell(getPerso().getMapInfos().getMap(), useDiagonale, tested);
+			if (cl == -1) {
+				TheBotFather.LOGGER.severe("Impossible de trouver une cellule pour la ressource " + r);
+				return;
+			}
+			if (getPerso().getMapInfos().getCellId() != cl)
+				getPerso().getNavigation().moveToCell(cl);
+			else break;
+			tested.add(cl);
+			TheBotFather.LOGGER.error("Impossible d'acceder à la cellule pour récolter '" + r.getType() + "' ! Switch de cellule");
+		} while (getPerso().getMapInfos().getCellId() == cl); // path non trouvé (par exemple a cause de mob agressifs)
 		getPerso().setState(PlayerState.HARVESTING);
 		if (getPerso().getMapInfos().getMap().getPlayers().size() > 1 && Randoms.nextBool())
 			getPerso().sendPacketToServer(new BasicUseSmileyPacket().setSmileyId(Smiley.getRandomTrollSmiley().getId()));

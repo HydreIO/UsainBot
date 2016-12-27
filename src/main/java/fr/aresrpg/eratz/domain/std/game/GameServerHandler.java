@@ -4,8 +4,8 @@ import fr.aresrpg.dofus.protocol.game.movement.*;
 import fr.aresrpg.dofus.protocol.game.server.GameEndPacket;
 import fr.aresrpg.dofus.protocol.game.server.GameTeamPacket.TeamEntity;
 import fr.aresrpg.dofus.structures.game.*;
+import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
-import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 
 /**
  * 

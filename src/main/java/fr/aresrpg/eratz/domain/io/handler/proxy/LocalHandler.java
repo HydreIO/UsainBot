@@ -48,6 +48,7 @@ import fr.aresrpg.eratz.domain.util.encryption.CryptHelper;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -58,6 +59,7 @@ public class LocalHandler extends BaseClientPacketHandler {
 	private boolean state_machine = false;
 	private Account account;
 	private Proxy proxy;
+	private boolean reconnecting;
 
 	// util ==
 	private BotMap lastmove;
@@ -82,8 +84,12 @@ public class LocalHandler extends BaseClientPacketHandler {
 			getProxy().getRemoteConnection().send(pkt);
 		} catch (IOException e) {
 			e.printStackTrace();
+			if (this.reconnecting) return;
+			this.reconnecting = true;
 			TheBotFather.LOGGER.error("Client disconnected");
 			getPerso().getAccount().getCurrentPlayed().shutdown();
+			getPerso().connectIn(10, TimeUnit.SECONDS);
+			this.reconnecting = false;
 		}
 	}
 
@@ -124,8 +130,12 @@ public class LocalHandler extends BaseClientPacketHandler {
 				((SocketChannel) getProxy().getRemoteConnection().getChannel()).write(ByteBuffer.wrap(packet.getBytes()));
 			} catch (IOException e) {
 				e.printStackTrace();
+				if (this.reconnecting) return true;
+				this.reconnecting = true;
 				TheBotFather.LOGGER.error("Client disconnected");
 				getPerso().getAccount().getCurrentPlayed().shutdown();
+				getPerso().connectIn(10, TimeUnit.SECONDS);
+				this.reconnecting = false;
 			}
 			return true;
 		}

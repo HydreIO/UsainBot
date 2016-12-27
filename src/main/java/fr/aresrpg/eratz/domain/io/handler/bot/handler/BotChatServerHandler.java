@@ -3,12 +3,15 @@ package fr.aresrpg.eratz.domain.io.handler.bot.handler;
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 import fr.aresrpg.commons.domain.log.AnsiColors.AnsiColor;
+import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.data.AccountsManager;
 import fr.aresrpg.eratz.domain.data.MindManager;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.std.chat.ChatServerHandler;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -31,8 +34,6 @@ public class BotChatServerHandler extends BotHandlerAbstract implements ChatServ
 
 	@Override
 	public void onUnsubscribe(Chat[] removed) {
-		// TODO
-
 	}
 
 	@Override
@@ -65,7 +66,22 @@ public class BotChatServerHandler extends BotHandlerAbstract implements ChatServ
 			default:
 				break;
 		}
-
+		
+		// cleverbot
+		if (player == getPerso().getId() || !getPerso().canRespond()) return;
+		switch (chat) {
+			case COMMON:
+				if (Randoms.nextInt(5) == 1)
+					getPerso().respondTo(msg, chat);
+				break;
+			case PM_RECEIVE:
+			case PRIVATE:
+				if (Randoms.nextBool()) Executors.SCHEDULED.schedule(() -> getPerso().getAbilities().getBaseAbility().sendPm(pseudo, getPerso().getChatInfos().getResponse(msg)),
+						Randoms.nextBetween(3, 8), TimeUnit.SECONDS);
+				break;
+			default:
+				break;
+		}
 	}
 
 }

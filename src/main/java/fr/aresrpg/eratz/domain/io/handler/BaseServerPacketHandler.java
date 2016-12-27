@@ -47,7 +47,7 @@ import fr.aresrpg.dofus.protocol.waypoint.server.ZaapCreatePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapUseErrorPacket;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
 import fr.aresrpg.dofus.structures.game.*;
-import fr.aresrpg.dofus.structures.item.Item;
+import fr.aresrpg.dofus.structures.item.*;
 import fr.aresrpg.dofus.structures.job.Job;
 import fr.aresrpg.dofus.structures.job.JobInfo;
 import fr.aresrpg.dofus.structures.map.*;
@@ -56,12 +56,10 @@ import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.SwfVariableExtractor;
 import fr.aresrpg.eratz.domain.TheBotFather;
-import fr.aresrpg.eratz.domain.data.AccountsManager;
-import fr.aresrpg.eratz.domain.data.MapsManager;
+import fr.aresrpg.eratz.domain.data.*;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.dofus.player.DofusJob;
-import fr.aresrpg.eratz.domain.data.dofus.ressource.Interractable;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.info.StatsInfo;
@@ -91,6 +89,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -658,9 +657,11 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	public void handle(GameEndPacket pkt) {
 		log(pkt);
 		getPerso().getFightInfos().getCurrentFight().setEnded(true);
-		TheBotFather.LOGGER.success("Switch en mode normal !");
-		getPerso().getMind().getBlocker().resume();
 		getGameHandler().forEach(h -> h.onFightEnd(pkt));
+		Executors.SCHEDULED.schedule(() -> {
+			TheBotFather.LOGGER.success("Switch en mode normal !");
+			getPerso().getMind().getBlocker().resume();
+		} , 2, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -981,8 +982,12 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(ItemAddOkPacket pkt) {
 		log(pkt);
-		for (Item i : pkt.getItems())
+		boolean bags = false;
+		for (Item i : pkt.getItems()) {
+			if (ItemsData.hasCategory(i, ItemCategory.RESOURCEBAG)) bags = true;
 			getPerso().getInventory().getContents().put(i.getUid(), i); // on add direct car quand c juste une update de quantité il y a un autre packet
+		}
+		if (bags) Executors.SCHEDULED.schedule(getPerso().getAbilities().getBaseAbility()::useRessourceBags, 3, TimeUnit.SECONDS);
 		getItemHandler().forEach(h -> h.onItemsAdd(pkt.getItems()));
 	}
 
@@ -1001,6 +1006,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(ItemRemovePacket pkt) {
 		log(pkt);
+		System.out.println("Item remove id : " + pkt.getItemuid());
 		getPerso().getInventory().getContents().remove(pkt.getItemuid());
 		getItemHandler().forEach(h -> h.onItemRemove(pkt.getItemuid()));
 	}

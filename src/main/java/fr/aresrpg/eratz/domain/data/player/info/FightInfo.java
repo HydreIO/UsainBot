@@ -80,7 +80,7 @@ public class FightInfo extends Info {
 	public void notifyFightStart() {
 		getPerso().getMind().getBlocker().pause();
 		TheBotFather.LOGGER.success("Switch en mode combat !");
-		if (getPerso().getAccount().isBotOnline()) Executors.FIXED.execute(getCurrentFightBehavior()::start);
+		if (getPerso().getAccount().isBotOnline() || getPerso().canFightInMitm()) Executors.FIXED.execute(getCurrentFightBehavior()::start);
 	}
 
 	/**

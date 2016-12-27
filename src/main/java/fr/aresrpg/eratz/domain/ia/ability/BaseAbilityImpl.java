@@ -16,8 +16,7 @@ import fr.aresrpg.dofus.protocol.game.actions.GameAction;
 import fr.aresrpg.dofus.protocol.game.actions.GameActions;
 import fr.aresrpg.dofus.protocol.game.actions.client.*;
 import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
-import fr.aresrpg.dofus.protocol.item.client.ItemMovementPacket;
-import fr.aresrpg.dofus.protocol.item.client.ItemUsePacket;
+import fr.aresrpg.dofus.protocol.item.client.*;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.client.*;
 import fr.aresrpg.dofus.protocol.waypoint.client.ZaapUsePacket;
@@ -186,6 +185,12 @@ public class BaseAbilityImpl implements BaseAbility {
 		GameInteractionAction action = new GameInteractionAction(cell, s);
 		getPerso().sendPacketToServer(new GameClientActionPacket(GameActions.INTERRACT, action));
 		getBotThread().pause();
+	}
+
+	@Override
+	public void destroyItem(int uid, int amount) {
+		ItemDestroyPacket pkt = new ItemDestroyPacket(uid, amount);
+		getPerso().sendPacketToServer(pkt);
 	}
 
 	@Override

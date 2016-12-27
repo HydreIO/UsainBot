@@ -17,7 +17,9 @@ import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
 import fr.aresrpg.dofus.structures.ExchangeMove;
 import fr.aresrpg.dofus.structures.item.Item;
+import fr.aresrpg.dofus.structures.item.ItemCategory;
 import fr.aresrpg.eratz.domain.data.ItemsData;
+import fr.aresrpg.eratz.domain.data.ItemsData.LangItem;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
@@ -32,11 +34,11 @@ import java.util.stream.Collectors;
  * 
  * @since
  */
-public class BankDepositPath extends Behavior {
+public class BankAmaknaDepositPath extends Behavior {
 
 	private int[] items;
 
-	public BankDepositPath(Perso perso, int... itemsToKeep) {
+	public BankAmaknaDepositPath(Perso perso, int... itemsToKeep) {
 		super(perso);
 		this.items = itemsToKeep;
 	}
@@ -46,7 +48,8 @@ public class BankDepositPath extends Behavior {
 	}
 
 	private String nameObject(Item o) {
-		return "x" + o.getQuantity() + " " + ItemsData.getName(o.getItemTypeId());
+		LangItem langItem = ItemsData.get(o.getItemTypeId());
+		return "x" + o.getQuantity() + " " + langItem.getName();
 	}
 
 	private void waitLitle() { // zone peuplé mieux vaut ne pas se déplacer trop vite
@@ -56,9 +59,14 @@ public class BankDepositPath extends Behavior {
 	@Override
 	public BehaviorStopReason start() {
 		BaseAbility ability = getPerso().getAbilities().getBaseAbility();
-		ability.goAndOpenBank();
+		ability.goAndOpenAmaknaBank();
 		waitLitle();
-		Set<Item> inv = getPerso().getInventory().getContents().values().stream().filter(e -> !ArrayUtils.contains(e.getItemTypeId(), items)).collect(Collectors.toSet());
+		Set<Item> inv = getPerso().getInventory().getContents().values().stream().filter(e -> {
+			if (ArrayUtils.contains(e.getItemTypeId(), items)) return false;
+			LangItem l = ItemsData.get(e.getItemTypeId());
+			if (l.getCategory() == ItemCategory.QUESTOBJECT || l.getCategory() == ItemCategory.QUEST) return false;
+			return true;
+		}).collect(Collectors.toSet());
 		MovedItem[] array = inv.stream().map(it -> new MovedItem(ExchangeMove.ADD, it.getUid(), it.getQuantity())).toArray(MovedItem[]::new);
 		Arrays.stream(array).forEach(i -> {
 			ability.moveItem(i);
@@ -71,7 +79,7 @@ public class BankDepositPath extends Behavior {
 		if (kamas > 0) ability.moveKama(kamas);
 		ability.exchangeLeave();
 		Threads.uSleep(1, TimeUnit.SECONDS);
-		getPerso().getNavigation().moveToCell(381, true);
+		getPerso().getNavigation().moveToCell(293, true);
 		return BehaviorStopReason.FINISHED;
 	}
 

@@ -3,6 +3,7 @@ package fr.aresrpg.eratz.domain.data.player.inventory;
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.dofus.util.StringJoiner;
 import fr.aresrpg.eratz.domain.data.ItemsData;
+import fr.aresrpg.eratz.domain.data.ItemsData.LangItem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,8 @@ public class Inventory {
 	}
 
 	private String showItem(Item i) {
-		return "{x" + i.getQuantity() + " " + ItemsData.getName(i.getItemTypeId()) + "(" + i.getUid() + ")" + "}";
+		LangItem l = ItemsData.get(i.getItemTypeId());
+		return "{x" + i.getQuantity() + " " + l.getName() + "(id:" + i.getUid() + ")(pods:" + (l.getPod() * i.getQuantity()) + ")}";
 	}
 
 	/**
