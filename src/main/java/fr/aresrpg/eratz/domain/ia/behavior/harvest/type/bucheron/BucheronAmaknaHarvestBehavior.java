@@ -27,7 +27,7 @@ public class BucheronAmaknaHarvestBehavior extends HarvestBehavior {
 		useExperimentalIA();
 
 		addRessource(Interractable.CHATAIGNIER);
-		addRessource(Interractable.FRENE);
+		//addRessource(Interractable.FRENE);
 		addRessource(Interractable.MERISIER);
 		addRessource(Interractable.CHENE);
 		addRessource(Interractable.NOYER);

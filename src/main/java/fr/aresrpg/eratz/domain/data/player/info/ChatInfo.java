@@ -14,9 +14,11 @@ import java.util.*;
 public class ChatInfo extends Info {
 
 	private Map<Chat, Boolean> chats = new HashMap<>();
+	private Map<String, Long> lastMsgByPlayer = new HashMap<>();
 	private final ChatterBotFactory factory = new ChatterBotFactory();
 	private ChatterBot voice;
 	private ChatterBotSession session;
+	private long lastSpeak;
 
 	/**
 	 * @param perso
@@ -38,6 +40,22 @@ public class ChatInfo extends Info {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public void notifySpeak(String player) {
+		lastMsgByPlayer.put(player, System.currentTimeMillis());
+	}
+
+	public void notifySpeak() {
+		this.lastSpeak = System.currentTimeMillis();
+	}
+
+	public long getLastSpeak(String player) {
+		return lastMsgByPlayer.getOrDefault(player, 0L);
+	}
+
+	public long getLastSpeak() {
+		return lastSpeak;
 	}
 
 	@Override

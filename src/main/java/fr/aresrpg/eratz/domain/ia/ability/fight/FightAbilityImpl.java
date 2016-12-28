@@ -7,8 +7,8 @@ import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
 import fr.aresrpg.dofus.protocol.game.actions.client.GameJoinFightAction;
 import fr.aresrpg.dofus.protocol.game.actions.client.GameLaunchSpellAction;
 import fr.aresrpg.dofus.protocol.game.client.*;
-import fr.aresrpg.eratz.domain.data.dofus.player.Spells;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.object.Spell;
 import fr.aresrpg.eratz.domain.util.BotThread;
 
 import java.util.List;
@@ -47,8 +47,10 @@ public class FightAbilityImpl implements FightAbility {
 	}
 
 	@Override
-	public void launchSpell(Spells spell, int cellid) {
-		GameLaunchSpellAction action = new GameLaunchSpellAction(spell.getId(), cellid);
+	public void launchSpell(Spell spell, int relance, int cellid) {
+		if (spell.getRelance() != 0) return;
+		spell.setRelance(relance);
+		GameLaunchSpellAction action = new GameLaunchSpellAction(spell.getType().getId(), cellid);
 		getPerso().sendPacketToServer(new GameClientActionPacket(GameActions.LAUNCH_SPELL, action));
 		getBotThread().pause();
 	}
@@ -72,7 +74,6 @@ public class FightAbilityImpl implements FightAbility {
 	@Override
 	public void endTurn() {
 		getPerso().sendPacketToServer(new GameEndTurnPacket());
-		getBotThread().pause();
 	}
 
 	@Override

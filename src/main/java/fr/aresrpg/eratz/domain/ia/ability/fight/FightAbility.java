@@ -1,7 +1,7 @@
 package fr.aresrpg.eratz.domain.ia.ability.fight;
 
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
-import fr.aresrpg.eratz.domain.data.dofus.player.Spells;
+import fr.aresrpg.eratz.domain.data.player.object.Spell;
 import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.Closeable;
 
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface FightAbility extends Closeable {
 
-	void launchSpell(Spells spell, int cellid);
+	void launchSpell(Spell spell, int relance, int cellid);
 
 	void setPosition(int pos);
 

@@ -8,7 +8,6 @@ import fr.aresrpg.dofus.structures.game.*;
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.Perso;
-import fr.aresrpg.eratz.domain.ia.behavior.fight.type.PassTurnBehavior;
 import fr.aresrpg.eratz.domain.std.game.GameServerHandler;
 
 /**
@@ -46,8 +45,6 @@ public class BotGameServerHandler extends BotHandlerAbstract implements GameServ
 	@Override
 	public void onFightJoin(GameType state, FightType fightType, boolean isSpectator, int startTimer, boolean cancelButton, boolean isDuel) {
 		getPerso().getAbilities().getFightAbility().getBotThread().unpause();
-		getPerso().getFightInfos().setCurrentFightBehavior(new PassTurnBehavior(getPerso()));
-		getPerso().getFightInfos().notifyFightStart();
 	}
 
 	@Override

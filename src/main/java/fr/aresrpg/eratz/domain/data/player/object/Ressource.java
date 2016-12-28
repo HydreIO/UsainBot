@@ -1,6 +1,5 @@
 package fr.aresrpg.eratz.domain.data.player.object;
 
-import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.util.Maps;
@@ -49,7 +48,7 @@ public class Ressource extends Cell {
 		Node[] neighbors = diagonale ? Pathfinding.getNeighbors(new Node(getX(), getY())) : Pathfinding.getNeighborsWithoutDiagonals(new Node(getX(), getY()));
 		for (Node n : neighbors) {
 			int id = Maps.getId(n.getX(), n.getY(), map.getDofusMap().getWidth());
-			if (ArrayUtils.contains(id, avoid)) continue;
+			if (avoid.contains(id)) continue;
 			Cell cell = null;
 			try {
 				cell = map.getDofusMap().getCell(id);

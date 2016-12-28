@@ -19,7 +19,7 @@ public interface ItemServerHandler {
 
 	void onItemDropError(DropResult error);
 
-	void onItemRemove(int itemUid);
+	void onItemRemove(long itemUid);
 
 	void onItemQuantityUpdate(int itemUid, int quantity);
 

@@ -10,6 +10,7 @@ package fr.aresrpg.eratz.domain.data.player;
 
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
+import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.protocol.DofusConnection;
 import fr.aresrpg.dofus.protocol.Packet;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
@@ -38,8 +39,10 @@ import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Set;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class Perso implements Closeable {
@@ -67,9 +70,10 @@ public class Perso implements Closeable {
 	private Group group;
 	private Behavior currentBehavior;
 	private PlayerState state;
-	private boolean canRespond;
+	private boolean canTalk;
 	private boolean canDestroyItems;
 	private boolean canFightInMitm;
+	private ScheduledFuture sch;
 
 	public Perso(int id, String pseudo, Account account, BotJob job, Classe classe, Genre sexe, Server srv) {
 		this.id = id;
@@ -77,15 +81,25 @@ public class Perso implements Closeable {
 		this.account = account;
 		this.botInfos.setBotJob(job);
 		this.server = srv;
+		this.sch = Executors.SCHEDULER.register(this::scheduledActions, 10, TimeUnit.SECONDS);
 	}
 
 	public Perso(int id, String pseudo, Account account, Classe classe, Genre sexe, Server srv) {
 		this(id, pseudo, account, null, classe, sexe, srv);
 	}
 
+	public void scheduledActions() { // methode éxécutée toute les 10s, utile pour divers petit check
+		if (getAccount() == null || !getAccount().isActive()) return;
+
+		getAbilities().getBaseAbility().useRessourceBags();
+		if (canTalk && Randoms.nextInt(15) == 1 && Instant.ofEpochMilli(getChatInfos().getLastSpeak()).plusSeconds(20).isAfter(Instant.now()))
+			getAbilities().getBaseAbility().speak(Chat.COMMON, getChatInfos().getResponse("je joue"));
+	}
+
 	@Override
 	public void shutdown() {
 		getAccount().setState(AccountState.OFFLINE);
+		sch.cancel(true);
 		mind.shutdown();
 		navigation.shutdown();
 		abilities.shutdown();
@@ -105,8 +119,8 @@ public class Perso implements Closeable {
 		return this.canDestroyItems;
 	}
 
-	public boolean canRespond() {
-		return this.canRespond;
+	public boolean canTalk() {
+		return this.canTalk;
 	}
 
 	/**
@@ -129,8 +143,8 @@ public class Perso implements Closeable {
 	 * @param canRespond
 	 *            the canRespond to set
 	 */
-	public void setCanRespond(boolean canRespond) {
-		this.canRespond = canRespond;
+	public void setCanTalk(boolean canTalk) {
+		this.canTalk = canTalk;
 	}
 
 	public void respondTo(String msg, Chat c) {

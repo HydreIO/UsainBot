@@ -33,6 +33,8 @@ import fr.aresrpg.dofus.protocol.job.client.JobChangeStatsPacket;
 import fr.aresrpg.dofus.protocol.mount.client.MountPlayerPacket;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.client.*;
+import fr.aresrpg.dofus.protocol.spell.client.SpellBoostPacket;
+import fr.aresrpg.dofus.protocol.spell.client.SpellMoveToUsedPacket;
 import fr.aresrpg.dofus.protocol.waypoint.ZaapLeavePacket;
 import fr.aresrpg.dofus.protocol.waypoint.client.ZaapUsePacket;
 import fr.aresrpg.eratz.domain.data.player.Perso;
@@ -511,6 +513,16 @@ public class BaseClientPacketHandler implements ClientPacketHandler {
 
 	@Override
 	public void handle(BasicChatMessageSendPacket pkt) {
+		log(pkt);
+	}
+
+	@Override
+	public void handle(SpellMoveToUsedPacket pkt) {
+		log(pkt);
+	}
+
+	@Override
+	public void handle(SpellBoostPacket pkt) {
 		log(pkt);
 	}
 

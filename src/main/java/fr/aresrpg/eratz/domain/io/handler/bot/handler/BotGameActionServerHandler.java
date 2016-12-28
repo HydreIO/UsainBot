@@ -152,4 +152,9 @@ public class BotGameActionServerHandler extends BotHandlerAbstract implements Ga
 		} , time, TimeUnit.MILLISECONDS);
 	}
 
+	@Override
+	public void onTacle() {
+		getPerso().getNavigation().notifyMovementEnd();
+	}
+
 }

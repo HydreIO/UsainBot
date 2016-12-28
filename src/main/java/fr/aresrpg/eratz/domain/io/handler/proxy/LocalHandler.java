@@ -32,6 +32,8 @@ import fr.aresrpg.dofus.protocol.job.client.JobChangeStatsPacket;
 import fr.aresrpg.dofus.protocol.mount.client.MountPlayerPacket;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.client.*;
+import fr.aresrpg.dofus.protocol.spell.client.SpellBoostPacket;
+import fr.aresrpg.dofus.protocol.spell.client.SpellMoveToUsedPacket;
 import fr.aresrpg.dofus.protocol.waypoint.ZaapLeavePacket;
 import fr.aresrpg.dofus.protocol.waypoint.client.ZaapUsePacket;
 import fr.aresrpg.eratz.domain.TheBotFather;
@@ -235,6 +237,18 @@ public class LocalHandler extends BaseClientPacketHandler {
 		super.handle(pkt);
 		transmit(pkt);
 
+	}
+
+	@Override
+	public void handle(SpellBoostPacket pkt) {
+		super.handle(pkt);
+		transmit(pkt);
+	}
+
+	@Override
+	public void handle(SpellMoveToUsedPacket pkt) {
+		super.handle(pkt);
+		transmit(pkt);
 	}
 
 	@Override

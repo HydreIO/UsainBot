@@ -47,7 +47,8 @@ import fr.aresrpg.dofus.protocol.waypoint.server.ZaapCreatePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapUseErrorPacket;
 import fr.aresrpg.dofus.structures.character.AvailableCharacter;
 import fr.aresrpg.dofus.structures.game.*;
-import fr.aresrpg.dofus.structures.item.*;
+import fr.aresrpg.dofus.structures.item.Interractable;
+import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.dofus.structures.job.Job;
 import fr.aresrpg.dofus.structures.job.JobInfo;
 import fr.aresrpg.dofus.structures.map.*;
@@ -56,7 +57,8 @@ import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.SwfVariableExtractor;
 import fr.aresrpg.eratz.domain.TheBotFather;
-import fr.aresrpg.eratz.domain.data.*;
+import fr.aresrpg.eratz.domain.data.AccountsManager;
+import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.dofus.player.DofusJob;
@@ -152,7 +154,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 		Arrays.stream(handlers).forEach(gameHandler::add);
 	}
 
-	public void addSpellHandlers(SubareaServerHandler... handlers) {
+	public void addSubareaHandlers(SubareaServerHandler... handlers) {
 		Arrays.stream(handlers).forEach(subareaServerHandler::add);
 	}
 
@@ -530,12 +532,21 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(ExchangeCreatePacket pkt) {
 		log(pkt);
+		getPerso().getAbilities().getBaseAbility().getStates().currentInventory = pkt.getType();
 		getExchangeHandler().forEach(h -> h.onCreate(pkt.getType(), pkt.getData()));
 	}
 
 	@Override
 	public void handle(ExchangeListPacket pkt) {
 		log(pkt);
+		switch (pkt.getInvType()) {
+			case BANK:
+				getAccount().getBanque().setKamas(pkt.getKamas());
+				getAccount().getBanque().updateContent(pkt.getItems());
+				break;
+			default:
+				break;
+		}
 		getExchangeHandler().forEach(h -> h.onInventoryList(pkt.getInvType(), pkt.getItems(), pkt.getKamas()));
 	}
 
@@ -587,6 +598,10 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 			case FIGHT_ATTRIBUTE_NEED_HELP_NOT_ACTIVE:
 				fight.setHelpNeeded(false);
 				break;
+			case EARN_KAMAS:
+				int kamas = Integer.parseInt(pkt.getExtraDatas());
+				getAccount().getBanque().addKamas(kamas);
+				break;
 			default:
 				break;
 		}
@@ -614,6 +629,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(SpellListPacket pkt) {
 		log(pkt);
+		getPerso().getStatsInfos().updateSpells(pkt.getSpells());
 		getSpellServerHandler().forEach(h -> h.onSpellList(pkt.getSpells()));
 	}
 
@@ -800,14 +816,17 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 				break;
 			case LIFE_CHANGE:
 				GameLifeChangeAction actionl = (GameLifeChangeAction) pkt.getAction();
+				if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().updateEntityLife(actionl.getEntity(), actionl.getLife());
 				getGameActionHandler().forEach(h -> h.onEntityLifeChange(actionl.getEntity(), actionl.getLife()));
 				break;
 			case PA_CHANGE:
 				GamePaChangeAction actionpa = (GamePaChangeAction) pkt.getAction();
+				if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().updateEntityPa(actionpa.getEntity(), actionpa.getPa());
 				getGameActionHandler().forEach(h -> h.onEntityPaChange(actionpa.getEntity(), actionpa.getPa()));
 				break;
 			case PM_CHANGE:
 				GamePmChangeAction actionpm = (GamePmChangeAction) pkt.getAction();
+				if (getPerso().isInFight()) getPerso().getFightInfos().getCurrentFight().updateEntityPm(actionpm.getEntity(), actionpm.getPm());
 				getGameActionHandler().forEach(h -> h.onEntityPmChange(actionpm.getEntity(), actionpm.getPm()));
 				break;
 			case KILL:
@@ -861,6 +880,9 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 			case HARVEST_TIME:
 				GameHarvestTimeAction actionh = (GameHarvestTimeAction) pkt.getAction();
 				getGameActionHandler().forEach(h -> h.onHarvestTime(actionh.getTime(), pkt.getEntityId()));
+				break;
+			case TACLE:
+				getGameActionHandler().forEach(GameActionServerHandler::onTacle);
 				break;
 			default:
 				break;
@@ -939,6 +961,7 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 			return;
 		}
 		fight.setCurrentTurn(pkt.getCharacterId());
+		getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 		getGameHandler().forEach(h -> h.onEntityTurnStart(pkt.getCharacterId(), pkt.getTime()));
 	}
 
@@ -982,12 +1005,8 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(ItemAddOkPacket pkt) {
 		log(pkt);
-		boolean bags = false;
-		for (Item i : pkt.getItems()) {
-			if (ItemsData.hasCategory(i, ItemCategory.RESOURCEBAG)) bags = true;
+		for (Item i : pkt.getItems())
 			getPerso().getInventory().getContents().put(i.getUid(), i); // on add direct car quand c juste une update de quantité il y a un autre packet
-		}
-		if (bags) Executors.SCHEDULED.schedule(getPerso().getAbilities().getBaseAbility()::useRessourceBags, 3, TimeUnit.SECONDS);
 		getItemHandler().forEach(h -> h.onItemsAdd(pkt.getItems()));
 	}
 
@@ -1102,6 +1121,23 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	@Override
 	public void handle(ExchangeStorageMovePacket pkt) {
 		log(pkt);
+		switch (getPerso().getAbilities().getBaseAbility().getStates().currentInventory) {
+			case BANK:
+				if (pkt.getMoved() != null) {
+					if (pkt.isAdd()) getAccount().getBanque().getContents().put(pkt.getMoved().getUid(), pkt.getMoved());
+					else {
+						Map<Long, Item> contents = getAccount().getBanque().getContents();
+						Item moved = pkt.getMoved();
+						Item itemInBank = contents.get(moved.getUid());
+						if (moved.getQuantity() >= itemInBank.getQuantity()) contents.remove(moved.getUid());
+						else itemInBank.setQuantity(itemInBank.getQuantity() - moved.getQuantity());
+					}
+				}
+				if (pkt.getKamas() != -1) getAccount().getBanque().setKamas(pkt.getKamas());
+				break;
+			default:
+				break;
+		}
 		getExchangeHandler().forEach(h -> h.onStorageMove(pkt.getMoved(), pkt.getKamas(), pkt.isAdd()));
 	}
 

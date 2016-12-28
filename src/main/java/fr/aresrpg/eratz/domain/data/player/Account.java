@@ -18,6 +18,7 @@ import fr.aresrpg.eratz.domain.data.player.inventory.Banque;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
 import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.ia.behavior.AntiAfkBehavior;
+import fr.aresrpg.eratz.domain.ia.behavior.fight.type.CraFeuFightBehavior;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
@@ -63,6 +64,7 @@ public class Account {
 					e.printStackTrace();
 				}
 			});
+			getCurrentPlayed().getFightInfos().setCurrentFightBehavior(new CraFeuFightBehavior(currentPlayed));
 			getCurrentPlayed().setState(PlayerState.IDLE);
 			Executors.FIXED.execute(new AntiAfkBehavior(currentPlayed, true)::start);
 			GroupsManager.getInstance().updateGroups(currentPlayed);
@@ -78,6 +80,7 @@ public class Account {
 					e.printStackTrace();
 				}
 			});
+			getCurrentPlayed().getFightInfos().setCurrentFightBehavior(new CraFeuFightBehavior(currentPlayed));
 			Executors.FIXED.execute(new AntiAfkBehavior(currentPlayed, true)::start);
 			getCurrentPlayed().sendPacketToServer(new MountPlayerPacket());
 			GroupsManager.getInstance().updateGroups(getCurrentPlayed());

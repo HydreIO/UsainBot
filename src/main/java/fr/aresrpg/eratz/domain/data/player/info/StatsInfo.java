@@ -6,8 +6,7 @@ import fr.aresrpg.eratz.domain.data.dofus.player.*;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.object.Spell;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 
@@ -32,7 +31,7 @@ public class StatsInfo extends Info {
 	private int lvl;
 	private int pods;
 	private int maxPods;
-	private final java.util.Map<Spells, Spell> spells = new HashMap<>();
+	private final Map<Spells, Spell> spells = new HashMap<>();
 
 	@Override
 	public void shutdown() {
@@ -48,6 +47,17 @@ public class StatsInfo extends Info {
 
 	public StatValue getStat(Stat stat) {
 		return getStats().get(stat);
+	}
+
+	public void updateSpells(Collection<fr.aresrpg.dofus.structures.Spell> spells) {
+		for (fr.aresrpg.dofus.structures.Spell s : spells) {
+			Spells sp = Spells.valueOf(s.getId());
+			if (sp == null) throw new NullPointerException("Invalid spell " + s);
+			Spell ss = new Spell(sp);
+			ss.setSpellLvl(s.getLevel());
+			ss.setPosition(s.getPosition());
+			this.spells.put(sp, ss);
+		}
 	}
 
 	public int getPA() {

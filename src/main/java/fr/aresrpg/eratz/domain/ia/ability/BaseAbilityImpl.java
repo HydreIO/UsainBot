@@ -144,7 +144,6 @@ public class BaseAbilityImpl implements BaseAbility {
 
 	@Override
 	public void moveKama(int amount) {
-		getPerso().getInventory().removeKamas(amount);
 		ExchangeMoveKamasPacket pkt = new ExchangeMoveKamasPacket(amount);
 		getPerso().sendPacketToServer(pkt);
 		getBotThread().pause();
@@ -198,6 +197,7 @@ public class BaseAbilityImpl implements BaseAbility {
 		BasicChatMessageSendPacket pkt = new BasicChatMessageSendPacket();
 		pkt.setChat(canal);
 		pkt.setMsg(msg);
+		getPerso().getChatInfos().notifySpeak();
 		getPerso().sendPacketToServer(pkt);
 	}
 
@@ -206,6 +206,7 @@ public class BaseAbilityImpl implements BaseAbility {
 		BasicChatMessageSendPacket pkt = new BasicChatMessageSendPacket();
 		pkt.setDest(playername);
 		pkt.setMsg(msg);
+		getPerso().getChatInfos().notifySpeak(playername);
 		getPerso().sendPacketToServer(pkt);
 	}
 

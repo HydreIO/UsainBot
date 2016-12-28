@@ -5,8 +5,7 @@ import fr.aresrpg.dofus.util.StringJoiner;
 import fr.aresrpg.eratz.domain.data.ItemsData;
 import fr.aresrpg.eratz.domain.data.ItemsData.LangItem;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 
@@ -18,7 +17,7 @@ public class Inventory {
 	private int kamas;
 
 	public String showContent() {
-		StringJoiner joiner = new StringJoiner(",", "[", "]");
+		StringJoiner joiner = new StringJoiner(",", "[", "]").add("Kamas: " + kamas);
 		contents.values().forEach(i -> joiner.add(showItem(i)));
 		return joiner.toString();
 	}
@@ -34,6 +33,12 @@ public class Inventory {
 	 */
 	public void setKamas(int kamas) {
 		this.kamas = kamas;
+	}
+
+	public void updateContent(List<Item> items) {
+		contents.clear();
+		for (Item i : items)
+			contents.put(i.getUid(), i);
 	}
 
 	public void addKamas(int kamas) {

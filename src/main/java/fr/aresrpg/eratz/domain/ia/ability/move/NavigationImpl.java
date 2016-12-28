@@ -167,6 +167,7 @@ public class NavigationImpl implements Navigation {
 		return null;
 	}
 
+	@Override
 	public void moveToRandomCell() {
 		Cell c = null;
 		List<Cell> cells = new ArrayList<>();

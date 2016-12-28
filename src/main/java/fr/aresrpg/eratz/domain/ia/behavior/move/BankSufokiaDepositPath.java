@@ -75,8 +75,15 @@ public class BankSufokiaDepositPath extends Behavior {
 		waitLitle();
 		LOGGER.info(AnsiColor.GREEN + "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",", "[", "]")) + " en banque !");
 		Threads.uSleep(1, TimeUnit.SECONDS);
-		int kamas = getPerso().getInventory().getKamas() - 5000;
-		if (kamas > 0) ability.moveKama(kamas);
+		int kamas = getPerso().getInventory().getKamas();
+		int bankK = getPerso().getAccount().getBanque().getKamas();
+		int tomove = 0;
+		if (kamas < 10_000) {
+			tomove = 10_000 - kamas;
+			if (tomove > bankK) tomove = bankK;
+			tomove = -tomove;
+		} else tomove = kamas - 10_000;
+		ability.moveKama(tomove);
 		ability.exchangeLeave();
 		Threads.uSleep(1, TimeUnit.SECONDS);
 		getPerso().getNavigation().moveToCell(432, true).moveToCell(15, true).moveToCell(15, true).moveToCell(15, true).moveToCell(445);

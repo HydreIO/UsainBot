@@ -24,6 +24,8 @@ public interface GameActionServerHandler {
 
 	void onEntityPmChange(int entityId, int pm);
 
+	void onTacle();
+
 	void onEntityKilled(int entityId);
 
 	void onEntitySummoned(MovementAction invoc);

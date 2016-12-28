@@ -40,7 +40,7 @@ public class BotItemServerHandler extends BotHandlerAbstract implements ItemServ
 	}
 
 	@Override
-	public void onItemRemove(int itemUid) {
+	public void onItemRemove(long itemUid) {
 		getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 
 	}

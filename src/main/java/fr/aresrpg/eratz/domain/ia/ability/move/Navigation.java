@@ -70,4 +70,9 @@ public interface Navigation {
 
 	void notifyMovementEnd();
 
+	/**
+	 * 
+	 */
+	void moveToRandomCell();
+
 }

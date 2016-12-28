@@ -46,14 +46,14 @@ public abstract class HarvestBehavior extends Behavior {
 
 	protected void experimentalTrace() {
 		posRessources.sort((a, b) -> Math.abs(b.x - a.x) + Math.abs(b.y - a.y));
-		posRessources.removeIf(p -> !hasLvlToGoHarvestOn(p));
+		posRessources.removeIf(p -> !needToVisitMap(p));
 	}
 
 	protected void useExperimentalIA() {
 		this.automate = true;
 	}
 
-	protected boolean hasLvlToGoHarvestOn(Point p) {
+	protected boolean needToVisitMap(Point p) {
 		BotMap map = MapsManager.getMap(p.x, p.y);
 		if (map == null) return true;
 		int lvlmin = 100;

@@ -1,6 +1,5 @@
 package fr.aresrpg.eratz.domain.ia.behavior.fight.type;
 
-import fr.aresrpg.eratz.domain.data.dofus.player.Spells;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.fight.FightAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.FightBehavior;
@@ -28,7 +27,7 @@ public class EnutrofCoffreBehavior extends FightBehavior {
 		tryHuman();
 		FightAbility fa = getPerso().getAbilities().getFightAbility();
 		if (getPerso().getStatsInfos().getLvl() > 99) {
-			fa.launchSpell(Spells.COFFRE_ANIME, -1);
+			//fa.launchSpell(Spells.COFFRE_ANIME, -1);
 			tryHuman();
 		}
 		fa.endTurn();

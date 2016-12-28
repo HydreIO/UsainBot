@@ -8,6 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.io.handler.proxy;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.protocol.*;
 import fr.aresrpg.dofus.protocol.ProtocolRegistry.Bound;
@@ -26,6 +27,7 @@ import fr.aresrpg.dofus.protocol.friend.server.FriendListPacket;
 import fr.aresrpg.dofus.protocol.game.actions.GameActions;
 import fr.aresrpg.dofus.protocol.game.actions.server.GameHarvestTimeAction;
 import fr.aresrpg.dofus.protocol.game.server.*;
+import fr.aresrpg.dofus.protocol.game.server.GamePositionsPacket.FightPosition;
 import fr.aresrpg.dofus.protocol.guild.server.GuildStatPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloConnectionPacket;
 import fr.aresrpg.dofus.protocol.hello.server.HelloGamePacket;
@@ -43,8 +45,7 @@ import fr.aresrpg.dofus.protocol.subarea.server.SubareaListPacket;
 import fr.aresrpg.dofus.protocol.waypoint.ZaapLeavePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapCreatePacket;
 import fr.aresrpg.dofus.protocol.waypoint.server.ZaapUseErrorPacket;
-import fr.aresrpg.dofus.structures.Chat;
-import fr.aresrpg.dofus.structures.InfosMsgType;
+import fr.aresrpg.dofus.structures.*;
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.data.ItemsData;
@@ -55,6 +56,7 @@ import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.io.handler.BaseServerPacketHandler;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy.ProxyConnectionType;
+import fr.aresrpg.eratz.domain.util.Constants;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.config.Variables;
 
@@ -63,6 +65,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -221,7 +224,8 @@ public class RemoteHandler extends BaseServerPacketHandler {
 				GameHarvestTimeAction actionh = (GameHarvestTimeAction) pkt.getAction();
 				Executors.SCHEDULED.schedule(() -> getPerso().setState(PlayerState.IDLE), actionh.getTime(), TimeUnit.MILLISECONDS);
 			}
-		}
+		} else if (pkt.getType() == GameActions.TACLE && pkt.getEntityId() == getPerso().getId()) getPerso().getNavigation().notifyMovementEnd();
+		else if (pkt.getType() == GameActions.SPELL_LAUNCHED && pkt.getEntityId() == getPerso().getId()) getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 		transmit(pkt);
 	}
 
@@ -243,7 +247,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	public void handle(ChatMessageOkPacket pkt) {
 		super.handle(pkt);
 		transmit(pkt);
-		if (pkt.getPlayerId() == getPerso().getId() || !getPerso().canRespond()) return;
+		if (pkt.getPlayerId() == getPerso().getId() || !getPerso().canTalk()) return;
 		switch (pkt.getChat()) {
 			case COMMON:
 				if (Randoms.nextInt(5) == 1)
@@ -251,9 +255,14 @@ public class RemoteHandler extends BaseServerPacketHandler {
 				break;
 			case PM_RECEIVE:
 			case PRIVATE:
-				String msg = pkt.getMsg();
-				if (Randoms.nextBool()) Executors.SCHEDULED.schedule(() -> getPerso().getAbilities().getBaseAbility().sendPm(pkt.getPseudo(), getPerso().getChatInfos().getResponse(msg)),
-						Randoms.nextBetween(3, 8), TimeUnit.SECONDS);
+				if (getPerso().canTalk() && Instant.ofEpochMilli(getPerso().getChatInfos().getLastSpeak()).plusSeconds(20).isAfter(Instant.now())) {
+					if (pkt.getMsg().contains("bot"))
+						Executors.SCHEDULED.schedule(
+								() -> getPerso().getAbilities().getBaseAbility().sendPm(pkt.getPseudo(), Constants.NO_BOT_SENTENCE.get(Randoms.nextInt(Constants.NO_BOT_SENTENCE.size()))),
+								Randoms.nextBetween(2, 4), TimeUnit.SECONDS);
+					else Executors.SCHEDULED.schedule(() -> getPerso().getAbilities().getBaseAbility().sendPm(pkt.getPseudo(), getPerso().getChatInfos().getResponse(pkt.getMsg())),
+							Randoms.nextBetween(3, 8), TimeUnit.SECONDS);
+				}
 				break;
 			default:
 				break;
@@ -409,6 +418,12 @@ public class RemoteHandler extends BaseServerPacketHandler {
 				TheBotFather.LOGGER.debug("Destruction de x" + todestroy + " " + lit.getName());
 				getPerso().sendPacketToServer(new ItemDestroyPacket(it.getUid(), todestroy));
 			}
+		} else if (pkt.getType() == InfosMsgType.INFOS && pkt.getMessage() == InfosMessage.PLAYER_IN_SPEC) {
+			Executors.SCHEDULED.schedule(() -> {
+				getPerso().getAbilities().getFightAbility().blockSpec(true);
+				Threads.uSleep(5, TimeUnit.SECONDS);
+				getPerso().getAbilities().getFightAbility().blockSpec(false);
+			} , 1, TimeUnit.SECONDS);
 		}
 	}
 
@@ -520,8 +535,9 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(GamePositionsPacket pkt) {
 		super.handle(pkt);
+		for (FightPosition p : pkt.getPositions())
+			if (p.getEntityId() == getPerso().getId()) getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 		transmit(pkt);
-
 	}
 
 	@Override
@@ -534,6 +550,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(GameServerReadyPacket pkt) {
 		super.handle(pkt);
+		if (pkt.getEntityId() == getPerso().getId()) getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}
@@ -548,6 +565,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(GameTurnFinishPacket pkt) {
 		super.handle(pkt);
+		if (pkt.getEntityId() == getPerso().getId()) getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}
@@ -569,6 +587,7 @@ public class RemoteHandler extends BaseServerPacketHandler {
 	@Override
 	public void handle(GameTurnReadyPacket pkt) {
 		super.handle(pkt);
+		if (pkt.getEntityId() == getPerso().getId()) getPerso().getAbilities().getFightAbility().getBotThread().unpause();
 		transmit(pkt);
 
 	}

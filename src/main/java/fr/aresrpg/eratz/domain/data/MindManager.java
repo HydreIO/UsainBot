@@ -7,6 +7,7 @@ import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
 import fr.aresrpg.eratz.domain.data.dofus.map.Bank;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.ia.behavior.fight.type.CraFeuFightBehavior;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.type.PassTurnBehavior;
 
 import java.util.concurrent.TimeUnit;
@@ -45,7 +46,7 @@ public class MindManager {
 
 	public void lvlUpBucheron(Perso p) {
 		LOGGER.success(p.getPseudo() + " va monter son métier bucheron !");
-		p.getFightInfos().setCurrentFightBehavior(new PassTurnBehavior(p));
+		p.getFightInfos().setCurrentFightBehavior(new CraFeuFightBehavior(p));
 		int hache = DofusItems2.HACHE_DE_L_APPRENTI_BÛCHERON.getId();
 		p.setCanDestroyItems(true);
 		p.getMind().keepItems(hache).thenHarvest(Path.BUCHERON_AMAKNA).thenDepositToNearestBank().thenRestart();

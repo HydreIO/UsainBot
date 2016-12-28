@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.io.handler.bot.handler;
 
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.protocol.game.client.GameCreatePacket;
 import fr.aresrpg.dofus.protocol.info.server.InfoCoordinatePacket.MovingPlayer;
 import fr.aresrpg.dofus.protocol.item.client.ItemDestroyPacket;
@@ -15,8 +16,10 @@ import fr.aresrpg.eratz.domain.data.ItemsData;
 import fr.aresrpg.eratz.domain.data.ItemsData.LangItem;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.std.info.InfoServerHandler;
+import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.awt.Point;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -34,7 +37,8 @@ public class BotInfoServerHandler extends BotHandlerAbstract implements InfoServ
 	@Override
 	public void onInfos(InfosMsgType type, int id, String msg) {
 		LOGGER.success(InfosData.getMessage(type, id));
-		if (InfosMessage.fromId(type, id) == InfosMessage.CURRENT_ADRESS) getPerso().sendPacketToServer(new GameCreatePacket().setGameType(GameType.SOLO));
+		InfosMessage infom = InfosMessage.fromId(type, id);
+		if (infom == InfosMessage.CURRENT_ADRESS) getPerso().sendPacketToServer(new GameCreatePacket().setGameType(GameType.SOLO));
 		if (type == InfosMsgType.ERROR && id == 12 && getPerso().canDestroyItems()) {
 			Item it = getPerso().getInventory().getHeaviestItem();
 			if (it == null) throw new NullPointerException("La ressource la plus lourde est introuvable !");
@@ -55,6 +59,12 @@ public class BotInfoServerHandler extends BotHandlerAbstract implements InfoServ
 				getPerso().sendPacketToServer(new ItemDestroyPacket(it.getUid(), todestroy));
 			}
 		}
+		if (infom == InfosMessage.PLAYER_IN_SPEC)
+			Executors.SCHEDULED.schedule(() -> {
+				getPerso().getAbilities().getFightAbility().blockSpec(true);
+				Threads.uSleep(5, TimeUnit.SECONDS);
+				getPerso().getAbilities().getFightAbility().blockSpec(false);
+			} , 1, TimeUnit.SECONDS);
 	}
 
 	@Override

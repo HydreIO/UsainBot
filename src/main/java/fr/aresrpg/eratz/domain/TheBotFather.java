@@ -166,12 +166,12 @@ public class TheBotFather {
 					AccountsManager.getInstance().getAccounts().forEach((s, a) -> {
 						if (a.isClientOnline() || a.isBotOnline()) {
 							Perso p = a.getCurrentPlayed();
-							if (p.canRespond()) {
+							if (p.canTalk()) {
 								LOGGER.success(p.getPseudo() + " va maintenant fermer sa grosse bouche carré");
-								p.setCanRespond(false);
+								p.setCanTalk(false);
 							} else {
 								LOGGER.success(p.getPseudo() + " va maintenant parler de temps en temps !");
-								p.setCanRespond(true);
+								p.setCanTalk(true);
 							}
 						}
 					});
@@ -243,6 +243,7 @@ public class TheBotFather {
 							LOGGER.debug("cell = " + p.getMapInfos().getCellId());
 							LOGGER.debug("Fight = " + p.getFightInfos().getCurrentFight());
 							LOGGER.debug("Inv = " + p.getInventory().showContent());
+							LOGGER.debug("Bank = " + a.getBanque().showContent());
 						}
 					});
 					break;

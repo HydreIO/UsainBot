@@ -3,6 +3,7 @@ package fr.aresrpg.eratz.domain.ia.ability.harvest;
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.protocol.basic.client.BasicUseSmileyPacket;
+import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.dofus.structures.job.Jobs;
 import fr.aresrpg.eratz.domain.TheBotFather;
@@ -10,8 +11,10 @@ import fr.aresrpg.eratz.domain.data.dofus.player.Smiley;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.object.Ressource;
 import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
+import fr.aresrpg.eratz.domain.util.Constants;
 import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
@@ -68,6 +71,7 @@ public class HarvestAbilityImpl implements HarvestAbility {
 			cl = r.getNeighborCell(getPerso().getMapInfos().getMap(), useDiagonale, tested);
 			if (cl == -1) {
 				TheBotFather.LOGGER.severe("Impossible de trouver une cellule pour la ressource " + r);
+				getPerso().getNavigation().moveToRandomCell();
 				return;
 			}
 			if (getPerso().getMapInfos().getCellId() != cl)
@@ -75,10 +79,12 @@ public class HarvestAbilityImpl implements HarvestAbility {
 			else break;
 			tested.add(cl);
 			TheBotFather.LOGGER.error("Impossible d'acceder à la cellule pour récolter '" + r.getType() + "' ! Switch de cellule");
-		} while (getPerso().getMapInfos().getCellId() == cl); // path non trouvé (par exemple a cause de mob agressifs)
+		} while (getPerso().getMapInfos().getCellId() != cl); // path non trouvé (par exemple a cause de mob agressifs)
 		getPerso().setState(PlayerState.HARVESTING);
 		if (getPerso().getMapInfos().getMap().getPlayers().size() > 1 && Randoms.nextBool())
 			getPerso().sendPacketToServer(new BasicUseSmileyPacket().setSmileyId(Smiley.getRandomTrollSmiley().getId()));
+		if (Randoms.nextInt(4) == 1 && Instant.ofEpochMilli(getPerso().getChatInfos().getLastSpeak()).plusSeconds(20).isAfter(Instant.now()))
+			getPerso().getAbilities().getBaseAbility().speak(Chat.COMMON, Constants.RANDOM_HARVEST.get(Randoms.nextInt(Constants.RANDOM_HARVEST.size())));
 		this.lastRess = r;
 		this.lastCellToHarvest = getPerso().getMapInfos().getCellId();
 		this.lastHarvest = System.currentTimeMillis();

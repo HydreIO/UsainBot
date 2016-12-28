@@ -44,10 +44,63 @@ public class Fight {
 		return f;
 	}
 
+	public void updateEntityPm(int entityId, int pm) {
+		Pair<MovementAction, FightEntity> findEntity = findEntity(entityId);
+		if (findEntity == null) {
+			LOGGER.severe("The entity was not found in the fight ! " + findEntity);
+			return;
+		}
+		if (findEntity.getSecond() != null)
+			findEntity.getSecond().setPm(pm);
+	}
+
+	public int getPositionOf(int entityId) {
+		Pair<MovementAction, FightEntity> findEntity = findEntity(entityId);
+		if (findEntity == null) {
+			LOGGER.severe("The entity was not found in the fight ! " + findEntity);
+			return -1;
+		}
+		return findEntity.getFirst().getCellId();
+	}
+
+	public void updateEntityPa(int entityId, int pa) {
+		Pair<MovementAction, FightEntity> findEntity = findEntity(entityId);
+		if (findEntity == null) {
+			LOGGER.severe("The entity was not found in the fight ! " + findEntity);
+			return;
+		}
+		if (findEntity.getSecond() != null)
+			findEntity.getSecond().setPa(pa);
+	}
+
+	public void updateEntityLife(int entityId, int life) {
+		Pair<MovementAction, FightEntity> findEntity = findEntity(entityId);
+		if (findEntity == null) {
+			LOGGER.severe("The entity was not found in the fight ! " + findEntity);
+			return;
+		}
+		if (findEntity.getSecond() != null)
+			findEntity.getSecond().setLife(life);
+	}
+
+	public boolean hasEntityOn(int cell) {
+		for (Pair<MovementAction, FightEntity> p : team0.values())
+			if (p.getFirst().getCellId() == cell) return true;
+		for (Pair<MovementAction, FightEntity> p : team1.values())
+			if (p.getFirst().getCellId() == cell) return true;
+		return false;
+	}
+
 	public Pair<MovementAction, FightEntity> findEntity(int id) {
 		Pair<MovementAction, FightEntity> a = team0.get(id);
 		if (a == null) a = team1.get(id);
 		return a;
+	}
+
+	public ConcurrentMap<Integer, Pair<MovementAction, FightEntity>> getOpponents(int entity) {
+		if (team0.containsKey(entity)) return team1;
+		else if (team1.containsKey(entity)) return team0;
+		else throw new NullPointerException("The entity " + entity + " is not registered in this fight !");
 	}
 
 	public void entityMove(int id, int cellid) {
