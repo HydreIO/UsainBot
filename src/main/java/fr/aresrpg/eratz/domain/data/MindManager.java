@@ -3,12 +3,12 @@ package fr.aresrpg.eratz.domain.data;
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
-import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
-import fr.aresrpg.eratz.domain.data.dofus.map.Bank;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.type.CraFeuFightBehavior;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.type.PassTurnBehavior;
+import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
+import fr.aresrpg.tofumanchou.domain.data.enums.DofusItems2;
 
 import java.util.concurrent.TimeUnit;
 

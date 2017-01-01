@@ -17,7 +17,7 @@ import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.state.AccountState;
 import fr.aresrpg.eratz.domain.io.handler.proxy.LocalHandler;
 import fr.aresrpg.eratz.domain.io.handler.proxy.RemoteHandler;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;

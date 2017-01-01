@@ -20,7 +20,7 @@ import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.ia.behavior.AntiAfkBehavior;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.type.PassTurnBehavior;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.io.IOException;
 import java.util.*;

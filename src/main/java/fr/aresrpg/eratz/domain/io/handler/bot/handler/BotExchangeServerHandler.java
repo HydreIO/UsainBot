@@ -7,7 +7,7 @@ import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility.BuyResult;
 import fr.aresrpg.eratz.domain.std.exchange.ExchangeServerHandler;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;

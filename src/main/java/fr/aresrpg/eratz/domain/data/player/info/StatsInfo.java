@@ -5,6 +5,8 @@ import fr.aresrpg.dofus.structures.stat.StatValue;
 import fr.aresrpg.eratz.domain.data.dofus.player.*;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.object.Spell;
+import fr.aresrpg.tofumanchou.domain.data.enums.Classe;
+import fr.aresrpg.tofumanchou.domain.data.enums.Genre;
 
 import java.util.*;
 

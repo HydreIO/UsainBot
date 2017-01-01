@@ -35,7 +35,9 @@ import fr.aresrpg.eratz.domain.ia.mind.BaseMind;
 import fr.aresrpg.eratz.domain.ia.mind.Mind;
 import fr.aresrpg.eratz.domain.io.handler.bot.BotPacketHandler;
 import fr.aresrpg.eratz.domain.util.Closeable;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.domain.data.enums.Classe;
+import fr.aresrpg.tofumanchou.domain.data.enums.Genre;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;

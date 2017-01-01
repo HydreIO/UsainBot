@@ -6,7 +6,7 @@ import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.FightBehavior;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.type.PassTurnBehavior;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.ArrayList;
 import java.util.List;

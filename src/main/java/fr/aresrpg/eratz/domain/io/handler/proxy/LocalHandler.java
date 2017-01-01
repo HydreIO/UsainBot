@@ -44,8 +44,8 @@ import fr.aresrpg.eratz.domain.event.BotMoveEvent;
 import fr.aresrpg.eratz.domain.io.handler.BaseClientPacketHandler;
 import fr.aresrpg.eratz.domain.io.proxy.DofusProxy;
 import fr.aresrpg.eratz.domain.io.proxy.Proxy;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 import fr.aresrpg.eratz.domain.util.encryption.CryptHelper;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

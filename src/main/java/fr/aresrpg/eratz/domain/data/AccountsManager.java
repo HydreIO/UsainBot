@@ -11,11 +11,11 @@ package fr.aresrpg.eratz.domain.data;
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 import fr.aresrpg.dofus.structures.server.*;
-import fr.aresrpg.eratz.domain.data.dofus.player.Classe;
-import fr.aresrpg.eratz.domain.data.dofus.player.Genre;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.Perso;
-import fr.aresrpg.eratz.domain.util.config.Variables;
+import fr.aresrpg.tofumanchou.domain.data.enums.Classe;
+import fr.aresrpg.tofumanchou.domain.data.enums.Genre;
+import fr.aresrpg.tofumanchou.infra.config.Variables;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -8,8 +8,8 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.ia.ability.move;
 
-import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
-import fr.aresrpg.eratz.domain.data.dofus.map.Zaapi;
+import fr.aresrpg.tofumanchou.domain.data.enums.Zaap;
+import fr.aresrpg.tofumanchou.domain.data.enums.Zaapi;
 
 import java.awt.Point;
 import java.util.List;

@@ -3,17 +3,14 @@ package fr.aresrpg.eratz.domain.io.handler.bot.handler;
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
-import fr.aresrpg.dofus.protocol.game.client.GameActionACKPacket;
 import fr.aresrpg.dofus.protocol.game.movement.MovementAction;
 import fr.aresrpg.dofus.structures.game.JoinError;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.std.game.action.GameActionServerHandler;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -137,19 +134,7 @@ public class BotGameActionServerHandler extends BotHandlerAbstract implements Ga
 			getPerso().getAbilities().getBaseAbility().getBotThread().unpause();
 			return;
 		}
-		Executors.SCHEDULED.schedule(() -> {
-			int action = 0;
-			switch (getPerso().getBotInfos().getCurrentJob().getType()) {
-				case JOB_BUCHERON:
-					action = 1;
-					break;
 
-				default:
-					break;
-			}
-			getPerso().sendPacketToServer(new GameActionACKPacket().setActionId(action));
-			getPerso().setState(PlayerState.IDLE);
-		} , time, TimeUnit.MILLISECONDS);
 	}
 
 	@Override

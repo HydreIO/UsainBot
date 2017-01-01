@@ -10,7 +10,7 @@ package fr.aresrpg.eratz.domain.data;
 
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
-import fr.aresrpg.dofus.structures.PathDirection;
+import fr.aresrpg.dofus.structures.Orientation;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
@@ -106,7 +106,7 @@ public class Roads {
 
 	public static boolean canMove(Point from, Point to) {
 		MapRestriction r = getRestriction(from);
-		PathDirection dir = Pathfinding.getDirectionForMap(from.x, from.y, to.x, to.y);
+		Orientation dir = Pathfinding.getDirectionForMap(from.x, from.y, to.x, to.y);
 		return r.canMove(dir);
 	}
 
@@ -174,7 +174,7 @@ public class Roads {
 			return new MapRestriction(p.x, p.y);
 		}
 
-		public boolean canMove(PathDirection dir) { // return true si le chemin n'est pas bloqué
+		public boolean canMove(Orientation dir) { // return true si le chemin n'est pas bloqué
 			switch (dir) {
 				case DOWN:
 				case DOWN_LEFT:
@@ -192,7 +192,7 @@ public class Roads {
 			return true;
 		}
 
-		public void setCantMove(PathDirection dir) { // indique qu'on ne peut pas aller dans cette direction depuis la case actuelle
+		public void setCantMove(Orientation dir) { // indique qu'on ne peut pas aller dans cette direction depuis la case actuelle
 			switch (dir) {
 				case DOWN:
 				case DOWN_LEFT:

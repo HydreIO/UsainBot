@@ -10,7 +10,7 @@ package fr.aresrpg.eratz.domain.ia.behavior;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.eratz.domain.data.player.Perso;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;

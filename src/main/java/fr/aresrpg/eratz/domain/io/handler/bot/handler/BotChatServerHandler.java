@@ -10,7 +10,7 @@ import fr.aresrpg.eratz.domain.data.MindManager;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.std.chat.ChatServerHandler;
 import fr.aresrpg.eratz.domain.util.Constants;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;

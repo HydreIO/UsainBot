@@ -8,9 +8,9 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.ia.ability.harvest;
 
-import fr.aresrpg.dofus.structures.Skills;
-import fr.aresrpg.eratz.domain.data.player.object.Ressource;
 import fr.aresrpg.eratz.domain.util.Closeable;
+import fr.aresrpg.tofumanchou.domain.data.enums.Skills;
+import fr.aresrpg.tofumanchou.infra.data.Ressource;
 
 /**
  * 

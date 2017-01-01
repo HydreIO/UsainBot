@@ -3,7 +3,7 @@ package fr.aresrpg.eratz.domain.data.player.object;
 import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 import fr.aresrpg.commons.domain.util.Randoms;
-import fr.aresrpg.dofus.structures.PathDirection;
+import fr.aresrpg.dofus.structures.Orientation;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.Perso;
@@ -81,34 +81,34 @@ public class Road {
 		return label;
 	}
 
-	private PathDirection getDifferentDir(PathDirection base) {
-		PathDirection dir = base;
+	private Orientation getDifferentDir(Orientation base) {
+		Orientation dir = base;
 		do {
-			dir = PathDirection.values()[Randoms.nextInt(PathDirection.values().length - 1)];
+			dir = Orientation.values()[Randoms.nextInt(Orientation.values().length - 1)];
 		} while (isSame(dir, base));
 		return dir;
 	}
 
-	private boolean isSame(PathDirection dir, PathDirection other) {
+	private boolean isSame(Orientation dir, Orientation other) {
 		if (dir == null || other == null) return false;
 		switch (dir) {
 			case DOWN:
 			case DOWN_LEFT:
 			case DOWN_RIGHT:
-				return other == PathDirection.DOWN || other == PathDirection.DOWN_LEFT || other == PathDirection.DOWN_RIGHT;
+				return other == Orientation.DOWN || other == Orientation.DOWN_LEFT || other == Orientation.DOWN_RIGHT;
 			case LEFT:
-				return other == PathDirection.LEFT;
+				return other == Orientation.LEFT;
 			case RIGHT:
-				return other == PathDirection.RIGHT;
+				return other == Orientation.RIGHT;
 			case UP:
 			case UP_LEFT:
 			case UP_RIGHT:
-				return other == PathDirection.UP || other == PathDirection.UP_LEFT || other == PathDirection.UP_RIGHT;
+				return other == Orientation.UP || other == Orientation.UP_LEFT || other == Orientation.UP_RIGHT;
 		}
 		return false;
 	}
 
-	private void moveWithDirection(Perso perso, PathDirection dir) {
+	private void moveWithDirection(Perso perso, Orientation dir) {
 		switch (dir) {
 			case DOWN:
 			case DOWN_LEFT:

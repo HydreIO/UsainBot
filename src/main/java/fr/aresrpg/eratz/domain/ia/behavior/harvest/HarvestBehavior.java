@@ -1,16 +1,16 @@
 package fr.aresrpg.eratz.domain.ia.behavior.harvest;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
-import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.TheBotFather;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.Perso;
-import fr.aresrpg.eratz.domain.data.player.object.Ressource;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
+import fr.aresrpg.tofumanchou.domain.data.enums.Skills;
+import fr.aresrpg.tofumanchou.infra.data.Ressource;
 
 import java.awt.Point;
 import java.util.*;

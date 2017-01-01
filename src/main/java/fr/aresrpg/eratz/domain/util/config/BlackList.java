@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.util.config;
 
+import fr.aresrpg.tofumanchou.infra.config.Configured;
+
 import java.util.ArrayList;
 import java.util.List;
 

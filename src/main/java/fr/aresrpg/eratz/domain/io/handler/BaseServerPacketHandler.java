@@ -61,38 +61,26 @@ import fr.aresrpg.eratz.domain.data.AccountsManager;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
-import fr.aresrpg.eratz.domain.data.dofus.player.DofusJob;
 import fr.aresrpg.eratz.domain.data.player.Account;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.info.StatsInfo;
-import fr.aresrpg.eratz.domain.data.player.object.Ressource;
 import fr.aresrpg.eratz.domain.gui.MapView;
 import fr.aresrpg.eratz.domain.std.aproach.AccountServerHandler;
-import fr.aresrpg.eratz.domain.std.area.SubareaServerHandler;
-import fr.aresrpg.eratz.domain.std.chat.ChatServerHandler;
 import fr.aresrpg.eratz.domain.std.dialog.DialogServerHandler;
-import fr.aresrpg.eratz.domain.std.exchange.ExchangeServerHandler;
-import fr.aresrpg.eratz.domain.std.fight.FightServerHandler;
-import fr.aresrpg.eratz.domain.std.friend.FriendServerHandler;
 import fr.aresrpg.eratz.domain.std.game.GameServerHandler;
 import fr.aresrpg.eratz.domain.std.game.action.GameActionServerHandler;
-import fr.aresrpg.eratz.domain.std.guild.GuildServerHandler;
-import fr.aresrpg.eratz.domain.std.info.InfoServerHandler;
-import fr.aresrpg.eratz.domain.std.item.ItemServerHandler;
-import fr.aresrpg.eratz.domain.std.job.JobServerHandler;
-import fr.aresrpg.eratz.domain.std.mount.MountServerHandler;
 import fr.aresrpg.eratz.domain.std.party.PartyServerHandler;
-import fr.aresrpg.eratz.domain.std.specialization.SpecializationServerHandler;
-import fr.aresrpg.eratz.domain.std.spell.SpellServerHandler;
 import fr.aresrpg.eratz.domain.std.zaap.ZaapServerHandler;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.infra.data.DofusJob;
+import fr.aresrpg.tofumanchou.infra.data.Ressource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * 
@@ -103,104 +91,10 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	private Perso perso;
 	private Account account;
 	private String ticket;
-	private Set<FightServerHandler> fightHandler = new HashSet<>();
-	private Set<AccountServerHandler> accountHandler = new HashSet<>();
-	private Set<ChatServerHandler> chatHandler = new HashSet<>();
-	private Set<ExchangeServerHandler> exchangeHandler = new HashSet<>();
-	private Set<ZaapServerHandler> zaapHandler = new HashSet<>();
-	private Set<GuildServerHandler> guildHandler = new HashSet<>();
-	private Set<InfoServerHandler> infoHandler = new HashSet<>();
-	private Set<MountServerHandler> mountHandler = new HashSet<>();
-	private Set<SpecializationServerHandler> specializationHandler = new HashSet<>();
-	private Set<SpellServerHandler> spellServerHandler = new HashSet<>();
-	private Set<SubareaServerHandler> subareaServerHandler = new HashSet<>();
-	private Set<GameActionServerHandler> gameActionHandler = new HashSet<>();
-	private Set<GameServerHandler> gameHandler = new HashSet<>();
-	private Set<DialogServerHandler> dialogHandler = new HashSet<>();
-	private Set<ItemServerHandler> itemHandler = new HashSet<>();
-	private Set<PartyServerHandler> partyHandler = new HashSet<>();
-	private Set<JobServerHandler> jobHandler = new HashSet<>();
-	private Set<FriendServerHandler> friendHandler = new HashSet<>();
 
 	public BaseServerPacketHandler(Perso perso) {
 		this.perso = perso;
 	}
-
-	public void addFriendHandlers(FriendServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(friendHandler::add);
-	}
-
-	public void addJobHandlers(JobServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(jobHandler::add);
-	}
-
-	public void addPartyHandlers(PartyServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(partyHandler::add);
-	}
-
-	public void addItemHandlers(ItemServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(itemHandler::add);
-	}
-
-	public void addDialogHandlers(DialogServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(dialogHandler::add);
-	}
-
-	public void addGameActionHandlers(GameActionServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(gameActionHandler::add);
-	}
-
-	public void addGameHandlers(GameServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(gameHandler::add);
-	}
-
-	public void addSubareaHandlers(SubareaServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(subareaServerHandler::add);
-	}
-
-	public void addSpellHandlers(SpellServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(spellServerHandler::add);
-	}
-
-	public void addSpecializationHandlers(SpecializationServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(specializationHandler::add);
-	}
-
-	public void addMountHandlers(MountServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(mountHandler::add);
-	}
-
-	public void addInfoHandlers(InfoServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(infoHandler::add);
-	}
-
-	public void addGuildHandlers(GuildServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(guildHandler::add);
-	}
-
-	public void addExchangeHandlers(ExchangeServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(exchangeHandler::add);
-	}
-
-	public void addFightHandlers(FightServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(fightHandler::add);
-	}
-
-	public void addZaapHandlers(ZaapServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(zaapHandler::add);
-	}
-
-	public void addAccountHandlers(AccountServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(accountHandler::add);
-	}
-
-	public void addChatHandlers(ChatServerHandler... handlers) {
-		Arrays.stream(handlers).forEach(chatHandler::add);
-	}
-
-	// base doit handle tout les packets correspondant au handlers custom <maphandler etc>
-	// transfert doit virer
-	// remote doit super.handle puis transmit pour tout les packets
 
 	/**
 	 * @return the perso
@@ -225,141 +119,11 @@ public abstract class BaseServerPacketHandler implements ServerPacketHandler {
 	}
 
 	/**
-	 * @return the jobHandler
-	 */
-	public Set<JobServerHandler> getJobHandler() {
-		return jobHandler;
-	}
-
-	/**
-	 * @return the exchangeHandler
-	 */
-	public Set<ExchangeServerHandler> getExchangeHandler() {
-		return exchangeHandler;
-	}
-
-	/**
-	 * @return the partyHandler
-	 */
-	public Set<PartyServerHandler> getPartyHandler() {
-		return partyHandler;
-	}
-
-	/**
-	 * @return the friendHandler
-	 */
-	public Set<FriendServerHandler> getFriendHandler() {
-		return friendHandler;
-	}
-
-	/**
-	 * @return the subareaServerHandler
-	 */
-	public Set<SubareaServerHandler> getSubareaServerHandler() {
-		return subareaServerHandler;
-	}
-
-	/**
-	 * @return the dialogHandler
-	 */
-	public Set<DialogServerHandler> getDialogHandler() {
-		return dialogHandler;
-	}
-
-	/**
-	 * @return the itemHandler
-	 */
-	public Set<ItemServerHandler> getItemHandler() {
-		return itemHandler;
-	}
-
-	/**
-	 * @return the chatHandler
-	 */
-	public Set<ChatServerHandler> getChatHandler() {
-		return chatHandler;
-	}
-
-	/**
-	 * @return the gameActionHandler
-	 */
-	public Set<GameActionServerHandler> getGameActionHandler() {
-		return gameActionHandler;
-	}
-
-	/**
-	 * @return the gameHandler
-	 */
-	public Set<GameServerHandler> getGameHandler() {
-		return gameHandler;
-	}
-
-	/**
-	 * @return the guildHandler
-	 */
-	public Set<GuildServerHandler> getGuildHandler() {
-		return guildHandler;
-	}
-
-	/**
-	 * @return the fightHandler
-	 */
-	public Set<FightServerHandler> getFightHandler() {
-		return fightHandler;
-	}
-
-	/**
-	 * @return the spellServerHandler
-	 */
-	public Set<SpellServerHandler> getSpellServerHandler() {
-		return spellServerHandler;
-	}
-
-	/**
-	 * @return the mountHandler
-	 */
-	public Set<MountServerHandler> getMountHandler() {
-		return mountHandler;
-	}
-
-	/**
 	 * @param perso
 	 *            the perso to set
 	 */
 	public void setPerso(Perso perso) {
 		this.perso = perso;
-	}
-
-	protected void forEachAccountHandlers(Consumer<? super AccountServerHandler> actions) {
-		getAccountHandler().forEach(actions);
-	}
-
-	/**
-	 * @return the specializationHandler
-	 */
-	public Set<SpecializationServerHandler> getSpecializationHandler() {
-		return specializationHandler;
-	}
-
-	/**
-	 * @return the accountHandler
-	 */
-	public Set<AccountServerHandler> getAccountHandler() {
-		return accountHandler;
-	}
-
-	/**
-	 * @return the infoHandler
-	 */
-	public Set<InfoServerHandler> getInfoHandler() {
-		return infoHandler;
-	}
-
-	/**
-	 * @return the zaapHandler
-	 */
-	public Set<ZaapServerHandler> getZaapHandler() {
-		return zaapHandler;
 	}
 
 	protected void log(Packet pkt) {

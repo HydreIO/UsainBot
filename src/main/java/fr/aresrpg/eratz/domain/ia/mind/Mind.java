@@ -1,12 +1,10 @@
 package fr.aresrpg.eratz.domain.ia.mind;
 
-import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems;
-import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
-import fr.aresrpg.eratz.domain.data.dofus.map.Bank;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.util.Closeable;
 import fr.aresrpg.eratz.domain.util.ThreadBlocker;
+import fr.aresrpg.tofumanchou.domain.data.enums.*;
 
 import java.util.Arrays;
 import java.util.Set;

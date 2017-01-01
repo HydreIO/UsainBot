@@ -22,14 +22,12 @@ import fr.aresrpg.dofus.protocol.party.client.*;
 import fr.aresrpg.dofus.protocol.waypoint.client.ZaapUsePacket;
 import fr.aresrpg.dofus.structures.*;
 import fr.aresrpg.dofus.structures.item.Item;
-import fr.aresrpg.eratz.domain.data.dofus.map.Zaap;
-import fr.aresrpg.eratz.domain.data.dofus.map.Zaapi;
-import fr.aresrpg.eratz.domain.data.dofus.player.Smiley;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.util.BotThread;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
-import fr.aresrpg.eratz.domain.util.exception.ZaapException;
+import fr.aresrpg.tofumanchou.domain.data.enums.*;
+import fr.aresrpg.tofumanchou.domain.exception.ZaapException;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;

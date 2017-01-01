@@ -11,12 +11,12 @@ import fr.aresrpg.dofus.structures.InfosMsgType;
 import fr.aresrpg.dofus.structures.game.GameType;
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.eratz.domain.TheBotFather;
-import fr.aresrpg.eratz.domain.data.InfosData;
-import fr.aresrpg.eratz.domain.data.ItemsData;
-import fr.aresrpg.eratz.domain.data.ItemsData.LangItem;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.std.info.InfoServerHandler;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.domain.data.InfosData;
+import fr.aresrpg.tofumanchou.domain.data.ItemsData;
+import fr.aresrpg.tofumanchou.domain.data.ItemsData.LangItem;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.awt.Point;
 import java.util.concurrent.TimeUnit;

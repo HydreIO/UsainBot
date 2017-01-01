@@ -17,7 +17,7 @@ import fr.aresrpg.eratz.domain.data.player.object.Spell;
 import fr.aresrpg.eratz.domain.ia.ability.fight.FightAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
-import fr.aresrpg.eratz.domain.util.config.Variables;
+import fr.aresrpg.tofumanchou.infra.config.Variables;
 
 import java.awt.Point;
 import java.util.*;

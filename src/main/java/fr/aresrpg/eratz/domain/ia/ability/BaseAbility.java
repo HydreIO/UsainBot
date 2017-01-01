@@ -7,17 +7,12 @@ import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.dofus.structures.item.ItemCategory;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.eratz.domain.data.Roads;
-import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems;
-import fr.aresrpg.eratz.domain.data.dofus.item.DofusItems2;
-import fr.aresrpg.eratz.domain.data.dofus.map.*;
-import fr.aresrpg.eratz.domain.data.dofus.player.Smiley;
 import fr.aresrpg.eratz.domain.data.player.Perso;
-import fr.aresrpg.eratz.domain.data.player.inventory.PlayerInventory;
 import fr.aresrpg.eratz.domain.data.player.object.Road;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.eratz.domain.util.Closeable;
-import fr.aresrpg.eratz.domain.util.exception.ZaapException;
+import fr.aresrpg.tofumanchou.domain.exception.ZaapException;
 
 import java.util.concurrent.TimeUnit;
 
@@ -263,22 +258,5 @@ public interface BaseAbility extends Closeable {
 		return c.getMovement() == 0;
 	}
 
-	public static enum BuyResult {
-		SUCCESS("Sucess"),
-		NO_KAMA("Kamas insuffisants"),
-		NO_PODS("Pods insuffisants");
-
-		private String reason;
-
-		private BuyResult(String reason) {
-			this.reason = reason;
-		}
-
-		/**
-		 * @return the reason
-		 */
-		public String getReason() {
-			return reason;
-		}
-	}
+	
 }

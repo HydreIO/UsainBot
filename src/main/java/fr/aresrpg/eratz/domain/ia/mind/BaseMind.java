@@ -4,13 +4,13 @@ import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.functional.suplier.Supplier;
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
 import fr.aresrpg.dofus.structures.Chat;
-import fr.aresrpg.eratz.domain.data.dofus.map.Bank;
 import fr.aresrpg.eratz.domain.data.dofus.map.Path;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.ia.behavior.move.*;
 import fr.aresrpg.eratz.domain.util.ThreadBlocker;
+import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;

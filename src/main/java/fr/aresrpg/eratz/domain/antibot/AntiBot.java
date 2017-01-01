@@ -7,7 +7,7 @@ import fr.aresrpg.commons.domain.util.schedule.Scheduled;
 import fr.aresrpg.eratz.domain.data.AccountsManager;
 import fr.aresrpg.eratz.domain.data.dofus.player.BotJob;
 import fr.aresrpg.eratz.domain.data.player.Perso;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.TimeUnit;
 

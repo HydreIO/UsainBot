@@ -18,12 +18,12 @@ import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedIt
 import fr.aresrpg.dofus.structures.ExchangeMove;
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.dofus.structures.item.ItemCategory;
-import fr.aresrpg.eratz.domain.data.ItemsData;
-import fr.aresrpg.eratz.domain.data.ItemsData.LangItem;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
+import fr.aresrpg.tofumanchou.domain.data.ItemsData;
+import fr.aresrpg.tofumanchou.domain.data.ItemsData.LangItem;
 
 import java.util.Arrays;
 import java.util.Set;

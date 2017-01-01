@@ -1,7 +1,7 @@
 package fr.aresrpg.eratz.domain.std.sell;
 
 import fr.aresrpg.dofus.structures.item.Item;
-import fr.aresrpg.eratz.domain.data.dofus.item.Hdv;
+import fr.aresrpg.tofumanchou.domain.data.enums.Hdv;
 
 /**
  * 

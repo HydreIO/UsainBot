@@ -2,8 +2,8 @@ package fr.aresrpg.eratz.domain.data.player.info;
 
 import fr.aresrpg.dofus.structures.job.Jobs;
 import fr.aresrpg.eratz.domain.data.dofus.player.BotJob;
-import fr.aresrpg.eratz.domain.data.dofus.player.DofusJob;
 import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.tofumanchou.infra.data.DofusJob;
 
 import java.awt.Point;
 import java.util.HashSet;

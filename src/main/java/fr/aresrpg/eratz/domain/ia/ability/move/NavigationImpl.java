@@ -10,7 +10,7 @@ import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
 import fr.aresrpg.dofus.protocol.game.client.GameActionACKPacket;
 import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
 import fr.aresrpg.dofus.protocol.game.movement.MovementMonsterGroup;
-import fr.aresrpg.dofus.structures.PathDirection;
+import fr.aresrpg.dofus.structures.Orientation;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.util.Maps;
@@ -19,11 +19,11 @@ import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.Roads;
 import fr.aresrpg.eratz.domain.data.Roads.MapRestriction;
 import fr.aresrpg.eratz.domain.data.dofus.map.*;
-import fr.aresrpg.eratz.domain.data.dofus.mob.AgressiveMobs;
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.event.BotMoveEvent;
 import fr.aresrpg.eratz.domain.util.BotThread;
-import fr.aresrpg.eratz.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.domain.data.enums.*;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.awt.Point;
 import java.io.IOException;
@@ -297,7 +297,7 @@ public class NavigationImpl implements Navigation {
 		for (Point p : path) {
 			BotMap newmap = perso.getMapInfos().getMap();
 			if (newmap.isOnPoint(p)) continue;
-			PathDirection dir = Pathfinding.getDirectionForMap(newmap.getX(), newmap.getY(), (int) p.getX(), (int) p.getY());
+			Orientation dir = Pathfinding.getDirectionForMap(newmap.getX(), newmap.getY(), (int) p.getX(), (int) p.getY());
 			if (dir == null) {
 				LOGGER.warning("Impossible de trouver la direction pour aller de [" + newmap.getX() + "," + newmap.getY() + "] vers [" + p.x + "," + p.y + "]");
 				LOGGER.warning("Recherche du téléporteur le plus éloigné !");
@@ -331,7 +331,7 @@ public class NavigationImpl implements Navigation {
 		}
 	}
 
-	public void moveWithDirection(Perso perso, PathDirection dir) {
+	public void moveWithDirection(Perso perso, Orientation dir) {
 		switch (dir) {
 			case DOWN:
 			case DOWN_LEFT:

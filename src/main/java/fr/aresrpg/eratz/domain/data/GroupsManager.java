@@ -4,7 +4,7 @@ import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
 
 import fr.aresrpg.eratz.domain.data.player.Perso;
 import fr.aresrpg.eratz.domain.data.player.object.Group;
-import fr.aresrpg.eratz.domain.util.config.Variables;
+import fr.aresrpg.tofumanchou.infra.config.Variables;
 
 import java.util.HashMap;
 import java.util.Map;
