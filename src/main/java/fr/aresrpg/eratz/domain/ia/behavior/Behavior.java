@@ -9,7 +9,7 @@
 package fr.aresrpg.eratz.domain.ia.behavior;
 
 import fr.aresrpg.commons.domain.functional.suplier.Supplier;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -21,21 +21,21 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class Behavior implements Supplier<BehaviorStopReason> {
 
-	private Perso perso;
+	private BotPerso perso;
 	private boolean isDone;
 	private boolean isCancelled;
 	private Queue<Runnable> moves = new LinkedList<>();
 	private Queue<Runnable> path = new LinkedList<>();
 	private boolean pathEnd;
 
-	public Behavior(Perso perso) {
+	public Behavior(BotPerso perso) {
 		this.perso = perso;
 	}
 
 	/**
 	 * @return the perso
 	 */
-	public Perso getPerso() {
+	public BotPerso getPerso() {
 		return perso;
 	}
 

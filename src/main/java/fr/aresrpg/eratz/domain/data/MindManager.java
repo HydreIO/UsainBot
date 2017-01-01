@@ -1,10 +1,9 @@
 package fr.aresrpg.eratz.domain.data;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+import static fr.aresrpg.eratz.domain.BotFather.LOGGER;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
-import fr.aresrpg.eratz.domain.data.dofus.map.Path;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.type.CraFeuFightBehavior;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.type.PassTurnBehavior;
 import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
@@ -30,7 +29,7 @@ public class MindManager {
 		return INSTANCE;
 	}
 
-	public void followPlayer(Perso p, int tofollow) {
+	public void followPlayer(BotPerso p, int tofollow) {
 		LOGGER.success(p.getPseudo() + " va suivre " + tofollow + " !");
 		p.getFightInfos().setCurrentFightBehavior(new PassTurnBehavior(p));
 		p.getAbilities().getBaseAbility().followGroupMember(tofollow);
@@ -38,13 +37,13 @@ public class MindManager {
 		p.getMind().thenFollow(tofollow);
 	}
 
-	public void lvlUpPaysan(Perso p) {
+	public void lvlUpPaysan(BotPerso p) {
 		LOGGER.success(p.getPseudo() + " va monter son métier paysan !");
 		p.getFightInfos().setCurrentFightBehavior(new PassTurnBehavior(p));
 		p.getMind().thenHarvest(Path.BLE).thenDepositToBank(Bank.ASTRUB).thenRestart();
 	}
 
-	public void lvlUpBucheron(Perso p) {
+	public void lvlUpBucheron(BotPerso p) {
 		LOGGER.success(p.getPseudo() + " va monter son métier bucheron !");
 		p.getFightInfos().setCurrentFightBehavior(new CraFeuFightBehavior(p));
 		int hache = DofusItems2.HACHE_DE_L_APPRENTI_BÛCHERON.getId();

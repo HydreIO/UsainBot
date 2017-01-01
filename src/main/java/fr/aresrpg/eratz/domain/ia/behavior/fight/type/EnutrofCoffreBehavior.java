@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.behavior.fight.type;
 
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.ability.fight.FightAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.FightBehavior;
 
@@ -13,7 +13,7 @@ public class EnutrofCoffreBehavior extends FightBehavior {
 	/**
 	 * @param perso
 	 */
-	public EnutrofCoffreBehavior(Perso perso) {
+	public EnutrofCoffreBehavior(BotPerso perso) {
 		super(perso);
 	}
 

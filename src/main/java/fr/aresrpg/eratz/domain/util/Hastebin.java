@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.util;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+import static fr.aresrpg.eratz.domain.BotFather.LOGGER;
 
 import fr.aresrpg.dofus.util.Lang;
 

@@ -8,7 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.ia.behavior.move;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+import static fr.aresrpg.eratz.domain.BotFather.LOGGER;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.log.AnsiColors.AnsiColor;
@@ -18,7 +18,7 @@ import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedIt
 import fr.aresrpg.dofus.structures.ExchangeMove;
 import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.dofus.structures.item.ItemCategory;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
@@ -38,7 +38,7 @@ public class BankSufokiaDepositPath extends Behavior {
 
 	private int[] items;
 
-	public BankSufokiaDepositPath(Perso perso, int... itemsToKeep) {
+	public BankSufokiaDepositPath(BotPerso perso, int... itemsToKeep) {
 		super(perso);
 		this.items = itemsToKeep;
 	}

@@ -1,8 +1,6 @@
 package fr.aresrpg.eratz.domain.data.player.info;
 
-import fr.aresrpg.dofus.protocol.chat.ChatSubscribeChannelPacket;
-import fr.aresrpg.dofus.structures.Chat;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.util.chat.*;
 
 import java.util.*;
@@ -13,7 +11,6 @@ import java.util.*;
  */
 public class ChatInfo extends Info {
 
-	private Map<Chat, Boolean> chats = new HashMap<>();
 	private Map<String, Long> lastMsgByPlayer = new HashMap<>();
 	private final ChatterBotFactory factory = new ChatterBotFactory();
 	private ChatterBot voice;
@@ -23,7 +20,7 @@ public class ChatInfo extends Info {
 	/**
 	 * @param perso
 	 */
-	public ChatInfo(Perso perso) {
+	public ChatInfo(BotPerso perso) {
 		super(perso);
 		try {
 			this.voice = factory.create(ChatterBotType.CLEVERBOT);
@@ -61,29 +58,6 @@ public class ChatInfo extends Info {
 	@Override
 	public void shutdown() {
 
-	}
-
-	/**
-	 * @return the chats
-	 */
-	public Map<Chat, Boolean> getChats() {
-		return chats;
-	}
-
-	public void activate(Chat... chts) {
-		Arrays.stream(chts).forEach(c -> chats.put(c, true));
-		ChatSubscribeChannelPacket pkt = new ChatSubscribeChannelPacket();
-		pkt.setAdd(true);
-		pkt.setChannels(chts);
-		getPerso().sendPacketToServer(pkt);
-	}
-
-	public void desactivate(Chat... chts) {
-		Arrays.stream(chts).forEach(c -> chats.put(c, false));
-		ChatSubscribeChannelPacket pkt = new ChatSubscribeChannelPacket();
-		pkt.setAdd(false);
-		pkt.setChannels(chts);
-		getPerso().sendPacketToServer(pkt);
 	}
 
 }

@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.behavior.move;
 
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.ability.move.Navigation;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
@@ -15,7 +15,7 @@ public class IncarnamToAstrubPath extends Behavior {
 	/**
 	 * @param perso
 	 */
-	public IncarnamToAstrubPath(Perso perso) {
+	public IncarnamToAstrubPath(BotPerso perso) {
 		super(perso);
 	}
 

@@ -8,10 +8,10 @@ import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.structures.stat.Stat;
 import fr.aresrpg.dofus.util.*;
-import fr.aresrpg.eratz.domain.TheBotFather;
+import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.dofus.fight.Fight;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.MapInfo;
 import fr.aresrpg.eratz.domain.data.player.object.Spell;
 import fr.aresrpg.eratz.domain.ia.ability.fight.FightAbility;
@@ -36,7 +36,7 @@ public abstract class FightBehavior extends Behavior {
 	/**
 	 * @param perso
 	 */
-	public FightBehavior(final Perso perso) {
+	public FightBehavior(final BotPerso perso) {
 		super(perso);
 	}
 
@@ -116,7 +116,7 @@ public abstract class FightBehavior extends Behavior {
 		final int cell = getPerso().getFightInfos().getCurrentFight().getPositionOf(getPerso().getId());
 		final DofusMap map = getPerso().getMapInfos().getMap().getDofusMap();
 		final int width = map.getWidth();
-		TheBotFather.LOGGER.error("[playerCell:" + cell + "][targetCell:" + targetCell + "] distance = " + Maps.distanceManathan(cell, targetCell, width) + " maxpo = " + maxPo);
+		BotFather.LOGGER.error("[playerCell:" + cell + "][targetCell:" + targetCell + "] distance = " + Maps.distanceManathan(cell, targetCell, width) + " maxpo = " + maxPo);
 		return Maps.distanceManathan(cell, targetCell, width) <= maxPo;
 	}
 
@@ -131,7 +131,7 @@ public abstract class FightBehavior extends Behavior {
 
 	protected void runAwayFromMobs() {
 		Cell c = getCellAwayFromMob(getPerso().getStatsInfos().getPM());
-		TheBotFather.LOGGER.severe("cell away from mob = " + c);
+		BotFather.LOGGER.severe("cell away from mob = " + c);
 		if (c != null) runTo(c.getId());
 
 	}
@@ -157,8 +157,8 @@ public abstract class FightBehavior extends Behavior {
 			return getPerso().getFightInfos().getCurrentFight().hasEntityOn(id);
 		};
 		final List<Point> cellPath = Pathfinding.getCellPath(x, y, xto, yto, map.getDofusMap().getCells(), width, false, cantGoOnCell.negate());
-		TheBotFather.LOGGER.error("Trying to move x=" + x + ", y=" + y + " ,xto=" + xto + ", yto=" + yto + ", cells=" + Arrays.toString(map.getDofusMap().getCells()));
-		TheBotFather.LOGGER.warning("Trying to move from " + cellId + " to " + cell + " path=" + cellPath);
+		BotFather.LOGGER.error("Trying to move x=" + x + ", y=" + y + " ,xto=" + xto + ", yto=" + yto + ", cells=" + Arrays.toString(map.getDofusMap().getCells()));
+		BotFather.LOGGER.warning("Trying to move from " + cellId + " to " + cell + " path=" + cellPath);
 		getPerso().getNavigation().moveToCell(cellPath, cell, false);
 	}
 
@@ -253,12 +253,12 @@ public abstract class FightBehavior extends Behavior {
 		waitCanStartFight();
 		getPerso().getAbilities().getFightAbility().beReady(true);
 		final Fight f = getPerso().getFightInfos().getCurrentFight();
-		TheBotFather.LOGGER.severe("saaaaaaaaaaaaaaaaaaaaaaaaaaaart");
+		BotFather.LOGGER.severe("saaaaaaaaaaaaaaaaaaaaaaaaaaaart");
 		while (!getPerso().getFightInfos().getCurrentFight().isEnded()) {
 			Threads.uSleep(50, TimeUnit.MILLISECONDS); // gentil cpu ! pas cramer !
 			if (f.getCurrentTurn() != null && f.getCurrentTurn().getFirst().getId() == getPerso().getId()) playTurn();
 		}
-		TheBotFather.LOGGER.severe("SORTIE");
+		BotFather.LOGGER.severe("SORTIE");
 		return BehaviorStopReason.FINISHED;
 	}
 

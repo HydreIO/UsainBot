@@ -2,10 +2,10 @@ package fr.aresrpg.eratz.domain.ia.behavior.harvest;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.structures.item.Interractable;
-import fr.aresrpg.eratz.domain.TheBotFather;
+import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
@@ -35,7 +35,7 @@ public abstract class HarvestBehavior extends Behavior {
 	/**
 	 * @param perso
 	 */
-	public HarvestBehavior(Perso perso) {
+	public HarvestBehavior(BotPerso perso) {
 		super(perso);
 		init();
 	}
@@ -90,7 +90,7 @@ public abstract class HarvestBehavior extends Behavior {
 				if (reason != BehaviorStopReason.FINISHED) return reason;
 			}
 			if (reason == BehaviorStopReason.FINISHED) { // si on a visité toute les map et que la raison n'a pas changé
-				TheBotFather.LOGGER.success("Récolte terminé mais non fullPod ! Reprise du trajet.");
+				BotFather.LOGGER.success("Récolte terminé mais non fullPod ! Reprise du trajet.");
 				return start(); // alors on recommence le trajet jusqu'a fullpod ou quantity harvested
 			}
 		}
@@ -124,12 +124,12 @@ public abstract class HarvestBehavior extends Behavior {
 		Ressource next = null;
 		while ((next = nextRessource()) != null) {
 			if (this.lastHarvest + 1800 > System.currentTimeMillis()) {
-				TheBotFather.LOGGER.severe("Harvest_loop_bug détécté ! Attente et switch vers la prochaine ressource.");
+				BotFather.LOGGER.severe("Harvest_loop_bug détécté ! Attente et switch vers la prochaine ressource.");
 				Threads.uSleep(2, TimeUnit.SECONDS);
 				continue;
 			}
 			Skills skill = getSkill(next.getType());
-			TheBotFather.LOGGER.debug("Récolte de " + next.getType() + "(" + next + ")");
+			BotFather.LOGGER.debug("Récolte de " + next.getType() + "(" + next + ")");
 			this.lastHarvest = System.currentTimeMillis();
 			getPerso().getAbilities().getHarvestAbility().harvest(next, skill);
 			if (podMax()) return BehaviorStopReason.POD_LIMIT;

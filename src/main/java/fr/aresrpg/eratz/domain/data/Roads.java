@@ -8,13 +8,13 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.data;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+import static fr.aresrpg.eratz.domain.BotFather.LOGGER;
 
 import fr.aresrpg.dofus.structures.Orientation;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.object.Road;
 
 import java.awt.Point;
@@ -124,34 +124,34 @@ public class Roads {
 		return near;
 	}
 
-	private static Consumer<Perso> up() {
+	private static Consumer<BotPerso> up() {
 		return p -> p.getNavigation().moveUp();
 	}
 
-	private static Consumer<Perso> finish() {
+	private static Consumer<BotPerso> finish() {
 		return p -> LOGGER.success(p.getPseudo() + " est arrivé à destination !");
 	}
 
-	private static Consumer<Perso> down() {
+	private static Consumer<BotPerso> down() {
 		return p -> p.getNavigation().moveDown();
 	}
 
-	private static Consumer<Perso> left() {
+	private static Consumer<BotPerso> left() {
 		return p -> p.getNavigation().moveLeft();
 	}
 
-	private static Consumer<Perso> right() {
+	private static Consumer<BotPerso> right() {
 		return p -> p.getNavigation().moveRight();
 	}
 
-	private static Consumer<Perso> toCell(int cellid) {
+	private static Consumer<BotPerso> toCell(int cellid) {
 		return p -> p.getNavigation().moveToCell(cellid, true);
 	}
 
 	public static class RoadBuilder {
-		private Map<Node, Consumer<Perso>> path = new LinkedHashMap();
+		private Map<Node, Consumer<BotPerso>> path = new LinkedHashMap();
 
-		public RoadBuilder withMap(int x, int y, Consumer<Perso> move) {
+		public RoadBuilder withMap(int x, int y, Consumer<BotPerso> move) {
 			path.put(new Node(x, y), move);
 			return this;
 		}

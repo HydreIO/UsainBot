@@ -8,7 +8,7 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.ia.behavior.craft.type;
 
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.ia.behavior.craft.CraftBehavior;
 
@@ -21,7 +21,7 @@ public class AmaknaBreadCraftBehavior extends CraftBehavior {
 	/**
 	 * @param perso
 	 */
-	public AmaknaBreadCraftBehavior(Perso perso, int craft) {
+	public AmaknaBreadCraftBehavior(BotPerso perso, int craft) {
 		super(perso, craft);
 
 	}

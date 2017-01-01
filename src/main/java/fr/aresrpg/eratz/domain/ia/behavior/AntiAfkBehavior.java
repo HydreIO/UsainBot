@@ -9,7 +9,7 @@
 package fr.aresrpg.eratz.domain.ia.behavior;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.ScheduledFuture;
@@ -27,7 +27,7 @@ public class AntiAfkBehavior extends Behavior {
 	/**
 	 * @param perso
 	 */
-	public AntiAfkBehavior(Perso perso, boolean infinite) {
+	public AntiAfkBehavior(BotPerso perso, boolean infinite) {
 		super(perso);
 		this.infinite = infinite;
 	}

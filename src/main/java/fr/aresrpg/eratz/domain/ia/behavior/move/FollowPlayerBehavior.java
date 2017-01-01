@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.behavior.move;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+import static fr.aresrpg.eratz.domain.BotFather.LOGGER;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.event.*;
@@ -8,7 +8,7 @@ import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.protocol.party.client.PartyFollowPacket;
 import fr.aresrpg.dofus.structures.game.FightSpawn;
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.event.BotMoveEvent;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
@@ -31,7 +31,7 @@ public class FollowPlayerBehavior extends Behavior implements Listener {
 	/**
 	 * @param perso
 	 */
-	public FollowPlayerBehavior(Perso perso, int toFollow) {
+	public FollowPlayerBehavior(BotPerso perso, int toFollow) {
 		super(perso);
 		this.toFollow = toFollow;
 		try {
@@ -81,7 +81,7 @@ public class FollowPlayerBehavior extends Behavior implements Listener {
 
 	public void joinFight() {
 		int fightId = -1;
-		for (Perso s : getPerso().getGroup().getMembers())
+		for (BotPerso s : getPerso().getGroup().getMembers())
 			if (hasFight(s.getId())) fightId = s.getId();
 		if (fightId == -1) return;
 		getPerso().getAbilities().getFightAbility().joinFight(fightId);

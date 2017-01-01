@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.util;
 
-import fr.aresrpg.eratz.domain.TheBotFather;
+import fr.aresrpg.eratz.domain.BotFather;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,13 +22,13 @@ public class ThreadBlocker {
 
 	public void pause() {
 		blockeds.add(thread);
-		TheBotFather.LOGGER.warning("Suspend " + thread.getName());
+		BotFather.LOGGER.warning("Suspend " + thread.getName());
 		thread.suspend();
 		//UnsafeAccessor.getUnsafe().monitorEnter(thread);
 	}
 
 	public void resume() {
-		TheBotFather.LOGGER.warning("Resume " + thread.getName());
+		BotFather.LOGGER.warning("Resume " + thread.getName());
 		thread.resume();
 		//UnsafeAccessor.getUnsafe().monitorExit(thread);
 		blockeds.remove(thread);

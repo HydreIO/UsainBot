@@ -5,7 +5,7 @@ import fr.aresrpg.dofus.protocol.game.actions.GameActions;
 import fr.aresrpg.dofus.protocol.game.actions.client.GameDuelAction;
 import fr.aresrpg.dofus.protocol.game.actions.client.GameRefuseDuelAction;
 import fr.aresrpg.dofus.protocol.game.client.GameClientActionPacket;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbility;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
@@ -25,7 +25,7 @@ public class DuelCrashBehavior extends Behavior {
 	/**
 	 * @param perso
 	 */
-	public DuelCrashBehavior(Perso perso, int target) {
+	public DuelCrashBehavior(BotPerso perso, int target) {
 		super(perso);
 		this.running = true;
 		this.target = target;
@@ -61,7 +61,6 @@ public class DuelCrashBehavior extends Behavior {
 			getPerso().getAbilities().getBaseAbility().getStates().currentToCrash = getTarget();
 			GameClientActionPacket ga = new GameClientActionPacket(GameActions.DUEL, action);
 			getPerso().sendPacketToServer(ga);
-
 			Threads.uSleep(2, TimeUnit.MILLISECONDS);
 			GameRefuseDuelAction actionr = new GameRefuseDuelAction();
 			actionr.setTargetId(getPerso().getId());

@@ -1,7 +1,7 @@
 package fr.aresrpg.eratz.domain.ia.behavior.item;
 
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 
@@ -12,7 +12,7 @@ public class WaterBuy extends Behavior {
 	/**
 	 * @param perso
 	 */
-	public WaterBuy(Perso perso, int quantity) {
+	public WaterBuy(BotPerso perso, int quantity) {
 		super(perso);
 		this.quantity = quantity;
 		moveDown();

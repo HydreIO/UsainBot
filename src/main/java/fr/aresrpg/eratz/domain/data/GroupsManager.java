@@ -1,8 +1,8 @@
 package fr.aresrpg.eratz.domain.data;
 
-import static fr.aresrpg.eratz.domain.TheBotFather.LOGGER;
+import static fr.aresrpg.eratz.domain.BotFather.LOGGER;
 
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.object.Group;
 import fr.aresrpg.tofumanchou.infra.config.Variables;
 
@@ -22,7 +22,7 @@ public class GroupsManager {
 		fetchGroup();
 	}
 
-	public void updateGroups(Perso p) {
+	public void updateGroups(BotPerso p) {
 		Variables.GROUPS.forEach(g -> {
 			if (g.getChef().equalsIgnoreCase(p.getPseudo())) p.setGroup(groups.get(g.getLabel()));
 			else
@@ -41,12 +41,12 @@ public class GroupsManager {
 	 */
 	public void fetchGroup() {
 		Variables.GROUPS.forEach(g -> {
-			Perso boss = AccountsManager.getInstance().getPerso(g.getChef());
+			BotPerso boss = AccountsManager.getInstance().getPerso(g.getChef());
 			if (boss == null) LOGGER.warning("Unable to fetch group '" + g.getLabel() + "' | Boss '" + g.getChef() + "' doesn't exist !");
 			else {
 				Group gr = new Group(g.getLabel(), boss);
 				for (String s : g.getMembers()) {
-					Perso memb = AccountsManager.getInstance().getPerso(s);
+					BotPerso memb = AccountsManager.getInstance().getPerso(s);
 					if (memb == null) LOGGER.warning("Unable to add '" + s + "' in group '" + gr.getLabel() + "' | Perso doesn't exist !");
 					else {
 						gr.getMembers().add(memb);

@@ -22,7 +22,7 @@ import fr.aresrpg.dofus.protocol.party.client.*;
 import fr.aresrpg.dofus.protocol.waypoint.client.ZaapUsePacket;
 import fr.aresrpg.dofus.structures.*;
 import fr.aresrpg.dofus.structures.item.Item;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.util.BotThread;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
@@ -38,11 +38,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class BaseAbilityImpl implements BaseAbility {
 
-	private Perso perso;
+	private BotPerso perso;
 	private BotThread botThread = new BotThread();
 	private BaseAbilityState states = new BaseAbilityState();
 
-	public BaseAbilityImpl(Perso perso) {
+	public BaseAbilityImpl(BotPerso perso) {
 		this.perso = perso;
 	}
 
@@ -74,7 +74,7 @@ public class BaseAbilityImpl implements BaseAbility {
 	}
 
 	@Override
-	public Perso getPerso() {
+	public BotPerso getPerso() {
 		return this.perso;
 	}
 

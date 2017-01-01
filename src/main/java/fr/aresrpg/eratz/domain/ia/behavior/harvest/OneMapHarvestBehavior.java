@@ -1,7 +1,7 @@
 package fr.aresrpg.eratz.domain.ia.behavior.harvest;
 
 import fr.aresrpg.eratz.domain.data.dofus.map.BotMap;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 
@@ -16,7 +16,7 @@ public abstract class OneMapHarvestBehavior extends Behavior {
 	/**
 	 * @param perso
 	 */
-	public OneMapHarvestBehavior(Perso perso) {
+	public OneMapHarvestBehavior(BotPerso perso) {
 		super(perso);
 	}
 

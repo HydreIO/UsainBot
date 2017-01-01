@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.util;
 
-import fr.aresrpg.eratz.domain.TheBotFather;
+import fr.aresrpg.eratz.domain.BotFather;
 
 import java.util.concurrent.locks.LockSupport;
 
@@ -21,7 +21,7 @@ public class BotThread {
 		this.thread = thread.currentThread();
 		if (ThreadBlocker.blockeds.contains(thread)) return;
 		paused = true;
-		TheBotFather.LOGGER.debug("Locking " + thread.getName());
+		BotFather.LOGGER.debug("Locking " + thread.getName());
 		LockSupport.park();
 	}
 
@@ -42,7 +42,7 @@ public class BotThread {
 		if (thread != null) {
 			if (ThreadBlocker.blockeds.contains(thread)) return;
 			paused = false;
-			TheBotFather.LOGGER.debug("Unlocking " + thread.getName());
+			BotFather.LOGGER.debug("Unlocking " + thread.getName());
 			LockSupport.unpark(thread);
 		}
 	}

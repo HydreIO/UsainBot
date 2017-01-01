@@ -9,7 +9,7 @@
 package fr.aresrpg.eratz.domain.ia.behavior.harvest.type.paysan;
 
 import fr.aresrpg.dofus.structures.item.Interractable;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.behavior.harvest.HarvestBehavior;
 
 /**
@@ -21,7 +21,7 @@ public class WheatHarvestBehavior extends HarvestBehavior {
 	/**
 	 * @param perso
 	 */
-	public WheatHarvestBehavior(Perso perso) {
+	public WheatHarvestBehavior(BotPerso perso) {
 		super(perso);
 	}
 

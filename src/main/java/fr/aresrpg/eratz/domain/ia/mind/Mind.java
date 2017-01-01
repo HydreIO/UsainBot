@@ -1,7 +1,7 @@
 package fr.aresrpg.eratz.domain.ia.mind;
 
-import fr.aresrpg.eratz.domain.data.dofus.map.Path;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.Path;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.util.Closeable;
 import fr.aresrpg.eratz.domain.util.ThreadBlocker;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
@@ -148,7 +148,7 @@ public interface Mind extends Closeable {
 	 *            the condition
 	 * @return the mind for chaining
 	 */
-	Mind thenDisconnectIf(String reason, Predicate<Perso> condition);
+	Mind thenDisconnectIf(String reason, Predicate<BotPerso> condition);
 
 	/**
 	 * Switch to the given perso
@@ -157,7 +157,7 @@ public interface Mind extends Closeable {
 	 *            the perso to switch
 	 * @return the mind for chaining
 	 */
-	Mind thenConnect(Perso perso);
+	Mind thenConnect(BotPerso perso);
 
 	/**
 	 * Reconnect the perso
@@ -201,5 +201,5 @@ public interface Mind extends Closeable {
 
 	ThreadBlocker getBlocker();
 
-	Perso getPerso();
+	BotPerso getPerso();
 }

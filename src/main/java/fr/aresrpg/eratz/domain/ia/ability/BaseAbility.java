@@ -7,7 +7,7 @@ import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.dofus.structures.item.ItemCategory;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.eratz.domain.data.Roads;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.object.Road;
 import fr.aresrpg.eratz.domain.ia.ability.BaseAbilityState.InvitationState;
 import fr.aresrpg.eratz.domain.util.BotThread;
@@ -173,7 +173,7 @@ public interface BaseAbility extends Closeable {
 
 	// DEFAULT UTIL
 
-	Perso getPerso();
+	BotPerso getPerso();
 
 	BaseAbilityState getStates();
 

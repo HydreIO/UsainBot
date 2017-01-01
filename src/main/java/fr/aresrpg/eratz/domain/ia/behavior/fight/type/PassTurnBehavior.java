@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.behavior.fight.type;
 
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.behavior.fight.FightBehavior;
 
 /**
@@ -12,7 +12,7 @@ public class PassTurnBehavior extends FightBehavior {
 	/**
 	 * @param perso
 	 */
-	public PassTurnBehavior(Perso perso) {
+	public PassTurnBehavior(BotPerso perso) {
 		super(perso);
 	}
 

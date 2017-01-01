@@ -4,8 +4,8 @@ import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.functional.suplier.Supplier;
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
 import fr.aresrpg.dofus.structures.Chat;
-import fr.aresrpg.eratz.domain.data.dofus.map.Path;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.Path;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 import fr.aresrpg.eratz.domain.ia.behavior.move.*;
@@ -23,14 +23,14 @@ import java.util.function.Predicate;
  */
 public class BaseMind implements Mind {
 
-	private final Perso perso;
+	private final BotPerso perso;
 	private Queue<Supplier<BehaviorStopReason>> actions = new LinkedList<>();
 	private boolean infinite;
 	private Set<Integer> itemsToKeep = new HashSet<>();
 	private boolean running;
 	private ThreadBlocker blocker;
 
-	public BaseMind(Perso perso) {
+	public BaseMind(BotPerso perso) {
 		this.perso = perso;
 
 	}
@@ -91,7 +91,7 @@ public class BaseMind implements Mind {
 	/**
 	 * @return the perso
 	 */
-	public Perso getPerso() {
+	public BotPerso getPerso() {
 		return perso;
 	}
 
@@ -150,7 +150,7 @@ public class BaseMind implements Mind {
 	}
 
 	@Override
-	public Mind thenDisconnectIf(String reason, Predicate<Perso> condition) {
+	public Mind thenDisconnectIf(String reason, Predicate<BotPerso> condition) {
 		getActions().add(() -> {
 			if (condition.test(getPerso())) getPerso().disconnect(reason);
 			while (!getPerso().getAccount().isOffline())
@@ -166,7 +166,7 @@ public class BaseMind implements Mind {
 	}
 
 	@Override
-	public Mind thenConnect(Perso perso) {
+	public Mind thenConnect(BotPerso perso) {
 		getActions().add(() -> {
 			getPerso().connect();
 			return BehaviorStopReason.FINISHED;

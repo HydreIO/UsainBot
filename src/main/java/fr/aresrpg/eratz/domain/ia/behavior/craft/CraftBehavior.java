@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.behavior.craft;
 
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 
 /**
@@ -14,7 +14,7 @@ public abstract class CraftBehavior extends Behavior {
 	/**
 	 * @param perso
 	 */
-	public CraftBehavior(Perso perso, int quantity) {
+	public CraftBehavior(BotPerso perso, int quantity) {
 		super(perso);
 		this.quantity = quantity;
 	}

@@ -9,7 +9,7 @@
 package fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron;
 
 import fr.aresrpg.dofus.structures.item.Interractable;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.behavior.harvest.HarvestBehavior;
 
 /**
@@ -18,7 +18,7 @@ import fr.aresrpg.eratz.domain.ia.behavior.harvest.HarvestBehavior;
  */
 public class BucheronAmaknaHarvestBehavior extends HarvestBehavior {
 
-	public BucheronAmaknaHarvestBehavior(Perso perso) {
+	public BucheronAmaknaHarvestBehavior(BotPerso perso) {
 		super(perso);
 	}
 

@@ -3,7 +3,7 @@ package fr.aresrpg.eratz.domain.antibot.behavior;
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.protocol.party.PartyRefusePacket;
 import fr.aresrpg.dofus.protocol.party.client.PartyInvitePacket;
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.behavior.Behavior;
 import fr.aresrpg.eratz.domain.ia.behavior.BehaviorStopReason;
 
@@ -21,7 +21,7 @@ public class GroupCrashBehavior extends Behavior {
 	/**
 	 * @param perso
 	 */
-	public GroupCrashBehavior(Perso perso, String target) {
+	public GroupCrashBehavior(BotPerso perso, String target) {
 		super(perso);
 		this.running = true;
 		this.target = target;

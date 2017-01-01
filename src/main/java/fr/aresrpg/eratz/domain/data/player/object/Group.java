@@ -1,10 +1,8 @@
 package fr.aresrpg.eratz.domain.data.player.object;
 
-import fr.aresrpg.eratz.domain.data.player.Perso;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * 
@@ -13,17 +11,17 @@ import java.util.stream.Collectors;
 public class Group {
 
 	private String label;
-	private Perso boss;
-	private Set<Perso> members = new HashSet<>();
+	private BotPerso boss;
+	private Set<BotPerso> members = new HashSet<>();
 
-	public Group(String label, Perso boss) {
+	public Group(String label, BotPerso boss) {
 		this.boss = boss;
 		this.label = label;
 	}
 
 	public void formGroup() {
-		if (boss == null || !boss.getAccount().isActive()) throw new IllegalStateException("Unable to make group | The boss is not online");
-		getMembers().forEach(p -> boss.getAbilities().getBaseAbility().invitPlayerToGroup(p.getPseudo()));
+		if (boss == null || !boss.isOnline()) throw new IllegalStateException("Unable to make group | The boss is not online");
+		getMembers().stream().filter(Objects::nonNull).filter(BotPerso::isOnline).forEach(p -> boss.getPerso().invitPlayerToGroup(p.getPerso().getPseudo()));
 	}
 
 	/**
@@ -44,7 +42,7 @@ public class Group {
 	/**
 	 * @return the boss
 	 */
-	public Perso getBoss() {
+	public BotPerso getBoss() {
 		return boss;
 	}
 
@@ -52,20 +50,20 @@ public class Group {
 	 * @param boss
 	 *            the boss to set
 	 */
-	public void setBoss(Perso boss) {
+	public void setBoss(BotPerso boss) {
 		this.boss = boss;
 	}
 
 	/**
 	 * @return the members
 	 */
-	public Set<Perso> getMembers() {
+	public Set<BotPerso> getMembers() {
 		return members;
 	}
 
 	@Override
 	public String toString() {
-		return "Group [label=" + label + ", boss=" + boss + ", members=" + members.stream().map(Perso::getPseudo).collect(Collectors.toList()) + "]";
+		return "Group [label=" + label + ", boss=" + boss + ", members=" + members + "]";
 	}
 
 }
