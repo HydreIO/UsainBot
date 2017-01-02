@@ -1,6 +1,4 @@
-package fr.aresrpg.eratz.domain.data.player.object;
-
-import fr.aresrpg.eratz.domain.data.player.BotPerso;
+package fr.aresrpg.eratz.domain.data.player;
 
 import java.util.*;
 

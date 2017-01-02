@@ -3,7 +3,7 @@ package fr.aresrpg.eratz.domain.data;
 import static fr.aresrpg.eratz.domain.BotFather.LOGGER;
 
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
-import fr.aresrpg.eratz.domain.data.player.object.Group;
+import fr.aresrpg.eratz.domain.data.player.Group;
 import fr.aresrpg.tofumanchou.infra.config.Variables;
 
 import java.util.HashMap;

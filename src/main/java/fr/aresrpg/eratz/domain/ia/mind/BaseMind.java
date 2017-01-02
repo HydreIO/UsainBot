@@ -32,7 +32,6 @@ public class BaseMind implements Mind {
 
 	public BaseMind(BotPerso perso) {
 		this.perso = perso;
-
 	}
 
 	public void shutdown() {

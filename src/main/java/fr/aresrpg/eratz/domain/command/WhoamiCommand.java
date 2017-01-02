@@ -8,6 +8,8 @@ import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
+import java.util.Arrays;
+
 /**
  * 
  * @since
@@ -21,11 +23,12 @@ public class WhoamiCommand implements Command {
 
 	@Override
 	public void trigger(String[] args) {
+		System.out.println(Arrays.toString(args));
 		if (args.length != 2) {
 			LOGGER.error("whoami <server> <playerName>");
 			return;
 		}
-		Server srv = Server.valueOf(args[0].toUpperCase());
+		Server srv = Server.fromName(args[0]);
 		if (srv == null) {
 			LOGGER.error("The server '" + args[0] + "' is invalid");
 			return;
@@ -48,6 +51,7 @@ public class WhoamiCommand implements Command {
 		LOGGER.debug("Fight = " + !p.getMap().isEnded());
 		LOGGER.debug("Inv = " + ((ManchouPerso) p).getInventory().showContent());
 		LOGGER.debug("Bank = " + ((ManchouPerso) p).getAccount().getBank().showContent());
+		LOGGER.debug("Outdoor = " + p.getMap().isOutdoor());
 	}
 
 }

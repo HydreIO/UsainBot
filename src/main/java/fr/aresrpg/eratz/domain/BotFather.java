@@ -21,6 +21,7 @@ import fr.aresrpg.tofumanchou.domain.Manchou;
 import fr.aresrpg.tofumanchou.domain.data.Account;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.domain.plugin.ManchouPlugin;
+import fr.aresrpg.tofumanchou.infra.BootStrap;
 import fr.aresrpg.tofumanchou.infra.config.Variables;
 import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
@@ -70,12 +71,10 @@ public class BotFather implements ManchouPlugin {
 	public void onEnable() {
 		instance = this;
 		injectSyso();
-		Variables.ACCOUNTS.forEach(p -> {
-			p.getPersos().forEach(pe -> {
-				Perso perso = Accounts.registerPerso(pe.getPseudo(), p.getAccountName(), p.getPassword(), pe.getDofusServer());
-				persos.put(perso.getUUID(), new BotPerso((ManchouPerso) perso));
-			});
-		});
+		Variables.ACCOUNTS.forEach(p -> p.getPersos().forEach(pe -> {
+			Perso perso = Accounts.registerPerso(pe.getPseudo(), p.getAccountName(), p.getPassword(), pe.getDofusServer());
+			persos.put(perso.getUUID(), new BotPerso((ManchouPerso) perso));
+		}));
 		Accounts.registerAccount("SceatSifu");
 		Accounts.registerAccount("SceatDrop3");
 		Accounts.registerAccount("SceatOkra");
@@ -84,6 +83,7 @@ public class BotFather implements ManchouPlugin {
 		Manchou.registerCommand(new WhoamiCommand());
 		Manchou.registerCommand(new HastebinCommand());
 		Manchou.registerCommand(new AccountCommand());
+		Manchou.registerCommand(new BucheronCommand());
 	}
 
 	private void injectSyso() {
@@ -127,6 +127,11 @@ public class BotFather implements ManchouPlugin {
 	 */
 	public static BotFather getInstance() {
 		return instance;
+	}
+
+	public static void main(String[] args) throws IOException {
+		BootStrap.main(args);
+		Manchou.directRegistry(new BotFather());
 	}
 
 }
