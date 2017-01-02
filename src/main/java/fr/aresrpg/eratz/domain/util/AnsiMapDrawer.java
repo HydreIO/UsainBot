@@ -38,8 +38,8 @@ public class AnsiMapDrawer {
 				default:
 					throw new IllegalStateException("Unknown movement " + c.getMovement());
 			}
-			int xp = Maps.getX(i, map.getWidth(), map.getHeight()) * 2 + 1;
-			int yp = Maps.getY(i, map.getWidth(), map.getHeight()) * 2 + 1;
+			int xp = Maps.getXRotated(i, map.getWidth(), map.getHeight()) * 2 + 1;
+			int yp = Maps.getYRotated(i, map.getWidth(), map.getHeight()) * 2 + 1;
 			buffer[yp][xp] = buffer[yp + 1][xp] = buffer[yp][xp + 1] = buffer[yp - 1][xp] = buffer[yp][xp - 1] = AnsiColors.getCode(color, color, false) + " ";
 
 		}

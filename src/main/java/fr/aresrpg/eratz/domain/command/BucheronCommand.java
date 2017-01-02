@@ -7,7 +7,7 @@ import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.state.BotState;
-import fr.aresrpg.eratz.domain.listener.MapListener;
+import fr.aresrpg.eratz.domain.listener.HarvestListener;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
@@ -142,8 +142,12 @@ public class BucheronCommand implements Command {
 		st.addPath(-1, 32);
 		st.addPath(-1, 33);
 		st.addPath(0, 33);
-		st.harvest = true;
-		MapListener.getInstance().goToNextMap(perso, perso.getPerso().getMap(), st);
+		HarvestListener.register();
+		try {
+			HarvestListener.getInstance().goToNextMap(perso, perso.getPerso().getMap(), st);
+		} catch (Exception e) {
+			LOGGER.error(e);
+		}
 	}
 
 }

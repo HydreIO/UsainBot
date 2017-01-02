@@ -14,7 +14,6 @@ import fr.aresrpg.commons.domain.log.LoggerBuilder;
 import fr.aresrpg.eratz.domain.command.*;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.listener.ConnectionListener;
-import fr.aresrpg.eratz.domain.listener.MapListener;
 import fr.aresrpg.eratz.domain.util.Hastebin;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.Manchou;
@@ -67,6 +66,7 @@ public class BotFather implements ManchouPlugin {
 		return getPerso(client.getPerso());
 	}
 
+	// bucheron henual bratva-nazar
 	@Override
 	public void onEnable() {
 		instance = this;
@@ -79,7 +79,6 @@ public class BotFather implements ManchouPlugin {
 		Accounts.registerAccount("SceatDrop3");
 		Accounts.registerAccount("SceatOkra");
 		new ConnectionListener();
-		new MapListener();
 		Manchou.registerCommand(new WhoamiCommand());
 		Manchou.registerCommand(new HastebinCommand());
 		Manchou.registerCommand(new AccountCommand());

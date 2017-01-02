@@ -8,28 +8,31 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.data.player;
 
+import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
+
 import fr.aresrpg.commons.domain.util.Pair;
 import fr.aresrpg.dofus.protocol.Packet;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.Orientation;
 import fr.aresrpg.dofus.structures.map.Cell;
-import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.Pathfinding;
+import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.Roads;
 import fr.aresrpg.eratz.domain.data.player.info.ChatInfo;
 import fr.aresrpg.eratz.domain.data.player.state.BotState;
 import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
 import fr.aresrpg.eratz.domain.ia.mind.Mind;
 import fr.aresrpg.eratz.domain.util.Closeable;
+import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
 import fr.aresrpg.tofumanchou.domain.data.item.Item;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
-import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
-import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
+import fr.aresrpg.tofumanchou.infra.data.*;
 
 import java.awt.Point;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 public class BotPerso implements Closeable {
 
@@ -43,6 +46,7 @@ public class BotPerso implements Closeable {
 	private BotState botState = new BotState();
 
 	private ChatInfo chatInfos = new ChatInfo(this);
+	private int[] itemsToKeep = new int[0];
 
 	public BotPerso(ManchouPerso perso) {
 		this.perso = perso;
@@ -58,6 +62,34 @@ public class BotPerso implements Closeable {
 	public void shutdown() {
 		sch.cancel(true);
 		//mind.shutdown();
+	}
+
+	/**
+	 * @return the itemsToKeep
+	 */
+	public int[] getItemsToKeep() {
+		return itemsToKeep;
+	}
+
+	public Bank getNearestBank() {
+		Bank near = Bank.ASTRUB;
+		int dist = perso.getMap().distance(near.getCoords());
+		for (Bank k : Bank.values()) {
+			int di = perso.getMap().distance(k.getCoords());
+			if (di < dist) {
+				dist = di;
+				near = k;
+			}
+		}
+		return near;
+	}
+
+	/**
+	 * @param itemsToKeep
+	 *            the itemsToKeep to set
+	 */
+	public void setItemsToKeep(int... itemsToKeep) {
+		this.itemsToKeep = itemsToKeep;
 	}
 
 	public boolean hasMount() {
@@ -167,6 +199,19 @@ public class BotPerso implements Closeable {
 		return this.group != null;
 	}
 
+	public boolean isInBankMap() {
+		int x = perso.getMap().getX();
+		int y = perso.getMap().getY();
+		if (perso.getMap().isOutdoor()) return false;
+		ManchouMap m = perso.getMap();
+		return m.isOnCoords(4, -16) ||
+				m.isOnCoords(2, -2) ||
+				m.isOnCoords(14, 25) ||
+				m.isOnCoords(-23, 40) ||
+				m.isOnCoords(-16, 4) ||
+				m.isOnCoords(-29, -58);
+	}
+
 	/**
 	 * @return the group
 	 */
@@ -211,14 +256,10 @@ public class BotPerso implements Closeable {
 		if (farestTeleporters.length == 0) throw new NullPointerException("No teleporters found on map !");
 		int width = perso.getMap().getWidth();
 		int height = perso.getMap().getHeight();
-		int px = Maps.getX(perso.getCellId(), width, height);
-		int py = Maps.getY(perso.getCellId(), width, height);
 		Cell[] protocolCells = perso.getMap().getProtocolCells();
 		for (ManchouCell c : farestTeleporters) {
 			if (!Roads.canUseToTeleport(perso.getMap(), c.getId())) continue;
-			int x = c.getX();
-			int y = c.getY();
-			List<Point> path = Pathfinding.getCellPath(px, py, x, y, protocolCells, width, height, true, perso::canGoOnCellAvoidingMobs);
+			List<Point> path = Pathfinding.getCellPath(perso.getCellId(), c.getId(), protocolCells, width, height, Pathfinding::getNeighbors, perso::canGoOnCellAvoidingMobs);
 			if (path == null) continue;
 			float time = Pathfinding.getPathTime(path, protocolCells, width, height, hasMount) * 30;
 			perso.move(path, true);
@@ -232,43 +273,36 @@ public class BotPerso implements Closeable {
 		int height = perso.getMap().getHeight();
 		int cell = perso.getCellId();
 		Cell[] protocolCells = perso.getMap().getProtocolCells();
-		int px = Maps.getX(cell, width, height);
-		int py = Maps.getY(cell, width, height);
+		LOGGER.error("CHANGE MAP TO " + dir);
+		Function<Node, Node[]> func = Pathfinding::getNeighbors;
 		switch (dir) {
 			case DOWN:
 			case DOWN_LEFT:
 			case DOWN_RIGHT:
-				int downTp = perso.getDownTp(i -> Roads.canUseToTeleport(perso.getMap(), i));
-				int x = Maps.getX(downTp, width, height);
-				int y = Maps.getY(downTp, width, height);
-				List<Point> cellPath = Pathfinding.getCellPath(px, py, x, y, perso.getMap().getProtocolCells(), width, height, true, perso::canGoOnCellAvoidingMobs);
-				if (cellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
+				int downTp = perso.getDownTp(i -> !Roads.canUseToTeleport(perso.getMap(), i));
+				LOGGER.error("cell = " + downTp);
+				List<Point> cellPath = Pathfinding.getCellPath(cell, downTp, perso.getMap().getProtocolCells(), width, height, func, perso::canGoOnCellAvoidingMobs);
+				if (downTp == -1 || cellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
 				perso.move(cellPath, true);
 				return new Pair<Long, ManchouCell>((long) (Pathfinding.getPathTime(cellPath, protocolCells, width, height, false) * 30), perso.getMap().getCells()[downTp]);
 			case LEFT:
-				int lTp = perso.getRightTp(i -> Roads.canUseToTeleport(perso.getMap(), i));
-				int lx = Maps.getX(lTp, width, height);
-				int ly = Maps.getY(lTp, width, height);
-				List<Point> lcellPath = Pathfinding.getCellPath(px, py, lx, ly, perso.getMap().getProtocolCells(), width, height, true, perso::canGoOnCellAvoidingMobs);
-				if (lcellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
+				int lTp = perso.getRightTp(i -> !Roads.canUseToTeleport(perso.getMap(), i));
+				List<Point> lcellPath = Pathfinding.getCellPath(cell, lTp, perso.getMap().getProtocolCells(), width, height, func, perso::canGoOnCellAvoidingMobs);
+				if (lTp == -1 || lcellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
 				perso.move(lcellPath, true);
 				return new Pair<Long, ManchouCell>((long) (Pathfinding.getPathTime(lcellPath, protocolCells, width, height, false) * 30), perso.getMap().getCells()[lTp]);
 			case RIGHT:
-				int rTp = perso.getRightTp(i -> Roads.canUseToTeleport(perso.getMap(), i));
-				int rx = Maps.getX(rTp, width, height);
-				int ry = Maps.getY(rTp, width, height);
-				List<Point> rcellPath = Pathfinding.getCellPath(px, py, rx, ry, perso.getMap().getProtocolCells(), width, height, true, perso::canGoOnCellAvoidingMobs);
-				if (rcellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
+				int rTp = perso.getRightTp(i -> !Roads.canUseToTeleport(perso.getMap(), i));
+				List<Point> rcellPath = Pathfinding.getCellPath(cell, rTp, perso.getMap().getProtocolCells(), width, height, func, perso::canGoOnCellAvoidingMobs);
+				if (rTp == -1 || rcellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
 				perso.move(rcellPath, true);
 				return new Pair<Long, ManchouCell>((long) (Pathfinding.getPathTime(rcellPath, protocolCells, width, height, false) * 30), perso.getMap().getCells()[rTp]);
 			case UP:
 			case UP_LEFT:
 			case UP_RIGHT:
-				int upTp = perso.getUpTp(i -> Roads.canUseToTeleport(perso.getMap(), i));
-				int ux = Maps.getX(upTp, width, height);
-				int uy = Maps.getY(upTp, width, height);
-				List<Point> ucellPath = Pathfinding.getCellPath(px, py, ux, uy, perso.getMap().getProtocolCells(), width, height, true, perso::canGoOnCellAvoidingMobs);
-				if (ucellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
+				int upTp = perso.getUpTp(i -> !Roads.canUseToTeleport(perso.getMap(), i));
+				List<Point> ucellPath = Pathfinding.getCellPath(cell, upTp, perso.getMap().getProtocolCells(), width, height, func, perso::canGoOnCellAvoidingMobs);
+				if (upTp == -1 || ucellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
 				perso.move(ucellPath, true);
 				return new Pair<Long, ManchouCell>((long) (Pathfinding.getPathTime(ucellPath, protocolCells, width, height, false) * 30), perso.getMap().getCells()[upTp]);
 		}

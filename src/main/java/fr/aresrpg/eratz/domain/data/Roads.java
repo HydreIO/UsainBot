@@ -75,6 +75,10 @@ public class Roads {
 		return r.canMove(dir);
 	}
 
+	public static boolean canMove(int xfrom, int yfrom, int xto, int yto) {
+		return canMove(new Point(xfrom, yfrom), new Point(xto, yto));
+	}
+
 	/**
 	 * @param map
 	 * @param cellid

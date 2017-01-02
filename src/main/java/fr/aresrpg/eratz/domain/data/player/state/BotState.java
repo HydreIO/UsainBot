@@ -11,11 +11,8 @@ public class BotState {
 	public Set<Interractable> ressources = new HashSet<>();
 	public Set<DofusMobs> mobs = new HashSet<>();
 
+	// harvest
 	public boolean changeMap;
-	public boolean harvest;
-	public boolean fightSelectedMobs;
-	public boolean joinFights;
-	public boolean fightAllMob;
 	public boolean canGoIndoor;
 	public boolean goToBank;
 
