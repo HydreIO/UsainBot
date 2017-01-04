@@ -15,6 +15,7 @@ import fr.aresrpg.dofus.protocol.Packet;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.Orientation;
 import fr.aresrpg.dofus.structures.map.Cell;
+import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.Roads;
@@ -44,18 +45,35 @@ public class BotPerso implements Closeable {
 	private boolean online;
 	private boolean hasMount;
 	private BotState botState = new BotState();
+	private DofusMapView view;
 
 	private ChatInfo chatInfos = new ChatInfo(this);
 	private int[] itemsToKeep = new int[0];
 
 	public BotPerso(ManchouPerso perso) {
 		this.perso = perso;
+		view = new DofusMapView();
 		this.sch = Executors.SCHEDULER.register(this::scheduledActions, 10, TimeUnit.SECONDS);
 	}
 
 	public void scheduledActions() { // methode éxécutée toute les 10s, utile pour divers petit check
 
 		perso.useRessourceBags();
+	}
+
+	/**
+	 * @return the view
+	 */
+	public DofusMapView getView() {
+		return view;
+	}
+
+	/**
+	 * @param view
+	 *            the view to set
+	 */
+	public void setView(DofusMapView view) {
+		this.view = view;
 	}
 
 	@Override
@@ -254,6 +272,8 @@ public class BotPerso implements Closeable {
 		ManchouCell[] farestTeleporters = perso.getFarestTeleporters1030();
 		if (farestTeleporters == null || farestTeleporters.length == 0) farestTeleporters = perso.getFarestTeleporters();
 		if (farestTeleporters.length == 0) throw new NullPointerException("No teleporters found on map !");
+		LOGGER.debug("farest tp = " + Arrays.toString(perso.getFarestTeleporters()));
+		LOGGER.debug("nearest tp = " + Arrays.toString(perso.getNearestTeleporters()));
 		int width = perso.getMap().getWidth();
 		int height = perso.getMap().getHeight();
 		Cell[] protocolCells = perso.getMap().getProtocolCells();
@@ -262,12 +282,20 @@ public class BotPerso implements Closeable {
 			List<Point> path = Pathfinding.getCellPath(perso.getCellId(), c.getId(), protocolCells, width, height, Pathfinding::getNeighbors, perso::canGoOnCellAvoidingMobs);
 			if (path == null) continue;
 			float time = Pathfinding.getPathTime(path, protocolCells, width, height, hasMount) * 30;
+			botState.lastCellMoved = new Pair<ManchouMap, Integer>(perso.getMap(), c.getId());
 			perso.move(path, true);
 			return new Pair<Long, ManchouCell>((long) time, c);
 		}
 		return new Pair<Long, ManchouCell>(-1L, null);
 	}
 
+	/**
+	 * Try to change map with the given direction
+	 * 
+	 * @param dir
+	 *            the direction
+	 * @return a Pair<pathTime,Teleporter> or a Pair<-1,null> if the teleporter is not found
+	 */
 	public Pair<Long, ManchouCell> changeMapWithDirection(Orientation dir) {
 		int width = perso.getMap().getWidth();
 		int height = perso.getMap().getHeight();
@@ -275,38 +303,15 @@ public class BotPerso implements Closeable {
 		Cell[] protocolCells = perso.getMap().getProtocolCells();
 		LOGGER.error("CHANGE MAP TO " + dir);
 		Function<Node, Node[]> func = Pathfinding::getNeighbors;
-		switch (dir) {
-			case DOWN:
-			case DOWN_LEFT:
-			case DOWN_RIGHT:
-				int downTp = perso.getDownTp(i -> !Roads.canUseToTeleport(perso.getMap(), i));
-				LOGGER.error("cell = " + downTp);
-				List<Point> cellPath = Pathfinding.getCellPath(cell, downTp, perso.getMap().getProtocolCells(), width, height, func, perso::canGoOnCellAvoidingMobs);
-				if (downTp == -1 || cellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
-				perso.move(cellPath, true);
-				return new Pair<Long, ManchouCell>((long) (Pathfinding.getPathTime(cellPath, protocolCells, width, height, false) * 30), perso.getMap().getCells()[downTp]);
-			case LEFT:
-				int lTp = perso.getRightTp(i -> !Roads.canUseToTeleport(perso.getMap(), i));
-				List<Point> lcellPath = Pathfinding.getCellPath(cell, lTp, perso.getMap().getProtocolCells(), width, height, func, perso::canGoOnCellAvoidingMobs);
-				if (lTp == -1 || lcellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
-				perso.move(lcellPath, true);
-				return new Pair<Long, ManchouCell>((long) (Pathfinding.getPathTime(lcellPath, protocolCells, width, height, false) * 30), perso.getMap().getCells()[lTp]);
-			case RIGHT:
-				int rTp = perso.getRightTp(i -> !Roads.canUseToTeleport(perso.getMap(), i));
-				List<Point> rcellPath = Pathfinding.getCellPath(cell, rTp, perso.getMap().getProtocolCells(), width, height, func, perso::canGoOnCellAvoidingMobs);
-				if (rTp == -1 || rcellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
-				perso.move(rcellPath, true);
-				return new Pair<Long, ManchouCell>((long) (Pathfinding.getPathTime(rcellPath, protocolCells, width, height, false) * 30), perso.getMap().getCells()[rTp]);
-			case UP:
-			case UP_LEFT:
-			case UP_RIGHT:
-				int upTp = perso.getUpTp(i -> !Roads.canUseToTeleport(perso.getMap(), i));
-				List<Point> ucellPath = Pathfinding.getCellPath(cell, upTp, perso.getMap().getProtocolCells(), width, height, func, perso::canGoOnCellAvoidingMobs);
-				if (upTp == -1 || ucellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
-				perso.move(ucellPath, true);
-				return new Pair<Long, ManchouCell>((long) (Pathfinding.getPathTime(ucellPath, protocolCells, width, height, false) * 30), perso.getMap().getCells()[upTp]);
-		}
-		return new Pair<Long, ManchouCell>(-1L, null);
+		int[] tps = perso.getTeleporters(i -> !Roads.canUseToTeleport(perso.getMap(), i));
+		int tp = perso.getTp(dir, tps);
+		LOGGER.error("cell = " + tp);
+		if (tp == -1) return new Pair<Long, ManchouCell>(-1L, null);
+		List<Point> cellPath = Pathfinding.getCellPath(cell, tp, perso.getMap().getProtocolCells(), width, height, func, perso::canGoOnCellAvoidingMobs);
+		if (cellPath == null) return new Pair<Long, ManchouCell>(-1L, null);
+		botState.lastCellMoved = new Pair<ManchouMap, Integer>(perso.getMap(), tp);
+		perso.move(cellPath, true);
+		return new Pair<Long, ManchouCell>((long) (Pathfinding.getPathTime(cellPath, protocolCells, width, height, false) * 30), perso.getMap().getCells()[tp]);
 	}
 
 	@Override

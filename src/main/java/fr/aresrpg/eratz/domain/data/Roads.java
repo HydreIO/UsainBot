@@ -106,15 +106,16 @@ public class Roads {
 		ManchouPerso p = perso.getPerso();
 		Point point = new Point(m.getX(), m.getY());
 		Predicate<Integer> pred = i -> canUseToTeleport(m, i);
-		if (p.getUpTp(pred.negate()) == -1) getRestriction(point).setMoveUp(false);
-		if (p.getDownTp(pred.negate()) == -1) getRestriction(point).setMoveDown(false);
-		if (p.getLeftTp(pred.negate()) == -1) getRestriction(point).setMoveLeft(false);
-		if (p.getRightTp(pred.negate()) == -1) getRestriction(point).setMoveRight(false);
+		int[] tps = perso.getPerso().getTeleporters(pred.negate());
+		MapRestriction r = getRestriction(point);
+		for (Orientation dir : Orientation.values())
+			if (p.getTp(dir, tps) == -1) r.setCantMove(dir);
 	}
 
 	public static class MapRestriction {
 		private int x, y;
 		private boolean moveUp = true, moveDown = true, moveLeft = true, moveRight = true;
+		private boolean moveUpLeft = true, moveUpRight = true, moveDownLeft = true, moveDownRight = true;
 
 		public MapRestriction(int x, int y) {
 			this.x = x;
@@ -128,17 +129,21 @@ public class Roads {
 		public boolean canMove(Orientation dir) { // return true si le chemin n'est pas bloqué
 			switch (dir) {
 				case DOWN:
+					return moveDown;
 				case DOWN_LEFT:
+					return moveDownLeft;
 				case DOWN_RIGHT:
-					return canMoveDown();
+					return moveDownRight;
 				case LEFT:
-					return canMoveLeft();
+					return moveLeft;
 				case RIGHT:
-					return canMoveRight();
+					return moveRight;
 				case UP:
+					return moveUp;
 				case UP_LEFT:
+					return moveUpLeft;
 				case UP_RIGHT:
-					return canMoveUp();
+					return moveUpRight;
 			}
 			return true;
 		}
@@ -146,9 +151,13 @@ public class Roads {
 		public void setCantMove(Orientation dir) { // indique qu'on ne peut pas aller dans cette direction depuis la case actuelle
 			switch (dir) {
 				case DOWN:
-				case DOWN_LEFT:
-				case DOWN_RIGHT:
 					moveDown = false;
+					return;
+				case DOWN_LEFT:
+					moveDownLeft = false;
+					return;
+				case DOWN_RIGHT:
+					moveDownRight = false;
 					return;
 				case LEFT:
 					moveLeft = false;
@@ -157,9 +166,13 @@ public class Roads {
 					moveRight = false;
 					return;
 				case UP:
-				case UP_LEFT:
-				case UP_RIGHT:
 					moveUp = false;
+					return;
+				case UP_LEFT:
+					moveUpLeft = false;
+					return;
+				case UP_RIGHT:
+					moveUpRight = false;
 					return;
 			}
 		}
@@ -218,6 +231,54 @@ public class Roads {
 		 */
 		public void setMoveUp(boolean moveUp) {
 			this.moveUp = moveUp;
+		}
+
+		public boolean canMoveUpLeft() {
+			return moveUpLeft;
+		}
+
+		public boolean canMoveUpRight() {
+			return moveUpRight;
+		}
+
+		public boolean canMoveDownLeft() {
+			return moveDownLeft;
+		}
+
+		public boolean canMoveDownRight() {
+			return moveDownRight;
+		}
+
+		/**
+		 * @param moveUpLeft
+		 *            the moveUpLeft to set
+		 */
+		public void setMoveUpLeft(boolean moveUpLeft) {
+			this.moveUpLeft = moveUpLeft;
+		}
+
+		/**
+		 * @param moveUpRight
+		 *            the moveUpRight to set
+		 */
+		public void setMoveUpRight(boolean moveUpRight) {
+			this.moveUpRight = moveUpRight;
+		}
+
+		/**
+		 * @param moveDownLeft
+		 *            the moveDownLeft to set
+		 */
+		public void setMoveDownLeft(boolean moveDownLeft) {
+			this.moveDownLeft = moveDownLeft;
+		}
+
+		/**
+		 * @param moveDownRight
+		 *            the moveDownRight to set
+		 */
+		public void setMoveDownRight(boolean moveDownRight) {
+			this.moveDownRight = moveDownRight;
 		}
 
 		/**

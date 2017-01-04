@@ -3,6 +3,8 @@ package fr.aresrpg.eratz.domain.command;
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.dofus.structures.server.Server;
+import fr.aresrpg.eratz.domain.BotFather;
+import fr.aresrpg.eratz.domain.gui.MapView;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.Account;
@@ -25,6 +27,16 @@ public class AccountCommand implements Command {
 	public void trigger(String[] args) {
 		if (args.length != 0) {
 			switch (args[0]) {
+				case "view":
+					if (args.length < 3) break;
+					Perso perso = Accounts.getPersoWithPseudo(args[1], Server.valueOf(args[2].toUpperCase()));
+					if (perso == null) {
+						LOGGER.info("Player not found");
+						return;
+					}
+					LOGGER.info("Showing view for " + perso);
+					MapView.getInstance().startView(BotFather.getPerso(perso).getView(), perso.getMap().getInfos());
+					return;
 				case "list":
 				case "List":
 				case "LIST":
@@ -34,13 +46,13 @@ public class AccountCommand implements Command {
 				case "Connect":
 				case "CONNECT":
 					if (args.length < 3) break;
-					Perso perso = Accounts.getPersoWithPseudo(args[1], Server.valueOf(args[2].toUpperCase()));
-					if (perso == null) {
+					Perso persoe = Accounts.getPersoWithPseudo(args[1], Server.valueOf(args[2].toUpperCase()));
+					if (persoe == null) {
 						LOGGER.info("Player not found");
 						return;
 					}
-					LOGGER.info("Selecting " + perso);
-					perso.connect();
+					LOGGER.info("Selecting " + persoe);
+					persoe.connect();
 					return;
 				default:
 					return;

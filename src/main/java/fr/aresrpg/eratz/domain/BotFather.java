@@ -11,9 +11,11 @@ package fr.aresrpg.eratz.domain;
 import fr.aresrpg.commons.domain.condition.Option;
 import fr.aresrpg.commons.domain.log.Logger;
 import fr.aresrpg.commons.domain.log.LoggerBuilder;
+import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.eratz.domain.command.*;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.listener.ConnectionListener;
+import fr.aresrpg.eratz.domain.listener.MapViewListener;
 import fr.aresrpg.eratz.domain.util.Hastebin;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.Manchou;
@@ -66,6 +68,7 @@ public class BotFather implements ManchouPlugin {
 		return getPerso(client.getPerso());
 	}
 
+	// whoami henual bratva-nazar
 	// bucheron henual bratva-nazar
 	@Override
 	public void onEnable() {
@@ -79,6 +82,8 @@ public class BotFather implements ManchouPlugin {
 		Accounts.registerAccount("SceatDrop3");
 		Accounts.registerAccount("SceatOkra");
 		new ConnectionListener();
+		MapViewListener.getInstance();
+		new DofusMapView(); // debug
 		Manchou.registerCommand(new WhoamiCommand());
 		Manchou.registerCommand(new HastebinCommand());
 		Manchou.registerCommand(new AccountCommand());

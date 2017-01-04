@@ -8,7 +8,9 @@ import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.state.BotState;
 import fr.aresrpg.eratz.domain.listener.HarvestListener;
+import fr.aresrpg.eratz.domain.listener.MapViewListener;
 import fr.aresrpg.tofumanchou.domain.Accounts;
+import fr.aresrpg.tofumanchou.domain.Manchou;
 import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 
@@ -144,7 +146,7 @@ public class BucheronCommand implements Command {
 		st.addPath(0, 33);
 		HarvestListener.register();
 		try {
-			HarvestListener.getInstance().goToNextMap(perso, perso.getPerso().getMap(), st);
+			if (!HarvestListener.getInstance().harvestRessource(perso, perso.getPerso().getMap(), perso.getBotState())) HarvestListener.getInstance().goToNextMap(perso, perso.getPerso().getMap(), st);
 		} catch (Exception e) {
 			LOGGER.error(e);
 		}
