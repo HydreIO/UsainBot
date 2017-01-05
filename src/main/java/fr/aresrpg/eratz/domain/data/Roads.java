@@ -16,6 +16,7 @@ import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
 import java.awt.Point;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.Predicate;
 
 /**
@@ -38,8 +39,6 @@ public class Roads {
 		addRestriction(27, -45, false, true, true, true); // grobe
 		addRestriction(29, -47, true, true, true, false); // grobe
 		addRestriction(11, 29, true, true, true, false); // sufokia
-		addRestriction(11, 22, true, false, true, true); // sufokia
-		addRestriction(12, -21, true, true, true, false); // pandala
 		addRestriction(5, 18, true, false, true, true); // noyer
 		addRestriction(5, 7, false, true, true, true); // dj tofu fuck
 		addRestriction(4, 6, true, true, true, false); // dj tofu
@@ -57,14 +56,26 @@ public class Roads {
 	}
 
 	/**
+	 * @return the cellRestrictions
+	 */
+	public static Map<ManchouMap, Set<Integer>> getCellRestrictions() {
+		return cellRestrictions;
+	}
+
+	/**
 	 * @return the mapRestrictions
 	 */
-	public static Map<Point, MapRestriction> getMapRestrictions() {
+	private static Map<Point, MapRestriction> getMapRestrictions() {
 		return mapRestrictions;
 	}
 
 	public static MapRestriction getRestriction(Point p) {
-		MapRestriction r = getMapRestrictions().get(p);
+		MapRestriction r = null;
+		for (Entry<Point, MapRestriction> i : getMapRestrictions().entrySet())
+			if (i.getKey().equals(p)) {
+				r = i.getValue();
+				break;
+			}
 		if (r == null) getMapRestrictions().put(p, r = new MapRestriction(p.x, p.y));
 		return r;
 	}
@@ -84,7 +95,7 @@ public class Roads {
 	 * @param cellid
 	 * @return true si la cell peut etre use en tant que teleporter
 	 */
-	public static boolean canUseToTeleport(ManchouMap map, int cellid) {
+	public static synchronized boolean canUseToTeleport(ManchouMap map, int cellid) {
 		if (!cellRestrictions.containsKey(map)) return true;
 		Set<Integer> set = cellRestrictions.get(map);
 		return !set.contains(cellid);

@@ -10,21 +10,27 @@ package fr.aresrpg.eratz.domain.data.player;
 
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.util.Pair;
 import fr.aresrpg.dofus.protocol.Packet;
+import fr.aresrpg.dofus.protocol.item.client.ItemDestroyPacket;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.Orientation;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
+import fr.aresrpg.dofus.util.Pathfinding.PathValidator;
+import fr.aresrpg.eratz.domain.data.Paths;
 import fr.aresrpg.eratz.domain.data.Roads;
 import fr.aresrpg.eratz.domain.data.player.info.ChatInfo;
 import fr.aresrpg.eratz.domain.data.player.state.BotState;
 import fr.aresrpg.eratz.domain.data.player.state.PlayerState;
+import fr.aresrpg.eratz.domain.event.PathEndEvent;
 import fr.aresrpg.eratz.domain.ia.mind.Mind;
 import fr.aresrpg.eratz.domain.util.Closeable;
-import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
+import fr.aresrpg.eratz.domain.util.ComparatorUtil;
+import fr.aresrpg.tofumanchou.domain.data.enums.*;
 import fr.aresrpg.tofumanchou.domain.data.item.Item;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.*;
@@ -34,10 +40,10 @@ import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class BotPerso implements Closeable {
 
-	//private final Mind mind = new BaseMind(this);
 	private ManchouPerso perso;
 	private Group group;
 	private PlayerState state;
@@ -46,9 +52,13 @@ public class BotPerso implements Closeable {
 	private boolean hasMount;
 	private BotState botState = new BotState();
 	private DofusMapView view;
+	private Paths currentPath;
 
 	private ChatInfo chatInfos = new ChatInfo(this);
-	private int[] itemsToKeep = new int[0];
+	private int[] itemsToKeep = { DofusItems2.HACHE_DE_L_APPRENTI_BÛCHERON.getId(), DofusItems2.POTION_DE_CITE___BONTA.getId(), DofusItems2.POTION_DE_RAPPEL.getId() };
+
+	private boolean moving;
+	private ScheduledFuture antiblock;
 
 	public BotPerso(ManchouPerso perso) {
 		this.perso = perso;
@@ -57,8 +67,22 @@ public class BotPerso implements Closeable {
 	}
 
 	public void scheduledActions() { // methode éxécutée toute les 10s, utile pour divers petit check
-
 		perso.useRessourceBags();
+	}
+
+	/**
+	 * @return the currentPath
+	 */
+	public Paths getCurrentPath() {
+		return currentPath;
+	}
+
+	/**
+	 * @param currentPath
+	 *            the currentPath to set
+	 */
+	public void setCurrentPath(Paths currentPath) {
+		this.currentPath = currentPath;
 	}
 
 	/**
@@ -80,6 +104,32 @@ public class BotPerso implements Closeable {
 	public void shutdown() {
 		sch.cancel(true);
 		//mind.shutdown();
+	}
+
+	public int getPodsPercent() {
+		int curr = perso.getPods();
+		int max = perso.getMaxPods();
+		return 100 * curr / max;
+	}
+
+	public void destroyHeaviestRessource() {
+		Item it = getPerso().getInventory().getHeaviestItem();
+		if (it == null) throw new NullPointerException("La ressource la plus lourde est introuvable !");
+		int maxp = perso.getMaxPods();
+		int pod = perso.getPods();
+		int over = pod + 1 - maxp;
+		int poditem = it.getPods();
+		int fullw = poditem * it.getAmount();
+		LOGGER.debug("Pod en trop = " + over);
+		LOGGER.debug("Poid total de l'item = " + fullw);
+		if (fullw <= over) {
+			LOGGER.debug("Destruction de x" + it.getAmount() + " " + it.getName());
+			getPerso().sendPacketToServer(new ItemDestroyPacket(it.getUUID(), it.getAmount()));
+		} else {
+			int todestroy = over / poditem + (over % poditem == 0 ? 0 : 1);
+			LOGGER.debug("Destruction de x" + todestroy + " " + it.getName());
+			getPerso().sendPacketToServer(new ItemDestroyPacket(it.getUUID(), todestroy));
+		}
 	}
 
 	/**
@@ -230,6 +280,125 @@ public class BotPerso implements Closeable {
 				m.isOnCoords(-29, -58);
 	}
 
+	public void goToBankMap() {
+		ManchouMap map = perso.getMap();
+		Bank nearestBank = getNearestBank();
+		final Point coords = nearestBank.getCoords();
+		if (map.isOnCoords(coords.x, coords.y)) {
+			perso.moveToCell(nearestBank.getCellid(), true, true, true);
+			return;
+		}
+		botState.path.clear();
+		botState.addPath(coords.x, coords.y);
+		goToNextMap();
+	}
+
+	/**
+	 * @return the antiblock
+	 */
+	public ScheduledFuture getAntiblock() {
+		return antiblock;
+	}
+
+	public void goToNextMap() {
+		if (moving) return;
+		moving = true;
+		final ManchouMap map = getPerso().getMap();
+		if (!map.isEnded()) return;
+		final BotState st = botState;
+		LOGGER.debug("go to next map method");
+		if (st.needToGo == null) {
+			if (st.path.isEmpty()) {
+				LOGGER.debug("PATH EMPTY return");
+				new PathEndEvent(this, st).send();
+				moving = false;
+				return;
+			}
+			LOGGER.debug("Need to go null ! on calcule");
+			final List<Point> list = st.path.stream().sorted((p1, p2) -> ComparatorUtil.comparingDistanceToPlayer(false, new Point(map.getX(), map.getY()), p1, p2)).collect(Collectors.toList());
+			st.needToGo = list.remove(0);
+			LOGGER.debug("needtogo apres calcul = " + st.needToGo);
+			st.path.remove(st.needToGo);
+		}
+		final Point next = st.needToGo;
+		LOGGER.debug("needtogo point = " + next);
+		PathValidator val = (a, b, c, d) -> {
+			boolean canMove = Roads.canMove(a, b, c, d);
+			boolean contains = st.lastBlockedMap.contains(new Point(c, d));
+			return canMove && !contains;
+		};
+		final List<Point> path = Pathfinding.getPath(map.getX(), map.getY(), next.x, next.y, val, Pathfinding::getNeighbors);
+		if (path == null) {
+			LOGGER.debug("Unable to find path from [" + map.getX() + "," + map.getY() + "] to [" + next.x + "," + next.y + "]");
+			LOGGER.debug("Retrying");
+			moving = false;
+			changeMap();
+			return;
+		}
+		if (path.size() == 1) {
+			st.needToGo = null;
+			LOGGER.debug("path size = 1 !! " + path);
+			moving = false;
+			goToNextMap();
+			return;
+		}
+		LOGGER.debug("path pour aller a la next ressource map " + path);
+		final Point point = path.get(1);
+		LOGGER.debug("prochain point " + point);
+		Orientation dir = Pathfinding.getDirectionForMap(map.getX(), map.getY(), point.x, point.y);
+		if (dir == null) {
+			moving = false;
+			throw new NullPointerException("Unable to find a direction to move from [" + map.getX() + "," + map.getY() + "] to [" + point.x + "," + point.y + "]");
+		}
+		LOGGER.debug("st haschangedmap = false");
+		LOGGER.debug("direction pour bouger= " + dir);
+		Pair<Long, ManchouCell> timeToTravel = changeMapWithDirection(dir);
+		if (timeToTravel.getFirst() == -1L) { // éssai sans diagonales
+			LOGGER.debug("impossible d'aller dans la direction " + dir);
+			LOGGER.debug("On change de map sans diagonals");
+			dir = dir.getNearestNeighborWithoutDiagonal();
+			timeToTravel = changeMapWithDirection(dir);
+		}
+		if (timeToTravel.getFirst() == -1L) { // éssai random
+			LOGGER.debug("impossible d'aller dans la direction " + dir);
+			st.lastBlockedMap.add(map.toPoint());
+			LOGGER.debug("on est blocké sur " + map.getCoordsInfos());
+			LOGGER.debug("On change de map random");
+			timeToTravel = changeMap();
+		}
+		if (timeToTravel.getFirst() == -1L) { // echec
+			LOGGER.debug("le changeMap a échoué retry dans 15s");
+			Executors.SCHEDULED.schedule(Threads.threadContextSwitch("GoToNextMap-" + getPerso().getPseudo(), () -> {
+				setMoving(false);
+				goToNextMap();
+			}), 15, TimeUnit.SECONDS);// Retest des que les mobs bougent ! TODO
+			getPerso().sit(true);
+			Threads.uSleep(500, TimeUnit.MILLISECONDS);
+			getPerso().sendSmiley(Smiley.SUEUR);
+			return;
+		}
+		final ManchouCell celltogo = timeToTravel.getSecond();
+		LOGGER.debug("celltogo = " + celltogo.toPoint());
+		antiblock = Executors.SCHEDULED.schedule(Threads.threadContextSwitch("BadTp", () -> {
+			final ManchouMap mm = getPerso().getMap();
+			if (mm.isOnCoords(map.getX(), map.getY()) && mm.isEnded()) {
+				LOGGER.error("IMPOSSIBLE D'USE CE TP (" + celltogo + "), ON NOTE ET ON RETENTE");
+				Roads.notifyCantUse(mm, celltogo.getId());
+				moving = false;
+				goToNextMap();
+			}
+		}), (long) (timeToTravel.getFirst() * 2), TimeUnit.MILLISECONDS);
+		moving = false;
+	}
+
+	/**
+	 * @param moving
+	 *            the moving to set
+	 */
+	private void setMoving(boolean moving) {
+		this.moving = moving;
+	}
+
 	/**
 	 * @return the group
 	 */
@@ -269,8 +438,7 @@ public class BotPerso implements Closeable {
 	 * @return le temps du path ainsi que la cellule du tp ou -1 si aucun teleporteur n'est accessible (blocké par mob ?)
 	 */
 	public Pair<Long, ManchouCell> changeMap() {
-		ManchouCell[] farestTeleporters = perso.getFarestTeleporters1030();
-		if (farestTeleporters == null || farestTeleporters.length == 0) farestTeleporters = perso.getFarestTeleporters();
+		ManchouCell[] farestTeleporters = perso.getFarestTeleporters();
 		if (farestTeleporters.length == 0) throw new NullPointerException("No teleporters found on map !");
 		LOGGER.debug("farest tp = " + Arrays.toString(perso.getFarestTeleporters()));
 		LOGGER.debug("nearest tp = " + Arrays.toString(perso.getNearestTeleporters()));

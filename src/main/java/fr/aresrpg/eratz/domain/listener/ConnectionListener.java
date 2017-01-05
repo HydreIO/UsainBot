@@ -31,6 +31,7 @@ public class ConnectionListener implements Listener {
 			BotPerso botPerso = new BotPerso(perso);
 			botPerso.setOnline(true);
 			BotFather.getInstance().getPersos().put(perso.getUUID(), botPerso);
+			System.out.println("SELECTED");
 		}
 	}
 

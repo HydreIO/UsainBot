@@ -20,7 +20,6 @@ public class BotState {
 
 	public int currentRessource = -1;
 	public Point needToGo = null;
-	public boolean hasChangedMap = true;
 	public Set<Point> lastBlockedMap = new HashSet<>();
 	public Pair<ManchouMap, Integer> lastCellMoved = null;
 

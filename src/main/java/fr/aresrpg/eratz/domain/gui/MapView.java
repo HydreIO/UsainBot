@@ -15,12 +15,12 @@ public class MapView extends Application {
 	private static MapView INSTANCE = new MapView();
 	private static Stage stage;
 
-	public static void main(String[] args) {
-		MapView.launch(args);
-	}
-
 	public MapView() {
 		INSTANCE = this;
+	}
+
+	public static void main(String... args) {
+		MapView.launch(args);
 	}
 
 	public static void setTitle(String name) {
@@ -39,7 +39,7 @@ public class MapView extends Application {
 		return INSTANCE;
 	}
 
-	public void startView(Parent parent, String name) {
+	public static void startView(Parent parent, String name) {
 		Platform.runLater(() -> {
 			if (stage != null) stage.close();
 			stage = new Stage();

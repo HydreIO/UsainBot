@@ -11,9 +11,9 @@ package fr.aresrpg.eratz.domain;
 import fr.aresrpg.commons.domain.condition.Option;
 import fr.aresrpg.commons.domain.log.Logger;
 import fr.aresrpg.commons.domain.log.LoggerBuilder;
-import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.eratz.domain.command.*;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
+import fr.aresrpg.eratz.domain.gui.MapView;
 import fr.aresrpg.eratz.domain.listener.ConnectionListener;
 import fr.aresrpg.eratz.domain.listener.MapViewListener;
 import fr.aresrpg.eratz.domain.util.Hastebin;
@@ -22,6 +22,7 @@ import fr.aresrpg.tofumanchou.domain.Manchou;
 import fr.aresrpg.tofumanchou.domain.data.Account;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.domain.plugin.ManchouPlugin;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.BootStrap;
 import fr.aresrpg.tofumanchou.infra.config.Variables;
 import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
@@ -68,8 +69,12 @@ public class BotFather implements ManchouPlugin {
 		return getPerso(client.getPerso());
 	}
 
+	// account view bratva-nazar henual
 	// whoami henual bratva-nazar
 	// bucheron henual bratva-nazar
+	// goto 4,16 bratva-nazar henual
+	// goto 14,25 bratva-nazar henual
+	// goto 21,-30 bratva-nazar henual
 	@Override
 	public void onEnable() {
 		instance = this;
@@ -78,15 +83,16 @@ public class BotFather implements ManchouPlugin {
 			Perso perso = Accounts.registerPerso(pe.getPseudo(), p.getAccountName(), p.getPassword(), pe.getDofusServer());
 			persos.put(perso.getUUID(), new BotPerso((ManchouPerso) perso));
 		}));
+		Executors.FIXED.execute(MapView::main);
 		Accounts.registerAccount("SceatSifu");
 		Accounts.registerAccount("SceatDrop3");
 		Accounts.registerAccount("SceatOkra");
 		new ConnectionListener();
 		MapViewListener.getInstance();
-		new DofusMapView(); // debug
 		Manchou.registerCommand(new WhoamiCommand());
 		Manchou.registerCommand(new HastebinCommand());
 		Manchou.registerCommand(new AccountCommand());
+		Manchou.registerCommand(new GotoCommand());
 		Manchou.registerCommand(new BucheronCommand());
 	}
 
@@ -122,7 +128,7 @@ public class BotFather implements ManchouPlugin {
 	/**
 	 * @return the persos
 	 */
-	public Map<Long, BotPerso> getPersos() {
+	public synchronized Map<Long, BotPerso> getPersos() {
 		return persos;
 	}
 
