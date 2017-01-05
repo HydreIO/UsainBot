@@ -11,11 +11,11 @@ package fr.aresrpg.eratz.domain;
 import fr.aresrpg.commons.domain.condition.Option;
 import fr.aresrpg.commons.domain.log.Logger;
 import fr.aresrpg.commons.domain.log.LoggerBuilder;
+import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.command.*;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.gui.MapView;
-import fr.aresrpg.eratz.domain.listener.ConnectionListener;
-import fr.aresrpg.eratz.domain.listener.MapViewListener;
+import fr.aresrpg.eratz.domain.listener.*;
 import fr.aresrpg.eratz.domain.util.Hastebin;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.Manchou;
@@ -69,31 +69,40 @@ public class BotFather implements ManchouPlugin {
 		return getPerso(client.getPerso());
 	}
 
+	public static BotPerso getPerso(String pseudo, Server srv) {
+		for (BotPerso p : instance.persos.values())
+			if (p.getPerso() != null && p.getPerso().getPseudo().equals(pseudo) && p.getPerso().getServer() == srv) return p;
+		return null;
+	}
+
 	// account view bratva-nazar henual
 	// whoami henual bratva-nazar
 	// bucheron henual bratva-nazar
 	// goto 4,16 bratva-nazar henual
 	// goto 14,25 bratva-nazar henual
 	// goto 21,-30 bratva-nazar henual
+	// crash party bratva-nazar henual Ethylind
+	// account connect bratva-nazar henual
 	@Override
 	public void onEnable() {
 		instance = this;
 		injectSyso();
 		Variables.ACCOUNTS.forEach(p -> p.getPersos().forEach(pe -> {
 			Perso perso = Accounts.registerPerso(pe.getPseudo(), p.getAccountName(), p.getPassword(), pe.getDofusServer());
-			persos.put(perso.getUUID(), new BotPerso((ManchouPerso) perso));
+			persos.put(pe.getUUID(), new BotPerso((ManchouPerso) perso));
 		}));
 		Executors.FIXED.execute(MapView::main);
 		Accounts.registerAccount("SceatSifu");
 		Accounts.registerAccount("SceatDrop3");
-		Accounts.registerAccount("SceatOkra");
 		new ConnectionListener();
-		MapViewListener.getInstance();
+		MapViewListener.register();
+		FightListener.register();
 		Manchou.registerCommand(new WhoamiCommand());
 		Manchou.registerCommand(new HastebinCommand());
 		Manchou.registerCommand(new AccountCommand());
 		Manchou.registerCommand(new GotoCommand());
 		Manchou.registerCommand(new BucheronCommand());
+		Manchou.registerCommand(new CrashCommand());
 	}
 
 	private void injectSyso() {

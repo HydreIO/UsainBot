@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.data;
 
 import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.Path;
 import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron.BucheronAmaknaPath;
+import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron.BucheronBombuOlivioletPath;
 
 /**
  * 
@@ -9,7 +10,8 @@ import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron.BucheronAmaknaP
  */
 public enum Paths {
 
-	BUCHERON_AMAKNA(new BucheronAmaknaPath()),;
+	BUCHERON_AMAKNA(new BucheronAmaknaPath()),
+	BUCHERON_BOMBU_OLI(new BucheronBombuOlivioletPath());
 
 	private Path path;
 

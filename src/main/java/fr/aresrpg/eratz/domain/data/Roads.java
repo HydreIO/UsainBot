@@ -44,6 +44,8 @@ public class Roads {
 		addRestriction(4, 6, true, true, true, false); // dj tofu
 		addRestriction(5, 5, true, false, true, true); // dj tofu
 		addRestriction(6, 6, true, true, false, true); // dj tofu
+		addRestriction(14, 18, true, true, true, false); //forgeron
+		addRestriction(-33, -57, false, true, true, false, true, false, true, true); // milice bonta
 	}
 
 	private static void addRestriction(int x, int y, boolean up, boolean down, boolean left, boolean right) {
@@ -52,6 +54,19 @@ public class Roads {
 		r.setMoveLeft(left);
 		r.setMoveRight(right);
 		r.setMoveUp(up);
+		mapRestrictions.put(new Point(x, y), r);
+	}
+
+	private static void addRestriction(int x, int y, boolean up, boolean down, boolean left, boolean right, boolean upLeft, boolean upRight, boolean downLeft, boolean downRight) {
+		MapRestriction r = new MapRestriction(x, y);
+		r.setMoveDown(down);
+		r.setMoveLeft(left);
+		r.setMoveRight(right);
+		r.setMoveUp(up);
+		r.setMoveUpLeft(upLeft);
+		r.setMoveDownLeft(downLeft);
+		r.setMoveUpRight(upRight);
+		r.setMoveDownRight(downRight);
 		mapRestrictions.put(new Point(x, y), r);
 	}
 

@@ -46,10 +46,11 @@ public class BucheronCommand implements Command {
 		LOGGER.success("Starting bucheron for " + p.getPseudo());
 		BotPerso perso = BotFather.getPerso(p);
 		BotState st = perso.getBotState();
-		perso.setCurrentPath(Paths.BUCHERON_AMAKNA);
+		perso.setCurrentPath(Paths.BUCHERON_BOMBU_OLI);
 		Path path = perso.getCurrentPath().getPath();
 		path.fillCoords(st.path);
 		path.fillRessources(st.ressources);
+		HarvestListener.unRegister();
 		HarvestListener.register();
 		try {
 			if (!HarvestListener.getInstance().harvestRessource(perso, perso.getPerso().getMap(), perso.getBotState())) perso.goToNextMap();

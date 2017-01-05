@@ -8,6 +8,7 @@ import fr.aresrpg.tofumanchou.domain.Manchou;
 import fr.aresrpg.tofumanchou.domain.data.Account;
 import fr.aresrpg.tofumanchou.domain.event.BotDisconnectEvent;
 import fr.aresrpg.tofumanchou.domain.event.ClientCrashEvent;
+import fr.aresrpg.tofumanchou.domain.event.entity.EntityMoveEvent;
 import fr.aresrpg.tofumanchou.domain.event.player.PersoSelectEvent;
 import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
@@ -47,6 +48,13 @@ public class ConnectionListener implements Listener {
 		Collection<BotPerso> values = BotFather.getInstance().getPersos().values();
 		for (BotPerso p : values)
 			if (p.getPerso().getAccount().equals(client)) p.setOnline(false);
+	}
+
+	@Subscribe
+	public void notifymove(EntityMoveEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso == null) return;
+		if (perso.getPerso().getUUID() == e.getEntity().getUUID()) perso.getBotState().lastmove = System.currentTimeMillis();
 	}
 
 }

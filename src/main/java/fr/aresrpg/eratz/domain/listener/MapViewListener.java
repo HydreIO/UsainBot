@@ -2,14 +2,13 @@ package fr.aresrpg.eratz.domain.listener;
 
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
-import fr.aresrpg.commons.domain.event.Listener;
-import fr.aresrpg.commons.domain.event.Subscribe;
-import fr.aresrpg.dofus.util.Maps;
-import fr.aresrpg.dofus.util.Pathfinding;
+import fr.aresrpg.commons.domain.event.*;
+import fr.aresrpg.commons.domain.util.Pair;
+import fr.aresrpg.dofus.structures.map.Cell;
+import fr.aresrpg.dofus.util.*;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.gui.MapView;
-import fr.aresrpg.tofumanchou.domain.Manchou;
 import fr.aresrpg.tofumanchou.domain.data.Account;
 import fr.aresrpg.tofumanchou.domain.data.map.Carte;
 import fr.aresrpg.tofumanchou.domain.event.BotStartMoveEvent;
@@ -19,7 +18,7 @@ import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
 import java.awt.Point;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javafx.scene.paint.Color;
@@ -31,9 +30,22 @@ import javafx.scene.paint.Color;
 public class MapViewListener implements Listener {
 
 	private static MapViewListener instance = new MapViewListener();
+	private static List<Pair<EventBus, Subscriber>> subs = new ArrayList<>();
 
-	private MapViewListener() {
-		Manchou.registerEvent(this);
+	public MapViewListener() {
+		instance = this;
+	}
+
+	public static void register() {
+		try {
+			subs = Events.register(getInstance());
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void unRegister() {
+		subs.forEach(p -> p.getFirst().unsubscribe(p.getSecond()));
 	}
 
 	/**
@@ -71,7 +83,13 @@ public class MapViewListener implements Listener {
 				LOGGER.debug("Movement = " + botPerso.getPerso().getMap().getCells()[i].getMovement());
 				LOGGER.debug("Object1num = " + botPerso.getPerso().getMap().getCells()[i].getLayerObject1Num());
 				LOGGER.debug("Object2num = " + botPerso.getPerso().getMap().getCells()[i].getLayerObject2Num());
-				LOGGER.debug("Cell = " + botPerso.getPerso().getMap().getCells()[i]);
+				LOGGER.debug("Cell= " + botPerso.getPerso().getMap().getCells()[i]);
+				List<Cell> accesibleCells = ShadowCasting.getAccesibleCells(i, 10, botPerso.getPerso().getMap().serialize(), botPerso.getPerso().getMap().cellAccessible().negate());
+				Iterator<Cell> iterator = accesibleCells.iterator();
+				while (iterator.hasNext())
+					if (!iterator.next().isWalkable()) iterator.remove();
+				System.out.println(accesibleCells.stream().map(Cell::getId).collect(Collectors.toList()));
+				botPerso.getView().setAccessible(accesibleCells, i, 10);
 				List<Point> cellPath = Pathfinding.getCellPath(botPerso.getPerso().getCellId(), i, botPerso.getPerso().getMap().getProtocolCells(), e.getMap().getWidth(), e.getMap().getHeight(),
 						Pathfinding::getNeighbors,
 						botPerso.getPerso()::canGoOnCellAvoidingMobs);
@@ -84,22 +102,29 @@ public class MapViewListener implements Listener {
 	@Subscribe
 	public void onPlayerAdd(EntityPlayerJoinMapEvent e) {
 		BotPerso botPerso = get(e.getClient());
+		if (botPerso == null) return;
 		botPerso.getView().addEntity((int) e.getPlayer().getUUID(), e.getPlayer().getCellId());
 	}
 
 	@Subscribe
 	public void onMobAdd(MonsterGroupSpawnEvent e) {
-		get(e.getClient()).getView().addMob((int) e.getGroup().getUUID(), e.getGroup().getCellId());
+		BotPerso botPerso = get(e.getClient());
+		if (botPerso == null) return;
+		botPerso.getView().addMob((int) e.getGroup().getUUID(), e.getGroup().getCellId());
 	}
 
 	@Subscribe
 	public void onMobAdd(MonsterJoinMapEvent e) {
-		get(e.getClient()).getView().addMob((int) e.getMob().getUUID(), e.getMob().getCellId());
+		BotPerso botPerso = get(e.getClient());
+		if (botPerso == null) return;
+		botPerso.getView().addMob((int) e.getMob().getUUID(), e.getMob().getCellId());
 	}
 
 	@Subscribe
 	public void onNpcAdd(NpcJoinMapEvent e) {
-		get(e.getClient()).getView().addNpc((int) e.getNpc().getUUID(), e.getNpc().getCellId());
+		BotPerso botPerso = get(e.getClient());
+		if (botPerso == null) return;
+		botPerso.getView().addNpc((int) e.getNpc().getUUID(), e.getNpc().getCellId());
 	}
 
 	@Subscribe

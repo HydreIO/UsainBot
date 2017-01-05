@@ -19,8 +19,8 @@ public class Test extends Application {
 	private final int width = 15;
 	private final int height = 17;
 	private final int cellsW = 479;
-	private final int range = 64;
-	private final int player = 61;
+	private final int range = 12;
+	private final int player = 92;
 	Cell[] cells = new Cell[cellsW];
 
 	@Override
@@ -110,8 +110,8 @@ public class Test extends Application {
 				gc.setFill(Color.GREEN);
 			else
 				gc.setFill(Color.LIGHTGRAY);
-			int xe = Maps.getXRotated(i, width, height);
-			int ye = Maps.getYRotated(i, width, height);
+			int xe = Maps.getX(i, width);
+			int ye = Maps.getY(i, width);
 
 			//	if (i == leftUpCorner || ArrayUtils.contains(i, leftupnode)) gc.setFill(Color.RED);
 			if (i == rightUpCorner || ArrayUtils.contains(i, rightupnode)) gc.setFill(Color.YELLOW);
@@ -120,13 +120,13 @@ public class Test extends Application {
 
 			System.out.println(xe + " " + ye);
 			System.out.println(i + " " + Maps.getIdRotated(xe, ye, width, height));
-			double xp = xe * 30;
-			double yp = ye * 30;
-			gc.fillRect(xp, yp, 29, 29);
-			/*
-			 * gc.fillPolygon(new double[] { xp, xp + 20, xp, xp - 20 },
-			 * new double[] { yp + 20, yp, yp - 20, yp }, 4);
-			 */
+			double xp = xe * 25;
+			double yp = ye * 25;
+			//gc.fillRect(xp, yp, 29, 29);
+
+			gc.fillPolygon(new double[] { xp, xp + 25, xp, xp - 25 },
+					new double[] { yp + 25, yp, yp - 25, yp }, 4);
+
 			//gid.fillText(i + "", xp, yp + gc.getFont().getSize() / 3);
 			gid.fillText(Maps.getXRotated(i, width, height) + "," + Maps.getYRotated(i, width, height) + "", xp, yp + 16);
 			gid.setFill(Color.RED);
@@ -223,7 +223,7 @@ public class Test extends Application {
 		if (x > height + width || y > height + width)
 			return null;
 		int id = Maps.getIdRotated(x, y, width, height);
-		if (Maps.isInMap(id, width, height))
+		if (Maps.isInMapRotated(x, y, width, height))
 			return cells[id];
 		else
 			return null;

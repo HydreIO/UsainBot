@@ -67,17 +67,18 @@ public class GotoListener implements Listener {
 	private void onMap(final BotPerso perso, final ManchouMap map) {
 		final BotState st = perso.getBotState();
 		LOGGER.debug("checking map");
+		st.visitedMaps.add(map);
 		Roads.checkMap(map, perso); // enregistre les tp manquant etc
 		LOGGER.debug("set has changed map true");
 		try {
-			boolean canUseToTeleport = st.lastCellMoved == null ? true : Roads.canUseToTeleport(st.lastCellMoved.getFirst(), st.lastCellMoved.getSecond());
+			boolean canUseToTeleport = st.lastCellMoved == null ? true : Roads.canUseToTeleport(st.lastCellMoved.getFirst(), st.lastCellMoved.getSecond().getFirst());
 			LOGGER.debug("rt");
 			LOGGER.debug("lastmoved = " + st.lastCellMoved + " can use ? " + canUseToTeleport);
 			if (!st.canGoIndoor && !map.isOutdoor()) {
 				LOGGER.debug("Indoor !" + map.getCoordsInfos());
 				final ManchouCell cl = perso.getPerso().getNearestTeleporters()[0];
 				if (st.lastCellMoved != null) {
-					Roads.notifyCantUse(st.lastCellMoved.getFirst(), st.lastCellMoved.getSecond());
+					Roads.notifyCantUse(st.lastCellMoved.getFirst(), st.lastCellMoved.getSecond().getFirst());
 					LOGGER.debug("On notify cantUse " + st.lastCellMoved);
 					st.lastCellMoved = null;
 				}

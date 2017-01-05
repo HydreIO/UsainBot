@@ -4,13 +4,9 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.event.*;
-import fr.aresrpg.commons.domain.log.AnsiColors.AnsiColor;
-import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.commons.domain.util.Pair;
-import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
 import fr.aresrpg.dofus.structures.*;
 import fr.aresrpg.dofus.structures.item.Interractable;
-import fr.aresrpg.dofus.structures.item.ItemCategory;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.Pathfinding;
@@ -23,9 +19,7 @@ import fr.aresrpg.eratz.domain.data.player.state.BotState;
 import fr.aresrpg.eratz.domain.event.PathEndEvent;
 import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.Path;
 import fr.aresrpg.eratz.domain.util.InterractUtil;
-import fr.aresrpg.tofumanchou.domain.data.item.Item;
 import fr.aresrpg.tofumanchou.domain.event.aproach.InfoMessageEvent;
-import fr.aresrpg.tofumanchou.domain.event.fight.FightEndEvent;
 import fr.aresrpg.tofumanchou.domain.event.item.PodsUpdateEvent;
 import fr.aresrpg.tofumanchou.domain.event.map.FrameUpdateEvent;
 import fr.aresrpg.tofumanchou.domain.event.map.HarvestTimeReceiveEvent;
@@ -34,9 +28,9 @@ import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.*;
 
 import java.awt.Point;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 
@@ -65,19 +59,22 @@ public class HarvestListener implements Listener {
 
 	@Subscribe
 	public void onFinish(final PathEndEvent e) {
-		Paths currentPath = e.getPerso().getCurrentPath();
-		if (currentPath == null) throw new NullPointerException("The bot doesn't have a path anymore !");
-		Path path = currentPath.getPath();
-		path.fillCoords(e.getPerso().getBotState().path);
-		path.fillRessources(e.getPerso().getBotState().ressources);
-		e.getPerso().goToNextMap();
+		Executors.SCHEDULED.schedule(() -> {
+			Paths currentPath = e.getPerso().getCurrentPath();
+			if (currentPath == null) throw new NullPointerException("The bot doesn't have a path anymore !");
+			Path path = currentPath.getPath();
+			path.fillCoords(e.getPerso().getBotState().path);
+			path.fillRessources(e.getPerso().getBotState().ressources);
+			e.getPerso().goToNextMap();
+		} , 3, TimeUnit.SECONDS);
+
 	}
 
 	@Subscribe
 	public void onPod(PodsUpdateEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || perso.getPodsPercent() < 95) return;
-		perso.getBotState().goToBank = true;
+		perso.notifyNeedToGoBank();
 	}
 
 	@Subscribe
@@ -87,7 +84,7 @@ public class HarvestListener implements Listener {
 		if ((e.getType() == InfosMsgType.ERROR && InfosMessage.TROP_CHARGE_.getId() == e.getMessageId())
 				|| (e.getType() == InfosMsgType.INFOS && InfosMessage.RECOLTE_LOST_FULL_POD.getId() == e.getMessageId())) {
 			perso.destroyHeaviestRessource();
-			perso.getBotState().goToBank = true;
+			perso.notifyNeedToGoBank();
 		}
 	}
 
@@ -102,20 +99,6 @@ public class HarvestListener implements Listener {
 			st.needToGo = null;
 			perso.goToNextMap(); // si il a finit d'harvest & qu'il ne doit pas aller a la banque et qu'il n'y a plus de ressources sur la map
 		}
-	}
-
-	@Subscribe
-	public void onFightEnd(final FightEndEvent e) {
-		Executors.SCHEDULED.schedule(() -> {
-			final ManchouPerso perso = (ManchouPerso) e.getClient().getPerso();
-			final BotPerso bp = BotFather.getPerso(perso);
-			final BotState st = bp.getBotState();
-			if (st.goToBank) bp.goToBankMap();
-			else if (!st.goToBank && !harvestRessource(bp, perso.getMap(), st)) {
-				st.needToGo = null;
-				bp.goToNextMap();
-			}
-		} , 1, TimeUnit.SECONDS);
 	}
 
 	@Subscribe
@@ -144,12 +127,16 @@ public class HarvestListener implements Listener {
 
 	private void onMap(final BotPerso perso, final ManchouMap map) {
 		final BotState st = perso.getBotState();
+		st.visitedMaps.add(map);
 		LOGGER.debug("checking map");
 		Roads.checkMap(map, perso); // enregistre les tp manquant etc
 		LOGGER.debug("set has changed map true");
-		if (perso.getPodsPercent() >= 95) st.goToBank = true;
+		if (perso.getPodsPercent() >= 95) {
+			perso.notifyNeedToGoBank();
+			return;
+		}
 		try {
-			boolean canUseToTeleport = st.lastCellMoved == null ? true : Roads.canUseToTeleport(st.lastCellMoved.getFirst(), st.lastCellMoved.getSecond());
+			boolean canUseToTeleport = st.lastCellMoved == null ? true : Roads.canUseToTeleport(st.lastCellMoved.getFirst(), st.lastCellMoved.getSecond().getFirst());
 			LOGGER.debug("rt");
 			LOGGER.debug("lastmoved = " + st.lastCellMoved + " can use ? " + canUseToTeleport);
 			if (!st.canGoIndoor && !map.isOutdoor()) {
@@ -161,12 +148,11 @@ public class HarvestListener implements Listener {
 					Threads.uSleep(1, TimeUnit.SECONDS);
 					perso.getPerso().npcTalkChoice(318, 259);
 					Threads.uSleep(1, TimeUnit.SECONDS);
-					depositBank(perso);
+					perso.depositBank();
 					Threads.uSleep(1, TimeUnit.SECONDS); // TODO Changer pour un systeme non blockant avec les évents d'ouverture d'inventaire !
 					st.goToBank = false;
-
 				} else if (st.lastCellMoved != null) {
-					Roads.notifyCantUse(st.lastCellMoved.getFirst(), st.lastCellMoved.getSecond());
+					Roads.notifyCantUse(st.lastCellMoved.getFirst(), st.lastCellMoved.getSecond().getFirst());
 					LOGGER.debug("On notify cantUse " + st.lastCellMoved);
 					st.lastCellMoved = null;
 				}
@@ -198,35 +184,6 @@ public class HarvestListener implements Listener {
 		} catch (final Exception e) {
 			LOGGER.error(e);
 		}
-	}
-
-	private String nameObject(final Item o) {
-		return "x" + o.getAmount() + " " + o.getName();
-	}
-
-	public void depositBank(final BotPerso perso) {
-		final Set<Item> inv = perso.getPerso().getInventory().getContents().values().stream().filter(e -> {
-			if (ArrayUtils.contains(e.getTypeId(), perso.getItemsToKeep())) return false;
-			if (e.getCategory() == ItemCategory.QUESTOBJECT || e.getCategory() == ItemCategory.QUEST) return false;
-			return true;
-		}).collect(Collectors.toSet());
-		final MovedItem[] array = inv.stream().map(it -> new MovedItem(ExchangeMove.ADD, it.getUUID(), it.getAmount())).toArray(MovedItem[]::new);
-		Arrays.stream(array).forEach(i -> {
-			perso.getPerso().moveItem(i);
-			Threads.uSleep(250, TimeUnit.MILLISECONDS);
-		});
-		LOGGER.info(AnsiColor.GREEN + "à déposé : " + inv.stream().map(this::nameObject).collect(Collectors.joining(",", "[", "]")) + " en banque !");
-		Threads.uSleep(1, TimeUnit.SECONDS);
-		final int kamas = perso.getPerso().getInventory().getKamas();
-		final int bankK = perso.getPerso().getAccount().getBank().getKamas();
-		int tomove;
-		if (kamas < 10_000) {
-			tomove = 10_000 - kamas;
-			if (tomove > bankK) tomove = bankK;
-			tomove = -tomove;
-		} else tomove = kamas - 10_000;
-		perso.getPerso().moveKama(tomove);
-		perso.getPerso().exchangeLeave();
 	}
 
 	public boolean harvestRessource(final BotPerso perso, final ManchouMap map, final BotState st) { // return false si plus de ressource
