@@ -78,6 +78,7 @@ public class BotFather implements ManchouPlugin {
 	// account view bratva-nazar henual
 	// whoami henual bratva-nazar
 	// bucheron henual bratva-nazar
+// fight henual bratva-nazar
 	// goto 4,16 bratva-nazar henual
 	// goto 14,25 bratva-nazar henual
 	// goto 21,-30 bratva-nazar henual
@@ -101,6 +102,7 @@ public class BotFather implements ManchouPlugin {
 		Manchou.registerCommand(new HastebinCommand());
 		Manchou.registerCommand(new AccountCommand());
 		Manchou.registerCommand(new GotoCommand());
+		Manchou.registerCommand(new FightCommand());
 		Manchou.registerCommand(new BucheronCommand());
 		Manchou.registerCommand(new CrashCommand());
 	}

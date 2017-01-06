@@ -387,10 +387,6 @@ public class BotPerso implements Closeable {
 		LOGGER.debug("needtogo point = " + next);
 		int distanceToAstrub = Maps.distanceManathan(Zaap.ASTRUB.getCoords(), next, map.getWidth(), map.getHeight());
 		int distanceToPlayer = Maps.distanceManathan(map.toPoint(), next, map.getWidth(), map.getHeight());
-		if (distanceToAstrub < distanceToPlayer && hasPopoRappel()) {
-			perso.useItem(DofusItems2.POTION_DE_RAPPEL);
-			return;
-		}
 		PathValidator val = (a, b, c, d) -> {
 			boolean canMove = Roads.canMove(a, b, c, d);
 			boolean contains = st.lastBlockedMap.contains(new Point(c, d));
@@ -432,11 +428,9 @@ public class BotPerso implements Closeable {
 		}
 		if (timeToTravel.getFirst() == -1L) { // echec
 			LOGGER.debug("le changeMap a échoué retry dans 15s");
-			getPerso().sendSmiley(Smiley.SUEUR);
-			Executors.SCHEDULED.schedule(Threads.threadContextSwitch("GoToNextMap-" + getPerso().getPseudo(), () -> {
-				goToNextMap();
-			}), 15, TimeUnit.SECONDS);// Retest des que les mobs bougent ! TODO
-			getPerso().sit(true);
+			//getPerso().sendSmiley(Smiley.SUEUR);
+			//getPerso().sit(true);
+			getPerso().useItem(DofusItems2.POTION_DE_RAPPEL);
 			return;
 		}
 		final ManchouCell celltogo = timeToTravel.getSecond();
@@ -639,11 +633,16 @@ public class BotPerso implements Closeable {
 	}
 
 	public void runAwayFromMobs() {
-		ManchouCell c = getCellAwayFromMob(perso.getPm());
-		LOGGER.debug("pm player = " + perso.getPm());
-		BotFather.LOGGER.severe("cell away from mob = " + c.getId());
-		if (c != null) runTo(c.getId());
-
+		try {
+			ManchouCell c = getCellAwayFromMob(perso.getPm());
+			LOGGER.debug("pm player = " + perso.getPm());
+			if (c != null) {
+				BotFather.LOGGER.severe("cell away from mob = " + c.getId());
+				runTo(c.getId());
+			}
+		} catch (Exception e) {
+			LOGGER.error(e);
+		}
 	}
 
 	public boolean isSafeFromMobs() {
@@ -759,6 +758,7 @@ public class BotPerso implements Closeable {
 		int dist = Integer.MAX_VALUE;
 		Entity near = null;
 		for (final Entity m : perso.getMap().getEntities().values()) {
+			if (m.getLife() < 1) continue;
 			// continue if allies
 			if (m instanceof Perso) continue;
 			else if (m instanceof Player) {

@@ -10,18 +10,18 @@ import fr.aresrpg.dofus.structures.InfosMsgType;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.domain.data.entity.Entity;
+import fr.aresrpg.tofumanchou.domain.data.entity.mob.MobGroup;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.domain.data.enums.Spells;
 import fr.aresrpg.tofumanchou.domain.event.aproach.InfoMessageEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityTurnStartEvent;
-import fr.aresrpg.tofumanchou.domain.event.fight.FightJoinEvent;
-import fr.aresrpg.tofumanchou.domain.event.fight.FightSpawnEvent;
+import fr.aresrpg.tofumanchou.domain.event.fight.*;
+import fr.aresrpg.tofumanchou.domain.event.player.MapJoinEvent;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 import fr.aresrpg.tofumanchou.infra.data.ManchouSpell;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,6 +57,36 @@ public class FightListener implements Listener {
 		}
 	}
 
+	//	@Subscribe
+	public void fightEnd(FightEndEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso != null) Executors.SCHEDULED.schedule(() -> {
+			try {
+				perso.goToNextMap();
+			} catch (Exception ee) {
+				LOGGER.error(ee);
+			}
+		} , 1, TimeUnit.SECONDS);
+	}
+
+	@Subscribe
+	public void onmap(MapJoinEvent e) {
+		Executors.SCHEDULED.schedule(() -> {
+			try {
+				BotPerso perso = BotFather.getPerso(e.getClient());
+				if (perso != null) {
+					Optional<Entity> findAny = perso.getPerso().getMap().getEntities().values().stream().filter(m -> m instanceof MobGroup).findAny();
+					if (findAny.isPresent() && perso.getBotState().needToGo != null && perso.getPerso().getMap().isOnCoords(perso.getBotState().needToGo.x, perso.getBotState().needToGo.y)) {
+						perso.getBotState().needToGo = null;
+						perso.getPerso().moveToCell(findAny.get().getCellId(), false, true, false);
+					} else perso.goToNextMap();
+				}
+			} catch (Exception ee) {
+				LOGGER.error(ee);
+			}
+		} , 1, TimeUnit.SECONDS);
+	}
+
 	@Subscribe
 	public void onFightSpawn(FightSpawnEvent e) {
 
@@ -82,36 +112,43 @@ public class FightListener implements Listener {
 	}
 
 	public void playTurn(BotPerso perso) {
-		ManchouSpell boost = (ManchouSpell) perso.getPerso().getSpells().get(Spells.TIR_ELOIGNEE);
-		boost.decrementRelance();
-		if (boost.getRelance() == 0) perso.getPerso().launchSpell(boost, 5, perso.getPerso().getCellId());
-		ManchouSpell atk = (ManchouSpell) perso.getPerso().getSpells().get(Spells.FLECHE_MAGIQUE);
-		Entity nearestEnnemy = perso.getNearestEnnemy();
-		LOGGER.debug("nearest Ennemy = " + nearestEnnemy.getLife() + " , " + nearestEnnemy.getCellId() + " id=" + nearestEnnemy.getUUID());
-		if (perso.hasMaxPoFor(atk, nearestEnnemy.getCellId())) { // si po
-			LOGGER.debug("has max po for");
-			perso.getPerso().launchSpell(atk, 0, nearestEnnemy.getCellId());
-		} else { // si pas po
-			ManchouCell cellToTargetMob = perso.getCellToTargetMob(perso.getPerso().getPm(), nearestEnnemy.getCellId(), perso.getMaxPoFor(atk), false);
-			LOGGER.debug("cell line = " + cellToTargetMob);
-			if (cellToTargetMob == null) {
-				LOGGER.debug("run to mob");
-				perso.runToMob(nearestEnnemy, false, perso.getPerso().getPm());
-				Threads.uSleep(1, TimeUnit.SECONDS);
-			} else {
-				LOGGER.debug("run to " + cellToTargetMob.getId());
-				perso.runTo(cellToTargetMob.getId());
-				Threads.uSleep(1, TimeUnit.SECONDS);
-				LOGGER.debug("Atk");
+		try {
+			ManchouSpell boost = (ManchouSpell) perso.getPerso().getSpells().get(Spells.TIR_ELOIGNEE);
+			boost.decrementRelance();
+			if (boost.getRelance() == 0) perso.getPerso().launchSpell(boost, 5, perso.getPerso().getCellId());
+			ManchouSpell atk = (ManchouSpell) perso.getPerso().getSpells().get(Spells.FLECHE_MAGIQUE);
+			ManchouCell persoC = perso.getPerso().getCell();
+			Entity nearestEnnemy = perso.getNearestEnnemy();
+			LOGGER.debug("nearest Ennemy = " + nearestEnnemy.getLife() + " , " + nearestEnnemy.getCellId() + " id=" + nearestEnnemy.getUUID());
+			if (perso.hasMaxPoFor(atk, nearestEnnemy.getCellId())) { // si po
+				LOGGER.debug("has max po for");
+				if (persoC.distanceManathan(nearestEnnemy.getCellId()) < 2) atk = (ManchouSpell) perso.getPerso().getSpells().get(Spells.FLECHE_DE_RECUL);
 				perso.getPerso().launchSpell(atk, 0, nearestEnnemy.getCellId());
+			} else { // si pas po
+				ManchouCell cellToTargetMob = perso.getCellToTargetMob(perso.getPerso().getPm(), nearestEnnemy.getCellId(), perso.getMaxPoFor(atk), false);
+				LOGGER.debug("cell line = " + cellToTargetMob);
+				if (cellToTargetMob == null) {
+					LOGGER.debug("run to mob");
+					perso.runToMob(nearestEnnemy, false, perso.getPerso().getPm());
+					Threads.uSleep(1, TimeUnit.SECONDS);
+				} else {
+					LOGGER.debug("run to " + cellToTargetMob.getId());
+					perso.runTo(cellToTargetMob.getId());
+					Threads.uSleep(1, TimeUnit.SECONDS);
+					LOGGER.debug("Atk");
+					perso.getPerso().launchSpell(atk, 0, nearestEnnemy.getCellId());
+				}
 			}
+			fallBack(perso);
+		} catch (Exception e) {
+			LOGGER.error(e);
 		}
-		fallBack(perso);
 	}
 
 	public void fallBack(BotPerso perso) {
 		LOGGER.debug("Run away");
 		perso.runAwayFromMobs(); // si il reste des pm alors le perso va fuir, si jamais il est trop loin il n'aura plus de pm car il aura déja rush le mob
+		Threads.uSleep(1, TimeUnit.SECONDS);
 		perso.getPerso().endTurn();
 	}
 

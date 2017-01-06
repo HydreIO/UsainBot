@@ -1,7 +1,7 @@
-package fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron;
+package fr.aresrpg.eratz.domain.ia.behavior.harvest.bucheron;
 
 import fr.aresrpg.dofus.structures.item.Interractable;
-import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.Path;
+import fr.aresrpg.eratz.domain.ia.behavior.Path;
 
 /**
  * 
@@ -27,15 +27,17 @@ public class BucheronBombuOlivioletPath extends Path {
 		addCoord(-8, -32);
 		addCoord(-9, -32);
 
-		addCoord(-26, 13);
-		addCoord(-27, 15);
-		addCoord(-27, 14);
-		addCoord(-27, 13);
-		addCoord(-27, 12);
-		addCoord(-27, 11);
-		addCoord(-27, 10);
-		addCoord(-27, 9);
-		addCoord(-27, 8);
+		/*
+		 * addCoord(-26, 13);
+		 * addCoord(-27, 15);
+		 * addCoord(-27, 14);
+		 * addCoord(-27, 13);
+		 * addCoord(-27, 12);
+		 * addCoord(-27, 11);
+		 * addCoord(-27, 10);
+		 * addCoord(-27, 9);
+		 * addCoord(-27, 8);
+		 */
 	}
 
 }

@@ -1,8 +1,9 @@
 package fr.aresrpg.eratz.domain.data;
 
-import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.Path;
-import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron.BucheronAmaknaPath;
-import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron.BucheronBombuOlivioletPath;
+import fr.aresrpg.eratz.domain.ia.behavior.Path;
+import fr.aresrpg.eratz.domain.ia.behavior.fight.PichonFightPath;
+import fr.aresrpg.eratz.domain.ia.behavior.harvest.bucheron.BucheronAmaknaPath;
+import fr.aresrpg.eratz.domain.ia.behavior.harvest.bucheron.BucheronBombuOlivioletPath;
 
 /**
  * 
@@ -11,7 +12,8 @@ import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron.BucheronBombuOl
 public enum Paths {
 
 	BUCHERON_AMAKNA(new BucheronAmaknaPath()),
-	BUCHERON_BOMBU_OLI(new BucheronBombuOlivioletPath());
+	BUCHERON_BOMBU_OLI(new BucheronBombuOlivioletPath()),
+	PICHON(new PichonFightPath()),;
 
 	private Path path;
 

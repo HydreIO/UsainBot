@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.ia.behavior.harvest.type;
+package fr.aresrpg.eratz.domain.ia.behavior;
 
 import fr.aresrpg.dofus.structures.item.Interractable;
 

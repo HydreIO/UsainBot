@@ -1,7 +1,7 @@
-package fr.aresrpg.eratz.domain.ia.behavior.harvest.type.bucheron;
+package fr.aresrpg.eratz.domain.ia.behavior.harvest.bucheron;
 
 import fr.aresrpg.dofus.structures.item.Interractable;
-import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.Path;
+import fr.aresrpg.eratz.domain.ia.behavior.Path;
 
 /**
  * 

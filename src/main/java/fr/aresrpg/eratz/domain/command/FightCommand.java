@@ -8,7 +8,6 @@ import fr.aresrpg.eratz.domain.data.Paths;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.state.BotState;
 import fr.aresrpg.eratz.domain.ia.behavior.Path;
-import fr.aresrpg.eratz.domain.listener.HarvestListener;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
@@ -19,18 +18,18 @@ import java.util.Arrays;
  * 
  * @since
  */
-public class BucheronCommand implements Command {
+public class FightCommand implements Command {
 
 	@Override
 	public String getCmd() {
-		return "bucheron";
+		return "fight";
 	}
 
 	@Override
 	public void trigger(String[] args) {
 		System.out.println(Arrays.toString(args));
 		if (args.length != 2) {
-			LOGGER.error("bucheron <server> <playerName>");
+			LOGGER.error("fight <server> <playerName>");
 			return;
 		}
 		Server srv = Server.fromName(args[0]);
@@ -43,20 +42,13 @@ public class BucheronCommand implements Command {
 			LOGGER.error("The perso '" + args[1] + "' is not found");
 			return;
 		}
-		LOGGER.success("Starting bucheron for " + p.getPseudo());
+		LOGGER.success("Starting fight for " + p.getPseudo());
 		BotPerso perso = BotFather.getPerso(p);
 		BotState st = perso.getBotState();
-		perso.setCurrentPath(Paths.BUCHERON_BOMBU_OLI);
+		perso.setCurrentPath(Paths.PICHON);
 		Path path = perso.getCurrentPath().getPath();
 		path.fillCoords(st.path);
-		path.fillRessources(st.ressources);
-		HarvestListener.unRegister();
-		HarvestListener.register();
-		try {
-			if (!HarvestListener.getInstance().harvestRessource(perso, perso.getPerso().getMap(), perso.getBotState())) perso.goToNextMap();
-		} catch (Exception e) {
-			LOGGER.error(e);
-		}
+		perso.goToNextMap();
 	}
 
 }

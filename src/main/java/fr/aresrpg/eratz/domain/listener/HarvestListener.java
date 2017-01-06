@@ -17,7 +17,7 @@ import fr.aresrpg.eratz.domain.data.Roads;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.state.BotState;
 import fr.aresrpg.eratz.domain.event.PathEndEvent;
-import fr.aresrpg.eratz.domain.ia.behavior.harvest.type.Path;
+import fr.aresrpg.eratz.domain.ia.behavior.Path;
 import fr.aresrpg.eratz.domain.util.InterractUtil;
 import fr.aresrpg.tofumanchou.domain.event.aproach.InfoMessageEvent;
 import fr.aresrpg.tofumanchou.domain.event.item.PodsUpdateEvent;
