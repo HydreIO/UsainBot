@@ -1,6 +1,6 @@
-package fr.aresrpg.eratz.domain.ia.behavior.fight;
+package fr.aresrpg.eratz.domain.ia.path.fight;
 
-import fr.aresrpg.eratz.domain.ia.behavior.Path;
+import fr.aresrpg.eratz.domain.ia.path.Path;
 
 /**
  * 

@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.ia.behavior;
+package fr.aresrpg.eratz.domain.ia.path;
 
 import fr.aresrpg.dofus.structures.item.Interractable;
 

@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain;
+package fr.aresrpg.eratz;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.dofus.util.*;

@@ -1,9 +1,8 @@
-package fr.aresrpg.eratz.domain.data;
+package fr.aresrpg.eratz.domain.ia.path;
 
-import fr.aresrpg.eratz.domain.ia.behavior.Path;
-import fr.aresrpg.eratz.domain.ia.behavior.fight.PichonFightPath;
-import fr.aresrpg.eratz.domain.ia.behavior.harvest.bucheron.BucheronAmaknaPath;
-import fr.aresrpg.eratz.domain.ia.behavior.harvest.bucheron.BucheronBombuOlivioletPath;
+import fr.aresrpg.eratz.domain.ia.path.fight.PichonFightPath;
+import fr.aresrpg.eratz.domain.ia.path.harvest.bucheron.BucheronAmaknaPath;
+import fr.aresrpg.eratz.domain.ia.path.harvest.bucheron.BucheronBombuOlivioletPath;
 
 /**
  * 

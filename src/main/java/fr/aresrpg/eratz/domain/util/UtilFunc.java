@@ -6,6 +6,7 @@ import fr.aresrpg.dofus.structures.item.ItemCategory;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.infra.data.ManchouItem;
 
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -40,6 +41,10 @@ public class UtilFunc {
 
 	public static Predicate<ManchouItem> needToDeposit(BotPerso perso) {
 		return i -> i.getPosition() == -1 && i.getCategory() != ItemCategory.QUESTOBJECT && i.getCategory() != ItemCategory.QUEST;
+	}
+
+	public static Map[] emptyMapArray() {
+		return new Map[0];
 	}
 
 }

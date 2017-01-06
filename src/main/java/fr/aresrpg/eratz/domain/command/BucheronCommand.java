@@ -4,10 +4,10 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.BotFather;
-import fr.aresrpg.eratz.domain.data.Paths;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.state.BotState;
-import fr.aresrpg.eratz.domain.ia.behavior.Path;
+import fr.aresrpg.eratz.domain.ia.path.Path;
+import fr.aresrpg.eratz.domain.ia.path.Paths;
 import fr.aresrpg.eratz.domain.listener.HarvestListener;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
