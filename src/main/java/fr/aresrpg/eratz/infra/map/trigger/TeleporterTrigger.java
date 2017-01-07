@@ -3,6 +3,7 @@ package fr.aresrpg.eratz.infra.map.trigger;
 import fr.aresrpg.eratz.domain.data.map.Destination;
 import fr.aresrpg.eratz.domain.data.map.trigger.Trigger;
 import fr.aresrpg.eratz.domain.data.map.trigger.TriggerType;
+import fr.aresrpg.eratz.infra.map.DestinationImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,12 +18,19 @@ public class TeleporterTrigger implements Trigger {
 	private static final String DEST_MAP = "destmap";
 	private static final String DEST_CELL = "destcell";
 
+	private String trigger = TriggerType.TELEPORT.name();
 	private int cellId;
 	private TeleportType type;
 	private Destination dest;
 
 	public TeleporterTrigger(int cell) {
 		this.cellId = cell;
+	}
+
+	public TeleporterTrigger(int cellId, TeleportType type, Destination dest) {
+		this.cellId = cellId;
+		this.type = type;
+		this.dest = dest;
 	}
 
 	@Override
@@ -69,7 +77,7 @@ public class TeleporterTrigger implements Trigger {
 	@Override
 	public Map<String, Object> readDatas() {
 		Map<String, Object> map = new HashMap<>();
-		map.put(TP, type.ordinal());
+		map.put(TP, type.name());
 		map.put(DEST_MAP, dest.getMapId());
 		map.put(DEST_CELL, dest.getCellId());
 		return map;
@@ -77,14 +85,14 @@ public class TeleporterTrigger implements Trigger {
 
 	@Override
 	public void writeDatas(Map<String, Object> datas) {
-		this.type = TeleportType.values()[(int) datas.get(TP)];
+		this.type = TeleportType.valueOf((String) datas.get(TP));
 		int dmap = (int) datas.get(DEST_MAP);
 		int dcell = (int) datas.get(DEST_CELL);
-		this.dest = Destination.create(dmap, dcell);
+		this.dest = new DestinationImpl(dmap, dcell);
 	}
 
 	public static enum TeleportType {
-		TELEPORTER,
+		MAP_TP,
 		ZAAP,
 		ZAAPI,
 	}

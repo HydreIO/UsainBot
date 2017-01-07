@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class TriggerDao {
 
-	private TriggerType type;
+	private String type;
 	private int cell;
 	private Map<String, Object> datas;
 
@@ -20,7 +20,7 @@ public class TriggerDao {
 	 * @param datas
 	 */
 	public TriggerDao(TriggerType type, int cell, Map<String, Object> datas) {
-		this.type = type;
+		this.type = type.name();
 		this.cell = cell;
 		this.datas = datas;
 	}
@@ -29,7 +29,7 @@ public class TriggerDao {
 	 * @return the type
 	 */
 	public TriggerType getType() {
-		return type;
+		return TriggerType.valueOf(type);
 	}
 
 	/**
@@ -37,7 +37,7 @@ public class TriggerDao {
 	 *            the type to set
 	 */
 	public void setType(TriggerType type) {
-		this.type = type;
+		this.type = type.name();
 	}
 
 	/**

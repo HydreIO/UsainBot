@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.infra.map.dao;
 
+import java.util.Arrays;
+
 /**
  * 
  * @since
@@ -7,17 +9,16 @@ package fr.aresrpg.eratz.infra.map.dao;
 public class BotMapDao {
 
 	private int mapid;
-	private String date;
+	private int x, y, width, height;
+	private long date;
 	private TriggerDao[] triggers;
 
-	/**
-	 * @param mapid
-	 * @param date
-	 * @param triggers
-	 */
-	public BotMapDao(int mapid, String date, TriggerDao[] triggers) {
-		super();
+	public BotMapDao(int mapid, int x, int y, int width, int height, long date, TriggerDao[] triggers) {
 		this.mapid = mapid;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
 		this.date = date;
 		this.triggers = triggers;
 	}
@@ -38,9 +39,69 @@ public class BotMapDao {
 	}
 
 	/**
+	 * @return the x
+	 */
+	public int getX() {
+		return x;
+	}
+
+	/**
+	 * @param x
+	 *            the x to set
+	 */
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	/**
+	 * @return the y
+	 */
+	public int getY() {
+		return y;
+	}
+
+	/**
+	 * @param y
+	 *            the y to set
+	 */
+	public void setY(int y) {
+		this.y = y;
+	}
+
+	/**
+	 * @return the width
+	 */
+	public int getWidth() {
+		return width;
+	}
+
+	/**
+	 * @param width
+	 *            the width to set
+	 */
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	/**
+	 * @return the height
+	 */
+	public int getHeight() {
+		return height;
+	}
+
+	/**
+	 * @param height
+	 *            the height to set
+	 */
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	/**
 	 * @return the date
 	 */
-	public String getDate() {
+	public long getDate() {
 		return date;
 	}
 
@@ -48,7 +109,7 @@ public class BotMapDao {
 	 * @param date
 	 *            the date to set
 	 */
-	public void setDate(String date) {
+	public void setDate(long date) {
 		this.date = date;
 	}
 
@@ -65,6 +126,11 @@ public class BotMapDao {
 	 */
 	public void setTriggers(TriggerDao[] triggers) {
 		this.triggers = triggers;
+	}
+
+	@Override
+	public String toString() {
+		return "BotMapDao [mapid=" + mapid + ", x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + ", date=" + date + ", triggers=" + Arrays.toString(triggers) + "]";
 	}
 
 }

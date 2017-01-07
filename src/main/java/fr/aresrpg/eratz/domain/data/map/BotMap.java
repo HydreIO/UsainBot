@@ -11,7 +11,15 @@ public interface BotMap {
 
 	int getMapId();
 
-	String getDate();
+	int getX();
+
+	int getY();
+
+	int getWidth();
+
+	int getHeight();
+
+	long getTimeMs();
 
 	Trigger[] getTriggers(TriggerType type);
 

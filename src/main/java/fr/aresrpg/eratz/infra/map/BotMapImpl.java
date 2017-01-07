@@ -14,18 +14,81 @@ import java.util.Map;
 public class BotMapImpl implements BotMap {
 
 	private int mapId;
-	private String subId;
+	private long time;
 	private Map<TriggerType, Trigger[]> triggers = new HashMap<>();
+	private int x;
+	private int y;
+	private int width;
+	private int height;
+
+	public BotMapImpl(int mapId, long subId, Map<TriggerType, Trigger[]> triggers, int x, int y, int width, int height) {
+		this.mapId = mapId;
+		this.time = subId;
+		this.triggers = triggers;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+	}
+
+	@Override
+	public long getTimeMs() {
+		return time;
+	}
+
+	/**
+	 * @return the triggers
+	 */
+	public Map<TriggerType, Trigger[]> getTriggers() {
+		return triggers;
+	}
+
+	/**
+	 * @param triggers
+	 *            the triggers to set
+	 */
+	public void setTriggers(Map<TriggerType, Trigger[]> triggers) {
+		this.triggers = triggers;
+	}
 
 	/**
 	 * @param mapId
-	 * @param subId
-	 * @param triggers
+	 *            the mapId to set
 	 */
-	public BotMapImpl(int mapId, String subId, Map<TriggerType, Trigger[]> triggers) {
+	public void setMapId(int mapId) {
 		this.mapId = mapId;
-		this.subId = subId;
-		this.triggers = triggers;
+	}
+
+	/**
+	 * @param x
+	 *            the x to set
+	 */
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	/**
+	 * @param y
+	 *            the y to set
+	 */
+	public void setY(int y) {
+		this.y = y;
+	}
+
+	/**
+	 * @param width
+	 *            the width to set
+	 */
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	/**
+	 * @param height
+	 *            the height to set
+	 */
+	public void setHeight(int height) {
+		this.height = height;
 	}
 
 	@Override
@@ -34,18 +97,32 @@ public class BotMapImpl implements BotMap {
 	}
 
 	@Override
-	public String getDate() {
-		return subId;
-	}
-
-	@Override
 	public Trigger[] getTriggers(TriggerType type) {
 		return triggers.get(type);
 	}
 
 	@Override
-	public String toString() {
-		return "BotMapImpl [mapId=" + mapId + ", subId=" + subId + ", triggers=" + triggers + "]";
+	public int getX() {
+		return x;
 	}
 
+	@Override
+	public int getY() {
+		return y;
+	}
+
+	@Override
+	public int getWidth() {
+		return width;
+	}
+
+	@Override
+	public int getHeight() {
+		return height;
+	}
+
+	@Override
+	public String toString() {
+		return "BotMapImpl [mapId=" + mapId + ", time=" + time + ", triggers=" + triggers + ", x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + "]";
+	}
 }
