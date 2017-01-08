@@ -9,14 +9,17 @@
 package fr.aresrpg.eratz.domain;
 
 import fr.aresrpg.commons.domain.condition.Option;
+import fr.aresrpg.commons.domain.database.Collection;
 import fr.aresrpg.commons.domain.log.Logger;
 import fr.aresrpg.commons.domain.log.LoggerBuilder;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.command.*;
+import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.gui.MapView;
 import fr.aresrpg.eratz.domain.listener.*;
 import fr.aresrpg.eratz.domain.util.Hastebin;
+import fr.aresrpg.eratz.infra.map.dao.BotMapDao;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.Manchou;
 import fr.aresrpg.tofumanchou.domain.data.Account;
@@ -26,6 +29,7 @@ import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.BootStrap;
 import fr.aresrpg.tofumanchou.infra.config.Variables;
 import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
+import fr.aresrpg.tofumanchou.infra.db.DbAccessor;
 
 import java.io.*;
 import java.util.HashMap;
@@ -35,6 +39,7 @@ public class BotFather implements ManchouPlugin {
 
 	private static BotFather instance;
 	public static final Logger LOGGER = new LoggerBuilder("BOT").setUseConsoleHandler(true, true, Option.none(), Option.none()).build();
+	public static Collection<BotMapDao> MAPS_DB;
 	private Map<Long, BotPerso> persos = new HashMap<>();
 
 	@Override
@@ -75,10 +80,11 @@ public class BotFather implements ManchouPlugin {
 		return null;
 	}
 
+	//account test Marine-Lpn eratz
 	// account view bratva-nazar henual
 	// whoami henual bratva-nazar
 	// bucheron henual bratva-nazar
-// fight henual bratva-nazar
+	// fight henual bratva-nazar
 	// goto 4,16 bratva-nazar henual
 	// goto 14,25 bratva-nazar henual
 	// goto 21,-30 bratva-nazar henual
@@ -92,12 +98,16 @@ public class BotFather implements ManchouPlugin {
 			Perso perso = Accounts.registerPerso(pe.getPseudo(), p.getAccountName(), p.getPassword(), pe.getDofusServer());
 			persos.put(pe.getUUID(), new BotPerso((ManchouPerso) perso));
 		}));
+		DbAccessor<BotMapDao> acc = DbAccessor.create(Manchou.getDatabase(), "maps", BotMapDao.class);
+		MAPS_DB = acc.get();
 		Executors.FIXED.execute(MapView::main);
 		Accounts.registerAccount("SceatSifu");
 		Accounts.registerAccount("SceatDrop3");
 		new ConnectionListener();
 		MapViewListener.register();
 		FightListener.register();
+		MapsDataListener.register();
+		MapsManager.init();
 		Manchou.registerCommand(new WhoamiCommand());
 		Manchou.registerCommand(new HastebinCommand());
 		Manchou.registerCommand(new AccountCommand());

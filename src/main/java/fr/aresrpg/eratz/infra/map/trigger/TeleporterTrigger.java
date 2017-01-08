@@ -34,6 +34,18 @@ public class TeleporterTrigger implements Trigger {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		return obj instanceof TeleporterTrigger && ((TeleporterTrigger) obj).cellId == cellId;
+	}
+
+	@Override
+	public int hashCode() {
+		return cellId;
+	}
+
+	@Override
 	public int getCellId() {
 		return cellId;
 	}

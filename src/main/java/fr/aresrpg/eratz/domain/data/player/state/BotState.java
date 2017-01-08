@@ -24,7 +24,6 @@ public class BotState {
 	public Set<Point> lastBlockedMap = new HashSet<>();
 	public Pair<ManchouMap, Pair<Integer, Orientation>> lastCellMoved = null;
 	public List<ManchouMap> visitedMaps = new ArrayList<>();
-	public long lastmove;
 
 	public void addPath(int x, int y) {
 		path.add(new Point(x, y));

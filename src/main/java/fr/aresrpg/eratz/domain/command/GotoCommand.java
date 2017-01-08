@@ -5,7 +5,6 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
-import fr.aresrpg.eratz.domain.listener.GotoListener;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
@@ -34,12 +33,12 @@ public class GotoCommand implements Command {
 				LOGGER.info("Player not found");
 				return;
 			}
-			GotoListener.unRegister();
+			//	GotoListener.unRegister();
 			LOGGER.info("Going to " + Arrays.toString(coords));
 			BotPerso bp = BotFather.getPerso(perso);
 			bp.getBotState().addPath(x, y);
-			GotoListener.register();
-			bp.goToNextMap();
+			//GotoListener.register();
+			//bp.goToNextMap();
 			return;
 		}
 		LOGGER.error("Usage: goto <x,y> <pseudo> <server>");

@@ -32,8 +32,7 @@ public class MapViewListener implements Listener {
 	private static MapViewListener instance = new MapViewListener();
 	private static List<Pair<EventBus, Subscriber>> subs = new ArrayList<>();
 
-	public MapViewListener() {
-		instance = this;
+	private MapViewListener() {
 	}
 
 	public static void register() {

@@ -12,7 +12,6 @@ import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.BotFather;
-import fr.aresrpg.eratz.domain.data.Roads;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.state.BotState;
 import fr.aresrpg.eratz.domain.event.PathEndEvent;
@@ -65,7 +64,7 @@ public class HarvestListener implements Listener {
 			Path path = currentPath.getPath();
 			path.fillCoords(e.getPerso().getBotState().path);
 			path.fillRessources(e.getPerso().getBotState().ressources);
-			e.getPerso().goToNextMap();
+			//	e.getPerso().goToNextMap();
 		} , 3, TimeUnit.SECONDS);
 
 	}
@@ -74,7 +73,7 @@ public class HarvestListener implements Listener {
 	public void onPod(PodsUpdateEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || perso.getPodsPercent() < 95) return;
-		perso.notifyNeedToGoBank();
+		//	perso.notifyNeedToGoBank();
 	}
 
 	@Subscribe
@@ -84,7 +83,7 @@ public class HarvestListener implements Listener {
 		if ((e.getType() == InfosMsgType.ERROR && InfosMessage.TROP_CHARGE_.getId() == e.getMessageId())
 				|| (e.getType() == InfosMsgType.INFOS && InfosMessage.RECOLTE_LOST_FULL_POD.getId() == e.getMessageId())) {
 			perso.destroyHeaviestRessource();
-			perso.notifyNeedToGoBank();
+			//	perso.notifyNeedToGoBank();
 		}
 	}
 
@@ -94,11 +93,13 @@ public class HarvestListener implements Listener {
 		final BotState st = perso.getBotState();
 		final boolean finishedHarvest = e.getCell().getId() == st.currentRessource && e.getFrame() == 3;
 		final ManchouMap map = (ManchouMap) e.getClient().getPerso().getMap();
-		if (st.goToBank) perso.goToBankMap();
-		else if (finishedHarvest && !st.goToBank && !harvestRessource(BotFather.getPerso(e.getClient()), (ManchouMap) e.getClient().getPerso().getMap(), st)) {
-			st.needToGo = null;
-			perso.goToNextMap(); // si il a finit d'harvest & qu'il ne doit pas aller a la banque et qu'il n'y a plus de ressources sur la map
-		}
+		/*
+		 * if (st.goToBank) perso.goToBankMap();
+		 * else if (finishedHarvest && !st.goToBank && !harvestRessource(BotFather.getPerso(e.getClient()), (ManchouMap) e.getClient().getPerso().getMap(), st)) {
+		 * st.needToGo = null;
+		 * perso.goToNextMap(); // si il a finit d'harvest & qu'il ne doit pas aller a la banque et qu'il n'y a plus de ressources sur la map
+		 * }
+		 */
 	}
 
 	@Subscribe
@@ -108,18 +109,20 @@ public class HarvestListener implements Listener {
 		final boolean steal = st.currentRessource == e.getCellId() && e.getClient().getPerso().getUUID() != e.getPlayer().getUUID();
 		final ManchouMap map = (ManchouMap) e.getClient().getPerso().getMap();
 		LOGGER.debug("STEAL = " + steal);
-		if (steal && st.goToBank) perso.goToBankMap();
-		else if (steal && !st.goToBank && !harvestRessource(perso, map, st)) {
-			st.needToGo = null; // si on lui a volé la ressource & qu'il ne doit pas aller a la banque et qu'il n'y a plus de ressources sur la map
-			perso.goToNextMap();
-		}
+		/*
+		 * if (steal && st.goToBank) perso.goToBankMap();
+		 * else if (steal && !st.goToBank && !harvestRessource(perso, map, st)) {
+		 * st.needToGo = null; // si on lui a volé la ressource & qu'il ne doit pas aller a la banque et qu'il n'y a plus de ressources sur la map
+		 * perso.goToNextMap();
+		 * }
+		 */
 	}
 
 	@Subscribe
 	public void onMap(final MapJoinEvent e) {
 		LOGGER.debug("new map");
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso != null && perso.getAntiblock() != null) perso.getAntiblock().cancel(true); // empeche le blockage d'une cellule pour rien 
+		//	if (perso != null && perso.getAntiblock() != null) perso.getAntiblock().cancel(true); // empeche le blockage d'une cellule pour rien 
 		if (e.getMap().isEnded())
 			Executors.SCHEDULED.schedule(Threads.threadContextSwitch("MapJoin", () -> this.onMap(BotFather.getPerso(e.getClient()), (ManchouMap) e.getMap())),
 					1, TimeUnit.SECONDS);
@@ -129,40 +132,42 @@ public class HarvestListener implements Listener {
 		final BotState st = perso.getBotState();
 		st.visitedMaps.add(map);
 		LOGGER.debug("checking map");
-		Roads.checkMap(map, perso); // enregistre les tp manquant etc
+		//	Roads.checkMap(map, perso); // enregistre les tp manquant etc
 		LOGGER.debug("set has changed map true");
 		if (perso.getPodsPercent() >= 95) {
-			perso.notifyNeedToGoBank();
+			//	perso.notifyNeedToGoBank();
 			return;
 		}
 		try {
-			boolean canUseToTeleport = st.lastCellMoved == null ? true : Roads.canUseToTeleport(st.lastCellMoved.getFirst(), st.lastCellMoved.getSecond().getFirst());
+			//		boolean canUseToTeleport = st.lastCellMoved == null ? true : Roads.canUseToTeleport(st.lastCellMoved.getFirst(), st.lastCellMoved.getSecond().getFirst());
 			LOGGER.debug("rt");
-			LOGGER.debug("lastmoved = " + st.lastCellMoved + " can use ? " + canUseToTeleport);
+			//		LOGGER.debug("lastmoved = " + st.lastCellMoved + " can use ? " + canUseToTeleport);
 			if (!st.canGoIndoor && !map.isOutdoor()) {
 				LOGGER.debug("Indoor !" + map.getCoordsInfos());
 				final ManchouCell cl = perso.getPerso().getNearestTeleporters()[0];
-				if (perso.isInBankMap()) {
-					LOGGER.debug("in bank");
-					perso.getPerso().speakToNpc(-2);
-					Threads.uSleep(1, TimeUnit.SECONDS);
-					perso.getPerso().npcTalkChoice(318, 259);
-					Threads.uSleep(1, TimeUnit.SECONDS);
-					perso.depositBank();
-					Threads.uSleep(1, TimeUnit.SECONDS); // TODO Changer pour un systeme non blockant avec les évents d'ouverture d'inventaire !
-					st.goToBank = false;
-				} else if (st.lastCellMoved != null) {
-					Roads.notifyCantUse(st.lastCellMoved.getFirst(), st.lastCellMoved.getSecond().getFirst());
-					LOGGER.debug("On notify cantUse " + st.lastCellMoved);
-					st.lastCellMoved = null;
-				}
+				/*
+				 * if (perso.isInBankMap()) {
+				 * LOGGER.debug("in bank");
+				 * perso.getPerso().speakToNpc(-2);
+				 * Threads.uSleep(1, TimeUnit.SECONDS);
+				 * perso.getPerso().npcTalkChoice(318, 259);
+				 * Threads.uSleep(1, TimeUnit.SECONDS);
+				 * perso.depositBank();
+				 * Threads.uSleep(1, TimeUnit.SECONDS); // TODO Changer pour un systeme non blockant avec les évents d'ouverture d'inventaire !
+				 * st.goToBank = false;
+				 * } else if (st.lastCellMoved != null) {
+				 * Roads.notifyCantUse(st.lastCellMoved.getFirst(), st.lastCellMoved.getSecond().getFirst());
+				 * LOGGER.debug("On notify cantUse " + st.lastCellMoved);
+				 * st.lastCellMoved = null;
+				 * }
+				 */
 				LOGGER.debug("on move sur " + cl.getId());
 				perso.getPerso().moveToCell(cl.getId(), true, true, false);
 				return;
 			}
 			if (st.goToBank) {
 				LOGGER.debug("on goto bank");
-				perso.goToBankMap();
+				//	perso.goToBankMap();
 				return;
 			}
 			if (st.needToGo != null) {
@@ -173,13 +178,13 @@ public class HarvestListener implements Listener {
 					st.lastBlockedMap.clear();
 				} else {
 					LOGGER.debug("goto nextMap");
-					perso.goToNextMap();
+					//		perso.goToNextMap();
 					return;
 				}
 			}
 			if (!harvestRessource(perso, map, st)) {
 				LOGGER.debug("onMap plus de ressource goto next");
-				perso.goToNextMap();
+				//		perso.goToNextMap();
 			}
 		} catch (final Exception e) {
 			LOGGER.error(e);

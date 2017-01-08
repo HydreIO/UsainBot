@@ -9,18 +9,45 @@ import java.util.Arrays;
 public class BotMapDao {
 
 	private int mapid;
-	private int x, y, width, height;
 	private long date;
+	private int x;
+	private int y;
+	private int width;
+	private int height;
+	private int musicId;
+	private int capabilities;
+	private boolean outdoor;
+	private int background;
 	private TriggerDao[] triggers;
+	private String datas;
 
-	public BotMapDao(int mapid, int x, int y, int width, int height, long date, TriggerDao[] triggers) {
+	/**
+	 * @param mapid
+	 * @param date
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @param musicId
+	 * @param capabilities
+	 * @param outdoor
+	 * @param background
+	 * @param triggers
+	 * @param cells
+	 */
+	public BotMapDao(int mapid, long date, int x, int y, int width, int height, int musicId, int capabilities, boolean outdoor, int background, TriggerDao[] triggers, String cells) {
 		this.mapid = mapid;
+		this.date = date;
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		this.date = date;
+		this.musicId = musicId;
+		this.capabilities = capabilities;
+		this.outdoor = outdoor;
+		this.background = background;
 		this.triggers = triggers;
+		this.datas = cells;
 	}
 
 	/**
@@ -36,6 +63,21 @@ public class BotMapDao {
 	 */
 	public void setMapid(int mapid) {
 		this.mapid = mapid;
+	}
+
+	/**
+	 * @return the date
+	 */
+	public long getDate() {
+		return date;
+	}
+
+	/**
+	 * @param date
+	 *            the date to set
+	 */
+	public void setDate(long date) {
+		this.date = date;
 	}
 
 	/**
@@ -99,18 +141,63 @@ public class BotMapDao {
 	}
 
 	/**
-	 * @return the date
+	 * @return the musicId
 	 */
-	public long getDate() {
-		return date;
+	public int getMusicId() {
+		return musicId;
 	}
 
 	/**
-	 * @param date
-	 *            the date to set
+	 * @param musicId
+	 *            the musicId to set
 	 */
-	public void setDate(long date) {
-		this.date = date;
+	public void setMusicId(int musicId) {
+		this.musicId = musicId;
+	}
+
+	/**
+	 * @return the capabilities
+	 */
+	public int getCapabilities() {
+		return capabilities;
+	}
+
+	/**
+	 * @param capabilities
+	 *            the capabilities to set
+	 */
+	public void setCapabilities(int capabilities) {
+		this.capabilities = capabilities;
+	}
+
+	/**
+	 * @return the outdoor
+	 */
+	public boolean isOutdoor() {
+		return outdoor;
+	}
+
+	/**
+	 * @param outdoor
+	 *            the outdoor to set
+	 */
+	public void setOutdoor(boolean outdoor) {
+		this.outdoor = outdoor;
+	}
+
+	/**
+	 * @return the background
+	 */
+	public int getBackground() {
+		return background;
+	}
+
+	/**
+	 * @param background
+	 *            the background to set
+	 */
+	public void setBackground(int background) {
+		this.background = background;
 	}
 
 	/**
@@ -128,9 +215,25 @@ public class BotMapDao {
 		this.triggers = triggers;
 	}
 
+	/**
+	 * @return the cells
+	 */
+	public String getCells() {
+		return datas;
+	}
+
+	/**
+	 * @param cells
+	 *            the cells to set
+	 */
+	public void setCells(String cells) {
+		this.datas = cells;
+	}
+
 	@Override
 	public String toString() {
-		return "BotMapDao [mapid=" + mapid + ", x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + ", date=" + date + ", triggers=" + Arrays.toString(triggers) + "]";
+		return "BotMapDao [mapid=" + mapid + ", date=" + date + ", x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + ", musicId=" + musicId + ", capabilities=" + capabilities
+				+ ", outdoor=" + outdoor + ", background=" + background + ", triggers=" + Arrays.toString(triggers) + ", datas=" + datas + "]";
 	}
 
 }

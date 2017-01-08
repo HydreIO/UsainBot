@@ -7,6 +7,8 @@ import fr.aresrpg.eratz.domain.data.player.BotPerso;
  * @since
  */
 public class BotInfo extends Info {
+	
+	
 
 	/**
 	 * @param perso

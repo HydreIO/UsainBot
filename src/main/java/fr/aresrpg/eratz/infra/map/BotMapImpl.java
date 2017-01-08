@@ -1,8 +1,10 @@
 package fr.aresrpg.eratz.infra.map;
 
+import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.map.trigger.Trigger;
 import fr.aresrpg.eratz.domain.data.map.trigger.TriggerType;
+import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,24 +18,41 @@ public class BotMapImpl implements BotMap {
 	private int mapId;
 	private long time;
 	private Map<TriggerType, Trigger[]> triggers = new HashMap<>();
-	private int x;
-	private int y;
-	private int width;
-	private int height;
+	private ManchouMap map;
 
-	public BotMapImpl(int mapId, long subId, Map<TriggerType, Trigger[]> triggers, int x, int y, int width, int height) {
+	public BotMapImpl(int mapId, long time, Map<TriggerType, Trigger[]> triggers, DofusMap map) {
 		this.mapId = mapId;
-		this.time = subId;
+		this.time = time;
 		this.triggers = triggers;
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
+		this.map = ManchouMap.fromDofusMap(map);
 	}
 
 	@Override
-	public long getTimeMs() {
-		return time;
+	public void setTriggers(TriggerType type, Trigger[] triggers) {
+		this.triggers.put(type, triggers);
+	}
+
+	/**
+	 * @return the mapId
+	 */
+	public int getMapId() {
+		return mapId;
+	}
+
+	/**
+	 * @param mapId
+	 *            the mapId to set
+	 */
+	public void setMapId(int mapId) {
+		this.mapId = mapId;
+	}
+
+	/**
+	 * @param time
+	 *            the time to set
+	 */
+	public void setTime(long time) {
+		this.time = time;
 	}
 
 	/**
@@ -52,48 +71,18 @@ public class BotMapImpl implements BotMap {
 	}
 
 	/**
-	 * @param mapId
-	 *            the mapId to set
+	 * @return the map
 	 */
-	public void setMapId(int mapId) {
-		this.mapId = mapId;
+	public ManchouMap getMap() {
+		return map;
 	}
 
 	/**
-	 * @param x
-	 *            the x to set
+	 * @param map
+	 *            the map to set
 	 */
-	public void setX(int x) {
-		this.x = x;
-	}
-
-	/**
-	 * @param y
-	 *            the y to set
-	 */
-	public void setY(int y) {
-		this.y = y;
-	}
-
-	/**
-	 * @param width
-	 *            the width to set
-	 */
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	/**
-	 * @param height
-	 *            the height to set
-	 */
-	public void setHeight(int height) {
-		this.height = height;
-	}
-
-	@Override
-	public int getMapId() {
-		return mapId;
+	public void setMap(ManchouMap map) {
+		this.map = map;
 	}
 
 	@Override
@@ -102,27 +91,13 @@ public class BotMapImpl implements BotMap {
 	}
 
 	@Override
-	public int getX() {
-		return x;
-	}
-
-	@Override
-	public int getY() {
-		return y;
-	}
-
-	@Override
-	public int getWidth() {
-		return width;
-	}
-
-	@Override
-	public int getHeight() {
-		return height;
-	}
-
-	@Override
 	public String toString() {
-		return "BotMapImpl [mapId=" + mapId + ", time=" + time + ", triggers=" + triggers + ", x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + "]";
+		return "BotMapImpl [mapId=" + mapId + ", time=" + time + ", triggers=" + triggers + "]";
 	}
+
+	@Override
+	public long getTimeMs() {
+		return time;
+	}
+
 }

@@ -10,18 +10,17 @@ import fr.aresrpg.dofus.structures.InfosMsgType;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.domain.data.entity.Entity;
-import fr.aresrpg.tofumanchou.domain.data.entity.mob.MobGroup;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.domain.data.enums.Spells;
 import fr.aresrpg.tofumanchou.domain.event.aproach.InfoMessageEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityTurnStartEvent;
-import fr.aresrpg.tofumanchou.domain.event.fight.*;
-import fr.aresrpg.tofumanchou.domain.event.player.MapJoinEvent;
+import fr.aresrpg.tofumanchou.domain.event.fight.FightJoinEvent;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 import fr.aresrpg.tofumanchou.infra.data.ManchouSpell;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,8 +32,7 @@ public class FightListener implements Listener {
 	private static FightListener instance = new FightListener();
 	private static List<Pair<EventBus, Subscriber>> subs = new ArrayList<>();
 
-	public FightListener() {
-		instance = this;
+	private FightListener() {
 	}
 
 	public static void register() {
@@ -57,43 +55,9 @@ public class FightListener implements Listener {
 		}
 	}
 
-	//	@Subscribe
-	public void fightEnd(FightEndEvent e) {
-		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso != null) Executors.SCHEDULED.schedule(() -> {
-			try {
-				perso.goToNextMap();
-			} catch (Exception ee) {
-				LOGGER.error(ee);
-			}
-		} , 1, TimeUnit.SECONDS);
-	}
-
-	@Subscribe
-	public void onmap(MapJoinEvent e) {
-		Executors.SCHEDULED.schedule(() -> {
-			try {
-				BotPerso perso = BotFather.getPerso(e.getClient());
-				if (perso != null) {
-					Optional<Entity> findAny = perso.getPerso().getMap().getEntities().values().stream().filter(m -> m instanceof MobGroup).findAny();
-					if (findAny.isPresent() && perso.getBotState().needToGo != null && perso.getPerso().getMap().isOnCoords(perso.getBotState().needToGo.x, perso.getBotState().needToGo.y)) {
-						perso.getBotState().needToGo = null;
-						perso.getPerso().moveToCell(findAny.get().getCellId(), false, true, false);
-					} else perso.goToNextMap();
-				}
-			} catch (Exception ee) {
-				LOGGER.error(ee);
-			}
-		} , 1, TimeUnit.SECONDS);
-	}
-
-	@Subscribe
-	public void onFightSpawn(FightSpawnEvent e) {
-
-	}
-
 	@Subscribe
 	public void onJoin(FightJoinEvent e) {
+		if (true) return;
 		BotPerso p = BotFather.getPerso(e.getClient());
 		if (p != null) p.getPerso().blockCombat();
 		Executors.SCHEDULED.schedule(() -> {
@@ -104,6 +68,8 @@ public class FightListener implements Listener {
 
 	@Subscribe
 	public void onTurn(EntityTurnStartEvent e) {
+		if (true) return;
+
 		Entity entity = e.getEntity();
 		if (!(entity instanceof Perso)) return;
 		BotPerso perso = BotFather.getPerso(entity.getUUID());

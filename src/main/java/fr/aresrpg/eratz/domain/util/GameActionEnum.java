@@ -1,4 +1,5 @@
 package fr.aresrpg.eratz.domain.util;
+
 public enum GameActionEnum {
 
 	MOVE(1),
@@ -20,11 +21,11 @@ public enum GameActionEnum {
 	BLOCKED_DAMAGE(105),
 	STEAL_GOLD(130), // vol de kama dagues/arnaque
 	CLEAR_BUFFS(132),
-	MESSAGE_PASS(140), // je croit que c'est le msg rouge "si vs avez finit vos actions passez votre tour"
+	MESSAGE_PASS(140), // je croit que c'est le msg rouge "si vs avez finit vos actions passez votre tour" // faux
 	TIMELINE(147), // acune idée
 	INVISIBLE(150),
 	INVISIBLE_OBSTACLE(151),
-	RETURN_PA(166), // heu ? ptet pour recup les pa utilisée par un allié/ennemi
+	RETURN_PA(166), // heu ? ptet pour recup les pa utilisée par un allié/ennemi // non
 	SUMMONED(180, 181, 780),
 	UNKNOWN_ACTION_ADD(185), // mystere et boule de gomme
 	CAST_SPELL(300),
