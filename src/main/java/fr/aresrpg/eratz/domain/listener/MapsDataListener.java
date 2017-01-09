@@ -3,9 +3,12 @@ package fr.aresrpg.eratz.domain.listener;
 import fr.aresrpg.commons.domain.event.*;
 import fr.aresrpg.commons.domain.util.Pair;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
+import fr.aresrpg.dofus.protocol.game.server.GameCellUpdatePacket;
+import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.MapsManager;
-import fr.aresrpg.eratz.domain.data.map.trigger.TriggerSniffer;
+import fr.aresrpg.eratz.domain.data.map.BotMap;
+import fr.aresrpg.eratz.domain.data.map.trigger.*;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.infra.map.DestinationImpl;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
@@ -46,7 +49,9 @@ public class MapsDataListener implements Listener {
 
 	@Subscribe
 	public void chechMap(MapJoinEvent e) {
-		MapsManager.checkUpdate((ManchouMap) e.getMap());
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso == null) return;
+		MapsManager.checkUpdate((ManchouMap) e.getMap(), perso);
 	}
 
 	@Subscribe
@@ -68,9 +73,27 @@ public class MapsDataListener implements Listener {
 		if (e.getClient().getPerso().getUUID() != e.getPlayer().getUUID()) return;
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null) return;
+		BotMap map = MapsManager.getOrCreateMap(perso.getPerso().getMap());
+		Trigger[] triggers = map.getTriggers(TriggerType.TELEPORT);
+		for (ManchouCell c : map.getMap().getCells()) {
+			if (!c.isTeleporter() || triggerExist(c.getId(), triggers)) continue;
+			GameCellUpdatePacket pkt = new GameCellUpdatePacket();
+			Cell origin = c.serialize();
+			Cell clone = origin.clone();
+			clone.setLayerObject2Num(1202);
+			pkt.addCell(clone, origin);
+			perso.sendPacketToClient(pkt);
+		}
 		TriggerSniffer sniffer = sniffers.get(perso);
 		if (sniffer == null) return;
 		sniffer.complete(new DestinationImpl(perso.getPerso().getMap().getMapId(), perso.getPerso().getCellId()));
+	}
+
+	private boolean triggerExist(int cellid, Trigger[] triggers) {
+		if (triggers == null) return false;
+		for (Trigger t : triggers)
+			if (t.getCellId() == cellid) return true;
+		return false;
 	}
 
 	@Subscribe

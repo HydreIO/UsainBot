@@ -2,8 +2,6 @@ package fr.aresrpg.eratz.domain.command;
 
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
-import fr.aresrpg.dofus.protocol.game.server.GameCellUpdatePacket;
-import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.dofus.util.Pathfinding;
@@ -39,20 +37,22 @@ public class AccountCommand implements Command {
 	public void trigger(String[] args) {
 		if (args.length != 0) {
 			switch (args[0]) {
-				case "test":
+				case "pktclient":
 					if (args.length < 3) break;
 					Perso perss = Accounts.getPersoWithPseudo(args[1], Server.valueOf(args[2].toUpperCase()));
 					if (perss == null) {
 						LOGGER.info("Player not found");
 						return;
 					}
-					BotPerso bdpd = BotFather.getPerso(perss);
-					GameCellUpdatePacket cellpkt = new GameCellUpdatePacket();
-					Cell cell = bdpd.getPerso().getMap().getProtocolCells()[351];
-					Cell clone = cell.clone();
-					clone.setLayerObject2Num(798);
-					cellpkt.addCell(clone, cell);
-					bdpd.sendPacketToClient(cellpkt);
+					BotPerso bdsp = BotFather.getPerso(perss);
+					StringBuilder sb = new StringBuilder();
+					for (int i = 2; i < args.length; i++)
+						sb.append(args[i]);
+					try {
+						((SocketChannel) bdsp.getPerso().getAccount().getProxy().getLocalConnection().getChannel()).write(ByteBuffer.wrap((args[3] + "\0\n").getBytes()));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 					return;
 				case "pkt":
 					if (args.length < 3) break;

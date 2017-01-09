@@ -12,6 +12,9 @@ import fr.aresrpg.commons.domain.condition.Option;
 import fr.aresrpg.commons.domain.database.Collection;
 import fr.aresrpg.commons.domain.log.Logger;
 import fr.aresrpg.commons.domain.log.LoggerBuilder;
+import fr.aresrpg.dofus.protocol.chat.server.ChatMessageOkPacket;
+import fr.aresrpg.dofus.protocol.chat.server.ChatServerMessagePacket;
+import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.command.*;
 import fr.aresrpg.eratz.domain.data.MapsManager;
@@ -32,15 +35,16 @@ import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 import fr.aresrpg.tofumanchou.infra.db.DbAccessor;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class BotFather implements ManchouPlugin {
 
 	private static BotFather instance;
 	public static final Logger LOGGER = new LoggerBuilder("BOT").setUseConsoleHandler(true, true, Option.none(), Option.none()).build();
 	public static Collection<BotMapDao> MAPS_DB;
-	private Map<Long, BotPerso> persos = new HashMap<>();
+	private ConcurrentMap<Long, BotPerso> persos = new ConcurrentHashMap<>();
 
 	@Override
 	public String getAuthor() {
@@ -81,6 +85,10 @@ public class BotFather implements ManchouPlugin {
 	}
 
 	//account test Marine-Lpn eratz
+
+	// account pktclient Marine-Lpn eratz cMK@|
+	// account pkt Marine-Lpn eratz eU1
+
 	// account view bratva-nazar henual
 	// whoami henual bratva-nazar
 	// bucheron henual bratva-nazar
@@ -139,6 +147,27 @@ public class BotFather implements ManchouPlugin {
 				Hastebin.stream.write(b, off, len);
 			}
 		}));
+	}
+
+	public static void broadcast(Chat chat, String msg) {
+		instance.persos.values().forEach(perso -> {
+			if (perso.isOnline() && perso.getPerso().isMitm()) {
+				ChatMessageOkPacket pkt = new ChatMessageOkPacket();
+				pkt.setPseudo("BotFather");
+				pkt.setPlayerId(perso.getPerso().getUUID());
+				pkt.setChat(chat);
+				pkt.setMsg(msg);
+				perso.sendPacketToClient(pkt);
+			}
+		});
+	}
+
+	public static void broadcastServerMsg(String msg) {
+		ChatServerMessagePacket pkt = new ChatServerMessagePacket();
+		pkt.setMsg(msg);
+		instance.persos.values().forEach(perso -> {
+			if (perso.isOnline() && perso.getPerso().isMitm()) perso.sendPacketToClient(pkt);
+		});
 	}
 
 	@Override

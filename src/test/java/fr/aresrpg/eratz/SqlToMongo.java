@@ -8,6 +8,7 @@ import fr.aresrpg.commons.infra.database.mongodb.MongoDBDatabase;
 import fr.aresrpg.commons.infra.serialization.unsafe.UnsafeSerializationFactory;
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.dofus.structures.map.Cell;
+import fr.aresrpg.dofus.structures.map.DofusMap;
 import fr.aresrpg.dofus.util.Compressor;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.map.trigger.Trigger;
@@ -16,9 +17,11 @@ import fr.aresrpg.eratz.infra.map.DestinationImpl;
 import fr.aresrpg.eratz.infra.map.adapter.BotMapAdapter;
 import fr.aresrpg.eratz.infra.map.adapter.TriggerAdapter;
 import fr.aresrpg.eratz.infra.map.dao.BotMapDao;
+import fr.aresrpg.eratz.infra.map.dao.TriggerDao;
 import fr.aresrpg.eratz.infra.map.trigger.InterractableTrigger;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger.TeleportType;
+import fr.aresrpg.tofumanchou.domain.data.MapsData;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +48,7 @@ public class SqlToMongo {
 	public static void main(String[] args) throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 		loadJar(ClassLoader.getSystemClassLoader());
 		initMongo();
+		MapsData.getInstance().init(false);
 		factory.addAdapter(TriggerAdapter.IDENTITY);
 		connect();
 		maps();
@@ -52,6 +56,7 @@ public class SqlToMongo {
 		System.out.println("Starting publishing...");
 		publish();
 		System.out.println("\n Finished !");
+
 	}
 
 	static void publish() {
@@ -118,10 +123,18 @@ public class SqlToMongo {
 		}
 	}
 
+	public static BotMapImpl adaptFrom(BotMapDao out) {
+		DofusMap dofusMap = new DofusMap(out.getMapid(), out.getDate(), out.getWidth(), out.getHeight(), out.getMusicId(), out.getCapabilities(), out.isOutdoor(), out.getBackground(),
+				Compressor.uncompressCells(out.getCells()));
+		return new BotMapImpl(out.getMapid(), out.getDate(), BotMapAdapter.IDENTITY.readTriggers(Arrays.stream(out.getTriggers()).map(TriggerAdapter.IDENTITY::adaptFrom).toArray(Trigger[]::new)),
+				dofusMap);
+	}
+
 	static BotMap tomMap(SqlMap m) {
-		BotMapImpl botMapImpl = new BotMapImpl(m.id, m.date.getTimeInMillis(), null, m.x, m.y, m.width, m.height);
+		BotMapDao dao = new BotMapDao(m.id, m.date.getTimeInMillis(), m.x, m.y, m.width, m.height, -1, -1, false, -1, null, null);
 		if (m.id == -1) return null;
-		Cell[] cells = Compressor.uncompressMap(m.decryptedData);
+		Cell[] cells = Compressor.uncompressCells(m.decryptedData);
+		dao.setCells(m.decryptedData);
 		Set<Trigger> tr = new HashSet<>();
 		for (Cell c : cells) {
 			if (Interractable.isZaap(c.getLayerObject2Num())) tr.add(new TeleporterTrigger(c.getId(), TeleportType.ZAAP, new DestinationImpl(-1, -1)));
@@ -130,7 +143,9 @@ public class SqlToMongo {
 		}
 		Set<TeleporterTrigger> set = triggg.get(m.id);
 		if (set != null) set.forEach(tr::add);
-		botMapImpl.setTriggers(BotMapAdapter.IDENTITY.readTriggers(tr.stream().toArray(Trigger[]::new)));
+		TriggerDao[] array = tr.stream().map(in -> TriggerAdapter.IDENTITY.adaptTo(in)).toArray(TriggerDao[]::new);
+		dao.setTriggers(array);
+		BotMapImpl botMapImpl = adaptFrom(dao);
 		return botMapImpl;
 	}
 

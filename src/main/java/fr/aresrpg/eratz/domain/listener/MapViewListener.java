@@ -86,7 +86,7 @@ public class MapViewListener implements Listener {
 				List<Cell> accesibleCells = ShadowCasting.getAccesibleCells(i, 10, botPerso.getPerso().getMap().serialize(), botPerso.getPerso().getMap().cellAccessible().negate());
 				Iterator<Cell> iterator = accesibleCells.iterator();
 				while (iterator.hasNext())
-					if (!iterator.next().isWalkable()) iterator.remove();
+					if (!iterator.next().isWalkeable()) iterator.remove();
 				System.out.println(accesibleCells.stream().map(Cell::getId).collect(Collectors.toList()));
 				botPerso.getView().setAccessible(accesibleCells, i, 10);
 				List<Point> cellPath = Pathfinding.getCellPath(botPerso.getPerso().getCellId(), i, botPerso.getPerso().getMap().getProtocolCells(), e.getMap().getWidth(), e.getMap().getHeight(),

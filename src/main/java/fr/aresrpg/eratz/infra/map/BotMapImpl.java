@@ -27,6 +27,13 @@ public class BotMapImpl implements BotMap {
 		this.map = ManchouMap.fromDofusMap(map);
 	}
 
+	public BotMapImpl(int mapId, long time, Map<TriggerType, Trigger[]> triggers, ManchouMap map) {
+		this.mapId = mapId;
+		this.time = time;
+		this.triggers = triggers;
+		this.map = map;
+	}
+
 	@Override
 	public void setTriggers(TriggerType type, Trigger[] triggers) {
 		this.triggers.put(type, triggers);
