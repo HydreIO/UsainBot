@@ -43,10 +43,14 @@ public class Validators {
 		return (x1, y1, x2, y2) -> dangerousCells.contains(Maps.getIdRotated(x2, y2, map.getWidth(), map.getHeight()));
 	}
 
+	/**
+	 * @return true if the dest coords are inside the big dofus map
+	 */
 	public static PathValidator insideDofusMap() {
 		return (x1, y1, x2, y2) -> x2 > -71 && x2 < 38 && y2 < 51 && y2 > -107;
 	}
 
+	// internal use
 	private static Set<Integer> recursiveSearch(Node[] node, int deep, int current, Function<Node, Integer> nodeToId, Function<Node, Node[]> NodeToNeighbors) {
 		System.out.println("current = " + current + " | " + Arrays.toString(node));
 		Set<Integer> set = new HashSet<>();

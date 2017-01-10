@@ -1,11 +1,16 @@
 package fr.aresrpg.eratz.domain.util;
 
+import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
 import fr.aresrpg.dofus.structures.ExchangeMove;
 import fr.aresrpg.dofus.structures.item.ItemCategory;
+import fr.aresrpg.dofus.util.Pathfinding.Node;
+import fr.aresrpg.eratz.domain.data.MapsManager;
+import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.infra.data.ManchouItem;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -37,6 +42,14 @@ public class UtilFunc {
 			if (toMove > amount) toMove = amount;
 			return new MovedItem(ExchangeMove.REMOVE, i.getUUID(), amount);
 		};
+	}
+
+	public static Function<int[], Node[]> mapsToNodes() {
+		return ids -> ArrayUtils.shrinkNulls(Arrays.stream(ids).mapToObj(id -> {
+			BotMap map = MapsManager.getMap(id);
+			if (map == null) return null;
+			return new Node(map.getMap().getX(), map.getMap().getY());
+		}).toArray(Node[]::new));
 	}
 
 	public static Predicate<ManchouItem> needToDeposit(BotPerso perso) {
