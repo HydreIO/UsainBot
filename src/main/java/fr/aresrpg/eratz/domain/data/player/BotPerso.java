@@ -34,7 +34,7 @@ import fr.aresrpg.tofumanchou.domain.data.entity.mob.Mob;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Player;
 import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
-import fr.aresrpg.tofumanchou.domain.data.enums.DofusItems2;
+import fr.aresrpg.tofumanchou.domain.data.enums.DofusItems;
 import fr.aresrpg.tofumanchou.domain.data.item.Item;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.*;
@@ -68,8 +68,8 @@ public class BotPerso implements Closeable {
 	public BotPerso(ManchouPerso perso) {
 		this.perso = perso;
 		view = new DofusMapView();
-		itemsToKeep.put(DofusItems2.POTION_DE_CITE_BONTA.getId(), 20);
-		itemsToKeep.put(DofusItems2.POTION_DE_RAPPEL.getId(), 20);
+		itemsToKeep.put(DofusItems.POTION_DE_CITE_BONTA, 20);
+		itemsToKeep.put(DofusItems.POTION_DE_RAPPEL, 20);
 		this.sch = Executors.SCHEDULER.register(this::scheduledActions, 10, TimeUnit.SECONDS);
 	}
 
@@ -328,15 +328,15 @@ public class BotPerso implements Closeable {
 	}
 
 	public boolean hasPopoRappel() {
-		return !perso.getInventory().getItems(DofusItems2.POTION_DE_RAPPEL.getId()).isEmpty();
+		return !perso.getInventory().getItems(DofusItems.POTION_DE_RAPPEL).isEmpty();
 	}
 
 	public boolean hasPopoBonta() {
-		return !perso.getInventory().getItems(DofusItems2.POTION_DE_CITE_BONTA.getId()).isEmpty();
+		return !perso.getInventory().getItems(DofusItems.POTION_DE_CITE_BONTA).isEmpty();
 	}
 
 	public boolean hasPopoBrakmar() {
-		return !perso.getInventory().getItems(DofusItems2.POTION_DE_CITE_BRAKMAR.getId()).isEmpty();
+		return !perso.getInventory().getItems(DofusItems.POTION_DE_CITE_BRAKMAR).isEmpty();
 	}
 
 	/**

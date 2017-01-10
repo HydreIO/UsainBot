@@ -1,11 +1,18 @@
 apply plugin: 'java'
-apply plugin: 'maven-publish'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
 
 group = 'fr.aresrpg.eratz'
 
 version = '1.0'
 
 compileJava.options.encoding='UTF-8'
+
+eclipse {
+    jdt {
+        javaRuntimeName = "jdk1.8.0_112"
+    }
+}
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -17,7 +24,7 @@ sourceSets {
 task fatJar(type: Jar) {
 	baseName = project.name
 	from {
-		configurations.include.collect {
+		configurations.export.collect {
 			it.isDirectory() ? it : zipTree(it)
 		}
 	}
@@ -25,8 +32,8 @@ task fatJar(type: Jar) {
 }
 
 configurations {
-	include
-	compile.extendsFrom include
+	export
+	compile.extendsFrom export
 }
 
 repositories {
@@ -43,6 +50,7 @@ repositories {
 }
 
 dependencies {
+export ('fr.aresrpg.tofumanchou:Tofumanchou:+') {changing=true}
 }
 
 

@@ -73,6 +73,10 @@ public class TeleporterTrigger implements Trigger {
 		this.cellId = cellId;
 	}
 
+	public TeleportType getTeleportType() {
+		return this.type;
+	}
+
 	/**
 	 * @param type
 	 *            the type to set

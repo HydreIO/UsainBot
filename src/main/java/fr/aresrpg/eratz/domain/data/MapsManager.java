@@ -112,7 +112,7 @@ public class MapsManager {
 	private static void updateMap(BotMap map, BotPerso perso) {
 		BotFather.broadcast(Chat.ADMIN, perso.getPerso().getPseudo() + " a mis une map à jour [" + map.getMap().getX() + "," + map.getMap().getY() + "]");
 		Executors.FIXED.execute(() -> DbAccessor.<BotMapDao> create(Manchou.getDatabase(), "maps", BotMapDao.class).get().putOrUpdate(Filter.eq("mapid", map.getMapId()),
-				BotMapAdapter.IDENTITY.adaptTo((BotMapImpl) map)));
+				BotMapAdapter.IDENTITY.adaptTo((BotMapImpl) map)));	
 	}
 
 	public static class MapNode {
