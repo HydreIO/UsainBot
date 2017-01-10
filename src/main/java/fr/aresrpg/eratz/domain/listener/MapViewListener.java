@@ -6,6 +6,7 @@ import fr.aresrpg.commons.domain.event.*;
 import fr.aresrpg.commons.domain.util.Pair;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.util.*;
+import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.gui.MapView;
@@ -17,7 +18,6 @@ import fr.aresrpg.tofumanchou.domain.event.player.MapJoinEvent;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
-import java.awt.Point;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -63,7 +63,7 @@ public class MapViewListener implements Listener {
 		Carte map = e.getClient().getPerso().getMap();
 		get(e.getClient()).getView()
 				.setPath(e.getPath().stream()
-						.map(frag -> new Point(Maps.getXRotated(frag.getCellId(), map.getWidth(), map.getHeight()), Maps.getYRotated(frag.getCellId(), map.getWidth(), map.getHeight())))
+						.map(frag -> new Node(Maps.getXRotated(frag.getCellId(), map.getWidth(), map.getHeight()), Maps.getYRotated(frag.getCellId(), map.getWidth(), map.getHeight())))
 						.collect(Collectors.toList()), Color.DARKTURQUOISE);
 	}
 
@@ -89,7 +89,7 @@ public class MapViewListener implements Listener {
 					if (!iterator.next().isWalkeable()) iterator.remove();
 				System.out.println(accesibleCells.stream().map(Cell::getId).collect(Collectors.toList()));
 				botPerso.getView().setAccessible(accesibleCells, i, 10);
-				List<Point> cellPath = Pathfinding.getCellPath(botPerso.getPerso().getCellId(), i, botPerso.getPerso().getMap().getProtocolCells(), e.getMap().getWidth(), e.getMap().getHeight(),
+				List<Node> cellPath = Pathfinding.getCellPath(botPerso.getPerso().getCellId(), i, botPerso.getPerso().getMap().getProtocolCells(), e.getMap().getWidth(), e.getMap().getHeight(),
 						Pathfinding::getNeighbors,
 						botPerso.getPerso()::canGoOnCellAvoidingMobs);
 				if (cellPath == null) LOGGER.debug("Path not found !");
@@ -132,7 +132,7 @@ public class MapViewListener implements Listener {
 		ManchouMap map = botPerso.getPerso().getMap();
 		botPerso.getView().addEntity((int) e.getEntity().getUUID(), e.getEntity().getCellId());
 		if (e.getEntity().getUUID() == botPerso.getPerso().getUUID()) botPerso.getView().setPath(e.getPath().stream()
-				.map(frag -> new Point(Maps.getXRotated(frag.getCellId(), map.getWidth(), map.getHeight()), Maps.getYRotated(frag.getCellId(), map.getWidth(), map.getHeight())))
+				.map(frag -> new Node(Maps.getXRotated(frag.getCellId(), map.getWidth(), map.getHeight()), Maps.getYRotated(frag.getCellId(), map.getWidth(), map.getHeight())))
 				.collect(Collectors.toList()), Color.DODGERBLUE);
 	}
 

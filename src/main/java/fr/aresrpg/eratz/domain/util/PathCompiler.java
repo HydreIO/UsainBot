@@ -5,12 +5,15 @@ import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.util.exception.MapNotDiscoveredException;
 import fr.aresrpg.eratz.domain.util.functionnal.*;
+import fr.aresrpg.eratz.infra.map.DestinationImpl;
+import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
+import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger.TeleportType;
 
-import java.awt.Point;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -34,18 +37,19 @@ public class PathCompiler {
 	 * @throws NullPointerException
 	 *             when the path is not found
 	 */
-	public static List<Point> compilPath(int originCell, int originMap, int destMap, IntPredicate knowZaap) throws MapNotDiscoveredException, NullPointerException {
+	public static List<TeleporterTrigger> compilPath(int originCell, int originMap, int destMap, IntPredicate knowZaap) throws MapNotDiscoveredException, NullPointerException {
 		BotMap origin = MapsManager.getMap(originMap);
 		BotMap dest = MapsManager.getMap(destMap);
 		if (origin == null) throw new MapNotDiscoveredException(originMap);
 		if (dest == null) throw new MapNotDiscoveredException(destMap);
-		BotNode firstNode = new BotNode(origin.getMap().getX(), origin.getMap().getY(), originMap, originCell);
+		BotNode firstNode = new BotNode(origin.getMap().getX(), origin.getMap().getY(), originMap, new TeleporterTrigger(-1, TeleportType.MAP_TP, new DestinationImpl(origin.getMapId(), originCell))); // on s'en fou de la premiere car elle sera exclu du path
 		int xto = dest.getMap().getX();
 		int yto = dest.getMap().getY();
-		Function<BotNode, BotNode[]> neighbors = Neighbors.findMapNeighbors(IntMapSupplier.defaultSupplier(), NodeMapSupplier.defaultSupplier(), knowZaap, CellPathPredicate.defaultPredicate());
-		List<Point> path = Pathfinding.getPath(firstNode, xto, yto, Validators.insideDofusMap(), neighbors);
-		Objects.requireNonNull(path, "The map is unreachable ! You need to discover a path at least one time before using it automaticaly");
-		return path;
+		CellPathFinder defaultFinder = CellPathFinder.defaultFinder();
+		Function<BotNode, BotNode[]> neighbors = Neighbors.findMapNeighbors(IntMapSupplier.defaultSupplier(), NodeMapSupplier.defaultSupplier(), knowZaap, defaultFinder);
+		List<BotNode> path = Pathfinding.getPath(firstNode, xto, yto, Validators.insideDofusMap(), neighbors);
+		Objects.requireNonNull(path, "The map is unreachable ! You need to discover a path at least one time before using it automatically");
+		return path.stream().map(n -> n.getTrigger()).collect(Collectors.toList());
 	}
 
 }

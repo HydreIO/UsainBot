@@ -19,6 +19,7 @@ import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.structures.stat.Stat;
 import fr.aresrpg.dofus.util.*;
+import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.dofus.util.Pathfinding.PathValidator;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.info.BotInfo;
@@ -33,13 +34,11 @@ import fr.aresrpg.tofumanchou.domain.data.entity.Entity;
 import fr.aresrpg.tofumanchou.domain.data.entity.mob.Mob;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Player;
-import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
-import fr.aresrpg.tofumanchou.domain.data.enums.DofusItems;
+import fr.aresrpg.tofumanchou.domain.data.enums.*;
 import fr.aresrpg.tofumanchou.domain.data.item.Item;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.*;
 
-import java.awt.Point;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
@@ -63,6 +62,7 @@ public class BotPerso implements Closeable {
 	private BotInfo botInfos = new BotInfo(this);
 
 	private Map<Integer, Integer> itemsToKeep = new HashMap<>();
+	private Set<Zaap> zaaps = new HashSet<>();
 	private final int kamasToKeep = 10_000;
 
 	public BotPerso(ManchouPerso perso) {
@@ -80,6 +80,10 @@ public class BotPerso implements Closeable {
 		} catch (Exception e) {
 			LOGGER.error(e);
 		}
+	}
+
+	public boolean hasZaap(Zaap zaap) {
+		return zaaps.contains(zaap);
 	}
 
 	/**
@@ -501,7 +505,7 @@ public class BotPerso implements Closeable {
 			final int id = Maps.getIdRotated(x2, y2, width, height);
 			return !perso.getMap().getCells()[id].hasMobOn();
 		};
-		final List<Point> cellPath = Pathfinding.getCellPath(cellId, cell, perso.getMap().getProtocolCells(), width, height, Pathfinding::getNeighborsWithoutDiagonals, canGo);
+		final List<Node> cellPath = Pathfinding.getCellPath(cellId, cell, perso.getMap().getProtocolCells(), width, height, Pathfinding::getNeighborsWithoutDiagonals, canGo);
 		// perso.setPm(perso.getPm() - dist); // TEMP REMOVE PM car on attend pas que le serv nous le dise pour pouvoir finir notre tour, de tt façon il reset apres
 		BotFather.LOGGER.warning("Trying to move from " + cellId + " to " + cell + " path=" + cellPath);
 		if (cellPath == null) throw new NullPointerException("PATH INVALID -_-");

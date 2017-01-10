@@ -1,6 +1,7 @@
 package fr.aresrpg.eratz.domain.util;
 
 import fr.aresrpg.dofus.util.Pathfinding.Node;
+import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 
 /**
  * 
@@ -9,26 +10,24 @@ import fr.aresrpg.dofus.util.Pathfinding.Node;
 public class BotNode extends Node {
 
 	public int id;
-	private int cellId; // la cell d'arrivée sur la map, ou la cell du joueur. sans ça le pathfinding est impossible car je veut pouvoir calculer pour chaque node (map) si il peut aller vers une autre (donc si le chemin est pas bloqué)
+	private TeleporterTrigger trigger; // ce trigger représente le trigger qui à été utilisé pour aller sur cette node, et donc la cell id de la node = trigger.getDest().getCellId();
 
-	public BotNode(int x, int y, int cost, int id, int cellid) {
+	public BotNode(int x, int y, int cost, TeleporterTrigger trigger) {
 		super(x, y);
 		super.cost = cost;
-		this.cellId = cellid;
-		this.id = id;
+		this.trigger = trigger;
+		this.id = trigger.getDest().getCellId();
 	}
 
-	public BotNode(int x, int y, int id, int cellId) {
-		super(x, y);
-		super.cost = 0;
-		this.id = id;
+	public BotNode(int x, int y, TeleporterTrigger trigger) {
+		this(x, y, 0, trigger);
 	}
 
 	/**
 	 * @return the cellId
 	 */
-	public int getCellId() {
-		return cellId;
+	public TeleporterTrigger getTrigger() {
+		return trigger;
 	}
 
 	/**

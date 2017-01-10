@@ -33,7 +33,7 @@ public class Neighbors {
 	 *            a CellPathPredicate which take the origin cell, the dest cell and the map as arguments to know if a trigger is reachable (for exemple if a teleporter is in the other side of a river)
 	 * @return the neighbors
 	 */
-	public static Function<BotNode, BotNode[]> findMapNeighbors(IntMapSupplier idToMap, NodeMapSupplier nodeToMap, IntPredicate knowZaap, CellPathPredicate pathPredicate) {
+	public static Function<BotNode, BotNode[]> findMapNeighbors(IntMapSupplier idToMap, NodeMapSupplier nodeToMap, IntPredicate knowZaap, CellPathFinder pathPredicate) {
 		return n -> {
 			BotMap map = nodeToMap.get(n);
 			if (map == null) return new BotNode[0];
@@ -41,25 +41,25 @@ public class Neighbors {
 			BotNode[] nodes = new BotNode[0];
 			if (triggers != null)
 				for (Trigger t : triggers) {
-				if (!pathPredicate.pathExist(n.getCellId(), t.getCellId(), map.getMap())) continue;
 				TeleporterTrigger tp = (TeleporterTrigger) t;
+				if (!pathPredicate.pathExist(n.getTrigger().getDest().getCellId(), t.getCellId(), map.getMap())) continue;
 				switch (tp.getTeleportType()) {
 					case MAP_TP:
 						Destination dest = tp.getDest();
 						BotMap destmap = idToMap.get(dest.getMapId());
 						if (destmap == null) continue;
-						nodes = ArrayUtils.addLast(new BotNode(destmap.getMap().getX(), destmap.getMap().getY(), destmap.getMapId(), dest.getCellId()), nodes);
+						nodes = ArrayUtils.addLast(new BotNode(destmap.getMap().getX(), destmap.getMap().getY(), destmap.getMapId(), tp), nodes);
 						continue;
 					case ZAAP:
 						nodes = ArrayUtils.concat(nodes,
-								IntStream.of(Zaap.getMapsIds()).filter(knowZaap).mapToObj(idToMap::get).filter(Objects::nonNull).map(m -> m.toNode(tp.getDest().getCellId()))
+								IntStream.of(Zaap.getMapsIds()).filter(knowZaap).mapToObj(idToMap::get).filter(Objects::nonNull).map(m -> m.toNode(tp))
 										.map(NodePricer.zaapPrice())
 										.toArray(BotNode[]::new));
 						continue;
 					case ZAAPI:
 						nodes = ArrayUtils.concat(nodes,
 								IntStream.of(Zaapi.getMapsIds(City.getWithY(map.getMap().getY()))).filter(knowZaap).mapToObj(idToMap::get).filter(Objects::nonNull)
-										.map(m -> m.toNode(tp.getDest().getCellId()))
+										.map(m -> m.toNode(tp))
 										.map(NodePricer.zaapiPrice())
 										.toArray(BotNode[]::new));
 						continue;

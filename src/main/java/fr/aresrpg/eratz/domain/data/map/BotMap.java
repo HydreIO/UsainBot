@@ -6,6 +6,7 @@ import fr.aresrpg.eratz.domain.util.BotNode;
 import fr.aresrpg.eratz.infra.map.BotMapImpl;
 import fr.aresrpg.eratz.infra.map.adapter.BotMapAdapter;
 import fr.aresrpg.eratz.infra.map.dao.BotMapDao;
+import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
 /**
@@ -24,8 +25,8 @@ public interface BotMap {
 
 	ManchouMap getMap();
 
-	default BotNode toNode(int originCell) {
-		return new BotNode(getMap().getX(), getMap().getY(), getMapId(), originCell);
+	default BotNode toNode(TeleporterTrigger triggerUsed) {
+		return new BotNode(getMap().getX(), getMap().getY(), getMapId(), triggerUsed);
 	}
 
 	default BotMapDao toDao() {
