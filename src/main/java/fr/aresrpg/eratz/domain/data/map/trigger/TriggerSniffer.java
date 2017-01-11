@@ -1,7 +1,6 @@
 package fr.aresrpg.eratz.domain.data.map.trigger;
 
 import fr.aresrpg.commons.domain.database.Filter;
-import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.MapsManager;
@@ -9,6 +8,9 @@ import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.map.Destination;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger.TeleportType;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 
@@ -35,11 +37,11 @@ public class TriggerSniffer {
 	}
 
 	private void updateTrigger(TeleporterTrigger t, BotMap map) {
-		Trigger[] triggers = map.getTriggers(t.getType());
-		if (ArrayUtils.contains(t, triggers)) {
+		Set<Trigger> triggers = map.getTriggers(t.getType());
+		if (triggers.contains(t)) {
 			for (Trigger tr : triggers)
 				if (tr.equals(t)) ((TeleporterTrigger) tr).setDest(t.getDest());
-		} else triggers = ArrayUtils.addLast(t, triggers);
+		} else triggers.add(t);
 		map.setTriggers(t.getType(), triggers);
 		BotFather.broadcast(Chat.ADMIN, "Nouveau trigger découvert ! [" + map.getMapId() + ":" + t.getCellId() + "] -> [" + t.getDest().getMapId() + ":" + t.getDest().getCellId() + "]");
 		BotFather.MAPS_DB.putOrUpdate(Filter.eq("mapid", map.getMapId()), map.toDao());
@@ -47,8 +49,8 @@ public class TriggerSniffer {
 
 	public void complete(Destination dest) {
 		BotMap map = MapsManager.getMap(currentMapId);
-		Trigger[] triggers = map.getTriggers(TriggerType.TELEPORT);
-		if (triggers == null) map.setTriggers(TriggerType.TELEPORT, triggers = new Trigger[0]);
+		Set<Trigger> triggers = map.getTriggers(TriggerType.TELEPORT);
+		if (triggers == null) map.setTriggers(TriggerType.TELEPORT, triggers = new HashSet<>());
 		for (Trigger t : triggers)
 			if (t.getCellId() == currentCellId) {
 				if (!isValid((TeleporterTrigger) t, dest)) updateTrigger((TeleporterTrigger) t, map);

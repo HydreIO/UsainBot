@@ -74,7 +74,7 @@ public class MapsDataListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null) return;
 		BotMap map = MapsManager.getOrCreateMap(perso.getPerso().getMap());
-		Trigger[] triggers = map.getTriggers(TriggerType.TELEPORT);
+		Set<Trigger> triggers = map.getTriggers(TriggerType.TELEPORT);
 		for (ManchouCell c : map.getMap().getCells()) {
 			if (!c.isTeleporter() || triggerExist(c.getId(), triggers)) continue;
 			GameCellUpdatePacket pkt = new GameCellUpdatePacket();
@@ -89,7 +89,7 @@ public class MapsDataListener implements Listener {
 		sniffer.complete(new DestinationImpl(perso.getPerso().getMap().getMapId(), perso.getPerso().getCellId()));
 	}
 
-	private boolean triggerExist(int cellid, Trigger[] triggers) {
+	private boolean triggerExist(int cellid, Set<Trigger> triggers) {
 		if (triggers == null) return false;
 		for (Trigger t : triggers)
 			if (t.getCellId() == cellid) return true;

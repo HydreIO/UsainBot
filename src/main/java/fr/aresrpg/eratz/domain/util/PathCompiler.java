@@ -4,7 +4,8 @@ import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.util.exception.MapNotDiscoveredException;
-import fr.aresrpg.eratz.domain.util.functionnal.*;
+import fr.aresrpg.eratz.domain.util.functionnal.CellPathFinder;
+import fr.aresrpg.eratz.domain.util.functionnal.IntMapSupplier;
 import fr.aresrpg.eratz.infra.map.DestinationImpl;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger.TeleportType;
@@ -45,10 +46,11 @@ public class PathCompiler {
 		BotNode firstNode = new BotNode(origin.getMap().getX(), origin.getMap().getY(), originMap, new TeleporterTrigger(-1, TeleportType.MAP_TP, new DestinationImpl(origin.getMapId(), originCell))); // on s'en fou de la premiere car elle sera exclu du path
 		int xto = dest.getMap().getX();
 		int yto = dest.getMap().getY();
-		CellPathFinder defaultFinder = CellPathFinder.defaultFinder();
-		Function<BotNode, BotNode[]> neighbors = Neighbors.findMapNeighbors(IntMapSupplier.defaultSupplier(), NodeMapSupplier.defaultSupplier(), knowZaap, defaultFinder);
-		List<BotNode> path = Pathfinding.getPath(firstNode, xto, yto, Validators.insideDofusMap(), neighbors);
-		Objects.requireNonNull(path, "The map is unreachable ! You need to discover a path at least one time before using it automatically");
+		CellPathFinder defaultFinder = CellPathFinder.defaultFinder(Pathfinding::getNeighbors);
+		Function<BotNode, BotNode[]> neighbors = Neighbors.findMapNeighbors(IntMapSupplier.defaultSupplier(), knowZaap, defaultFinder);
+		List<BotNode> path = Pathfinding.getPath(firstNode, xto, yto, nd -> nd.getId() == destMap, Validators.insideDofusMap(), neighbors);
+		Objects.requireNonNull(path,
+				"The map is unreachable ! You need to discover a path at least one time before using it automatically\n origin:" + originCell + ", originMap:" + originMap + ", destMap:" + destMap);
 		return path.stream().map(n -> n.getTrigger()).collect(Collectors.toList());
 	}
 

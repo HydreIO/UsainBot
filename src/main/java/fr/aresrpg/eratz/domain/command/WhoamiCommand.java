@@ -2,7 +2,6 @@ package fr.aresrpg.eratz.domain.command;
 
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
-import fr.aresrpg.commons.domain.util.Predicates;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
@@ -10,7 +9,6 @@ import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 /**
  * 
@@ -58,9 +56,6 @@ public class WhoamiCommand implements Command {
 		LOGGER.debug("Map Height = " + p.getMap().getHeight());
 		LOGGER.debug("Jobs = " + p.getJobs());
 		LOGGER.debug("Job = " + p.getJob());
-		((ManchouPerso) p).getTeleporters(Predicates.alwaysFalse());
-		LOGGER.debug("All tp = " + Arrays.stream(((ManchouPerso) p).getAllTeleporters())
-				.map(i -> String.valueOf(i.getId() + ",mov=" + i.getMovement() + ", 1n=" + i.getLayerObject1Num() + ", 2n=" + i.getLayerObject2Num())).collect(Collectors.joining(" | ")));
 	}
 
 }

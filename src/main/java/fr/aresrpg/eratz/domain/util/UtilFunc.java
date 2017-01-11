@@ -23,7 +23,7 @@ public class UtilFunc {
 
 	public static Function<ManchouItem, MovedItem> deposit(BotPerso perso) {
 		return i -> {
-			Integer toKeep = perso.getItemsToKeep().get(i.getTypeId());
+			Integer toKeep = perso.getUtilities().getItemsToKeep().get(i.getTypeId());
 			int amount = i.getAmount();
 			if (toKeep != null) amount -= toKeep.intValue();
 			if (amount < 1) return null;
@@ -33,9 +33,9 @@ public class UtilFunc {
 
 	public static Function<ManchouItem, MovedItem> retrieve(BotPerso perso) {
 		return i -> {
-			Integer toKeep = perso.getItemsToKeep().get(i.getTypeId());
+			Integer toKeep = perso.getUtilities().getItemsToKeep().get(i.getTypeId());
 			int amount = i.getAmount();
-			int amountInInv = perso.getQuantityInInventoryOf(i.getTypeId());
+			int amountInInv = perso.getUtilities().getQuantityInInventoryOf(i.getTypeId());
 			int toMove = 0;
 			if (toKeep != null && amountInInv < toKeep.intValue()) toMove = toKeep.intValue() - amountInInv;
 			if (toMove < 1) return null;

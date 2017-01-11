@@ -16,7 +16,7 @@ public class BotNode extends Node {
 		super(x, y);
 		super.cost = cost;
 		this.trigger = trigger;
-		this.id = trigger.getDest().getCellId();
+		this.id = trigger.getDest().getMapId();
 	}
 
 	public BotNode(int x, int y, TeleporterTrigger trigger) {

@@ -21,6 +21,7 @@ import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.gui.MapView;
 import fr.aresrpg.eratz.domain.listener.*;
+import fr.aresrpg.eratz.domain.util.BotConfig;
 import fr.aresrpg.eratz.domain.util.Hastebin;
 import fr.aresrpg.eratz.infra.map.dao.BotMapDao;
 import fr.aresrpg.tofumanchou.domain.Accounts;
@@ -30,12 +31,15 @@ import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.domain.plugin.ManchouPlugin;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.BootStrap;
+import fr.aresrpg.tofumanchou.infra.config.Configurations;
+import fr.aresrpg.tofumanchou.infra.config.Configurations.Config;
 import fr.aresrpg.tofumanchou.infra.config.Variables;
 import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 import fr.aresrpg.tofumanchou.infra.db.DbAccessor;
 
 import java.io.*;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -45,6 +49,7 @@ public class BotFather implements ManchouPlugin {
 	public static final Logger LOGGER = new LoggerBuilder("BOT").setUseConsoleHandler(true, true, Option.none(), Option.none()).build();
 	public static Collection<BotMapDao> MAPS_DB;
 	private ConcurrentMap<Long, BotPerso> persos = new ConcurrentHashMap<>();
+	private Config config;
 
 	@Override
 	public String getAuthor() {
@@ -90,11 +95,12 @@ public class BotFather implements ManchouPlugin {
 	// account pkt Marine-Lpn eratz eU1
 
 	// account view bratva-nazar henual
+	// account view marine-lpn eratz
 	// whoami henual bratva-nazar
 	// bucheron henual bratva-nazar
 	// fight henual bratva-nazar
-	// goto 4,16 bratva-nazar henual
-	// goto 14,25 bratva-nazar henual
+	// goto 10356 marine-lpn eratz
+	// goto 9460 bratva-nazar henual
 	// goto 21,-30 bratva-nazar henual
 	// crash party bratva-nazar henual Ethylind
 	// account connect bratva-nazar henual
@@ -106,6 +112,10 @@ public class BotFather implements ManchouPlugin {
 			Perso perso = Accounts.registerPerso(pe.getPseudo(), p.getAccountName(), p.getPassword(), pe.getDofusServer());
 			persos.put(pe.getUUID(), new BotPerso((ManchouPerso) perso));
 		}));
+		this.config = Configurations.generate("BotFather.yml", BotConfig.class, Optional.of(() -> {
+			LOGGER.info("Configuration created ! please configure and then restart.");
+			onDisable();
+		}), Optional.empty());
 		DbAccessor<BotMapDao> acc = DbAccessor.create(Manchou.getDatabase(), "maps", BotMapDao.class);
 		MAPS_DB = acc.get();
 		Executors.FIXED.execute(MapView::main);
@@ -113,15 +123,14 @@ public class BotFather implements ManchouPlugin {
 		Accounts.registerAccount("SceatDrop3");
 		new ConnectionListener();
 		MapViewListener.register();
-		FightListener.register();
+		//	FightListener.register();
 		MapsDataListener.register();
+		MovingListener.register();
 		MapsManager.init();
 		Manchou.registerCommand(new WhoamiCommand());
 		Manchou.registerCommand(new HastebinCommand());
 		Manchou.registerCommand(new AccountCommand());
 		Manchou.registerCommand(new GotoCommand());
-		Manchou.registerCommand(new FightCommand());
-		Manchou.registerCommand(new BucheronCommand());
 		Manchou.registerCommand(new CrashCommand());
 	}
 

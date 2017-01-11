@@ -6,16 +6,28 @@ package fr.aresrpg.eratz.domain.ia;
  */
 public enum Interrupt {
 
-	FIGHT,
+	FIGHT_JOIN,
+	FIGHT_START,
+	TURN_START,
+	FIGHT_END,
+
 	DISCONNECT,
+
 	RESSOURCE_STEAL,
 	RESSOURCE_HARVESTED,
 	NO_RESSOURCES,
+
 	DEATH,
 	GRAVE, // succomber
+
 	FULL_POD,
-	MOB_ON_PATH,
+
 	OUT_OF_PATH,
-	PATH_END,
+	MOVED,
+
+	BANNED,
+	LOGIN_ERROR,
+	SAVE,
+	CLOSED,
 
 }

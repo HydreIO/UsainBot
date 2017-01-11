@@ -10,6 +10,7 @@ import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
@@ -33,11 +34,11 @@ public class Neighbors {
 	 *            a CellPathPredicate which take the origin cell, the dest cell and the map as arguments to know if a trigger is reachable (for exemple if a teleporter is in the other side of a river)
 	 * @return the neighbors
 	 */
-	public static Function<BotNode, BotNode[]> findMapNeighbors(IntMapSupplier idToMap, NodeMapSupplier nodeToMap, IntPredicate knowZaap, CellPathFinder pathPredicate) {
+	public static Function<BotNode, BotNode[]> findMapNeighbors(IntMapSupplier idToMap, IntPredicate knowZaap, CellPathFinder pathPredicate) {
 		return n -> {
-			BotMap map = nodeToMap.get(n);
+			BotMap map = idToMap.get(n.getId());
 			if (map == null) return new BotNode[0];
-			Trigger[] triggers = map.getTriggers(TriggerType.TELEPORT);
+			Set<Trigger> triggers = map.getTriggers(TriggerType.TELEPORT);
 			BotNode[] nodes = new BotNode[0];
 			if (triggers != null)
 				for (Trigger t : triggers) {
@@ -48,7 +49,7 @@ public class Neighbors {
 						Destination dest = tp.getDest();
 						BotMap destmap = idToMap.get(dest.getMapId());
 						if (destmap == null) continue;
-						nodes = ArrayUtils.addLast(new BotNode(destmap.getMap().getX(), destmap.getMap().getY(), destmap.getMapId(), tp), nodes);
+						nodes = ArrayUtils.addLast(new BotNode(destmap.getMap().getX(), destmap.getMap().getY(), 0, tp), nodes);
 						continue;
 					case ZAAP:
 						nodes = ArrayUtils.concat(nodes,

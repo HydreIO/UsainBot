@@ -5,6 +5,7 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.dofus.util.Pathfinding;
+import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.gui.MapView;
@@ -13,7 +14,6 @@ import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.Account;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 
-import java.awt.Point;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -81,7 +81,7 @@ public class AccountCommand implements Command {
 					bp.getView().setMap(bp.getPerso().getMap().serialize());
 					bp.getView().setCurrentPosition(bp.getPerso().getCellId());
 					bp.getView().setOnCellClick(i -> {
-						List<Point> cellPath = Pathfinding.getCellPath(bp.getPerso().getCellId(), i, bp.getPerso().getMap().getProtocolCells(), perso.getMap().getWidth(), perso.getMap().getHeight(),
+						List<Node> cellPath = Pathfinding.getCellPath(bp.getPerso().getCellId(), i, bp.getPerso().getMap().getProtocolCells(), perso.getMap().getWidth(), perso.getMap().getHeight(),
 								Pathfinding::getNeighbors,
 								bp.getPerso()::canGoOnCellAvoidingMobs);
 						if (cellPath == null) LOGGER.debug("Path not found !");

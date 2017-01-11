@@ -6,8 +6,7 @@ import fr.aresrpg.eratz.domain.data.map.trigger.Trigger;
 import fr.aresrpg.eratz.domain.data.map.trigger.TriggerType;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 
@@ -17,17 +16,17 @@ public class BotMapImpl implements BotMap {
 
 	private int mapId;
 	private long time;
-	private Map<TriggerType, Trigger[]> triggers = new HashMap<>();
+	private Map<TriggerType, Set<Trigger>> triggers = new HashMap<>();
 	private ManchouMap map;
 
-	public BotMapImpl(int mapId, long time, Map<TriggerType, Trigger[]> triggers, DofusMap map) {
+	public BotMapImpl(int mapId, long time, Map<TriggerType, Set<Trigger>> triggers, DofusMap map) {
 		this.mapId = mapId;
 		this.time = time;
 		this.triggers = triggers;
 		this.map = ManchouMap.fromDofusMap(map);
 	}
 
-	public BotMapImpl(int mapId, long time, Map<TriggerType, Trigger[]> triggers, ManchouMap map) {
+	public BotMapImpl(int mapId, long time, Map<TriggerType, Set<Trigger>> triggers, ManchouMap map) {
 		this.mapId = mapId;
 		this.time = time;
 		this.triggers = triggers;
@@ -35,7 +34,7 @@ public class BotMapImpl implements BotMap {
 	}
 
 	@Override
-	public void setTriggers(TriggerType type, Trigger[] triggers) {
+	public void setTriggers(TriggerType type, Set<Trigger> triggers) {
 		this.triggers.put(type, triggers);
 	}
 
@@ -65,7 +64,7 @@ public class BotMapImpl implements BotMap {
 	/**
 	 * @return the triggers
 	 */
-	public Map<TriggerType, Trigger[]> getTriggers() {
+	public Map<TriggerType, Set<Trigger>> getTriggers() {
 		return triggers;
 	}
 
@@ -73,7 +72,7 @@ public class BotMapImpl implements BotMap {
 	 * @param triggers
 	 *            the triggers to set
 	 */
-	public void setTriggers(Map<TriggerType, Trigger[]> triggers) {
+	public void setTriggers(Map<TriggerType, Set<Trigger>> triggers) {
 		this.triggers = triggers;
 	}
 
@@ -93,7 +92,7 @@ public class BotMapImpl implements BotMap {
 	}
 
 	@Override
-	public Trigger[] getTriggers(TriggerType type) {
+	public Set<Trigger> getTriggers(TriggerType type) {
 		return triggers.get(type);
 	}
 

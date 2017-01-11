@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.data.player.info;
 
+import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.util.chat.*;
 
@@ -9,7 +10,7 @@ import java.util.*;
  * 
  * @since
  */
-public class ChatInfo extends Info {
+public class ChatUtilities extends Info {
 
 	private Map<String, Long> lastMsgByPlayer = new HashMap<>();
 	private final ChatterBotFactory factory = new ChatterBotFactory();
@@ -20,7 +21,7 @@ public class ChatInfo extends Info {
 	/**
 	 * @param perso
 	 */
-	public ChatInfo(BotPerso perso) {
+	public ChatUtilities(BotPerso perso) {
 		super(perso);
 		try {
 			this.voice = factory.create(ChatterBotType.CLEVERBOT);
@@ -28,6 +29,11 @@ public class ChatInfo extends Info {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void respondTo(String msg, Chat c) {
+		String resp = getResponse(msg);
+		if (resp != null) getPerso().getPerso().speak(c, resp);
 	}
 
 	public String getResponse(String s) {

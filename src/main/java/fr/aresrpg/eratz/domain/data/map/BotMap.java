@@ -9,6 +9,8 @@ import fr.aresrpg.eratz.infra.map.dao.BotMapDao;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
+import java.util.Set;
+
 /**
  * 
  * @since
@@ -19,14 +21,14 @@ public interface BotMap {
 
 	long getTimeMs();
 
-	Trigger[] getTriggers(TriggerType type);
+	Set<Trigger> getTriggers(TriggerType type);
 
-	void setTriggers(TriggerType type, Trigger[] triggers);
+	void setTriggers(TriggerType type, Set<Trigger> triggers);
 
 	ManchouMap getMap();
 
 	default BotNode toNode(TeleporterTrigger triggerUsed) {
-		return new BotNode(getMap().getX(), getMap().getY(), getMapId(), triggerUsed);
+		return new BotNode(getMap().getX(), getMap().getY(), 0, triggerUsed);
 	}
 
 	default BotMapDao toDao() {

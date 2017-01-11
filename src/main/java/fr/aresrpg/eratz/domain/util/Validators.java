@@ -40,7 +40,7 @@ public class Validators {
 			Function<Node, Node[]> nodeToNB = Pathfinding::getNeighborsWithoutDiagonals;
 			dangerousCells.addAll(recursiveSearch(nb, distanceAgro, 0, nodeToId, nodeToNB));
 		}
-		return (x1, y1, x2, y2) -> dangerousCells.contains(Maps.getIdRotated(x2, y2, map.getWidth(), map.getHeight()));
+		return (x1, y1, x2, y2) -> !dangerousCells.contains(Maps.getIdRotated(x2, y2, map.getWidth(), map.getHeight()));
 	}
 
 	/**

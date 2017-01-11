@@ -2,14 +2,16 @@ package fr.aresrpg.eratz.domain.command;
 
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
+import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.BotFather;
+import fr.aresrpg.eratz.domain.data.MapsManager;
+import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
-
-import java.util.Arrays;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 /**
  * 
@@ -25,23 +27,26 @@ public class GotoCommand implements Command {
 	@Override
 	public void trigger(String[] args) {
 		if (args.length >= 3) {
-			String[] coords = args[0].split(",");
-			int x = Integer.parseInt(coords[0]);
-			int y = Integer.parseInt(coords[1]);
+			int id = Integer.parseInt(args[0]);
 			Perso perso = Accounts.getPersoWithPseudo(args[1], Server.valueOf(args[2].toUpperCase()));
 			if (perso == null) {
 				LOGGER.info("Player not found");
 				return;
 			}
-			//	GotoListener.unRegister();
-			LOGGER.info("Going to " + Arrays.toString(coords));
+			BotMap map = MapsManager.getMap(id);
+			if (map == null) {
+				LOGGER.error("Map inconnue !");
+				return;
+			}
 			BotPerso bp = BotFather.getPerso(perso);
-			bp.getBotState().addPath(x, y);
-			//GotoListener.register();
-			//bp.goToNextMap();
+			LOGGER.info("Going to " + map.getMap().getInfos());
+			Executors.FIXED.execute(() -> {
+				bp.getMind().moveToMap(map).whenComplete((val, ex) -> LOGGER.error(ex)).join();
+				BotFather.broadcast(Chat.MEETIC, perso.getPseudo() + " est arrivé à destination ! " + map.getMap().getInfos());
+			});
 			return;
 		}
-		LOGGER.error("Usage: goto <x,y> <pseudo> <server>");
+		LOGGER.error("Usage: goto <mapid> <pseudo> <server>");
 	}
 
 }

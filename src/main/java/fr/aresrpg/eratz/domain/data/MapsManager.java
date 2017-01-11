@@ -7,6 +7,8 @@ import fr.aresrpg.commons.domain.database.Filter;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
+import fr.aresrpg.eratz.domain.data.map.trigger.Trigger;
+import fr.aresrpg.eratz.domain.data.map.trigger.TriggerType;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.util.PercentPrinter;
 import fr.aresrpg.eratz.infra.map.BotMapImpl;
@@ -19,9 +21,7 @@ import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 import fr.aresrpg.tofumanchou.infra.db.DbAccessor;
 
-import java.awt.Point;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -33,7 +33,6 @@ public class MapsManager {
 
 	private static final MapsManager instance = new MapsManager();
 	private static ConcurrentMap<Integer, BotMap> mapsById = new ConcurrentHashMap<>();
-	private static ConcurrentMap<MapNode, BotMap> mapsByCoords = new ConcurrentHashMap<>();
 
 	private MapsManager() {
 	}
@@ -49,7 +48,6 @@ public class MapsManager {
 		for (BotMapDao dao : find) {
 			BotMapImpl map = BotMapAdapter.IDENTITY.adaptFrom(dao);
 			mapsById.put(dao.getMapid(), map);
-			mapsByCoords.put(new MapNode(map.getMap().getX(), map.getMap().getY()), map);
 			printer.incrementAndPrint("Loading maps.. [%s%%]");
 		}
 		LOGGER.info("Maps loaded from database ! (" + t.getAsLong() + "ms)");
@@ -57,14 +55,6 @@ public class MapsManager {
 
 	public static BotMap getMap(int mapid) {
 		return instance.mapsById.get(mapid);
-	}
-
-	public static BotMap getMap(int x, int y) {
-		return instance.mapsByCoords.get(new MapNode(x, y));
-	}
-
-	public static BotMap getMap(Point coords) {
-		return getMap(coords.x, coords.y);
 	}
 
 	public static synchronized BotMap getOrCreateMap(ManchouMap map) {
@@ -76,7 +66,6 @@ public class MapsManager {
 	private BotMap createAndRegisterMap(ManchouMap map) {
 		BotMap bm = new BotMapImpl(map.getMapId(), map.getDate(), new HashMap<>(), map);
 		mapsById.put(map.getMapid(), bm);
-		mapsByCoords.put(new MapNode(map.getX(), map.getY()), bm);
 		return bm;
 	}
 
@@ -95,24 +84,48 @@ public class MapsManager {
 		else if (map2.getCapabilities() != map.getCapabilities()) needUpdate = true;
 		else if (map2.isOutdoor() != map.isOutdoor()) needUpdate = true;
 		else if (map2.getBackgroundId() != map.getBackgroundId()) needUpdate = true;
+		Set<Trigger> triggers = bm.getTriggers(TriggerType.TELEPORT);
+		int faketrigCount = 0;
 		for (int i = 0; i < map.getCells().length; i++) {
 			ManchouCell cell1 = map.getCells()[i];
 			ManchouCell cell2 = map2.getCells()[i];
-			if (!cell1.fieldsEquals(cell2)) {
+			boolean fakeTrig = triggerExist(i, triggers) && !cell1.isTeleporter();
+			if (fakeTrig || !cell1.fieldsEquals(cell2)) {
+				if (fakeTrig) {
+					faketrigCount++;
+					removeTrigger(i, triggers);
+				}
 				needUpdate = true;
-				break;
 			}
 		}
 		if (needUpdate) {
 			((BotMapImpl) bm).setMap(map);
+			if (faketrigCount != 0) BotFather.broadcast(Chat.ADMIN, faketrigCount + " faux triggers " + (faketrigCount == 1 ? "a" : "onts") + " été suprimé ! [" + bm.getMap().getInfos() + "]");
 			updateMap(bm, perso);
 		}
 	}
 
+	private static boolean triggerExist(int cellid, Set<Trigger> triggers) {
+		if (triggers == null) return false;
+		for (Trigger t : triggers) {
+			if (t.getCellId() == cellid) return true;
+		}
+		return false;
+	}
+
+	private static void removeTrigger(int cellid, Set<Trigger> triggers) {
+		if (triggers == null) return;
+		for (Trigger t : triggers)
+			if (t.getCellId() == cellid) {
+				triggers.remove(t);
+				return;
+			}
+	}
+
 	private static void updateMap(BotMap map, BotPerso perso) {
-		BotFather.broadcast(Chat.ADMIN, perso.getPerso().getPseudo() + " a mis une map à jour [" + map.getMap().getX() + "," + map.getMap().getY() + "]");
-		Executors.FIXED.execute(() -> DbAccessor.<BotMapDao> create(Manchou.getDatabase(), "maps", BotMapDao.class).get().putOrUpdate(Filter.eq("mapid", map.getMapId()),
-				BotMapAdapter.IDENTITY.adaptTo((BotMapImpl) map)));	
+		BotFather.broadcast(Chat.ADMIN, perso.getPerso().getPseudo() + " a mis une map à jour [" + map.getMap().getInfos() + "]");
+		Executors.FIXED.execute(() -> DbAccessor.<BotMapDao>create(Manchou.getDatabase(), "maps", BotMapDao.class).get().putOrUpdate(Filter.eq("mapid", map.getMapId()),
+				BotMapAdapter.IDENTITY.adaptTo((BotMapImpl) map)));
 	}
 
 	public static class MapNode {
