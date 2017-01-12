@@ -37,7 +37,7 @@ public class MovingListener implements Listener {
 	@Subscribe
 	public void onMap(EntityPlayerJoinMapEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso == null) return;
+		if (perso == null || e.getPlayer().getUUID() != perso.getPerso().getUUID()) return;
 		perso.getMind().forEachState(c -> c.accept(perso.getUtilities().isOnPath() ? Interrupt.MOVED : Interrupt.OUT_OF_PATH));
 	}
 }

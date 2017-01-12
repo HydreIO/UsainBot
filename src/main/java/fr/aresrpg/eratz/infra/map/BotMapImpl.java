@@ -20,6 +20,7 @@ public class BotMapImpl implements BotMap {
 	private ManchouMap map;
 
 	public BotMapImpl(int mapId, long time, Map<TriggerType, Set<Trigger>> triggers, DofusMap map) {
+		fillTriggers();
 		this.mapId = mapId;
 		this.time = time;
 		this.triggers = triggers;
@@ -27,15 +28,39 @@ public class BotMapImpl implements BotMap {
 	}
 
 	public BotMapImpl(int mapId, long time, Map<TriggerType, Set<Trigger>> triggers, ManchouMap map) {
+		fillTriggers();
 		this.mapId = mapId;
 		this.time = time;
 		this.triggers = triggers;
 		this.map = map;
 	}
 
+	void fillTriggers() {
+		for (TriggerType t : TriggerType.values())
+			triggers.put(t, new HashSet<>());
+	}
+
 	@Override
-	public void setTriggers(TriggerType type, Set<Trigger> triggers) {
-		this.triggers.put(type, triggers);
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		return obj instanceof BotMap && ((BotMap) obj).getMapId() == mapId;
+	}
+
+	@Override
+	public int hashCode() {
+		return mapId;
+	}
+
+	/**
+	 * This method remove all zaap and zaapi from Teleporters triggers to only keep them as Interractable trigger ! <br>
+	 * In DB we only want Map_tp as teleporters and we keep only the "interractable instance" of zaap and zaapi
+	 */
+	public void removeDuplicatedTriggers() {
+		Set<Trigger> tp = triggers.get(TriggerType.TELEPORT);
+		Set<Trigger> inter = triggers.get(TriggerType.INTERRACTABLE);
+		if (tp != null && inter != null)
+			tp.removeIf(inter::contains);
 	}
 
 	/**
@@ -66,14 +91,6 @@ public class BotMapImpl implements BotMap {
 	 */
 	public Map<TriggerType, Set<Trigger>> getTriggers() {
 		return triggers;
-	}
-
-	/**
-	 * @param triggers
-	 *            the triggers to set
-	 */
-	public void setTriggers(Map<TriggerType, Set<Trigger>> triggers) {
-		this.triggers = triggers;
 	}
 
 	/**

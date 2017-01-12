@@ -23,8 +23,6 @@ public interface BotMap {
 
 	Set<Trigger> getTriggers(TriggerType type);
 
-	void setTriggers(TriggerType type, Set<Trigger> triggers);
-
 	ManchouMap getMap();
 
 	default BotNode toNode(TeleporterTrigger triggerUsed) {

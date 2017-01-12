@@ -41,8 +41,8 @@ public class GotoCommand implements Command {
 			BotPerso bp = BotFather.getPerso(perso);
 			LOGGER.info("Going to " + map.getMap().getInfos());
 			Executors.FIXED.execute(() -> {
-				bp.getMind().moveToMap(map).whenComplete((val, ex) -> LOGGER.error(ex)).join();
-				BotFather.broadcast(Chat.MEETIC, perso.getPseudo() + " est arrivé à destination ! " + map.getMap().getInfos());
+				bp.getMind().moveToMap(map);
+				BotFather.broadcast(Chat.ADMIN, perso.getPseudo() + " est arrivé à destination ! " + map.getMap().getInfos());
 			});
 			return;
 		}

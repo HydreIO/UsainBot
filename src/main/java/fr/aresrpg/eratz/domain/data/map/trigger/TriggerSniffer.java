@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.data.map.trigger;
 
+import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
+
 import fr.aresrpg.commons.domain.database.Filter;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.BotFather;
@@ -9,7 +11,6 @@ import fr.aresrpg.eratz.domain.data.map.Destination;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger.TeleportType;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -42,7 +43,6 @@ public class TriggerSniffer {
 			for (Trigger tr : triggers)
 				if (tr.equals(t)) ((TeleporterTrigger) tr).setDest(t.getDest());
 		} else triggers.add(t);
-		map.setTriggers(t.getType(), triggers);
 		BotFather.broadcast(Chat.ADMIN, "Nouveau trigger découvert ! [" + map.getMapId() + ":" + t.getCellId() + "] -> [" + t.getDest().getMapId() + ":" + t.getDest().getCellId() + "]");
 		BotFather.MAPS_DB.putOrUpdate(Filter.eq("mapid", map.getMapId()), map.toDao());
 	}
@@ -50,7 +50,7 @@ public class TriggerSniffer {
 	public void complete(Destination dest) {
 		BotMap map = MapsManager.getMap(currentMapId);
 		Set<Trigger> triggers = map.getTriggers(TriggerType.TELEPORT);
-		if (triggers == null) map.setTriggers(TriggerType.TELEPORT, triggers = new HashSet<>());
+		LOGGER.warning("trrg = " + triggers);
 		for (Trigger t : triggers)
 			if (t.getCellId() == currentCellId) {
 				if (!isValid((TeleporterTrigger) t, dest)) updateTrigger((TeleporterTrigger) t, map);

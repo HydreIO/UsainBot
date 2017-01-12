@@ -30,6 +30,18 @@ public class InterractableTrigger implements Trigger {
 		else this.interract = interractable.name();
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj == this) return true;
+		return obj instanceof Trigger && ((Trigger) obj).getCellId() == cellId;
+	}
+
+	@Override
+	public int hashCode() {
+		return cellId;
+	}
+
 	public Interractable getInterractable() {
 		return Interractable.valueOf(interract);
 	}
@@ -62,6 +74,11 @@ public class InterractableTrigger implements Trigger {
 	@Override
 	public void writeDatas(Map<String, Object> datas) {
 		this.interract = (String) datas.get(INTT);
+	}
+
+	@Override
+	public String toString() {
+		return "InterractableTrigger [trigger=" + trigger + ", cellId=" + cellId + ", interract=" + interract + "]";
 	}
 
 }

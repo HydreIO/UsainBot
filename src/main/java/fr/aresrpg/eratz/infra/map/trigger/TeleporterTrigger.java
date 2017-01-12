@@ -37,7 +37,7 @@ public class TeleporterTrigger implements Trigger {
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
 		if (obj == this) return true;
-		return obj instanceof TeleporterTrigger && ((TeleporterTrigger) obj).cellId == cellId;
+		return obj instanceof Trigger && ((Trigger) obj).getCellId() == cellId;
 	}
 
 	@Override
@@ -111,6 +111,9 @@ public class TeleporterTrigger implements Trigger {
 		MAP_TP,
 		ZAAP,
 		ZAAPI,
+		POTION_BONTA,
+		POTION_ASTRUB,
+		POTION_BRAK
 	}
 
 	@Override

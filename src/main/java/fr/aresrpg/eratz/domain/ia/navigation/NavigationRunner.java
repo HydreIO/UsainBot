@@ -26,7 +26,7 @@ public class NavigationRunner extends Info {
 
 	public CompletableFuture<CompletableFuture<?>> runNavigation(Navigator navigator) {
 		if (navigator.isFinished()) return CompletableFuture.completedFuture(null);
-		CompletableFuture<CompletableFuture<CompletableFuture<?>>> actions = new CompletableFuture<>();
+		CompletableFuture<CompletableFuture<?>> actions = new CompletableFuture<>();
 		getPerso().getMind().publishState(MindState.MOVEMENT, interrupt -> {
 			switch (interrupt) {
 				case DISCONNECT:
@@ -34,7 +34,7 @@ public class NavigationRunner extends Info {
 							CompletableFuture.<Connector>completedFuture(new Connector(getPerso(), Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS))
 									.thenCompose(getPerso().getConRunner()::runConnection)
 									.thenApply(cf -> navigator)
-									.thenCompose(this::runNavigation));
+									.thenCompose(this::runNavigation).join());
 					break;
 				case FIGHT_JOIN: // TODO mais flemme
 					break;
@@ -42,25 +42,19 @@ public class NavigationRunner extends Info {
 					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator).thenCompose(nav -> {
 						getPerso().getUtilities().destroyHeaviestRessource();
 						return runNavigation(navigator);
-					}));
+					}).join());
 					break;
 				case OUT_OF_PATH:
-					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator).thenCompose(nav -> {
-						nav.compilePath();
-						return runNavigation(navigator);
-					}));
+					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator).thenApply(Navigator::compilePath).thenCompose(this::runNavigation).join());
 					break;
 				case MOVED:
-					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator).thenCompose(n -> {
-						n.notifyMoved();
-						return runNavigation(n);
-					}));
+					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator).thenApply(Navigator::notifyMoved).thenCompose(this::runNavigation).join());
 					break;
 			}
 			getPerso().getMind().getStates().remove(MindState.MOVEMENT);
 		});
 		navigator.runToNext();
-		return actions.join();
+		return actions;
 	}
 
 }

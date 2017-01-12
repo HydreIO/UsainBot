@@ -6,13 +6,14 @@ import fr.aresrpg.eratz.domain.data.map.Destination;
 import fr.aresrpg.eratz.domain.data.map.trigger.Trigger;
 import fr.aresrpg.eratz.domain.data.map.trigger.TriggerType;
 import fr.aresrpg.eratz.domain.util.functionnal.*;
+import fr.aresrpg.eratz.infra.map.DestinationImpl;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
+import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger.TeleportType;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
 
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.function.IntPredicate;
+import java.util.function.*;
 import java.util.stream.IntStream;
 
 /**
@@ -32,14 +33,22 @@ public class Neighbors {
 	 *            a predicate to know if a zaap mapid is knowed by the player
 	 * @param canUseCell
 	 *            a CellPathPredicate which take the origin cell, the dest cell and the map as arguments to know if a trigger is reachable (for exemple if a teleporter is in the other side of a river)
+	 * @param canUsePotion
+	 *            a predicate to know if potions can be used from a node
 	 * @return the neighbors
 	 */
-	public static Function<BotNode, BotNode[]> findMapNeighbors(IntMapSupplier idToMap, IntPredicate knowZaap, CellPathFinder pathPredicate) {
+	public static Function<BotNode, BotNode[]> findMapNeighbors(IntMapSupplier idToMap, IntPredicate knowZaap, CellPathFinder pathPredicate, BiPredicate<PotionType, BotNode> canUsePotion) {
 		return n -> {
 			BotMap map = idToMap.get(n.getId());
 			if (map == null) return new BotNode[0];
 			Set<Trigger> triggers = map.getTriggers(TriggerType.TELEPORT);
 			BotNode[] nodes = new BotNode[0];
+			if (canUsePotion.test(PotionType.RAPPEL, n))
+				nodes = ArrayUtils.addLast(new BotNode(4, -19, 10, new TeleporterTrigger(-1, TeleportType.POTION_ASTRUB, new DestinationImpl(7411, 311))), nodes);
+			if (canUsePotion.test(PotionType.BONTA, n))
+				nodes = ArrayUtils.addLast(new BotNode(-33, -57, 10, new TeleporterTrigger(-1, TeleportType.POTION_BONTA, new DestinationImpl(6159, 211))), nodes);
+			if (canUsePotion.test(PotionType.BRAKMAR, n))
+				nodes = ArrayUtils.addLast(new BotNode(-23, 38, 10, new TeleporterTrigger(-1, TeleportType.POTION_BRAK, new DestinationImpl(6167, 183))), nodes);
 			if (triggers != null)
 				for (Trigger t : triggers) {
 				TeleporterTrigger tp = (TeleporterTrigger) t;

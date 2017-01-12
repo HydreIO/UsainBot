@@ -6,7 +6,6 @@ import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
 import fr.aresrpg.eratz.domain.ia.connection.Connector;
 import fr.aresrpg.eratz.domain.ia.navigation.Navigator;
-import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.*;
 
@@ -37,13 +36,13 @@ public class Mind extends Info {
 		states.values().stream().forEach(actions::accept);
 	}
 
-	public CompletableFuture<?> moveToMap(BotMap destination) {
-		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId()) return CompletableFuture.completedFuture(null);
+	public void moveToMap(BotMap destination) {
+		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId()) return;
 		Navigator navigator = new Navigator(getPerso(), destination);
-		return CompletableFuture.<Navigator>supplyAsync(navigator::compilePath, Executors.FIXED).thenCompose(getPerso().getNavRunner()::runNavigation);
+		CompletableFuture.<Navigator>completedFuture(navigator).thenApply(Navigator::compilePath).thenCompose(getPerso().getNavRunner()::runNavigation).join();
 	}
 
-	public CompletableFuture<?> connect(long time, TimeUnit unit) {
+	public CompletableFuture<CompletableFuture<?>> connect(long time, TimeUnit unit) {
 		Connector con = new Connector(getPerso(), time, unit);
 		return CompletableFuture.<Connector>completedFuture(con).thenCompose(getPerso().getConRunner()::runConnection);
 	}

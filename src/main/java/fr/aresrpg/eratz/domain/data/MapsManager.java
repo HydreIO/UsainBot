@@ -14,6 +14,7 @@ import fr.aresrpg.eratz.domain.util.PercentPrinter;
 import fr.aresrpg.eratz.infra.map.BotMapImpl;
 import fr.aresrpg.eratz.infra.map.adapter.BotMapAdapter;
 import fr.aresrpg.eratz.infra.map.dao.BotMapDao;
+import fr.aresrpg.eratz.infra.map.trigger.InterractableTrigger;
 import fr.aresrpg.tofumanchou.domain.Manchou;
 import fr.aresrpg.tofumanchou.domain.util.BenchTime;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
@@ -85,22 +86,39 @@ public class MapsManager {
 		else if (map2.isOutdoor() != map.isOutdoor()) needUpdate = true;
 		else if (map2.getBackgroundId() != map.getBackgroundId()) needUpdate = true;
 		Set<Trigger> triggers = bm.getTriggers(TriggerType.TELEPORT);
+		Set<Trigger> interractables = bm.getTriggers(TriggerType.INTERRACTABLE);
+		LOGGER.debug(interractables + "");
+		LOGGER.debug(((BotMapImpl) bm).getTriggers() + "");
 		int faketrigCount = 0;
+		int missingInterractable = 0;
+		int fakeInterractable = 0;
 		for (int i = 0; i < map.getCells().length; i++) {
 			ManchouCell cell1 = map.getCells()[i];
 			ManchouCell cell2 = map2.getCells()[i];
-			boolean fakeTrig = triggerExist(i, triggers) && !cell1.isTeleporter();
-			if (fakeTrig || !cell1.fieldsEquals(cell2)) {
-				if (fakeTrig) {
-					faketrigCount++;
-					removeTrigger(i, triggers);
-				}
+			if (triggerExist(i, interractables) && !cell1.isInterractable()) {
+				interractables.remove(new InterractableTrigger(i));
+				fakeInterractable++;
 				needUpdate = true;
 			}
+			if (cell1.isInterractable() && !triggerExist(i, interractables)) {
+				interractables.add(new InterractableTrigger(i, cell1.getInterractableId()));
+				missingInterractable++;
+				needUpdate = true;
+			}
+			if (triggerExist(i, triggers) && !cell1.isTeleporter() && !cell1.isZaapOrZaapi()) {
+				faketrigCount++;
+				removeTrigger(i, triggers);
+			}
+			if (!cell1.fieldsEquals(cell2)) needUpdate = true;
 		}
 		if (needUpdate) {
 			((BotMapImpl) bm).setMap(map);
-			if (faketrigCount != 0) BotFather.broadcast(Chat.ADMIN, faketrigCount + " faux triggers " + (faketrigCount == 1 ? "a" : "onts") + " été suprimé ! [" + bm.getMap().getInfos() + "]");
+			if (faketrigCount != 0)
+				BotFather.broadcast(Chat.ADMIN, faketrigCount + " faux teleporter(s) " + (faketrigCount == 1 ? "a" : "onts") + " été suprimé(s) ! [" + bm.getMap().getInfos() + "]");
+			if (fakeInterractable != 0)
+				BotFather.broadcast(Chat.ADMIN, fakeInterractable + " faux objet(s) intérractif(s) " + (fakeInterractable == 1 ? "a" : "onts") + " été suprimé(s) ! [" + bm.getMap().getInfos() + "]");
+			if (missingInterractable != 0)
+				BotFather.broadcast(Chat.ADMIN, missingInterractable + " objet(s) intérractif(s) " + (missingInterractable == 1 ? "a" : "onts") + " été ajouté(s) ! [" + bm.getMap().getInfos() + "]");
 			updateMap(bm, perso);
 		}
 	}

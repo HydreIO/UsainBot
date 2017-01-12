@@ -1,0 +1,2 @@
+includeBuild '../Tofumanchou'
+includeBuild '../dofus-protocol-1.29'
