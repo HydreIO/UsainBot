@@ -36,10 +36,10 @@ public class Mind extends Info {
 		states.values().stream().forEach(actions::accept);
 	}
 
-	public void moveToMap(BotMap destination) {
-		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId()) return;
+	public CompletableFuture<CompletableFuture<?>> moveToMap(BotMap destination) {
+		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId()) return CompletableFuture.completedFuture(null);
 		Navigator navigator = new Navigator(getPerso(), destination);
-		CompletableFuture.<Navigator>completedFuture(navigator).thenApply(Navigator::compilePath).thenCompose(getPerso().getNavRunner()::runNavigation).join();
+		return CompletableFuture.<Navigator>completedFuture(navigator).thenApply(Navigator::compilePath).thenCompose(getPerso().getNavRunner()::runNavigation);
 	}
 
 	public CompletableFuture<CompletableFuture<?>> connect(long time, TimeUnit unit) {

@@ -43,6 +43,10 @@ public class Navigator extends Info {
 		this.destination = destination;
 	}
 
+	public Navigator himSelf() {
+		return this;
+	}
+
 	/**
 	 * Search the path
 	 */
