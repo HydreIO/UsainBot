@@ -36,7 +36,7 @@ public class BotMapAdapter implements Adapter<BotMapImpl, BotMapDao> {
 					Set<Trigger> set = new HashSet<>(a);
 					set.addAll(b);
 					return set;
-				}).get().stream().map(TriggerAdapter.IDENTITY::adaptTo).toArray(TriggerDao[]::new), Compressor.compressCells(in.getMap().getProtocolCells()));
+				}).orElseGet(HashSet::new).stream().map(TriggerAdapter.IDENTITY::adaptTo).toArray(TriggerDao[]::new), Compressor.compressCells(in.getMap().getProtocolCells()));
 	}
 
 	public Map<TriggerType, Set<Trigger>> readTriggers(Set<Trigger> triggers) {

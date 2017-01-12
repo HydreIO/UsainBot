@@ -3,7 +3,6 @@ package fr.aresrpg.eratz.domain.ia.navigation;
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
-import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.dofus.util.Pathfinding.PathValidator;
@@ -17,7 +16,7 @@ import fr.aresrpg.eratz.domain.util.exception.PathNotFoundException;
 import fr.aresrpg.eratz.domain.util.functionnal.PathContext;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
-import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
 import java.util.*;
@@ -48,6 +47,8 @@ public class Navigator extends Info {
 	 * Search the path
 	 */
 	public Navigator compilePath() {
+		path.clear();
+		LOGGER.success("CALCUL DU PATH");
 		ManchouMap mMap = getPerso().getPerso().getMap();
 		BotMap current = MapsManager.getOrCreateMap(mMap);
 		BiPredicate<PotionType, BotNode> usePopo = (type, node) -> {
@@ -69,6 +70,7 @@ public class Navigator extends Info {
 			compilPath.remove(0);
 			compilPath.forEach(path::add);
 		}
+		LOGGER.success("PATH CALCULÉ " + path);
 		return this;
 	}
 
@@ -87,6 +89,7 @@ public class Navigator extends Info {
 	public Navigator runToNext() {
 		TeleporterTrigger next = path.peek();
 		ManchouMap map = getPerso().getPerso().getMap();
+		LOGGER.success("RUN TO NEXT " + next);
 		switch (next.getTeleportType()) {
 			case ZAAP:
 				return runZaap(next, map);
@@ -139,42 +142,28 @@ public class Navigator extends Info {
 	}
 
 	private Navigator runZaap(TeleporterTrigger next, ManchouMap map) {
-		int validCellAround = getValidCellAround(next.getCellId(), map);
-		LOGGER.warning("WANT TO RUN ZAAP " + validCellAround);
-		List<Node> template = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), validCellAround, map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
+		List<Node> template = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), next.getCellId(), map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
 				PathValidator.alwaysTrue());
-		List<Node> real = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), validCellAround, map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
+		List<Node> real = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), next.getCellId(), map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
 				Validators.avoidingMobs(map));
 		if (template == null) throw new PathNotFoundException(PathContext.empty());
 		if (real == null) throw new MobOnPathException();
 		getPerso().getUtilities().setNextMapId(next.getDest().getMapId());
-		getPerso().getPerso().move(real, true);
+		Executors.SCHEDULED.schedule(() -> getPerso().getPerso().useZaap(next.getCellId(), Zaap.getWithMap(next.getDest().getMapId())), getPerso().getPerso().move(real, true), TimeUnit.MILLISECONDS);
 		return this;
 	}
 
 	private Navigator runZaapi(TeleporterTrigger next, ManchouMap map) {
-		int validCellAround = getValidCellAround(next.getCellId(), map);
-		LOGGER.warning("WANT TO RUN ZAAPI " + validCellAround);
-		List<Node> template = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), validCellAround, map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
+		List<Node> template = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), next.getCellId(), map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
 				PathValidator.alwaysTrue());
-		List<Node> real = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), validCellAround, map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
+		List<Node> real = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), next.getCellId(), map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
 				Validators.avoidingMobs(map));
 		if (template == null) throw new PathNotFoundException(PathContext.empty());
 		if (real == null) throw new MobOnPathException();
 		getPerso().getUtilities().setNextMapId(next.getDest().getMapId());
-		getPerso().getPerso().move(real, true);
+		Executors.SCHEDULED.schedule(() -> getPerso().getPerso().useZaapi(next.getCellId(), Zaapi.getWithMap(next.getDest().getMapId())), getPerso().getPerso().move(real, true),
+				TimeUnit.MILLISECONDS);
 		return this;
-	}
-
-	private int getValidCellAround(int origin, ManchouMap map) {
-		int x = Maps.getXRotated(origin, map.getWidth(), map.getHeight());
-		int y = Maps.getYRotated(origin, map.getWidth(), map.getHeight());
-		Node[] nb = Pathfinding.getNeighborsWithoutDiagonals(new Node(x, y));
-		for (Node n : nb) {
-			ManchouCell cell = map.getCells()[Maps.getIdRotated(x, y, map.getWidth(), map.getHeight())];
-			if (cell.isWalkeable()) return cell.getId();
-		}
-		throw new NullPointerException("Unable to get a cell around the cell " + origin + " on " + map.getInfos());
 	}
 
 	@Override

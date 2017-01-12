@@ -1,16 +1,16 @@
 package fr.aresrpg.eratz.domain.data.map.trigger;
 
-import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
-
 import fr.aresrpg.commons.domain.database.Filter;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.map.Destination;
+import fr.aresrpg.eratz.infra.map.BotMapImpl;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger.TeleportType;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -50,7 +50,7 @@ public class TriggerSniffer {
 	public void complete(Destination dest) {
 		BotMap map = MapsManager.getMap(currentMapId);
 		Set<Trigger> triggers = map.getTriggers(TriggerType.TELEPORT);
-		LOGGER.warning("trrg = " + triggers);
+		if (triggers == null) ((BotMapImpl) map).getTriggers().put(TriggerType.TELEPORT, triggers = new HashSet<>());
 		for (Trigger t : triggers)
 			if (t.getCellId() == currentCellId) {
 				if (!isValid((TeleporterTrigger) t, dest)) updateTrigger((TeleporterTrigger) t, map);

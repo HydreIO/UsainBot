@@ -9,7 +9,7 @@ import fr.aresrpg.eratz.domain.util.functionnal.IntMapSupplier;
 import fr.aresrpg.eratz.infra.map.DestinationImpl;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger.TeleportType;
-import fr.aresrpg.tofumanchou.domain.data.enums.PotionType;
+import fr.aresrpg.tofumanchou.domain.data.enums.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -46,7 +46,7 @@ public class PathCompiler {
 		BotMap dest = MapsManager.getMap(destMap);
 		if (origin == null) throw new MapNotDiscoveredException(originMap);
 		if (dest == null) throw new MapNotDiscoveredException(destMap);
-		BotNode firstNode = new BotNode(origin.getMap().getX(), origin.getMap().getY(), originMap, new TeleporterTrigger(-1, TeleportType.MAP_TP, new DestinationImpl(origin.getMapId(), originCell))); // on s'en fou de la premiere car elle sera exclu du path
+		BotNode firstNode = new BotNode(origin.getMap().getX(), origin.getMap().getY(), 0, new TeleporterTrigger(-1, TeleportType.MAP_TP, new DestinationImpl(origin.getMapId(), originCell))); // on s'en fou de la premiere car elle sera exclu du path
 		int xto = dest.getMap().getX();
 		int yto = dest.getMap().getY();
 		CellPathFinder defaultFinder = CellPathFinder.defaultFinder(Pathfinding::getNeighbors);
@@ -54,7 +54,14 @@ public class PathCompiler {
 		List<BotNode> path = Pathfinding.getPath(firstNode, xto, yto, nd -> nd.getId() == destMap, Validators.insideDofusMap(), neighbors);
 		Objects.requireNonNull(path,
 				"The map is unreachable ! You need to discover a path at least one time before using it automatically\n origin:" + originCell + ", originMap:" + originMap + ", destMap:" + destMap);
-		return path.stream().map(n -> n.getTrigger()).collect(Collectors.toList());
+		return path.stream().map(n -> {
+			TeleporterTrigger trigger = n.getTrigger();
+			if (trigger.getTeleportType() == TeleportType.ZAAP)
+				trigger.setDest(new DestinationImpl(n.getId(), Zaap.getWithMap(n.getId()).findCellId(MapsManager.getMap(n.getId()).getMap().getCells())));
+			if (trigger.getTeleportType() == TeleportType.ZAAPI)
+				trigger.setDest(new DestinationImpl(n.getId(), Zaapi.getWithMap(n.getId()).findCellId(MapsManager.getMap(n.getId()).getMap().getCells())));
+			return trigger;
+		}).collect(Collectors.toList());
 	}
 
 }

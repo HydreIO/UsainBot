@@ -18,6 +18,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 sourceSets {
+	main { java { srcDirs 'src/ignored/java' } }
 	main { java { srcDirs 'src/main/java' } }
 }
 
@@ -50,7 +51,7 @@ repositories {
 }
 
 dependencies {
-export ('fr.aresrpg.tofumanchou:Tofumanchou:+') {changing=true}
+export ('fr.aresrpg.tofumanchou:Tofumanchou:+'){changing=true}
 }
 
 

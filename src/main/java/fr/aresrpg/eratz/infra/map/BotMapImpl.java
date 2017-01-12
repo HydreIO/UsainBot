@@ -20,7 +20,6 @@ public class BotMapImpl implements BotMap {
 	private ManchouMap map;
 
 	public BotMapImpl(int mapId, long time, Map<TriggerType, Set<Trigger>> triggers, DofusMap map) {
-		fillTriggers();
 		this.mapId = mapId;
 		this.time = time;
 		this.triggers = triggers;
@@ -28,14 +27,13 @@ public class BotMapImpl implements BotMap {
 	}
 
 	public BotMapImpl(int mapId, long time, Map<TriggerType, Set<Trigger>> triggers, ManchouMap map) {
-		fillTriggers();
 		this.mapId = mapId;
 		this.time = time;
 		this.triggers = triggers;
 		this.map = map;
 	}
 
-	void fillTriggers() {
+	public void fillTriggers() {
 		for (TriggerType t : TriggerType.values())
 			triggers.put(t, new HashSet<>());
 	}

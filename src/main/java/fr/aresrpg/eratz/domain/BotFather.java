@@ -102,7 +102,7 @@ public class BotFather implements ManchouPlugin {
 	// goto 10356 marine-lpn eratz
 	// goto 10215 bratva-nazar henual
 	// goto 21,-30 bratva-nazar henual
-	// crash party bratva-nazar henual Ephetal
+	// crash party bratva-nazar henual Ethylind
 	// account connect bratva-nazar henual
 	@Override
 	public void onEnable() {

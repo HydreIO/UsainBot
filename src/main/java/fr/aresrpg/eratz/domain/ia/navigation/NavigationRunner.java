@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.ia.navigation;
 
+import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
+
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
@@ -25,6 +27,7 @@ public class NavigationRunner extends Info {
 	}
 
 	public CompletableFuture<CompletableFuture<?>> runNavigation(Navigator navigator) {
+		LOGGER.success("RUN NAV finished=" + navigator.isFinished());
 		if (navigator.isFinished()) return CompletableFuture.completedFuture(null);
 		CompletableFuture<CompletableFuture<?>> actions = new CompletableFuture<>();
 		getPerso().getMind().publishState(MindState.MOVEMENT, interrupt -> {
@@ -36,7 +39,7 @@ public class NavigationRunner extends Info {
 									.thenApply(cf -> navigator)
 									.thenCompose(this::runNavigation).join());
 					break;
-				case FIGHT_JOIN: // TODO mais flemme
+				case FIGHT_JOIN: // TODO
 					break;
 				case FULL_POD:
 					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator).thenCompose(nav -> {
@@ -48,6 +51,7 @@ public class NavigationRunner extends Info {
 					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator).thenApply(Navigator::compilePath).thenCompose(this::runNavigation).join());
 					break;
 				case MOVED:
+					LOGGER.success("ACCEPT moved");
 					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator).thenApply(Navigator::notifyMoved).thenCompose(this::runNavigation).join());
 					break;
 			}

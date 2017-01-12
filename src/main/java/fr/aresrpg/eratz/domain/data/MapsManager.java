@@ -10,11 +10,14 @@ import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.map.trigger.Trigger;
 import fr.aresrpg.eratz.domain.data.map.trigger.TriggerType;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
+import fr.aresrpg.eratz.domain.ia.Interrupt;
 import fr.aresrpg.eratz.domain.util.PercentPrinter;
 import fr.aresrpg.eratz.infra.map.BotMapImpl;
 import fr.aresrpg.eratz.infra.map.adapter.BotMapAdapter;
 import fr.aresrpg.eratz.infra.map.dao.BotMapDao;
 import fr.aresrpg.eratz.infra.map.trigger.InterractableTrigger;
+import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
+import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger.TeleportType;
 import fr.aresrpg.tofumanchou.domain.Manchou;
 import fr.aresrpg.tofumanchou.domain.util.BenchTime;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
@@ -65,7 +68,8 @@ public class MapsManager {
 	}
 
 	private BotMap createAndRegisterMap(ManchouMap map) {
-		BotMap bm = new BotMapImpl(map.getMapId(), map.getDate(), new HashMap<>(), map);
+		BotMapImpl bm = new BotMapImpl(map.getMapId(), map.getDate(), new HashMap<>(), map);
+		bm.fillTriggers();
 		mapsById.put(map.getMapid(), bm);
 		return bm;
 	}
@@ -87,25 +91,35 @@ public class MapsManager {
 		else if (map2.getBackgroundId() != map.getBackgroundId()) needUpdate = true;
 		Set<Trigger> triggers = bm.getTriggers(TriggerType.TELEPORT);
 		Set<Trigger> interractables = bm.getTriggers(TriggerType.INTERRACTABLE);
-		LOGGER.debug(interractables + "");
-		LOGGER.debug(((BotMapImpl) bm).getTriggers() + "");
+		LOGGER.debug("Interractables Trigs = " + interractables);
+		LOGGER.debug("Full trigs = " + ((BotMapImpl) bm).getTriggers());
 		int faketrigCount = 0;
 		int missingInterractable = 0;
 		int fakeInterractable = 0;
 		for (int i = 0; i < map.getCells().length; i++) {
 			ManchouCell cell1 = map.getCells()[i];
 			ManchouCell cell2 = map2.getCells()[i];
-			if (triggerExist(i, interractables) && !cell1.isInterractable()) {
+
+			boolean triggerExist = triggerExist(i, triggers);
+			boolean interExist = triggerExist(i, interractables);
+
+			if (interExist && !cell1.isInterractable()) {
 				interractables.remove(new InterractableTrigger(i));
 				fakeInterractable++;
 				needUpdate = true;
 			}
-			if (cell1.isInterractable() && !triggerExist(i, interractables)) {
-				interractables.add(new InterractableTrigger(i, cell1.getInterractableId()));
-				missingInterractable++;
-				needUpdate = true;
+			if (cell1.isInterractable()) {
+				if (!interExist) {
+					interractables.add(new InterractableTrigger(i, cell1.getInterractableId()));
+					missingInterractable++;
+					needUpdate = true;
+				}
+				if (!triggerExist) {
+					if (cell1.isZaap()) triggers.add(new TeleporterTrigger(i, TeleportType.ZAAP, null));
+					else if (cell1.isZaapi()) triggers.add(new TeleporterTrigger(i, TeleportType.ZAAPI, null));
+				}
 			}
-			if (triggerExist(i, triggers) && !cell1.isTeleporter() && !cell1.isZaapOrZaapi()) {
+			if (triggerExist && !cell1.isTeleporter() && !cell1.isZaapOrZaapi()) {
 				faketrigCount++;
 				removeTrigger(i, triggers);
 			}
@@ -113,14 +127,17 @@ public class MapsManager {
 		}
 		if (needUpdate) {
 			((BotMapImpl) bm).setMap(map);
-			if (faketrigCount != 0)
+			if (faketrigCount != 0) {
+				perso.getMind().forEachState(c -> c.accept(Interrupt.OUT_OF_PATH)); // On notify out_of_path car vu qu'on a sup des trigger il faut recalculer le chemin
 				BotFather.broadcast(Chat.ADMIN, faketrigCount + " faux teleporter(s) " + (faketrigCount == 1 ? "a" : "onts") + " été suprimé(s) ! [" + bm.getMap().getInfos() + "]");
+			}
 			if (fakeInterractable != 0)
 				BotFather.broadcast(Chat.ADMIN, fakeInterractable + " faux objet(s) intérractif(s) " + (fakeInterractable == 1 ? "a" : "onts") + " été suprimé(s) ! [" + bm.getMap().getInfos() + "]");
 			if (missingInterractable != 0)
 				BotFather.broadcast(Chat.ADMIN, missingInterractable + " objet(s) intérractif(s) " + (missingInterractable == 1 ? "a" : "onts") + " été ajouté(s) ! [" + bm.getMap().getInfos() + "]");
 			updateMap(bm, perso);
 		}
+		perso.getUtilities().setMapUpdated(true);
 	}
 
 	private static boolean triggerExist(int cellid, Set<Trigger> triggers) {

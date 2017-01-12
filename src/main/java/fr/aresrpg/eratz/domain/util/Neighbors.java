@@ -62,14 +62,18 @@ public class Neighbors {
 						continue;
 					case ZAAP:
 						nodes = ArrayUtils.concat(nodes,
-								IntStream.of(Zaap.getMapsIds()).filter(knowZaap).mapToObj(idToMap::get).filter(Objects::nonNull).map(m -> m.toNode(tp))
+								IntStream.of(Zaap.getMapsIds()).filter(i -> {
+									boolean know = knowZaap.test(i);
+									return know;
+								}).mapToObj(idToMap::get).filter(Objects::nonNull)
+										.map(m -> m.toZaapNode(tp.getCellId(), m.getMapId()))
 										.map(NodePricer.zaapPrice())
 										.toArray(BotNode[]::new));
 						continue;
 					case ZAAPI:
 						nodes = ArrayUtils.concat(nodes,
-								IntStream.of(Zaapi.getMapsIds(City.getWithY(map.getMap().getY()))).filter(knowZaap).mapToObj(idToMap::get).filter(Objects::nonNull)
-										.map(m -> m.toNode(tp))
+								IntStream.of(Zaapi.getMapsIds(City.getWithY(map.getMap().getY()))).mapToObj(idToMap::get).filter(Objects::nonNull)
+										.map(m -> m.toZaapiNode(tp.getCellId(), m.getMapId()))
 										.map(NodePricer.zaapiPrice())
 										.toArray(BotNode[]::new));
 						continue;

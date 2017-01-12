@@ -17,6 +17,7 @@ import fr.aresrpg.tofumanchou.domain.event.ClientCrashEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityMoveEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityPlayerJoinMapEvent;
 import fr.aresrpg.tofumanchou.domain.event.player.MapJoinEvent;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
@@ -51,7 +52,7 @@ public class MapsDataListener implements Listener {
 	public void chechMap(MapJoinEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null) return;
-		MapsManager.checkUpdate((ManchouMap) e.getMap(), perso);
+		Executors.FIXED.execute(() -> MapsManager.checkUpdate((ManchouMap) e.getMap(), perso));
 	}
 
 	@Subscribe
