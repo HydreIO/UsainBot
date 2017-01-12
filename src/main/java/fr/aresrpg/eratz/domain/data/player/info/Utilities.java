@@ -26,7 +26,6 @@ public class Utilities extends Info {
 	private Map<Integer, Integer> itemsToKeep = new HashMap<>();
 	private Set<Zaap> zaaps;
 	private int nextMapId; // used in navigator to inform of the next map
-	private boolean mapUpdated;
 
 	public Utilities(BotPerso perso) {
 		super(perso);
@@ -42,16 +41,6 @@ public class Utilities extends Info {
 	public boolean hasZaap(Zaap zaap) {
 		if (zaaps == null) return true; // si zaap non init on return true pour qu'il aille init
 		return zaaps.contains(zaap);
-	}
-
-	public void waitUntilMapUpdate() {
-		while (!mapUpdated)
-			Threads.uSleep(50, TimeUnit.MILLISECONDS);
-		mapUpdated = false;
-	}
-
-	public void setMapUpdated(boolean mapUpdated) {
-		this.mapUpdated = mapUpdated;
 	}
 
 	/**

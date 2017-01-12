@@ -42,15 +42,14 @@ public class MovingListener implements Listener {
 		subs.forEach(p -> p.getFirst().unsubscribe(p.getSecond()));
 	}
 
+	static int count = 0;
+
 	@Subscribe
 	public void onMap(EntityPlayerJoinMapEvent e) {
-		LOGGER.success("MOVED");
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || e.getPlayer().getUUID() != perso.getPerso().getUUID()) return;
-		LOGGER.success("WAIT UNTIL");
-		perso.getUtilities().waitUntilMapUpdate();
-		LOGGER.success("WAITED");
 		perso.getMind().forEachState(c -> c.accept(perso.getUtilities().isOnPath() ? Interrupt.MOVED : Interrupt.OUT_OF_PATH));
+		LOGGER.success("Event received handled = " + (++count));
 	}
 
 	@Subscribe

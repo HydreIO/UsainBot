@@ -137,7 +137,6 @@ public class MapsManager {
 				BotFather.broadcast(Chat.ADMIN, missingInterractable + " objet(s) intérractif(s) " + (missingInterractable == 1 ? "a" : "onts") + " été ajouté(s) ! [" + bm.getMap().getInfos() + "]");
 			updateMap(bm, perso);
 		}
-		perso.getUtilities().setMapUpdated(true);
 	}
 
 	private static boolean triggerExist(int cellid, Set<Trigger> triggers) {

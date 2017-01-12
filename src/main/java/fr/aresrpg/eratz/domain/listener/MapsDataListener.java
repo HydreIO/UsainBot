@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.listener;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.event.*;
 import fr.aresrpg.commons.domain.util.Pair;
 import fr.aresrpg.dofus.protocol.game.actions.GameMoveAction.PathFragment;
@@ -52,7 +53,7 @@ public class MapsDataListener implements Listener {
 	public void chechMap(MapJoinEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null) return;
-		Executors.FIXED.execute(() -> MapsManager.checkUpdate((ManchouMap) e.getMap(), perso));
+		Executors.FIXED.execute(Threads.threadContextSwitch("CheckingMap", () -> MapsManager.checkUpdate((ManchouMap) e.getMap(), perso)));
 	}
 
 	@Subscribe

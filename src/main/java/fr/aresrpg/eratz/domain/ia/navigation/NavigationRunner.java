@@ -51,7 +51,6 @@ public class NavigationRunner extends Info {
 					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator).thenApply(Navigator::compilePath).thenCompose(this::runNavigation).join());
 					break;
 				case MOVED:
-					LOGGER.success("ACCEPT moved");
 					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator).thenApply(Navigator::notifyMoved).thenCompose(this::runNavigation).join());
 					break;
 			}
