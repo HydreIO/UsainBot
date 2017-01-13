@@ -4,8 +4,8 @@ import fr.aresrpg.commons.domain.functional.consumer.Consumer;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
-import fr.aresrpg.eratz.domain.ia.connection.Connector;
 import fr.aresrpg.eratz.domain.ia.navigation.Navigator;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.*;
 
@@ -36,15 +36,11 @@ public class Mind extends Info {
 		states.values().stream().forEach(actions::accept);
 	}
 
-	public CompletableFuture<CompletableFuture<?>> moveToMap(BotMap destination) {
-		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId()) return CompletableFuture.completedFuture(null);
-		Navigator navigator = new Navigator(getPerso(), destination);
-		return CompletableFuture.<Navigator>completedFuture(navigator).thenApply(Navigator::compilePath).thenCompose(getPerso().getNavRunner()::runNavigation);
-	}
-
-	public CompletableFuture<CompletableFuture<?>> connect(long time, TimeUnit unit) {
-		Connector con = new Connector(getPerso(), time, unit);
-		return CompletableFuture.<Connector>completedFuture(con).thenCompose(getPerso().getConRunner()::runConnection);
+	public CompletableFuture<CompletableFuture<Navigator>> moveToMap(BotMap destination) {
+		CompletableFuture<CompletableFuture<Navigator>> promise = CompletableFuture.completedFuture(CompletableFuture.completedFuture(new Navigator(getPerso(), destination)));
+		if (getPerso().getPerso().getMap().getMapId() != destination.getMapId())
+			promise.thenAcceptAsync(c -> c.thenApply(Navigator::compilePath).thenCompose(getPerso().getNavRunner()::runNavigation), Executors.FIXED);
+		return promise;
 	}
 
 	public static enum MindState {

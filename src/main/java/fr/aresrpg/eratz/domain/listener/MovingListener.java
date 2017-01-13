@@ -1,7 +1,5 @@
 package fr.aresrpg.eratz.domain.listener;
 
-import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
-
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.event.*;
 import fr.aresrpg.commons.domain.util.Pair;
@@ -49,7 +47,6 @@ public class MovingListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || e.getPlayer().getUUID() != perso.getPerso().getUUID()) return;
 		perso.getMind().forEachState(c -> c.accept(perso.getUtilities().isOnPath() ? Interrupt.MOVED : Interrupt.OUT_OF_PATH));
-		LOGGER.success("Event received handled = " + (++count));
 	}
 
 	@Subscribe
@@ -69,6 +66,7 @@ public class MovingListener implements Listener {
 	public void onZaap(ZaapGuiOpenEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null) return;
-		if (perso.getUtilities().getZaaps() == null) perso.getUtilities().setZaaps(Arrays.stream(e.getWaypoints()).map(w -> Zaap.getWithMap(w.getId())).collect(Collectors.toSet()));
+		// si jamais il n'a pas de kama il ne va pas réouvrir le gui donc il ne va pas reset ses zaap en boucle
+		perso.getUtilities().setZaaps(Arrays.stream(e.getWaypoints()).map(w -> Zaap.getWithMap(w.getId())).collect(Collectors.toSet()));
 	}
 }

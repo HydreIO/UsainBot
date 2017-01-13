@@ -75,20 +75,22 @@ public class MapsDataListener implements Listener {
 		if (e.getClient().getPerso().getUUID() != e.getPlayer().getUUID()) return;
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null) return;
-		BotMap map = MapsManager.getOrCreateMap(perso.getPerso().getMap());
-		Set<Trigger> triggers = map.getTriggers(TriggerType.TELEPORT);
-		for (ManchouCell c : map.getMap().getCells()) {
-			if (!c.isTeleporter() || triggerExist(c.getId(), triggers)) continue;
-			GameCellUpdatePacket pkt = new GameCellUpdatePacket();
-			Cell origin = c.serialize();
-			Cell clone = origin.clone();
-			clone.setLayerObject2Num(1202);
-			pkt.addCell(clone, origin);
-			perso.sendPacketToClient(pkt);
-		}
-		TriggerSniffer sniffer = sniffers.get(perso);
-		if (sniffer == null) return;
-		sniffer.complete(new DestinationImpl(perso.getPerso().getMap().getMapId(), perso.getPerso().getCellId()));
+		Executors.FIXED.execute(() -> {
+			BotMap map = MapsManager.getOrCreateMap(perso.getPerso().getMap());
+			Set<Trigger> triggers = map.getTriggers(TriggerType.TELEPORT);
+			for (ManchouCell c : map.getMap().getCells()) {
+				if (!c.isTeleporter() || triggerExist(c.getId(), triggers)) continue;
+				GameCellUpdatePacket pkt = new GameCellUpdatePacket();
+				Cell origin = c.serialize();
+				Cell clone = origin.clone();
+				clone.setLayerObject2Num(1202);
+				pkt.addCell(clone, origin);
+				perso.sendPacketToClient(pkt);
+			}
+			TriggerSniffer sniffer = sniffers.get(perso);
+			if (sniffer == null) return;
+			sniffer.complete(new DestinationImpl(perso.getPerso().getMap().getMapId(), perso.getPerso().getCellId()));
+		});
 	}
 
 	private boolean triggerExist(int cellid, Set<Trigger> triggers) {

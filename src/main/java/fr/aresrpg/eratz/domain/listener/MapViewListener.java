@@ -102,28 +102,28 @@ public class MapViewListener implements Listener {
 	public void onPlayerAdd(EntityPlayerJoinMapEvent e) {
 		BotPerso botPerso = get(e.getClient());
 		if (botPerso == null) return;
-		botPerso.getView().addEntity((int) e.getPlayer().getUUID(), e.getPlayer().getCellId());
+		Executors.FIXED.execute(() -> botPerso.getView().addEntity((int) e.getPlayer().getUUID(), e.getPlayer().getCellId()));
 	}
 
 	@Subscribe
 	public void onMobAdd(MonsterGroupSpawnEvent e) {
 		BotPerso botPerso = get(e.getClient());
 		if (botPerso == null) return;
-		botPerso.getView().addMob((int) e.getGroup().getUUID(), e.getGroup().getCellId());
+		Executors.FIXED.execute(() -> botPerso.getView().addMob((int) e.getGroup().getUUID(), e.getGroup().getCellId()));
 	}
 
 	@Subscribe
 	public void onMobAdd(MonsterJoinMapEvent e) {
 		BotPerso botPerso = get(e.getClient());
 		if (botPerso == null) return;
-		botPerso.getView().addMob((int) e.getMob().getUUID(), e.getMob().getCellId());
+		Executors.FIXED.execute(() -> botPerso.getView().addMob((int) e.getMob().getUUID(), e.getMob().getCellId()));
 	}
 
 	@Subscribe
 	public void onNpcAdd(NpcJoinMapEvent e) {
 		BotPerso botPerso = get(e.getClient());
 		if (botPerso == null) return;
-		botPerso.getView().addNpc((int) e.getNpc().getUUID(), e.getNpc().getCellId());
+		Executors.FIXED.execute(() -> botPerso.getView().addNpc((int) e.getNpc().getUUID(), e.getNpc().getCellId()));
 	}
 
 	@Subscribe
