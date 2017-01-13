@@ -40,6 +40,7 @@ public class GotoCommand implements Command {
 			BotPerso bp = BotFather.getPerso(perso);
 			LOGGER.info("Going to " + map.getMap().getInfos());
 			bp.getMind().moveToMap(map).thenRun(() -> BotFather.broadcast(Chat.ADMIN, perso.getPseudo() + " est arrivé à destination ! " + map.getMap().getInfos()));
+			LOGGER.severe("started");
 			return;
 		}
 		LOGGER.error("Usage: goto <mapid> <pseudo> <server>");

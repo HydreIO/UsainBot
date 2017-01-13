@@ -1,7 +1,5 @@
 package fr.aresrpg.eratz.domain.ia.navigation;
 
-import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
-
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
@@ -27,44 +25,32 @@ public class NavigationRunner extends Info {
 	public void shutdown() {
 	}
 
-	public CompletableFuture<CompletableFuture<?>> runNavigation(Navigator navigator) {
-		LOGGER.success("RUN NAV finished=" + navigator.isFinished());
-		if (navigator.isFinished()) return CompletableFuture.completedFuture(null);
-		CompletableFuture<CompletableFuture<?>> actions = new CompletableFuture<>();
+	public void runNavigation(Navigator navigator, CompletableFuture<Navigator> promise) {
 		getPerso().getMind().publishState(MindState.MOVEMENT, interrupt -> {
 			switch (interrupt) {
 				case DISCONNECT:
-					actions.complete(
-							CompletableFuture.<Connector>completedFuture(new Connector(getPerso(), Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS)));
-					actions.thenAcceptAsync(c -> {
-						((CompletableFuture<Connector>) c).thenCompose(getPerso().getConRunner()::runConnection)
-								.thenApply(cf -> navigator)
-								.thenCompose(this::runNavigation);
-					}, Executors.FIXED);
-
+					Connector connector = new Connector(getPerso(), Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS);
+					CompletableFuture<Connector> conPromise = new CompletableFuture<>();
+					getPerso().getConRunner().runConnection(connector, conPromise);
+					conPromise.thenRunAsync(() -> runNavigation(navigator, promise), Executors.FIXED);
 					break;
 				case FIGHT_JOIN: // TODO
 					break;
-				case FULL_POD:
-					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator));
-					actions.thenComposeAsync(nav -> {
-						getPerso().getUtilities().destroyHeaviestRessource();
-						return runNavigation(navigator);
-					}, Executors.FIXED);
-					break;
-				case OUT_OF_PATH:
-					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator));
-					actions.thenAcceptAsync(c -> ((CompletableFuture<Navigator>) c).thenApply(Navigator::compilePath).thenCompose(this::runNavigation), Executors.FIXED);
+				case OVER_POD:
+					getPerso().getUtilities().destroyHeaviestRessource();
+					Executors.FIXED.execute(() -> runNavigation(navigator, promise));
 					break;
 				case MOVED:
-					actions.complete(CompletableFuture.<Navigator>completedFuture(navigator));
-					actions.thenAcceptAsync(c -> ((CompletableFuture<Navigator>) c).thenApply(Navigator::notifyMoved).thenCompose(this::runNavigation), Executors.FIXED);
-					break;
+					navigator.notifyMoved();
+					if (navigator.isFinished()) {
+						navigator.resetPersoPath();
+						promise.complete(navigator);
+					} else Executors.FIXED.execute(() -> runNavigation(navigator, promise));
 			}
 			getPerso().getMind().getStates().remove(MindState.MOVEMENT);
 		});
+		if (!getPerso().getUtilities().isOnPath()) navigator.compilePath();
 		navigator.runToNext();
-		return actions;
 	}
 
 }

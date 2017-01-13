@@ -3,11 +3,16 @@ package fr.aresrpg.eratz.domain.listener;
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.event.*;
 import fr.aresrpg.commons.domain.util.Pair;
+import fr.aresrpg.dofus.structures.InfosMessage;
+import fr.aresrpg.dofus.structures.InfosMsgType;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.Interrupt;
 import fr.aresrpg.tofumanchou.domain.data.enums.Zaap;
+import fr.aresrpg.tofumanchou.domain.event.aproach.InfoMessageEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityPlayerJoinMapEvent;
+import fr.aresrpg.tofumanchou.domain.event.item.PodsUpdateEvent;
+import fr.aresrpg.tofumanchou.domain.event.map.FrameUpdateEvent;
 import fr.aresrpg.tofumanchou.domain.event.player.ZaapGuiOpenEvent;
 import fr.aresrpg.tofumanchou.domain.event.player.ZaapUseErrorEvent;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
@@ -20,12 +25,12 @@ import java.util.stream.Collectors;
  * 
  * @since
  */
-public class MovingListener implements Listener {
+public class IaListener implements Listener {
 
-	private static final MovingListener instance = new MovingListener();
+	private static final IaListener instance = new IaListener();
 	private static List<Pair<EventBus, Subscriber>> subs = new ArrayList<>();
 
-	private MovingListener() {
+	private IaListener() {
 	}
 
 	public static void register() {
@@ -46,7 +51,7 @@ public class MovingListener implements Listener {
 	public void onMap(EntityPlayerJoinMapEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || e.getPlayer().getUUID() != perso.getPerso().getUUID()) return;
-		perso.getMind().forEachState(c -> c.accept(perso.getUtilities().isOnPath() ? Interrupt.MOVED : Interrupt.OUT_OF_PATH));
+		perso.getMind().accept(Interrupt.MOVED);
 	}
 
 	@Subscribe
@@ -58,7 +63,7 @@ public class MovingListener implements Listener {
 		Executors.SCHEDULED.schedule(() -> {
 			perso.getPerso().leaveZaap();
 			Threads.uSleep(500, TimeUnit.MILLISECONDS);
-			perso.getMind().forEachState(c -> c.accept(Interrupt.OUT_OF_PATH)); // on vient d'enregistrer les zaap donc on peut recalculer le path
+			perso.getMind().accept(Interrupt.MOVED); // on vient d'enregistrer les zaap donc on peut sortir (comme il n'est pas sur la bonne map le path sera recalculé)
 		}, 500, TimeUnit.MILLISECONDS);
 	}
 
@@ -68,5 +73,28 @@ public class MovingListener implements Listener {
 		if (perso == null) return;
 		// si jamais il n'a pas de kama il ne va pas réouvrir le gui donc il ne va pas reset ses zaap en boucle
 		perso.getUtilities().setZaaps(Arrays.stream(e.getWaypoints()).map(w -> Zaap.getWithMap(w.getId())).collect(Collectors.toSet()));
+	}
+
+	@Subscribe
+	public void onPod(PodsUpdateEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso == null || perso.getUtilities().getPodsPercent() < 95) return;
+		perso.getMind().accept(Interrupt.FULL_POD);
+	}
+
+	@Subscribe
+	public void podBlocked(InfoMessageEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso == null) return;
+		if ((e.getType() == InfosMsgType.ERROR && InfosMessage.TROP_CHARGE_.getId() == e.getMessageId())
+				|| (e.getType() == InfosMsgType.INFOS && InfosMessage.RECOLTE_LOST_FULL_POD.getId() == e.getMessageId())) {
+			perso.getMind().accept(Interrupt.OVER_POD);
+		}
+	}
+
+	@Subscribe
+	public void onFrame(final FrameUpdateEvent e) {
+		final BotPerso perso = BotFather.getPerso(e.getClient());
+		if (e.getCell().getId() == perso.getUtilities().getCurrentHarvest() && e.getFrame() == 3) perso.getMind().accept(Interrupt.RESSOURCE_HARVESTED);
 	}
 }

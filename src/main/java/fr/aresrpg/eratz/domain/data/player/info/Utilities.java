@@ -4,13 +4,17 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.log.AnsiColors.AnsiColor;
+import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
 import fr.aresrpg.dofus.protocol.item.client.ItemDestroyPacket;
+import fr.aresrpg.dofus.structures.Skills;
+import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.util.UtilFunc;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
 import fr.aresrpg.tofumanchou.domain.data.item.Item;
 import fr.aresrpg.tofumanchou.infra.data.ManchouItem;
+import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -25,12 +29,14 @@ public class Utilities extends Info {
 	private int kamasToKeep = 10_000;
 	private Map<Integer, Integer> itemsToKeep = new HashMap<>();
 	private Set<Zaap> zaaps;
-	private int nextMapId; // used in navigator to inform of the next map
+	private int nextMapId = -1; // used in navigator to inform of the next map
+	private int currentHarvest = -1; // used in harvesting to inform of the current harvested ressource
 
 	public Utilities(BotPerso perso) {
 		super(perso);
 		itemsToKeep.put(DofusItems.POTION_DE_CITE_BONTA, 20);
 		itemsToKeep.put(DofusItems.POTION_DE_RAPPEL, 20);
+		itemsToKeep.put(DofusItems.POTION_DE_CITE_BRAKMAR, 20);
 	}
 
 	@Override
@@ -51,20 +57,41 @@ public class Utilities extends Info {
 	}
 
 	/**
+	 * @return the currentHarvest
+	 */
+	public int getCurrentHarvest() {
+		return currentHarvest;
+	}
+
+	/**
+	 * @param currentHarvest
+	 *            the currentHarvest to set
+	 */
+	public void setCurrentHarvest(int currentHarvest) {
+		this.currentHarvest = currentHarvest;
+	}
+
+	public Skills getSkillFor(Interractable i) {
+		if (!ArrayUtils.contains(getPerso().getPerso().getJob().getType(), i.getRequiredJob())) return null;
+		for (Skills s : Skills.values())
+			if (s.getType() == i) return s;
+		return null;
+	}
+
+	/**
 	 * @param zaaps
 	 *            the zaaps to set
 	 */
 	public void setZaaps(Set<Zaap> zaaps) {
 		this.zaaps = zaaps;
-		LOGGER.success("ZAAPS INIT " + zaaps);
 	}
 
 	public int getKamasToKeep() {
 		return kamasToKeep;
 	}
 
-	public boolean isOnPath() {
-		return getPerso().getPerso().getMap().getMapId() == getNextMapId();
+	public boolean isOnPath() { // si -1 alors aucun path
+		return nextMapId == -1 || getPerso().getPerso().getMap().getMapId() == nextMapId;
 	}
 
 	public int getNextMapId() {
@@ -103,6 +130,12 @@ public class Utilities extends Info {
 			LOGGER.debug("Destruction de x" + todestroy + " " + it.getName());
 			getPerso().sendPacketToServer(new ItemDestroyPacket(it.getUUID(), todestroy));
 		}
+	}
+
+	public void openBank() {
+		ManchouPerso p = getPerso().getPerso();
+		p.speakToNpc(-2);
+		p.npcTalkChoice(318, 259);
 	}
 
 	public Bank getNearestBank() {

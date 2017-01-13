@@ -6,8 +6,7 @@ import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.domain.Manchou;
 import fr.aresrpg.tofumanchou.domain.data.Account;
-import fr.aresrpg.tofumanchou.domain.event.BotDisconnectEvent;
-import fr.aresrpg.tofumanchou.domain.event.ClientCrashEvent;
+import fr.aresrpg.tofumanchou.domain.event.*;
 import fr.aresrpg.tofumanchou.domain.event.player.PersoSelectEvent;
 import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
@@ -46,6 +45,13 @@ public class ConnectionListener implements Listener {
 		Collection<BotPerso> values = BotFather.getInstance().getPersos().values();
 		for (BotPerso p : values)
 			if (p.getPerso().getAccount().equals(client)) p.setOnline(false);
+	}
+
+	@Subscribe
+	public void onAtk(PacketSpamEvent e) {
+		if (e.getCount() < 10) return;
+		BotFather.broadcastServerMsg("Overflow detected ! Mitigation..");
+		BotFather.broadcastServerMsg(e.getCount() + " of [" + e.getClazz().getSimpleName() + "] were dropped.");
 	}
 
 }

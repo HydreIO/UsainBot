@@ -10,7 +10,6 @@ import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.map.trigger.Trigger;
 import fr.aresrpg.eratz.domain.data.map.trigger.TriggerType;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
-import fr.aresrpg.eratz.domain.ia.Interrupt;
 import fr.aresrpg.eratz.domain.util.PercentPrinter;
 import fr.aresrpg.eratz.infra.map.BotMapImpl;
 import fr.aresrpg.eratz.infra.map.adapter.BotMapAdapter;
@@ -91,8 +90,6 @@ public class MapsManager {
 		else if (map2.getBackgroundId() != map.getBackgroundId()) needUpdate = true;
 		Set<Trigger> triggers = bm.getTriggers(TriggerType.TELEPORT);
 		Set<Trigger> interractables = bm.getTriggers(TriggerType.INTERRACTABLE);
-		LOGGER.debug("Interractables Trigs = " + interractables);
-		LOGGER.debug("Full trigs = " + ((BotMapImpl) bm).getTriggers());
 		int faketrigCount = 0;
 		int missingInterractable = 0;
 		int fakeInterractable = 0;
@@ -127,10 +124,8 @@ public class MapsManager {
 		}
 		if (needUpdate) {
 			((BotMapImpl) bm).setMap(map);
-			if (faketrigCount != 0) {
-				perso.getMind().forEachState(c -> c.accept(Interrupt.OUT_OF_PATH)); // On notify out_of_path car vu qu'on a sup des trigger il faut recalculer le chemin
+			if (faketrigCount != 0)
 				BotFather.broadcast(Chat.ADMIN, faketrigCount + " faux teleporter(s) " + (faketrigCount == 1 ? "a" : "onts") + " été suprimé(s) ! [" + bm.getMap().getInfos() + "]");
-			}
 			if (fakeInterractable != 0)
 				BotFather.broadcast(Chat.ADMIN, fakeInterractable + " faux objet(s) intérractif(s) " + (fakeInterractable == 1 ? "a" : "onts") + " été suprimé(s) ! [" + bm.getMap().getInfos() + "]");
 			if (missingInterractable != 0)
@@ -157,7 +152,7 @@ public class MapsManager {
 	}
 
 	private static void updateMap(BotMap map, BotPerso perso) {
-		BotFather.broadcast(Chat.ADMIN, perso.getPerso().getPseudo() + " a mis une map à jour [" + map.getMap().getInfos() + "]");
+		BotFather.broadcast(Chat.ADMIN, "Map updated [" + map.getMap().getInfos() + "]");
 		Executors.FIXED.execute(() -> DbAccessor.<BotMapDao>create(Manchou.getDatabase(), "maps", BotMapDao.class).get().putOrUpdate(Filter.eq("mapid", map.getMapId()),
 				BotMapAdapter.IDENTITY.adaptTo((BotMapImpl) map)));
 	}

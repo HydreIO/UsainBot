@@ -43,7 +43,8 @@ public class Navigator extends Info {
 		this.destination = destination;
 	}
 
-	public Navigator himSelf() {
+	public Navigator resetPersoPath() { // called at the end of a path
+		getPerso().getUtilities().setNextMapId(-1);
 		return this;
 	}
 
@@ -93,7 +94,6 @@ public class Navigator extends Info {
 	public Navigator runToNext() {
 		TeleporterTrigger next = path.peek();
 		ManchouMap map = getPerso().getPerso().getMap();
-		LOGGER.success("RUN TO NEXT " + next);
 		switch (next.getTeleportType()) {
 			case ZAAP:
 				return runZaap(next, map);

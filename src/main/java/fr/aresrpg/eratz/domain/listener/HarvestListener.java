@@ -46,37 +46,6 @@ public class HarvestListener implements Listener {
 		subs.forEach(p -> p.getFirst().unsubscribe(p.getSecond()));
 	}
 
-	@Subscribe
-	public void onPod(PodsUpdateEvent e) {
-		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso == null || perso.getUtilities().getPodsPercent() < 95) return;
-		//	perso.notifyNeedToGoBank();
-	}
-
-	@Subscribe
-	public void podBlocked(InfoMessageEvent e) {
-		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso == null) return;
-		if ((e.getType() == InfosMsgType.ERROR && InfosMessage.TROP_CHARGE_.getId() == e.getMessageId())
-				|| (e.getType() == InfosMsgType.INFOS && InfosMessage.RECOLTE_LOST_FULL_POD.getId() == e.getMessageId())) {
-			perso.getUtilities().destroyHeaviestRessource();
-			//	perso.notifyNeedToGoBank();
-		}
-	}
-
-	@Subscribe
-	public void onFrame(final FrameUpdateEvent e) {
-		final BotPerso perso = BotFather.getPerso(e.getClient());
-		//		final boolean finishedHarvest = e.getCell().getId() == st.currentRessource && e.getFrame() == 3;
-		final ManchouMap map = (ManchouMap) e.getClient().getPerso().getMap();
-		/*
-		 * if (st.goToBank) perso.goToBankMap();
-		 * else if (finishedHarvest && !st.goToBank && !harvestRessource(BotFather.getPerso(e.getClient()), (ManchouMap) e.getClient().getPerso().getMap(), st)) {
-		 * st.needToGo = null;
-		 * perso.goToNextMap(); // si il a finit d'harvest & qu'il ne doit pas aller a la banque et qu'il n'y a plus de ressources sur la map
-		 * }
-		 */
-	}
 
 	@Subscribe
 	public void onRessourceStartHarvest(final HarvestTimeReceiveEvent e) {

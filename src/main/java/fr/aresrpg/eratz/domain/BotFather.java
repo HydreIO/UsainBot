@@ -100,10 +100,11 @@ public class BotFather implements ManchouPlugin {
 	// bucheron henual bratva-nazar
 	// fight henual bratva-nazar
 	// goto 10356 marine-lpn eratz
-	// goto 5703 bratva-nazar henual
+	// goto 7549 bratva-nazar henual
 	// goto 21,-30 bratva-nazar henual
 	// crash party bratva-nazar henual Ethylind
-    // crash party bratva-nazar henual Stevity 
+	// crash party bratva-nazar henual Stevity 
+	// crash duel bratva-nazar henual 526645 
 	// account connect bratva-nazar henual
 	@Override
 	public void onEnable() {
@@ -126,7 +127,7 @@ public class BotFather implements ManchouPlugin {
 		MapViewListener.register();
 		//	FightListener.register();
 		MapsDataListener.register();
-		MovingListener.register();
+		IaListener.register();
 		MapsManager.init();
 		Manchou.registerCommand(new WhoamiCommand());
 		Manchou.registerCommand(new HastebinCommand());
@@ -163,7 +164,7 @@ public class BotFather implements ManchouPlugin {
 		instance.persos.values().forEach(perso -> {
 			if (perso.isOnline() && perso.getPerso().isMitm()) {
 				ChatMessageOkPacket pkt = new ChatMessageOkPacket();
-				pkt.setPseudo("BotFather");
+				pkt.setPseudo(" ");
 				pkt.setPlayerId(perso.getPerso().getUUID());
 				pkt.setChat(chat);
 				pkt.setMsg(msg);

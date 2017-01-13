@@ -5,7 +5,6 @@ import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
 import fr.aresrpg.eratz.domain.ia.navigation.Navigator;
-import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.*;
 
@@ -32,20 +31,28 @@ public class Mind extends Info {
 		return states;
 	}
 
-	public void forEachState(Consumer<Consumer<Interrupt>> actions) {
-		states.values().stream().forEach(actions::accept);
+	public void accept(Interrupt interrupt) {
+		states.values().stream().forEach(c -> c.accept(interrupt));
 	}
 
-	public CompletableFuture<CompletableFuture<Navigator>> moveToMap(BotMap destination) {
-		CompletableFuture<CompletableFuture<Navigator>> promise = CompletableFuture.completedFuture(CompletableFuture.completedFuture(new Navigator(getPerso(), destination)));
-		if (getPerso().getPerso().getMap().getMapId() != destination.getMapId())
-			promise.thenAcceptAsync(c -> c.thenApply(Navigator::compilePath).thenCompose(getPerso().getNavRunner()::runNavigation), Executors.FIXED);
+	/**
+	 * Return a CompletableFuture that is completed when the perso reach the destination map
+	 * 
+	 * @param destination
+	 *            the destination
+	 * @return the CompletableFuture
+	 */
+	public CompletableFuture<Navigator> moveToMap(BotMap destination) {
+		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId()) return CompletableFuture.completedFuture(new Navigator(getPerso(), destination));
+		CompletableFuture<Navigator> promise = new CompletableFuture<>();
+		getPerso().getNavRunner().runNavigation(new Navigator(getPerso(), destination).compilePath(), promise);
 		return promise;
 	}
 
 	public static enum MindState {
 		MOVEMENT,
 		LOGIN,
+		HARVEST,
 	}
 
 	@Override
