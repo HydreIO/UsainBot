@@ -13,20 +13,19 @@ public class BucheronBombuOlivioletPath extends Path {
 	protected void init() {
 		addRessource(Interractable.BOMBU);
 		addRessource(Interractable.OLIVIOLET);
-		addCoord(-10, -22);
-		addCoord(-9, -22);
-		addCoord(-8, -22);
-		addCoord(-8, -23);
-		addCoord(-8, -24);
-		addCoord(-8, -25);
-		addCoord(-8, -26);
-		addCoord(-8, -27);
-		addCoord(-8, -29);
-		addCoord(-8, -30);
-		addCoord(-8, -31);
-		addCoord(-8, -32);
-		addCoord(-9, -32);
-
+		addMap(3460);
+		addMap(3499);
+		addMap(3500);
+		addMap(3501);
+		addMap(3502);
+		addMap(3504);
+		addMap(3505);
+		addMap(3506);
+		addMap(3507);
+		addMap(3508);
+		addMap(3509);
+		addMap(3470);
+		addMap(3431);
 		/*
 		 * addCoord(-26, 13);
 		 * addCoord(-27, 15);

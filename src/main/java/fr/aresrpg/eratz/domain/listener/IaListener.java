@@ -5,16 +5,20 @@ import fr.aresrpg.commons.domain.event.*;
 import fr.aresrpg.commons.domain.util.Pair;
 import fr.aresrpg.dofus.structures.InfosMessage;
 import fr.aresrpg.dofus.structures.InfosMsgType;
+import fr.aresrpg.dofus.structures.server.ServerState;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.Interrupt;
 import fr.aresrpg.tofumanchou.domain.data.enums.Zaap;
+import fr.aresrpg.tofumanchou.domain.event.*;
 import fr.aresrpg.tofumanchou.domain.event.aproach.InfoMessageEvent;
+import fr.aresrpg.tofumanchou.domain.event.aproach.LoginErrorEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityPlayerJoinMapEvent;
+import fr.aresrpg.tofumanchou.domain.event.fight.FightJoinEvent;
 import fr.aresrpg.tofumanchou.domain.event.item.PodsUpdateEvent;
 import fr.aresrpg.tofumanchou.domain.event.map.FrameUpdateEvent;
-import fr.aresrpg.tofumanchou.domain.event.player.ZaapGuiOpenEvent;
-import fr.aresrpg.tofumanchou.domain.event.player.ZaapUseErrorEvent;
+import fr.aresrpg.tofumanchou.domain.event.map.HarvestTimeReceiveEvent;
+import fr.aresrpg.tofumanchou.domain.event.player.*;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.*;
@@ -52,6 +56,42 @@ public class IaListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || e.getPlayer().getUUID() != perso.getPerso().getUUID()) return;
 		perso.getMind().accept(Interrupt.MOVED);
+	}
+
+	@Subscribe
+	public void onDisconnect(BotDisconnectEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso != null) perso.getMind().accept(Interrupt.DISCONNECT);
+	}
+
+	@Subscribe
+	public void onCrash(ClientCrashEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso != null) perso.getMind().accept(Interrupt.DISCONNECT);
+	}
+
+	@Subscribe
+	public void onFight(FightJoinEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso != null) perso.getMind().accept(Interrupt.FIGHT_JOIN);
+	}
+
+	@Subscribe
+	public void onBan(LoginErrorEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso != null) perso.getMind().accept(Interrupt.LOGIN_ERROR);
+	}
+
+	@Subscribe
+	public void onServer(ServerStateEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso != null) perso.getMind().accept(e.getServer().getState() == ServerState.SAVING ? Interrupt.SAVE : Interrupt.CLOSED);
+	}
+
+	@Subscribe
+	public void onConnect(PersoSelectEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso != null) Executors.SCHEDULED.schedule(() -> perso.getMind().accept(Interrupt.CONNECTED), 5, TimeUnit.SECONDS);
 	}
 
 	@Subscribe
@@ -97,4 +137,11 @@ public class IaListener implements Listener {
 		final BotPerso perso = BotFather.getPerso(e.getClient());
 		if (e.getCell().getId() == perso.getUtilities().getCurrentHarvest() && e.getFrame() == 3) perso.getMind().accept(Interrupt.RESSOURCE_HARVESTED);
 	}
+
+	@Subscribe
+	public void onRessourceStartHarvest(final HarvestTimeReceiveEvent e) {
+		final BotPerso perso = BotFather.getPerso(e.getClient());
+		if (e.getCellId() == perso.getUtilities().getCurrentHarvest() && perso.getPerso().getUUID() != e.getPlayer().getUUID()) perso.getMind().accept(Interrupt.RESSOURCE_STEAL);
+	}
+
 }

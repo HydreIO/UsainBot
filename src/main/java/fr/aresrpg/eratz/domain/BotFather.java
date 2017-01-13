@@ -103,8 +103,8 @@ public class BotFather implements ManchouPlugin {
 	// goto 7549 bratva-nazar henual
 	// goto 21,-30 bratva-nazar henual
 	// crash party bratva-nazar henual Ethylind
-	// crash party bratva-nazar henual Stevity 
-	// crash duel bratva-nazar henual 526645 
+	// crash party bratva-nazar henual Roncillarbre 
+	// crash duel bratva-nazar henual 529361 
 	// account connect bratva-nazar henual
 	@Override
 	public void onEnable() {
@@ -134,6 +134,7 @@ public class BotFather implements ManchouPlugin {
 		Manchou.registerCommand(new AccountCommand());
 		Manchou.registerCommand(new GotoCommand());
 		Manchou.registerCommand(new CrashCommand());
+		Manchou.registerCommand(new BucheronCommand());
 	}
 
 	private void injectSyso() {

@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.ia.harvest;
 
+import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
+
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.eratz.domain.data.MapsManager;
@@ -24,16 +26,14 @@ import java.util.concurrent.TimeUnit;
  */
 public class HarvestRunner extends Info {
 
-	private final Path path;
+	private Path path;
 	private final Queue<Integer> allMaps = new LinkedList<>();
 
 	/**
 	 * @param perso
 	 */
-	public HarvestRunner(BotPerso perso, Paths path) {
+	public HarvestRunner(BotPerso perso) {
 		super(perso);
-		this.path = path.getPath();
-		refill();
 	}
 
 	void refill() {
@@ -45,15 +45,32 @@ public class HarvestRunner extends Info {
 
 	}
 
+	public void startHarvest(Paths path, CompletableFuture<Harvesting> promise) {
+		this.path = path.getPath();
+		refill();
+		runHarvest(new Harvesting(getPerso(), path.getPath().getRessources()), promise);
+	}
+
 	public void runHarvest(Harvesting harvesting, CompletableFuture<Harvesting> promise) {
+		if (allMaps.isEmpty()) refill();
+		if (!harvesting.harvest()) {
+			getPerso().getMind().moveToMap(MapsManager.getMap(allMaps.poll())).thenRunAsync(() -> {
+				Threads.uSleep(1, TimeUnit.SECONDS);
+				runHarvest(harvesting, promise);
+			}, Executors.FIXED);
+			return;
+		}
 		getPerso().getMind().publishState(MindState.HARVEST, interrupt -> {
+			LOGGER.debug("state " + interrupt);
 			switch (interrupt) {
 				case FIGHT_JOIN:
 					break;
 				case MOVED:
+					Executors.SCHEDULED.schedule(() -> runHarvest(harvesting, promise), 1, TimeUnit.SECONDS);
+					break;
 				case RESSOURCE_STEAL:
 				case RESSOURCE_HARVESTED:
-					Executors.FIXED.execute(() -> runHarvest(harvesting, promise));
+					Executors.SCHEDULED.schedule(() -> runHarvest(harvesting, promise), 100, TimeUnit.MILLISECONDS);
 					break;
 				case OVER_POD:
 					getPerso().getUtilities().destroyHeaviestRessource();
@@ -78,8 +95,6 @@ public class HarvestRunner extends Info {
 			}
 			getPerso().getMind().getStates().remove(MindState.HARVEST);
 		});
-		if (allMaps.isEmpty()) refill();
-		if (!harvesting.harvest()) getPerso().getMind().moveToMap(MapsManager.getMap(allMaps.poll()));
 	}
 
 }

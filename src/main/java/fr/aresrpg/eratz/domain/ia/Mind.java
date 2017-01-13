@@ -4,7 +4,9 @@ import fr.aresrpg.commons.domain.functional.consumer.Consumer;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
+import fr.aresrpg.eratz.domain.ia.harvest.Harvesting;
 import fr.aresrpg.eratz.domain.ia.navigation.Navigator;
+import fr.aresrpg.eratz.domain.ia.path.Paths;
 
 import java.util.concurrent.*;
 
@@ -46,6 +48,12 @@ public class Mind extends Info {
 		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId()) return CompletableFuture.completedFuture(new Navigator(getPerso(), destination));
 		CompletableFuture<Navigator> promise = new CompletableFuture<>();
 		getPerso().getNavRunner().runNavigation(new Navigator(getPerso(), destination).compilePath(), promise);
+		return promise;
+	}
+
+	public CompletableFuture<Harvesting> harvest(Paths path) {
+		CompletableFuture<Harvesting> promise = new CompletableFuture<>();
+		getPerso().getHarRunner().startHarvest(path, promise);
 		return promise;
 	}
 

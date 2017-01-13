@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.ia.navigation;
 
+import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
+
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
@@ -27,6 +29,7 @@ public class NavigationRunner extends Info {
 
 	public void runNavigation(Navigator navigator, CompletableFuture<Navigator> promise) {
 		getPerso().getMind().publishState(MindState.MOVEMENT, interrupt -> {
+			LOGGER.debug("state move " + interrupt);
 			switch (interrupt) {
 				case DISCONNECT:
 					Connector connector = new Connector(getPerso(), Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS);

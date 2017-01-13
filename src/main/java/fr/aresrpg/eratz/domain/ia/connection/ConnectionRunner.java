@@ -36,7 +36,6 @@ public class ConnectionRunner extends Info {
 					promise.complete(connector);
 					break;
 				case DISCONNECT:
-				case BANNED:
 				case SAVE:
 				case CLOSED:
 				case LOGIN_ERROR:
@@ -57,6 +56,7 @@ public class ConnectionRunner extends Info {
 					loginCount++;
 					connector.setTime(time);
 					connector.setUnit(unit);
+					getPerso().getPerso().disconnect();
 					Executors.FIXED.execute(() -> runConnection(connector, promise));
 					break;
 			}

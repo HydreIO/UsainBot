@@ -109,6 +109,7 @@ public class Utilities extends Info {
 	public int getPodsPercent() {
 		int curr = getPerso().getPerso().getPods();
 		int max = getPerso().getPerso().getMaxPods();
+		if (max == 0) return 0;
 		return 100 * curr / max;
 	}
 

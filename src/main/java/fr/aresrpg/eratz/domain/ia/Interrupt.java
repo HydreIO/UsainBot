@@ -22,7 +22,6 @@ public enum Interrupt {
 
 	MOVED,
 
-	BANNED,
 	LOGIN_ERROR,
 	SAVE,
 	CLOSED,

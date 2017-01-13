@@ -77,7 +77,9 @@ public class Harvesting extends Info {
 		int cellId = getPerso().getPerso().getCellId();
 		Node[] neighbors = Pathfinding.getNeighbors(new Node(c.getX(), c.getY()));
 		for (Node n : neighbors) {
-			List<Node> cellPath = Pathfinding.getCellPath(cellId, Maps.getIdRotated(n.getX(), n.getY(), map.getWidth(), map.getHeight()), map.getProtocolCells(), map.getWidth(), map.getHeight(),
+			ManchouCell manchouCell = map.getCells()[Maps.getIdRotated(n.getX(), n.getY(), map.getWidth(), map.getHeight())];
+			if (manchouCell.hasMobOn()) continue;
+			List<Node> cellPath = Pathfinding.getCellPath(cellId, manchouCell.getId(), map.getProtocolCells(), map.getWidth(), map.getHeight(),
 					Pathfinding::getNeighbors, Validators.avoidingMobs(map));
 			if (cellPath != null) return cellPath;
 		}
