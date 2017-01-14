@@ -19,7 +19,7 @@ public class Test extends Application {
 	private final int width = 15;
 	private final int height = 17;
 	private final int cellsW = 479;
-	private final int range = 12;
+	private final int range = 50;
 	private final int player = 92;
 	Cell[] cells = new Cell[cellsW];
 
@@ -48,10 +48,22 @@ public class Test extends Application {
 		cells[player] = new Cell(true, false);
 		cells[93] = new Cell(false, true);
 		cells[94] = new Cell(false, true);
+		cells[180] = new Cell(false, true);
+		cells[74] = new Cell(false, true);
+		cells[250] = new Cell(false, true);
+		cells[258] = new Cell(false, true);
+		cells[107] = new Cell(false, true);
+
 		int ox = Maps.getXRotated(player, width, height);
 		int oy = Maps.getYRotated(player, width, height);
 		castShadow(Maps.getXRotated(93, width, height), Maps.getYRotated(93, width, height), ox, oy);
 		castShadow(Maps.getXRotated(94, width, height), Maps.getYRotated(94, width, height), ox, oy);
+		castShadow(Maps.getXRotated(180, width, height), Maps.getYRotated(180, width, height), ox, oy);
+		castShadow(Maps.getXRotated(74, width, height), Maps.getYRotated(74, width, height), ox, oy);
+		castShadow(Maps.getXRotated(250, width, height), Maps.getYRotated(250, width, height), ox, oy);
+		castShadow(Maps.getXRotated(258, width, height), Maps.getYRotated(258, width, height), ox, oy);
+		castShadow(Maps.getXRotated(107, width, height), Maps.getYRotated(107, width, height), ox, oy);
+
 		Canvas canvas1 = new Canvas();
 		Canvas canvas2 = new Canvas();
 		canvas1.setWidth(1200);
@@ -182,7 +194,6 @@ public class Test extends Application {
 							ax = cx;
 							flag = true;
 						}
-
 						mirrorHide(cx, cy, ox, oy, flipX, flipY);
 					} else {
 						if (flag) {
@@ -223,7 +234,7 @@ public class Test extends Application {
 		if (x > height + width || y > height + width)
 			return null;
 		int id = Maps.getIdRotated(x, y, width, height);
-		if (Maps.isInMapRotated(x, y, width, height))
+		if (id > 0 && id < cellsW && Maps.isInMapRotated(x, y, width, height))
 			return cells[id];
 		else
 			return null;

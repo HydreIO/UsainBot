@@ -12,8 +12,7 @@ import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger.TeleportType;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
 
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.*;
 import java.util.stream.IntStream;
 
@@ -53,7 +52,8 @@ public class Neighbors {
 			if (triggers != null)
 				for (Trigger t : triggers) {
 				TeleporterTrigger tp = (TeleporterTrigger) t;
-				if (!pathPredicate.pathExist(n.getTrigger().getDest().getCellId(), t.getCellId(), map.getMap())) continue;
+				int cellid = tp.getTeleportType() == TeleportType.MAP_TP ? t.getCellId() : map.getMap().getCells()[t.getCellId()].getRandomNeighborCell(map.getMap(), false, new ArrayList<>());
+				if (cellid == -1 || !pathPredicate.pathExist(n.getTrigger().getDest().getCellId(), cellid, map.getMap())) continue;
 				switch (tp.getTeleportType()) {
 					case MAP_TP:
 						Destination dest = tp.getDest();

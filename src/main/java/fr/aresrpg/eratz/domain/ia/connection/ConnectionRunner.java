@@ -58,6 +58,8 @@ public class ConnectionRunner extends Info {
 					getPerso().getPerso().disconnect();
 					Executors.FIXED.execute(() -> runConnection(connector, promise));
 					break;
+				default:
+					return; // avoid reset if non handled
 			}
 			getPerso().getMind().resetState();
 		});

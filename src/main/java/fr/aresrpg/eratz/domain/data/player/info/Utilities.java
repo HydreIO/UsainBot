@@ -113,14 +113,15 @@ public class Utilities extends Info {
 		if (max == 0) return 0;
 		return 100 * curr / max;
 	}
-	
+
 	public void useRessourceBags() {
-		getPerso().getPerso().getInventory().getItemsByCategory(ItemCategory.RESOURCEBAG).forEach(i->{
+		getPerso().getPerso().getInventory().getItemsByCategory(ItemCategory.RESOURCEBAG).forEach(i -> {
 			getPerso().getPerso().useRessourceBags();
 		});
 	}
 
 	public void destroyHeaviestRessource() {
+		useRessourceBags();
 		Item it = getPerso().getPerso().getInventory().getHeaviestItem();
 		if (it == null) throw new NullPointerException("La ressource la plus lourde est introuvable !");
 		int maxp = getPerso().getPerso().getMaxPods();
@@ -135,12 +136,14 @@ public class Utilities extends Info {
 			getPerso().sendPacketToServer(new ItemDestroyPacket(it.getUUID(), it.getAmount()));
 		} else {
 			int todestroy = over / poditem + (over % poditem == 0 ? 0 : 1);
+			if (todestroy < 0) return;
 			LOGGER.debug("Destruction de x" + todestroy + " " + it.getName());
 			getPerso().sendPacketToServer(new ItemDestroyPacket(it.getUUID(), todestroy));
 		}
 	}
 
 	public void openBank() {
+		Threads.uSleep(2, TimeUnit.SECONDS);
 		ManchouPerso p = getPerso().getPerso();
 		p.speakToNpc(-2);
 		p.npcTalkChoice(318, 259);
@@ -160,21 +163,26 @@ public class Utilities extends Info {
 	}
 
 	public void depositBank() {
+		Threads.uSleep(2, TimeUnit.SECONDS);
 		final Set<Item> inv = getPerso().getPerso().getInventory().getContents().values().stream().map(i -> (ManchouItem) i).filter(UtilFunc.needToDeposit(getPerso())).collect(Collectors.toSet());
 		final MovedItem[] array = inv.stream().map(i -> (ManchouItem) i).map(UtilFunc.deposit(getPerso())).filter(Objects::nonNull).toArray(MovedItem[]::new);
+		LOGGER.info(AnsiColor.GREEN + "à déposé : "
+				+ Arrays.stream(array).map(m -> getPerso().getPerso().getInventory().getItem(m.getItemUid())).map(Item::showInfos).collect(Collectors.joining(",", "[", "]")) + " en banque !");
 		Arrays.stream(array).forEach(i -> {
 			getPerso().getPerso().moveItem(i);
 			Threads.uSleep(250, TimeUnit.MILLISECONDS);
 		});
-		Threads.uSleep(1, TimeUnit.SECONDS);
-		LOGGER.info(AnsiColor.GREEN + "à déposé : " + inv.stream().map(Item::showInfos).collect(Collectors.joining(",", "[", "]")) + " en banque !");
+		Threads.uSleep(2, TimeUnit.SECONDS);
 		MovedItem[] toRetrieve = getPerso().getPerso().getAccount().getBank().getContents().values().stream().map(i -> (ManchouItem) i).map(UtilFunc.retrieve(getPerso())).filter(Objects::nonNull)
 				.toArray(MovedItem[]::new);
+		LOGGER.info(AnsiColor.GREEN + "à récupéré : "
+				+ Arrays.stream(toRetrieve).map(m -> getPerso().getPerso().getAccount().getBank().getItem(m.getItemUid())).map(Item::showInfos).collect(Collectors.joining(",", "[", "]"))
+				+ " en banque !");
 		Arrays.stream(toRetrieve).forEach(i -> {
 			getPerso().getPerso().moveItem(i);
 			Threads.uSleep(250, TimeUnit.MILLISECONDS);
 		});
-		Threads.uSleep(1, TimeUnit.SECONDS);
+		Threads.uSleep(2, TimeUnit.SECONDS);
 		final int kamas = getPerso().getPerso().getInventory().getKamas();
 		final int bankK = getPerso().getPerso().getAccount().getBank().getKamas();
 		int tomove;
@@ -184,6 +192,9 @@ public class Utilities extends Info {
 			tomove = -tomove;
 		} else tomove = kamas - 10_000;
 		getPerso().getPerso().moveKama(tomove);
+		if (tomove > 0) LOGGER.info(AnsiColor.GREEN + " à déposé " + tomove + " kamas !");
+		else LOGGER.info(AnsiColor.GREEN + " à récupéré " + (-tomove) + " kamas !");
+		Threads.uSleep(1, TimeUnit.SECONDS);
 		getPerso().getPerso().exchangeLeave();
 	}
 

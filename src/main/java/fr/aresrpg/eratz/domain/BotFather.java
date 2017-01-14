@@ -100,10 +100,10 @@ public class BotFather implements ManchouPlugin {
 	// bucheron henual bratva-nazar
 	// fight henual bratva-nazar
 	// goto 10356 marine-lpn eratz
-	// goto 7549 bratva-nazar henual
+	// goto 5703 bratva-nazar henual
 	// goto 21,-30 bratva-nazar henual
 	// crash party bratva-nazar henual Ethylind
-	// crash party bratva-nazar henual Roncillarbre 
+	// crash party bratva-nazar henual Stevity 
 	// crash duel bratva-nazar henual 529361 
 	// crash duel bratva-nazar henual 523583
 	// account connect bratva-nazar henual

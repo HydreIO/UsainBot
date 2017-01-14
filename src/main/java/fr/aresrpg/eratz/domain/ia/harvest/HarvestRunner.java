@@ -54,9 +54,12 @@ public class HarvestRunner extends Info {
 					break;
 				case RESSOURCE_STEAL:
 				case RESSOURCE_HARVESTED:
+					getPerso().getUtilities().setCurrentHarvest(-1);
 					Executors.SCHEDULED.schedule(() -> runHarvest(harvesting, promise), 100, TimeUnit.MILLISECONDS);
 					break;
 				case OVER_POD:
+					getPerso().getUtilities().useRessourceBags();
+					Threads.uSleep(1, TimeUnit.SECONDS);
 					getPerso().getUtilities().destroyHeaviestRessource();
 					Threads.uSleep(1, TimeUnit.SECONDS);
 				case FULL_POD:
@@ -64,32 +67,31 @@ public class HarvestRunner extends Info {
 						getPerso().getUtilities().destroyHeaviestRessource();
 						Threads.uSleep(1, TimeUnit.SECONDS);
 					}
-					getPerso().getMind().moveToMap(MapsManager.getMap(Bank.BONTA.getMapId()))
+					Executors.FIXED.execute(() -> getPerso().getMind().moveToMap(MapsManager.getMap(Bank.BONTA.getMapId()))
 							.thenRun(() -> {
 								getPerso().getUtilities().openBank();
 								Threads.uSleep(1, TimeUnit.SECONDS);
 								getPerso().getUtilities().depositBank();
 								Threads.uSleep(1, TimeUnit.SECONDS);
-								promise.complete(harvesting); // finish
-							});
+							}));
 					break;
 				case DISCONNECT:
 					Connector connector = new Connector(getPerso(), Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS);
 					CompletableFuture<Connector> conPromise = new CompletableFuture<>();
-					getPerso().getConRunner().runConnection(connector, conPromise);
+					Executors.FIXED.execute(() -> getPerso().getConRunner().runConnection(connector, conPromise));
 					conPromise.thenRunAsync(() -> runHarvest(harvesting, promise), Executors.FIXED);
 					break;
 				default:
-					break;
+					return; // avoid reset if non handled
 			}
 			getPerso().getMind().resetState();
 		});
 		if (!harvesting.harvest()) {
 			LOGGER.debug("map empty -> no ressource");
-			getPerso().getMind().moveToMap(MapsManager.getMap(zone.getNextMap())).thenRunAsync(() -> {
+			Executors.FIXED.execute(() -> getPerso().getMind().moveToMap(MapsManager.getMap(zone.getNextMap())).thenRunAsync(() -> {
 				Threads.uSleep(1, TimeUnit.SECONDS);
 				runHarvest(harvesting, promise);
-			}, Executors.FIXED);
+			}, Executors.FIXED));
 		}
 	}
 

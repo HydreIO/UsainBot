@@ -38,7 +38,7 @@ public class UtilFunc {
 			if (toKeep != null && amountInInv < toKeep.intValue()) toMove = toKeep.intValue() - amountInInv;
 			if (toMove < 1) return null;
 			if (toMove > amount) toMove = amount;
-			return new MovedItem(ExchangeMove.REMOVE, i.getUUID(), amount);
+			return new MovedItem(ExchangeMove.REMOVE, i.getUUID(), toMove);
 		};
 	}
 
