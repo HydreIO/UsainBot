@@ -3,14 +3,17 @@ package fr.aresrpg.eratz.domain.ia;
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.commons.domain.functional.consumer.Consumer;
+import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
+import fr.aresrpg.eratz.domain.ia.connection.Connector;
 import fr.aresrpg.eratz.domain.ia.harvest.Harvesting;
 import fr.aresrpg.eratz.domain.ia.navigation.Navigator;
-import fr.aresrpg.eratz.domain.ia.path.Paths;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -25,6 +28,10 @@ public class Mind extends Info {
 	}
 
 	public void publishState(Consumer<Interrupt> state) {
+		CompletableFuture.completedFuture(state).thenAcceptAsync(this::setState, Executors.FIXED);
+	}
+
+	public void setState(Consumer<Interrupt> state) {
 		this.state = state;
 	}
 
@@ -52,16 +59,17 @@ public class Mind extends Info {
 	 */
 	public CompletableFuture<Navigator> moveToMap(BotMap destination) {
 		LOGGER.debug("Move to map " + destination.getMap().getInfos());
-		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId()) return CompletableFuture.completedFuture(new Navigator(getPerso(), destination));
-		CompletableFuture<Navigator> promise = new CompletableFuture<>();
-		getPerso().getNavRunner().runNavigation(new Navigator(getPerso(), destination).compilePath(), promise);
-		return promise;
+		Navigator navigator = new Navigator(getPerso(), destination);
+		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId()) return CompletableFuture.completedFuture(navigator);
+		return CompletableFuture.completedFuture(navigator).thenApplyAsync(Navigator::compilePath, Executors.FIXED).thenCompose(getPerso().getNavRunner()::runNavigation);
 	}
 
-	public CompletableFuture<Harvesting> harvest(Paths path) {
-		CompletableFuture<Harvesting> promise = new CompletableFuture<>();
-		getPerso().getHarRunner().startHarvest(path, promise);
-		return promise;
+	public CompletableFuture<Harvesting> harvest(Interractable... ressources) {
+		return CompletableFuture.completedFuture(new Harvesting(getPerso(), ressources)).thenComposeAsync(getPerso().getHarRunner()::runHarvest, Executors.FIXED);
+	}
+
+	public CompletableFuture<Connector> connect(long time, TimeUnit unit) {
+		return CompletableFuture.completedFuture(new Connector(getPerso(), time, unit)).thenComposeAsync(getPerso().getConRunner()::runConnection, Executors.FIXED);
 	}
 
 	public static enum MindState {

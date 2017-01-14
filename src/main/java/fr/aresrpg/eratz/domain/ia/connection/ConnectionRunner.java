@@ -11,6 +11,7 @@ import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * 
@@ -28,11 +29,13 @@ public class ConnectionRunner extends Info {
 		super(perso);
 	}
 
-	public void runConnection(Connector connector, CompletableFuture<Connector> promise) {
+	public CompletableFuture<Connector> runConnection(Connector connector) {
+		if (getPerso().isOnline()) return CompletableFuture.completedFuture(connector);
+		CompletableFuture<CompletableFuture<Connector>> promise = new CompletableFuture<>();
 		getPerso().getMind().publishState(interrupt -> {
 			switch (interrupt) {
 				case CONNECTED:
-					promise.complete(connector);
+					promise.complete(CompletableFuture.completedFuture(connector));
 					break;
 				case DISCONNECT:
 				case SAVE:
@@ -56,7 +59,7 @@ public class ConnectionRunner extends Info {
 					connector.setTime(time);
 					connector.setUnit(unit);
 					getPerso().getPerso().disconnect();
-					Executors.FIXED.execute(() -> runConnection(connector, promise));
+					promise.complete(CompletableFuture.completedFuture(connector).thenComposeAsync(this::runConnection));
 					break;
 				default:
 					return; // avoid reset if non handled
@@ -64,6 +67,7 @@ public class ConnectionRunner extends Info {
 			getPerso().getMind().resetState();
 		});
 		connector.connect();
+		return promise.thenComposeAsync(Function.identity(), Executors.FIXED);
 	}
 
 	private boolean isBanned() {

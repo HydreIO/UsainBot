@@ -7,7 +7,6 @@ import fr.aresrpg.dofus.util.*;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
-import fr.aresrpg.eratz.domain.ia.path.zone.HarvestZone;
 import fr.aresrpg.eratz.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
@@ -27,9 +26,9 @@ public class Harvesting extends Info {
 	/**
 	 * @param perso
 	 */
-	public Harvesting(BotPerso perso, HarvestZone zone) {
+	public Harvesting(BotPerso perso, Interractable... ressources) {
 		super(perso);
-		this.ressources = zone.getRessources();
+		this.ressources = ressources;
 	}
 
 	@Override

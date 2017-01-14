@@ -4,11 +4,14 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.BotFather;
+import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.path.Paths;
+import fr.aresrpg.eratz.domain.ia.path.zone.HarvestZone;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 /**
  * 
@@ -30,7 +33,11 @@ public class BucheronCommand implements Command {
 				return;
 			}
 			BotPerso bdp = BotFather.getPerso(pers);
-			bdp.getMind().harvest(Paths.AMAKNA);
+			Executors.FIXED.execute(() -> {
+				HarvestZone zone = Paths.AMAKNA.getHarvestPath(bdp);
+				for (;;)
+					bdp.getMind().harvest(zone.getRessources()).thenApply(h -> MapsManager.getMap(zone.getNextMap())).thenAccept(bdp.getMind()::moveToMap);
+			});
 		}
 		LOGGER.error("Usage: bucheron <server> <perso>");
 	}
