@@ -13,6 +13,8 @@ import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * 
  * @since
@@ -33,13 +35,17 @@ public class BucheronCommand implements Command {
 				return;
 			}
 			BotPerso bdp = BotFather.getPerso(pers);
-			Executors.FIXED.execute(() -> {
-				HarvestZone zone = Paths.AMAKNA.getHarvestPath(bdp);
-				for (;;)
-					bdp.getMind().harvest(zone.getRessources()).thenApply(h -> MapsManager.getMap(zone.getNextMap())).thenAccept(bdp.getMind()::moveToMap);
-			});
+			Executors.FIXED.execute(() -> harvest(bdp));
 		}
 		LOGGER.error("Usage: bucheron <server> <perso>");
+	}
+
+	private CompletableFuture<?> harvest(BotPerso perso) {
+		HarvestZone zone = Paths.AMAKNA.getHarvestPath(perso);
+		return perso.getMind().harvest(zone.getRessources())
+				.thenApply(h -> MapsManager.getMap(zone.getNextMap()))
+				.thenCompose(perso.getMind()::moveToMap).thenApply(i -> perso)
+				.thenCompose(this::harvest);
 	}
 
 }

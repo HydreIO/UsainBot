@@ -60,7 +60,8 @@ public class Mind extends Info {
 	public CompletableFuture<Navigator> moveToMap(BotMap destination) {
 		LOGGER.debug("Move to map " + destination.getMap().getInfos());
 		Navigator navigator = new Navigator(getPerso(), destination);
-		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId()) return CompletableFuture.completedFuture(navigator);
+		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId())
+			return CompletableFuture.completedFuture(navigator);
 		return CompletableFuture.completedFuture(navigator).thenApplyAsync(Navigator::compilePath, Executors.FIXED).thenCompose(getPerso().getNavRunner()::runNavigation);
 	}
 
