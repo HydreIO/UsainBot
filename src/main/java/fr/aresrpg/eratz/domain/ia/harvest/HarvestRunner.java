@@ -54,7 +54,8 @@ public class HarvestRunner extends Info {
 			getPerso().getMind().resetState();
 		});
 		harvesting.harvest();
-		return promise.thenComposeAsync(Function.identity(), Executors.FIXED);
+		LOGGER.debug("finish run harvest !!!!!!!!!!!!");
+		return promise.thenCompose(Function.identity());
 	}
 
 }

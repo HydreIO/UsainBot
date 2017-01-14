@@ -17,7 +17,7 @@ public interface NodePricer {
 
 	static Function<BotNode, BotNode> zaapiPrice() {
 		return n -> {
-			n.setCost(0);
+			n.setCost(2);
 			return n;
 		};
 	}

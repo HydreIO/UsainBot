@@ -7,7 +7,6 @@ import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
 import fr.aresrpg.eratz.domain.util.BotConfig;
 import fr.aresrpg.tofumanchou.domain.Manchou;
-import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -67,7 +66,7 @@ public class ConnectionRunner extends Info {
 			getPerso().getMind().resetState();
 		});
 		connector.connect();
-		return promise.thenComposeAsync(Function.identity(), Executors.FIXED);
+		return promise.thenCompose(Function.identity());
 	}
 
 	private boolean isBanned() {

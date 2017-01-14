@@ -67,7 +67,7 @@ public class NavigationRunner extends Info {
 		});
 		if (!getPerso().getUtilities().isOnPath()) navigator.compilePath();
 		navigator.runToNext();
-		return promise.thenComposeAsync(Function.identity(), Executors.FIXED);
+		return promise.thenCompose(Function.identity());
 	}
 
 }

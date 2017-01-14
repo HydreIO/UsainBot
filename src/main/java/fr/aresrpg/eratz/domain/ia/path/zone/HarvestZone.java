@@ -51,6 +51,10 @@ public abstract class HarvestZone implements Zone {
 		}).sorted(UtilFunc.distanceToPlayer(position)).mapToInt(BotMap::getMapId).forEach(maps::add);
 	}
 
+	public void sort() {
+		((LinkedList) maps).sort(UtilFunc.distanceToPlayer(position));
+	}
+
 	private void compile() {
 		this.allMaps = ZoneCompiler.compilePath(getType(), this::isValid);
 	}

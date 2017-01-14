@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.command;
 
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.MapsManager;
@@ -14,6 +15,7 @@ import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -35,17 +37,19 @@ public class BucheronCommand implements Command {
 				return;
 			}
 			BotPerso bdp = BotFather.getPerso(pers);
-			Executors.FIXED.execute(() -> harvest(bdp));
+			HarvestZone zone = Paths.AMAKNA.getHarvestPath(bdp);
+			Executors.FIXED.execute(() -> harvest(bdp, zone));
 		}
 		LOGGER.error("Usage: bucheron <server> <perso>");
 	}
 
-	private CompletableFuture<?> harvest(BotPerso perso) {
-		HarvestZone zone = Paths.AMAKNA.getHarvestPath(perso);
+	private CompletableFuture<?> harvest(BotPerso perso, HarvestZone zone) {
+		zone.sort();
+		Threads.uSleep(1, TimeUnit.SECONDS);
 		return perso.getMind().harvest(zone.getRessources())
 				.thenApply(h -> MapsManager.getMap(zone.getNextMap()))
-				.thenCompose(perso.getMind()::moveToMap).thenApply(i -> perso)
-				.thenCompose(this::harvest);
+				.thenCompose(perso.getMind()::moveToMap)
+				.thenCompose(c -> harvest(perso, zone));
 	}
 
 }

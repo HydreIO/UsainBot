@@ -10,7 +10,8 @@ import fr.aresrpg.tofumanchou.domain.data.enums.AgressiveMobs;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -52,7 +53,6 @@ public class Validators {
 
 	// internal use
 	private static Set<Integer> recursiveSearch(Node[] node, int deep, int current, Function<Node, Integer> nodeToId, Function<Node, Node[]> NodeToNeighbors) {
-		System.out.println("current = " + current + " | " + Arrays.toString(node));
 		Set<Integer> set = new HashSet<>();
 		for (Node n : node)
 			set.add(nodeToId.apply(n));
