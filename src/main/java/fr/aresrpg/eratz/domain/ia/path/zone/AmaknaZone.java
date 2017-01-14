@@ -14,7 +14,8 @@ import fr.aresrpg.tofumanchou.domain.data.MapsData.MapDataBean;
 public class AmaknaZone extends HarvestZone {
 
 	public AmaknaZone(BotPerso perso) {
-		super(() -> perso, Interractable.NOYER, Interractable.CHENE, Interractable.CHATAIGNIER, Interractable.ERABLE, Interractable.MERISIER, Interractable.EBENE, Interractable.CHARME,
+		super(() -> perso, Interractable.NOYER, Interractable.CHENE, Interractable.CHATAIGNIER, Interractable.ERABLE, Interractable.MERISIER, Interractable.EBENE,
+				Interractable.CHARME,
 				Interractable.IF);
 	}
 

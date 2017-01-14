@@ -105,7 +105,8 @@ public class BotFather implements ManchouPlugin {
 	// crash party bratva-nazar henual Ethylind
 	// crash party bratva-nazar henual Stevity 
 	// crash duel bratva-nazar henual 529361 
-	// crash duel bratva-nazar henual 523583
+	// crash duel bratva-nazar henual 515564
+
 	// account connect bratva-nazar henual
 	@Override
 	public void onEnable() {

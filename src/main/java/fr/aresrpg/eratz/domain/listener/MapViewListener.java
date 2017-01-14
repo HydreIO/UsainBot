@@ -83,12 +83,12 @@ public class MapViewListener implements Listener {
 				LOGGER.debug("Object1num = " + botPerso.getPerso().getMap().getCells()[i].getLayerObject1Num());
 				LOGGER.debug("Object2num = " + botPerso.getPerso().getMap().getCells()[i].getLayerObject2Num());
 				LOGGER.debug("Cell= " + botPerso.getPerso().getMap().getCells()[i]);
-				List<Cell> accesibleCells = ShadowCasting.getAccesibleCells(i, 10, botPerso.getPerso().getMap().serialize(), botPerso.getPerso().getMap().cellAccessible().negate());
+				Set<Cell> accesibleCells = ShadowCasting.getAccesibleCells(i, 10, botPerso.getPerso().getMap().serialize(), botPerso.getPerso().getMap().cellAccessible().negate());
 				Iterator<Cell> iterator = accesibleCells.iterator();
 				while (iterator.hasNext())
 					if (!iterator.next().isWalkeable()) iterator.remove();
 				System.out.println(accesibleCells.stream().map(Cell::getId).collect(Collectors.toList()));
-				botPerso.getView().setAccessible(accesibleCells, i, 10);
+				botPerso.getView().setAccessible(accesibleCells.stream().collect(Collectors.toList()), i, 10);
 				List<Node> cellPath = Pathfinding.getCellPath(botPerso.getPerso().getCellId(), i, botPerso.getPerso().getMap().getProtocolCells(), e.getMap().getWidth(), e.getMap().getHeight(),
 						Pathfinding::getNeighbors,
 						botPerso.getPerso()::canGoOnCellAvoidingMobs);

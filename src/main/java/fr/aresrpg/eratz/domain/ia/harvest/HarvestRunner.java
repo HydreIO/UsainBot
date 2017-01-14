@@ -58,22 +58,19 @@ public class HarvestRunner extends Info {
 					Executors.SCHEDULED.schedule(() -> runHarvest(harvesting, promise), 100, TimeUnit.MILLISECONDS);
 					break;
 				case OVER_POD:
+				case FULL_POD:
 					getPerso().getUtilities().useRessourceBags();
 					Threads.uSleep(1, TimeUnit.SECONDS);
 					getPerso().getUtilities().destroyHeaviestRessource();
 					Threads.uSleep(1, TimeUnit.SECONDS);
-				case FULL_POD:
-					if (getPerso().getUtilities().getPodsPercent() > 99) {
-						getPerso().getUtilities().destroyHeaviestRessource();
-						Threads.uSleep(1, TimeUnit.SECONDS);
-					}
 					Executors.FIXED.execute(() -> getPerso().getMind().moveToMap(MapsManager.getMap(Bank.BONTA.getMapId()))
-							.thenRun(() -> {
+							.thenRunAsync(() -> {
 								getPerso().getUtilities().openBank();
 								Threads.uSleep(1, TimeUnit.SECONDS);
 								getPerso().getUtilities().depositBank();
 								Threads.uSleep(1, TimeUnit.SECONDS);
-							}));
+								runHarvest(harvesting, promise);
+							}, Executors.FIXED));
 					break;
 				case DISCONNECT:
 					Connector connector = new Connector(getPerso(), Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS);

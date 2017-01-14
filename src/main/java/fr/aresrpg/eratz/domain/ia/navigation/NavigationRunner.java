@@ -49,13 +49,13 @@ public class NavigationRunner extends Info {
 					getPerso().getUtilities().destroyHeaviestRessource();
 					Threads.uSleep(1, TimeUnit.SECONDS);
 					Executors.FIXED.execute(() -> getPerso().getMind().moveToMap(MapsManager.getMap(Bank.BONTA.getMapId()))
-							.thenRun(() -> {
+							.thenRunAsync(() -> {
 								getPerso().getUtilities().openBank();
 								Threads.uSleep(1, TimeUnit.SECONDS);
 								getPerso().getUtilities().depositBank();
 								Threads.uSleep(1, TimeUnit.SECONDS);
 								promise.complete(navigator); // finish
-							}));
+							}, Executors.FIXED));
 					break;
 				case MOVED:
 					navigator.notifyMoved();
