@@ -1,8 +1,8 @@
 package fr.aresrpg.eratz.domain.ia.path;
 
-import fr.aresrpg.eratz.domain.ia.path.fight.PichonFightPath;
-import fr.aresrpg.eratz.domain.ia.path.harvest.bucheron.BucheronAmaknaPath;
-import fr.aresrpg.eratz.domain.ia.path.harvest.bucheron.BucheronBombuOlivioletPath;
+import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
+import fr.aresrpg.eratz.domain.data.player.BotPerso;
+import fr.aresrpg.eratz.domain.ia.path.zone.*;
 
 /**
  * 
@@ -10,24 +10,24 @@ import fr.aresrpg.eratz.domain.ia.path.harvest.bucheron.BucheronBombuOlivioletPa
  */
 public enum Paths {
 
-	BUCHERON_AMAKNA(new BucheronAmaknaPath()),
-	BUCHERON_BOMBU_OLI(new BucheronBombuOlivioletPath()),
-	PICHON(new PichonFightPath()),;
+	BUCHERON_BOMBU_OLI,
+	BOMBU,
+	OLIVIOLET,
+	AMAKNA;
 
-	private Path path;
-
-	/**
-	 * @param path
-	 */
-	private Paths(Path path) {
-		this.path = path;
-	}
-
-	/**
-	 * @return the path
-	 */
-	public Path getPath() {
-		return path;
+	public HarvestZone getHarvestPath(BotPerso perso) {
+		switch (this) {
+			case BUCHERON_BOMBU_OLI:
+				return new BombuOlivioletZone(perso);
+			case BOMBU:
+				return new BombuZone(perso);
+			case OLIVIOLET:
+				return new OliZone(perso);
+			case AMAKNA:
+				return new AmaknaZone(perso);
+			default:
+				throw new NotImplementedException();
+		}
 	}
 
 }

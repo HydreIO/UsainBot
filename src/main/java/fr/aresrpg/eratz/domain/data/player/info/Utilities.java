@@ -9,6 +9,7 @@ import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedIt
 import fr.aresrpg.dofus.protocol.item.client.ItemDestroyPacket;
 import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.dofus.structures.item.Interractable;
+import fr.aresrpg.dofus.structures.item.ItemCategory;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.util.UtilFunc;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
@@ -111,6 +112,12 @@ public class Utilities extends Info {
 		int max = getPerso().getPerso().getMaxPods();
 		if (max == 0) return 0;
 		return 100 * curr / max;
+	}
+	
+	public void useRessourceBags() {
+		getPerso().getPerso().getInventory().getItemsByCategory(ItemCategory.RESOURCEBAG).forEach(i->{
+			getPerso().getPerso().useRessourceBags();
+		});
 	}
 
 	public void destroyHeaviestRessource() {

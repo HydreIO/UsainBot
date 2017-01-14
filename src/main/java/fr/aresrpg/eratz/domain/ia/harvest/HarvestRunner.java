@@ -7,16 +7,13 @@ import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
-import fr.aresrpg.eratz.domain.ia.Mind.MindState;
 import fr.aresrpg.eratz.domain.ia.connection.Connector;
-import fr.aresrpg.eratz.domain.ia.path.Path;
 import fr.aresrpg.eratz.domain.ia.path.Paths;
+import fr.aresrpg.eratz.domain.ia.path.zone.HarvestZone;
 import fr.aresrpg.eratz.domain.util.BotConfig;
 import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -26,8 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class HarvestRunner extends Info {
 
-	private Path path;
-	private final Queue<Integer> allMaps = new LinkedList<>();
+	private HarvestZone zone;
 
 	/**
 	 * @param perso
@@ -36,31 +32,19 @@ public class HarvestRunner extends Info {
 		super(perso);
 	}
 
-	void refill() {
-		this.path.fillMaps(allMaps);
-	}
-
 	@Override
 	public void shutdown() {
 
 	}
 
 	public void startHarvest(Paths path, CompletableFuture<Harvesting> promise) {
-		this.path = path.getPath();
-		refill();
-		runHarvest(new Harvesting(getPerso(), path.getPath().getRessources()), promise);
+		this.zone = path.getHarvestPath(getPerso());
+		runHarvest(new Harvesting(getPerso(), zone), promise);
 	}
 
 	public void runHarvest(Harvesting harvesting, CompletableFuture<Harvesting> promise) {
-		if (allMaps.isEmpty()) refill();
-		if (!harvesting.harvest()) {
-			getPerso().getMind().moveToMap(MapsManager.getMap(allMaps.poll())).thenRunAsync(() -> {
-				Threads.uSleep(1, TimeUnit.SECONDS);
-				runHarvest(harvesting, promise);
-			}, Executors.FIXED);
-			return;
-		}
-		getPerso().getMind().publishState(MindState.HARVEST, interrupt -> {
+		LOGGER.debug("run harvest");
+		getPerso().getMind().publishState(interrupt -> {
 			LOGGER.debug("state " + interrupt);
 			switch (interrupt) {
 				case FIGHT_JOIN:
@@ -74,7 +58,12 @@ public class HarvestRunner extends Info {
 					break;
 				case OVER_POD:
 					getPerso().getUtilities().destroyHeaviestRessource();
+					Threads.uSleep(1, TimeUnit.SECONDS);
 				case FULL_POD:
+					if (getPerso().getUtilities().getPodsPercent() > 99) {
+						getPerso().getUtilities().destroyHeaviestRessource();
+						Threads.uSleep(1, TimeUnit.SECONDS);
+					}
 					getPerso().getMind().moveToMap(MapsManager.getMap(Bank.BONTA.getMapId()))
 							.thenRun(() -> {
 								getPerso().getUtilities().openBank();
@@ -93,8 +82,15 @@ public class HarvestRunner extends Info {
 				default:
 					break;
 			}
-			getPerso().getMind().getStates().remove(MindState.HARVEST);
+			getPerso().getMind().resetState();
 		});
+		if (!harvesting.harvest()) {
+			LOGGER.debug("map empty -> no ressource");
+			getPerso().getMind().moveToMap(MapsManager.getMap(zone.getNextMap())).thenRunAsync(() -> {
+				Threads.uSleep(1, TimeUnit.SECONDS);
+				runHarvest(harvesting, promise);
+			}, Executors.FIXED);
+		}
 	}
 
 }

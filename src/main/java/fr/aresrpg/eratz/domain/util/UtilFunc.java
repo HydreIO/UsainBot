@@ -10,10 +10,8 @@ import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.infra.data.ManchouItem;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.*;
+import java.util.function.*;
 
 /**
  * 
@@ -58,6 +56,14 @@ public class UtilFunc {
 
 	public static Map[] emptyMapArray() {
 		return new Map[0];
+	}
+
+	public static Comparator<BotMap> distanceToPlayer(Supplier<BotPerso> playerPosition) {
+		return (o1, o2) -> {
+			BotMap map = MapsManager.getMap(playerPosition.get().getPerso().getMap().getMapId());
+			if (map == null) return 0;
+			return map.distance(o1) - map.distance(o2);
+		};
 	}
 
 }

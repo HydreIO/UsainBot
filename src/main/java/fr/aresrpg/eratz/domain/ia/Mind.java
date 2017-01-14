@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.ia;
 
+import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
+
 import fr.aresrpg.commons.domain.functional.consumer.Consumer;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
@@ -8,7 +10,7 @@ import fr.aresrpg.eratz.domain.ia.harvest.Harvesting;
 import fr.aresrpg.eratz.domain.ia.navigation.Navigator;
 import fr.aresrpg.eratz.domain.ia.path.Paths;
 
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 
@@ -16,25 +18,29 @@ import java.util.concurrent.*;
  */
 public class Mind extends Info {
 
-	private ConcurrentMap<MindState, Consumer<Interrupt>> states = new ConcurrentHashMap<>();
+	private Consumer<Interrupt> state = i -> {};
 
 	public Mind(BotPerso perso) {
 		super(perso);
 	}
 
-	public void publishState(MindState type, Consumer<Interrupt> state) {
-		states.put(type, state);
+	public void publishState(Consumer<Interrupt> state) {
+		this.state = state;
 	}
 
 	/**
-	 * @return the states
+	 * @return the state
 	 */
-	public ConcurrentMap<MindState, Consumer<Interrupt>> getStates() {
-		return states;
+	public Consumer<Interrupt> getState() {
+		return state;
 	}
 
 	public void accept(Interrupt interrupt) {
-		states.values().stream().forEach(c -> c.accept(interrupt));
+		state.accept(interrupt);
+	}
+
+	public void resetState() {
+		state = i -> {};
 	}
 
 	/**
@@ -45,6 +51,7 @@ public class Mind extends Info {
 	 * @return the CompletableFuture
 	 */
 	public CompletableFuture<Navigator> moveToMap(BotMap destination) {
+		LOGGER.debug("Move to map " + destination.getMap().getInfos());
 		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId()) return CompletableFuture.completedFuture(new Navigator(getPerso(), destination));
 		CompletableFuture<Navigator> promise = new CompletableFuture<>();
 		getPerso().getNavRunner().runNavigation(new Navigator(getPerso(), destination).compilePath(), promise);

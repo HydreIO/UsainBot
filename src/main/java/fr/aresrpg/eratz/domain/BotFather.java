@@ -63,7 +63,7 @@ public class BotFather implements ManchouPlugin {
 
 	@Override
 	public int getSubVersion() {
-		return 2;
+		return 8;
 	}
 
 	@Override
@@ -105,6 +105,7 @@ public class BotFather implements ManchouPlugin {
 	// crash party bratva-nazar henual Ethylind
 	// crash party bratva-nazar henual Roncillarbre 
 	// crash duel bratva-nazar henual 529361 
+	// crash duel bratva-nazar henual 523583
 	// account connect bratva-nazar henual
 	@Override
 	public void onEnable() {

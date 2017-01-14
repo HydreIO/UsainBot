@@ -1,11 +1,13 @@
 package fr.aresrpg.eratz.domain.ia.harvest;
 
+import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.dofus.util.*;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
+import fr.aresrpg.eratz.domain.ia.path.zone.HarvestZone;
 import fr.aresrpg.eratz.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
@@ -20,14 +22,14 @@ import java.util.concurrent.TimeUnit;
  */
 public class Harvesting extends Info {
 
-	private final Set<Interractable> ressources;
+	private final Interractable[] ressources;
 
 	/**
 	 * @param perso
 	 */
-	public Harvesting(BotPerso perso, Set<Interractable> ressources) {
+	public Harvesting(BotPerso perso, HarvestZone zone) {
 		super(perso);
-		this.ressources = ressources;
+		this.ressources = zone.getRessources();
 	}
 
 	@Override
@@ -38,7 +40,7 @@ public class Harvesting extends Info {
 	public boolean isMapHarvested() {
 		for (ManchouCell cell : getPerso().getPerso().getMap().getCells()) {
 			Interractable type = cell.getInterractable();
-			if (!cell.isRessourceSpawned() || type == null || !ressources.contains(type)) continue;
+			if (!cell.isRessourceSpawned() || type == null || !ArrayUtils.contains(type, ressources)) continue;
 			return false;
 		}
 		return true;
@@ -47,7 +49,7 @@ public class Harvesting extends Info {
 	/**
 	 * Harvest nearest ressource
 	 * 
-	 * @return false is there is no more ressource on the map, false otherwise
+	 * @return false is there is no more ressource on the map, true otherwise
 	 */
 	public boolean harvest() {
 		ManchouMap map = getPerso().getPerso().getMap();
@@ -78,7 +80,7 @@ public class Harvesting extends Info {
 		Node[] neighbors = Pathfinding.getNeighbors(new Node(c.getX(), c.getY()));
 		for (Node n : neighbors) {
 			ManchouCell manchouCell = map.getCells()[Maps.getIdRotated(n.getX(), n.getY(), map.getWidth(), map.getHeight())];
-			if (manchouCell.hasMobOn()) continue;
+			if (manchouCell.hasMobGroupOn()) continue;
 			List<Node> cellPath = Pathfinding.getCellPath(cellId, manchouCell.getId(), map.getProtocolCells(), map.getWidth(), map.getHeight(),
 					Pathfinding::getNeighbors, Validators.avoidingMobs(map));
 			if (cellPath != null) return cellPath;
@@ -94,7 +96,9 @@ public class Harvesting extends Info {
 		Interractable found = null;
 		for (ManchouCell cell : map.getCells()) {
 			Interractable type = cell.getInterractable();
-			if (!cell.isRessourceSpawned() || type == null || !ressources.contains(type) || exclude.contains(cell.getId())) continue;
+			if (!cell.isRessourceSpawned() || type == null || !ArrayUtils.contains(type, ressources) || exclude.contains(cell.getId())
+					|| !getPerso().getPerso().getJob().hasLevelToUse(getPerso().getUtilities().getSkillFor(type)))
+				continue;
 			if (near == -1) near = cell.getId();
 			int di = cell.distance(cellId);
 			if (di < dist) {

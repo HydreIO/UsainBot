@@ -5,7 +5,8 @@ import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.map.Destination;
 import fr.aresrpg.eratz.domain.data.map.trigger.Trigger;
 import fr.aresrpg.eratz.domain.data.map.trigger.TriggerType;
-import fr.aresrpg.eratz.domain.util.functionnal.*;
+import fr.aresrpg.eratz.domain.util.functionnal.CellPathFinder;
+import fr.aresrpg.eratz.domain.util.functionnal.IntMapSupplier;
 import fr.aresrpg.eratz.infra.map.DestinationImpl;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger.TeleportType;
@@ -67,14 +68,12 @@ public class Neighbors {
 									return know;
 								}).mapToObj(idToMap::get).filter(Objects::nonNull)
 										.map(m -> m.toZaapNode(tp.getCellId(), m.getMapId()))
-										.map(NodePricer.zaapPrice())
 										.toArray(BotNode[]::new));
 						continue;
 					case ZAAPI:
 						nodes = ArrayUtils.concat(nodes,
 								IntStream.of(Zaapi.getMapsIds(City.getWithY(map.getMap().getY()))).mapToObj(idToMap::get).filter(Objects::nonNull)
 										.map(m -> m.toZaapiNode(tp.getCellId(), m.getMapId()))
-										.map(NodePricer.zaapiPrice())
 										.toArray(BotNode[]::new));
 						continue;
 					default:

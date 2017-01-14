@@ -10,7 +10,6 @@ import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.map.trigger.Trigger;
 import fr.aresrpg.eratz.domain.data.map.trigger.TriggerType;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
-import fr.aresrpg.eratz.domain.util.PercentPrinter;
 import fr.aresrpg.eratz.infra.map.BotMapImpl;
 import fr.aresrpg.eratz.infra.map.adapter.BotMapAdapter;
 import fr.aresrpg.eratz.infra.map.dao.BotMapDao;
@@ -19,6 +18,7 @@ import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger.TeleportType;
 import fr.aresrpg.tofumanchou.domain.Manchou;
 import fr.aresrpg.tofumanchou.domain.util.BenchTime;
+import fr.aresrpg.tofumanchou.domain.util.PercentPrinter;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
@@ -56,12 +56,19 @@ public class MapsManager {
 		LOGGER.info("Maps loaded from database ! (" + t.getAsLong() + "ms)");
 	}
 
+	/**
+	 * @return the mapsById
+	 */
+	public static ConcurrentMap<Integer, BotMap> getMaps() {
+		return mapsById;
+	}
+
 	public static BotMap getMap(int mapid) {
 		return instance.mapsById.get(mapid);
 	}
 
 	public static synchronized BotMap getOrCreateMap(ManchouMap map) {
-		BotMap map2 = getMap(map.getMapid());
+		BotMap map2 = getMap(map.getMapId());
 		if (map2 == null) map2 = instance.createAndRegisterMap(map);
 		return map2;
 	}
@@ -69,12 +76,12 @@ public class MapsManager {
 	private BotMap createAndRegisterMap(ManchouMap map) {
 		BotMapImpl bm = new BotMapImpl(map.getMapId(), map.getDate(), new HashMap<>(), map);
 		bm.fillTriggers();
-		mapsById.put(map.getMapid(), bm);
+		mapsById.put(map.getMapId(), bm);
 		return bm;
 	}
 
 	public static void checkUpdate(ManchouMap map, BotPerso perso) {
-		BotMap bm = getMap(map.getMapid());
+		BotMap bm = getMap(map.getMapId());
 		if (bm == null) {
 			LOGGER.error("MAP NULL ON CREATE");
 			bm = getOrCreateMap(map);

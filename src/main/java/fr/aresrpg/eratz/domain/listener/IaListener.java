@@ -54,7 +54,8 @@ public class IaListener implements Listener {
 	@Subscribe
 	public void onMap(EntityPlayerJoinMapEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso == null || e.getPlayer().getUUID() != perso.getPerso().getUUID()) return;
+		if (perso == null || e.getPlayer().getUUID() != perso.getPerso().getUUID() || perso.isInFight()) return;
+		perso.getUtilities().useRessourceBags();
 		perso.getMind().accept(Interrupt.MOVED);
 	}
 

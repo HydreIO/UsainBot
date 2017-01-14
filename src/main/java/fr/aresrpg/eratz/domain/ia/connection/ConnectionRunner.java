@@ -5,7 +5,6 @@ import fr.aresrpg.dofus.structures.server.DofusServer;
 import fr.aresrpg.dofus.structures.server.ServerState;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
-import fr.aresrpg.eratz.domain.ia.Mind.MindState;
 import fr.aresrpg.eratz.domain.util.BotConfig;
 import fr.aresrpg.tofumanchou.domain.Manchou;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
@@ -30,7 +29,7 @@ public class ConnectionRunner extends Info {
 	}
 
 	public void runConnection(Connector connector, CompletableFuture<Connector> promise) {
-		getPerso().getMind().publishState(MindState.LOGIN, interrupt -> {
+		getPerso().getMind().publishState(interrupt -> {
 			switch (interrupt) {
 				case CONNECTED:
 					promise.complete(connector);
@@ -60,7 +59,7 @@ public class ConnectionRunner extends Info {
 					Executors.FIXED.execute(() -> runConnection(connector, promise));
 					break;
 			}
-			getPerso().getMind().getStates().remove(MindState.LOGIN);
+			getPerso().getMind().resetState();
 		});
 		connector.connect();
 	}

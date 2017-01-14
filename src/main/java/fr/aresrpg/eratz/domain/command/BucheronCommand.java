@@ -30,7 +30,7 @@ public class BucheronCommand implements Command {
 				return;
 			}
 			BotPerso bdp = BotFather.getPerso(pers);
-			bdp.getMind().harvest(Paths.BUCHERON_BOMBU_OLI);
+			bdp.getMind().harvest(Paths.AMAKNA);
 		}
 		LOGGER.error("Usage: bucheron <server> <perso>");
 	}

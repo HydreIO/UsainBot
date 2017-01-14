@@ -55,6 +55,7 @@ public class BotPerso implements Closeable {
 
 	@Override
 	public void shutdown() {
+		perso.useRessourceBags();
 	}
 
 	/**

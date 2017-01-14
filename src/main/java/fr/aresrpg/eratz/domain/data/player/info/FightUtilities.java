@@ -54,7 +54,7 @@ public class FightUtilities extends Info {
 		int dist = Integer.MAX_VALUE;
 		for (final ManchouCell cell : aroundP) {
 			if (!cell.isWalkeable()) continue;
-			if (free && cell.hasMobOn()) continue;
+			if (free && cell.hasEntityOn()) continue;
 			final int distance = cell.distanceManathan(m.getCellId());
 			if (nearest == null || distance < dist) {
 				nearest = cell;
@@ -152,7 +152,7 @@ public class FightUtilities extends Info {
 		int dist = Maps.distanceManathan(cellId, cell, width, height);
 		final PathValidator canGo = (x1, y1, x2, y2) -> {
 			final int id = Maps.getIdRotated(x2, y2, width, height);
-			return !getPerso().getPerso().getMap().getCells()[id].hasMobOn();
+			return !getPerso().getPerso().getMap().getCells()[id].hasEntityOn();
 		};
 		final List<Node> cellPath = Pathfinding.getCellPath(cellId, cell, getPerso().getPerso().getMap().getProtocolCells(), width, height, Pathfinding::getNeighborsWithoutDiagonals, canGo);
 		// perso.setPm(perso.getPm() - dist); // TEMP REMOVE PM car on attend pas que le serv nous le dise pour pouvoir finir notre tour, de tt façon il reset apres
@@ -202,7 +202,7 @@ public class FightUtilities extends Info {
 		final Iterator<ManchouCell> it = aroundP.iterator();
 		while (it.hasNext()) {
 			final ManchouCell cell = it.next();
-			if (cell.hasMobOn() || !cell.isWalkeable() || cell.distanceManathan(m.getCellId()) <= m.getPm()) it.remove();
+			if (cell.hasEntityOn() || !cell.isWalkeable() || cell.distanceManathan(m.getCellId()) <= m.getPm()) it.remove();
 		}
 		return aroundP;
 	}
@@ -223,7 +223,7 @@ public class FightUtilities extends Info {
 	public ManchouCell getCellToTargetMob(int distToPlayer, int targetCell, int range, boolean line) {
 		Set<ManchouCell> cellsAroundPlayer = getCellsAroundPlayer(distToPlayer);
 		for (ManchouCell c : cellsAroundPlayer) {
-			if (c.hasMobOn() || !c.isWalkeable()) continue;
+			if (c.hasEntityOn() || !c.isWalkeable()) continue;
 			if (line && !c.isOnSameLineOrCollumn(getPerso().getPerso().getMap().getCells()[targetCell])) continue;
 			List<Integer> acc = getAccessibleCells(c.getId(), range);
 			if (acc.contains(targetCell)) return c;
@@ -267,7 +267,7 @@ public class FightUtilities extends Info {
 		Map<ManchouCell, Integer> cost = new HashMap<>();
 		int team = getPerso().getPerso().getTeam();
 		for (ManchouCell c : aroundP) {
-			if (c.hasMobOn() || !c.isWalkeable()) continue;
+			if (c.hasEntityOn() || !c.isWalkeable()) continue;
 			int pts = 0;
 			for (Entity e : getPerso().getPerso().getMap().getEntities().values()) {
 				// continue if allies
