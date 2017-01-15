@@ -8,6 +8,8 @@ import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.path.Paths;
 import fr.aresrpg.eratz.domain.ia.path.ZoneCompiler;
 import fr.aresrpg.eratz.domain.util.UtilFunc;
+import fr.aresrpg.tofumanchou.domain.data.MapsData;
+import fr.aresrpg.tofumanchou.domain.data.MapsData.MapDataBean;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 
 import java.util.*;
@@ -36,6 +38,16 @@ public abstract class HarvestZone implements Zone {
 	public int getNextMap() {
 		if (maps.isEmpty()) refill();
 		return maps.poll();
+	}
+
+	protected boolean hasArea(BotMap map, int... ids) {
+		MapDataBean data = MapsData.getData(map.getMapId());
+		return ArrayUtils.contains(data.getAreaId(), ids);
+	}
+
+	protected boolean hasSubArea(BotMap map, int... ids) {
+		MapDataBean data = MapsData.getData(map.getMapId());
+		return ArrayUtils.contains(data.getSubareaId(), ids);
 	}
 
 	public Interractable[] getRessources() {

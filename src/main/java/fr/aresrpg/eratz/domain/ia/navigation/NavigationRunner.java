@@ -41,33 +41,42 @@ public class NavigationRunner extends Runner {
 			LOGGER.debug("state move " + interrupt);
 			switch (interrupt) {
 				case DISCONNECT:
+					getPerso().getMind().resetState();
 					promise.complete(getPerso().getMind().connect(Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS)
 							.thenApplyAsync(Threads.threadContextSwitch("connect->navigate", c -> navigator), Executors.FIXED).thenCompose(this::runNavigation));
 					break;
 				case FIGHT_JOIN: // TODO
-					break;
+					return;
 				case OVER_POD:
 				case FULL_POD:
 					if (fullPod) return;
+					getPerso().getMind().resetState();
 					fullPod = true;
 					promise.complete(onFullPod().thenRun(this::resetStateMachine).thenCompose(i -> CompletableFuture.completedFuture(navigator)));
 					break;
 				case ACTION_STOP: // on laisse le notify moved pour recalculer un path
+					if (getPerso().getUtilities().getPodsPercent() > 95) getPerso().getUtilities().destroyHeaviestRessource();
+					else {
+						//getPerso().getMind().resetState();
+						getPerso().getPerso().disconnect();
+						break;
+					}
+				case TIMEOUT:
 				case MOVED:
+					getPerso().getMind().resetState();
 					String name = interrupt == Interrupt.ACTION_STOP ? "actionstop->navigate" : "moved->navigate";
 					navigator.notifyMoved();
 					if (navigator.isFinished()) {
 						LOGGER.debug("navigation completed !");
 						navigator.resetPersoPath();
 						// complete async pour éviter que la state soit pas reset quand la suite des actions s'éffectue (probleme rencontré)
-						Executors.FIXED.execute(() -> promise.complete(CompletableFuture.completedFuture(navigator)));
+						promise.complete(CompletableFuture.completedFuture(navigator));
 					} else promise.complete(CompletableFuture.completedFuture(navigator).thenComposeAsync(Threads.threadContextSwitch(name, this::runNavigation), Executors.FIXED));
 					break;
 				default:
 					return; // avoid reset if non handled
 			}
-			getPerso().getMind().resetState();
-		});
+		}, 10, TimeUnit.SECONDS);
 		if (!getPerso().getUtilities().isOnPath()) {
 			LOGGER.debug("NOT ON PATH RECALCULING");
 			navigator.compilePath();

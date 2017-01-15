@@ -13,6 +13,7 @@ public enum Paths {
 	BUCHERON_BOMBU_OLI,
 	BOMBU,
 	OLIVIOLET,
+	BONTA,
 	AMAKNA;
 
 	public HarvestZone getHarvestPath(BotPerso perso) {
@@ -25,6 +26,8 @@ public enum Paths {
 				return new OliZone(perso);
 			case AMAKNA:
 				return new AmaknaZone(perso);
+			case BONTA:
+				return new BontaZone(perso);
 			default:
 				throw new NotImplementedException();
 		}

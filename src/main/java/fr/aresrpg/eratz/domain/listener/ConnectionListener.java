@@ -45,6 +45,7 @@ public class ConnectionListener implements Listener {
 		Collection<BotPerso> values = BotFather.getInstance().getPersos().values();
 		for (BotPerso p : values)
 			if (p.getPerso().getAccount().equals(client)) p.setOnline(false);
+		System.exit(1);
 	}
 
 	@Subscribe

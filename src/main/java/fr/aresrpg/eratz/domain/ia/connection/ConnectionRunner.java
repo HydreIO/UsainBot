@@ -64,7 +64,7 @@ public class ConnectionRunner extends Info {
 					return; // avoid reset if non handled
 			}
 			getPerso().getMind().resetState();
-		});
+		}, 2, TimeUnit.HOURS);
 		connector.connect();
 		return promise.thenCompose(Function.identity());
 	}

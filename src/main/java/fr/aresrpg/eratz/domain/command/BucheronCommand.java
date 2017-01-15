@@ -50,7 +50,7 @@ public class BucheronCommand implements Command {
 				return;
 			}
 			BotPerso bdp = BotFather.getPerso(pers);
-			HarvestZone zone = Paths.AMAKNA.getHarvestPath(bdp);
+			HarvestZone zone = Paths.BONTA.getHarvestPath(bdp);
 			Executors.FIXED.execute(() -> {
 				try {
 					setHarvest(harvest(bdp, zone));
@@ -70,7 +70,7 @@ public class BucheronCommand implements Command {
 				.thenApply(h -> MapsManager.getMap(zone.getNextMap()))
 				.thenCompose(perso.getMind()::moveToMap)
 				.handle((v, e) -> {
-					LOGGER.severe(e);
+					if (e != null) LOGGER.severe(e);
 					return v;
 				}).thenCompose(c -> harvest(perso, zone));
 	}

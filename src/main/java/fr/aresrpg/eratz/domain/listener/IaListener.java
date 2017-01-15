@@ -16,6 +16,7 @@ import fr.aresrpg.tofumanchou.domain.event.*;
 import fr.aresrpg.tofumanchou.domain.event.aproach.InfoMessageEvent;
 import fr.aresrpg.tofumanchou.domain.event.aproach.LoginErrorEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityPlayerJoinMapEvent;
+import fr.aresrpg.tofumanchou.domain.event.fight.FightEndEvent;
 import fr.aresrpg.tofumanchou.domain.event.fight.FightJoinEvent;
 import fr.aresrpg.tofumanchou.domain.event.item.PodsUpdateEvent;
 import fr.aresrpg.tofumanchou.domain.event.map.FrameUpdateEvent;
@@ -77,7 +78,19 @@ public class IaListener implements Listener {
 	@Subscribe
 	public void onFight(FightJoinEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso != null) perso.getMind().accept(Interrupt.FIGHT_JOIN);
+		if (perso == null) return;
+		Executors.FIXED.execute(() -> {
+			FightListener.register();
+			FightListener.getInstance().onJoin(e);
+		});
+		perso.getMind().accept(Interrupt.FIGHT_JOIN);
+	}
+
+	@Subscribe
+	public void onFightEnd(FightEndEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso == null) return;
+		Executors.FIXED.execute(FightListener::unRegister);
 	}
 
 	@Subscribe
@@ -104,7 +117,7 @@ public class IaListener implements Listener {
 		if (perso == null) return;
 		// on clear les zaap pour ne plus les utiliser
 		LOGGER.debug("CLEAR ZAAP !!");
-		perso.getUtilities().getZaaps().clear(); // TODO faire un systeme qui attend un event de refill de kamas pour set la liste a null (comme ça il retournera au zaap pour l'init lors du prochain move)
+		if (perso.getPerso().getInventory().getKamas() < 1000) perso.getUtilities().getZaaps().clear(); // TODO faire un systeme qui attend un event de refill de kamas pour set la liste a null (comme ça il retournera au zaap pour l'init lors du prochain move)
 		Executors.SCHEDULED.schedule(() -> {
 			perso.getPerso().leaveZaap();
 			Threads.uSleep(500, TimeUnit.MILLISECONDS);
@@ -130,7 +143,7 @@ public class IaListener implements Listener {
 	@Subscribe
 	public void onError(ActionErrorEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso == null) return;
+		if (perso == null || perso.isInFight()) return;
 		perso.getMind().accept(Interrupt.ACTION_STOP);
 	}
 

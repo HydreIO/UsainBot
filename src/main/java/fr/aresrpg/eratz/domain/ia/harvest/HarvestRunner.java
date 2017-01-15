@@ -39,41 +39,46 @@ public class HarvestRunner extends Runner {
 	}
 
 	public CompletableFuture<Harvesting> runHarvest(Harvesting harvesting) {
-		if (harvesting.isMapHarvested()) {
+		LOGGER.debug("run harvest");
+		CompletableFuture<CompletableFuture<Harvesting>> promise = new CompletableFuture<>();
+		if (!harvesting.harvest()) {
 			LOGGER.debug("Harvest completed ");
 			return CompletableFuture.completedFuture(harvesting);
 		}
-		LOGGER.debug("run harvest");
-		CompletableFuture<CompletableFuture<Harvesting>> promise = new CompletableFuture<>();
 		getPerso().getMind().publishState(interrupt -> {
 			LOGGER.debug("state " + interrupt);
 			switch (interrupt) {
 				case FIGHT_JOIN:
-					break;
+					return;
 				case OVER_POD:
 				case FULL_POD:
 					if (fullPod) return;
+					getPerso().getMind().resetState();
 					fullPod = true;
 					promise.complete(onFullPod().thenRun(this::resetStateMachine).thenCompose(i -> CompletableFuture.completedFuture(harvesting)));
 					break;
+				case TIMEOUT:
 				case ACTION_STOP:
+					getPerso().getMind().resetState();
+					promise.complete(CompletableFuture.completedFuture(harvesting));
+					break;
 				case RESSOURCE_STEAL:
 				case RESSOURCE_HARVESTED:
+					getPerso().getMind().resetState();
 					String name = interrupt == Interrupt.ACTION_STOP ? "actionstop->harvest" : interrupt == Interrupt.RESSOURCE_STEAL ? "steal->harvest" : "harvested->harvest";
 					getPerso().getUtilities().setCurrentHarvest(-1);
 					promise.complete(CompletableFuture.completedFuture(harvesting).thenComposeAsync(Threads.threadContextSwitch(name, this::runHarvest), Executors.FIXED));
 					break;
 				case DISCONNECT:
+					getPerso().getMind().resetState();
 					promise.complete(getPerso().getMind().connect(Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS)
 							.thenApplyAsync(Threads.threadContextSwitch("connect->harvest", c -> harvesting), Executors.FIXED).thenCompose(this::runHarvest));
 					break;
 				default:
 					return; // avoid reset if non handled
 			}
-			getPerso().getMind().resetState();
-		});
-		boolean harvest = harvesting.harvest();
-		LOGGER.debug(harvest + " finish run harvest !!!!!!!!!!!!");
+		}, 25, TimeUnit.SECONDS);
+		LOGGER.debug("Harvest WIP");
 		return promise.thenCompose(Function.identity());
 	}
 

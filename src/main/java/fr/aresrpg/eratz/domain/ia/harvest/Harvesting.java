@@ -38,15 +38,6 @@ public class Harvesting extends Info {
 
 	}
 
-	public boolean isMapHarvested() {
-		for (ManchouCell cell : getPerso().getPerso().getMap().getCells()) {
-			Interractable type = cell.getInterractable();
-			if (!cell.isRessourceSpawned() || type == null || !ArrayUtils.contains(type, ressources)) continue;
-			return false;
-		}
-		return true;
-	}
-
 	/**
 	 * Harvest nearest ressource
 	 * 

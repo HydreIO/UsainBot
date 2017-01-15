@@ -74,7 +74,7 @@ public class MapsDataListener implements Listener {
 	public void onJoin(EntityPlayerJoinMapEvent e) {
 		if (e.getClient().getPerso().getUUID() != e.getPlayer().getUUID()) return;
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso == null) return;
+		if (perso == null || !perso.getPerso().isMitm()) return;
 		Executors.FIXED.execute(() -> {
 			BotMap map = MapsManager.getOrCreateMap(perso.getPerso().getMap());
 			Set<Trigger> triggers = map.getTriggers(TriggerType.TELEPORT);

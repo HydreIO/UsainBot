@@ -13,8 +13,7 @@ import fr.aresrpg.eratz.domain.ia.harvest.Harvesting;
 import fr.aresrpg.eratz.domain.ia.navigation.Navigator;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * 
@@ -24,15 +23,17 @@ public class Mind extends Info {
 
 	private Consumer<Interrupt> state;
 	private boolean park = false;
+	private ScheduledFuture<?> sch;
 
 	public Mind(BotPerso perso) {
 		super(perso);
 		resetState();
 	}
 
-	public void publishState(Consumer<Interrupt> state) {
+	public void publishState(Consumer<Interrupt> state, long timeout, TimeUnit unit) {
 		LOGGER.debug("publish state");
 		this.state = state;
+		sch = Executors.SCHEDULED.schedule(() -> accept(Interrupt.TIMEOUT), timeout, unit);
 	}
 
 	/**
@@ -49,6 +50,7 @@ public class Mind extends Info {
 			return;
 		}
 		parkMind();
+		if (sch != null) sch.cancel(true);
 		LOGGER.debug("Accepting " + interrupt);
 		CompletableFuture.completedFuture(interrupt).thenAcceptAsync(Threads.threadContextSwitch("mind->accepting", state::accept), Executors.FIXED).thenRun(this::unparkMind);
 	}
