@@ -27,5 +27,7 @@ public enum Interrupt {
 	CLOSED,
 	DISCONNECT,
 	CONNECTED,
+	
+	ACTION_STOP,
 
 }

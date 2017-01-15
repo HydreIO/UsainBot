@@ -7,7 +7,6 @@ import fr.aresrpg.dofus.structures.stat.Stat;
 import fr.aresrpg.dofus.util.*;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.dofus.util.Pathfinding.PathValidator;
-import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.domain.data.Spell;
 import fr.aresrpg.tofumanchou.domain.data.entity.Entity;
@@ -98,7 +97,7 @@ public class FightUtilities extends Info {
 		final int cell = getPerso().getPerso().getCellId();
 		final int width = getPerso().getPerso().getMap().getWidth();
 		final int height = getPerso().getPerso().getMap().getHeight();
-		BotFather.LOGGER.error("[playerCell:" + cell + "][targetCell:" + targetCell + "] distance = " + Maps.distanceManathan(cell, targetCell, width, height) + " maxpo = " + maxPo);
+		LOGGER.error("[playerCell:" + cell + "][targetCell:" + targetCell + "] distance = " + Maps.distanceManathan(cell, targetCell, width, height) + " maxpo = " + maxPo);
 		return Maps.distanceManathan(cell, targetCell, width, height) <= maxPo;
 	}
 
@@ -114,7 +113,7 @@ public class FightUtilities extends Info {
 			ManchouCell c = getCellAwayFromMob(getPerso().getPerso().getPm());
 			LOGGER.debug("pm player = " + getPerso().getPerso().getPm());
 			if (c != null) {
-				BotFather.LOGGER.severe("cell away from mob = " + c.getId());
+				LOGGER.severe("cell away from mob = " + c.getId());
 				runTo(c.getId());
 			}
 		} catch (Exception e) {
@@ -156,7 +155,7 @@ public class FightUtilities extends Info {
 		};
 		final List<Node> cellPath = Pathfinding.getCellPath(cellId, cell, getPerso().getPerso().getMap().getProtocolCells(), width, height, Pathfinding::getNeighborsWithoutDiagonals, canGo);
 		// perso.setPm(perso.getPm() - dist); // TEMP REMOVE PM car on attend pas que le serv nous le dise pour pouvoir finir notre tour, de tt façon il reset apres
-		BotFather.LOGGER.warning("Trying to move from " + cellId + " to " + cell + " path=" + cellPath);
+		LOGGER.warning("Trying to move from " + cellId + " to " + cell + " path=" + cellPath);
 		if (cellPath == null) throw new NullPointerException("PATH INVALID -_-");
 		getPerso().getPerso().move(cellPath, false);
 	}

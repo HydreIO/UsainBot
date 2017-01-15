@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.ia.path.zone;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.dofus.structures.item.Interractable;
+import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.path.Paths;
@@ -11,6 +12,7 @@ import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -52,7 +54,9 @@ public abstract class HarvestZone implements Zone {
 	}
 
 	public void sort() {
-		((LinkedList) maps).sort(UtilFunc.distanceToPlayer(position));
+		List<Integer> collect = maps.stream().map(MapsManager::getMap).sorted(UtilFunc.distanceToPlayer(position)).map(BotMap::getMapId).collect(Collectors.toList());
+		maps.clear();
+		maps.addAll(collect);
 	}
 
 	private void compile() {

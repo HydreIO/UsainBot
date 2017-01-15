@@ -10,8 +10,13 @@ import fr.aresrpg.dofus.protocol.item.client.ItemDestroyPacket;
 import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.dofus.structures.item.ItemCategory;
+import fr.aresrpg.dofus.structures.map.Cell;
+import fr.aresrpg.dofus.util.Maps;
+import fr.aresrpg.dofus.util.Pathfinding;
+import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.util.UtilFunc;
+import fr.aresrpg.eratz.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
 import fr.aresrpg.tofumanchou.domain.data.item.Item;
 import fr.aresrpg.tofumanchou.infra.data.ManchouItem;
@@ -19,6 +24,7 @@ import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -120,6 +126,24 @@ public class Utilities extends Info {
 		});
 	}
 
+	public int getRandomAccessibleCellNextTo(int cellid, Function<Node, Node[]> neigbors) {
+		Cell[] cells = getPerso().getPerso().getMap().getProtocolCells();
+		Cell cell = cells[cellid];
+		int width = getPerso().getPerso().getMap().getWidth();
+		int height = getPerso().getPerso().getMap().getHeight();
+		Node[] nodes = neigbors.apply(new Node(cell.getXRot(), cell.getYRot()));
+		int perso = getPerso().getPerso().getCellId();
+		List<Node> path = null;
+		for (Node n : nodes) {
+			if (!Maps.isInMapRotated(n.getX(), n.getY(), width, height)) continue;
+			int id = Maps.getIdRotated(n.getX(), n.getY(), width, height);
+			if (id < 0 || id >= cells.length) continue;
+			path = Pathfinding.getCellPath(perso, id, cells, width, height, Pathfinding::getNeighbors, Validators.avoidingMobs(getPerso().getPerso().getMap()));
+			if (path != null) return id;
+		}
+		return -1;
+	}
+
 	public void destroyHeaviestRessource() {
 		useRessourceBags();
 		Item it = getPerso().getPerso().getInventory().getHeaviestItem();
@@ -127,6 +151,7 @@ public class Utilities extends Info {
 		int maxp = getPerso().getPerso().getMaxPods();
 		int pod = getPerso().getPerso().getPods();
 		int over = pod + 1 - maxp;
+		if (over < 1) return;
 		int poditem = it.getPods();
 		int fullw = poditem * it.getAmount();
 		LOGGER.debug("Pod en trop = " + over);
@@ -136,7 +161,6 @@ public class Utilities extends Info {
 			getPerso().sendPacketToServer(new ItemDestroyPacket(it.getUUID(), it.getAmount()));
 		} else {
 			int todestroy = over / poditem + (over % poditem == 0 ? 0 : 1);
-			if (todestroy < 0) return;
 			LOGGER.debug("Destruction de x" + todestroy + " " + it.getName());
 			getPerso().sendPacketToServer(new ItemDestroyPacket(it.getUUID(), todestroy));
 		}

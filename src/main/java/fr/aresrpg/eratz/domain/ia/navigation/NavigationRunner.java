@@ -4,11 +4,10 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.util.Randoms;
-import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
-import fr.aresrpg.eratz.domain.data.player.info.Info;
+import fr.aresrpg.eratz.domain.ia.Interrupt;
+import fr.aresrpg.eratz.domain.ia.Runner;
 import fr.aresrpg.eratz.domain.util.BotConfig;
-import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.CompletableFuture;
@@ -19,7 +18,9 @@ import java.util.function.Function;
  * 
  * @since
  */
-public class NavigationRunner extends Info {
+public class NavigationRunner extends Runner {
+
+	private boolean fullPod;
 
 	public NavigationRunner(BotPerso perso) {
 		super(perso);
@@ -27,6 +28,10 @@ public class NavigationRunner extends Info {
 
 	@Override
 	public void shutdown() {
+	}
+
+	void resetStateMachine() {
+		fullPod = false;
 	}
 
 	public CompletableFuture<Navigator> runNavigation(Navigator navigator) {
@@ -37,36 +42,38 @@ public class NavigationRunner extends Info {
 			switch (interrupt) {
 				case DISCONNECT:
 					promise.complete(getPerso().getMind().connect(Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS)
-							.thenApplyAsync(c -> navigator, Executors.FIXED).thenCompose(this::runNavigation));
+							.thenApplyAsync(Threads.threadContextSwitch("connect->navigate", c -> navigator), Executors.FIXED).thenCompose(this::runNavigation));
 					break;
 				case FIGHT_JOIN: // TODO
 					break;
 				case OVER_POD:
 				case FULL_POD:
-					getPerso().getUtilities().useRessourceBags();
-					Threads.uSleep(1, TimeUnit.SECONDS);
-					getPerso().getUtilities().destroyHeaviestRessource();
-					Threads.uSleep(1, TimeUnit.SECONDS);
-					promise.complete(getPerso().getMind().moveToMap(MapsManager.getMap(Bank.BONTA.getMapId())).thenRunAsync(() -> {
-						getPerso().getUtilities().openBank();
-						Threads.uSleep(1, TimeUnit.SECONDS);
-						getPerso().getUtilities().depositBank();
-						Threads.uSleep(1, TimeUnit.SECONDS);
-					}, Executors.FIXED).thenApply(c -> navigator).thenCompose(this::runNavigation));
+					if (fullPod) return;
+					fullPod = true;
+					promise.complete(onFullPod().thenRun(this::resetStateMachine).thenCompose(i -> CompletableFuture.completedFuture(navigator)));
 					break;
+				case ACTION_STOP: // on laisse le notify moved pour recalculer un path
 				case MOVED:
+					String name = interrupt == Interrupt.ACTION_STOP ? "actionstop->navigate" : "moved->navigate";
 					navigator.notifyMoved();
 					if (navigator.isFinished()) {
+						LOGGER.debug("navigation completed !");
 						navigator.resetPersoPath();
-						promise.complete(CompletableFuture.completedFuture(navigator));
-					} else promise.complete(CompletableFuture.completedFuture(navigator).thenComposeAsync(this::runNavigation));
+						// complete async pour éviter que la state soit pas reset quand la suite des actions s'éffectue (probleme rencontré)
+						Executors.FIXED.execute(() -> promise.complete(CompletableFuture.completedFuture(navigator)));
+					} else promise.complete(CompletableFuture.completedFuture(navigator).thenComposeAsync(Threads.threadContextSwitch(name, this::runNavigation), Executors.FIXED));
+					break;
 				default:
 					return; // avoid reset if non handled
 			}
 			getPerso().getMind().resetState();
 		});
-		if (!getPerso().getUtilities().isOnPath()) navigator.compilePath();
+		if (!getPerso().getUtilities().isOnPath()) {
+			LOGGER.debug("NOT ON PATH RECALCULING");
+			navigator.compilePath();
+		}
 		navigator.runToNext();
+		LOGGER.debug("runned to next ok !");
 		return promise.thenCompose(Function.identity());
 	}
 

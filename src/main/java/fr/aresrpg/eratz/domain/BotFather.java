@@ -8,10 +8,9 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain;
 
-import fr.aresrpg.commons.domain.condition.Option;
+import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
+
 import fr.aresrpg.commons.domain.database.Collection;
-import fr.aresrpg.commons.domain.log.Logger;
-import fr.aresrpg.commons.domain.log.LoggerBuilder;
 import fr.aresrpg.dofus.protocol.chat.server.ChatMessageOkPacket;
 import fr.aresrpg.dofus.protocol.chat.server.ChatServerMessagePacket;
 import fr.aresrpg.dofus.structures.Chat;
@@ -21,8 +20,7 @@ import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.gui.MapView;
 import fr.aresrpg.eratz.domain.listener.*;
-import fr.aresrpg.eratz.domain.util.BotConfig;
-import fr.aresrpg.eratz.domain.util.Hastebin;
+import fr.aresrpg.eratz.domain.util.*;
 import fr.aresrpg.eratz.infra.map.dao.BotMapDao;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.Manchou;
@@ -46,7 +44,6 @@ import java.util.concurrent.ConcurrentMap;
 public class BotFather implements ManchouPlugin {
 
 	private static BotFather instance;
-	public static final Logger LOGGER = new LoggerBuilder("BOT").setUseConsoleHandler(true, true, Option.none(), Option.none()).build();
 	public static Collection<BotMapDao> MAPS_DB;
 	private ConcurrentMap<Long, BotPerso> persos = new ConcurrentHashMap<>();
 	private Config config;
@@ -101,11 +98,12 @@ public class BotFather implements ManchouPlugin {
 	// fight henual bratva-nazar
 	// goto 10356 marine-lpn eratz
 	// goto 5703 bratva-nazar henual
-	// goto 21,-30 bratva-nazar henual
+	// goto 21,-30 bratva-nazar henual Motra
 	// crash party bratva-nazar henual Ethylind
+	// crash party bratva-nazar henual Motra
 	// crash party bratva-nazar henual Stevity 
-	// crash duel bratva-nazar henual 529361 
-	// crash duel bratva-nazar henual 515564
+	// crash duel bratva-nazar henual 533091 
+	// crash duel bratva-nazar henual 465589
 
 	// account connect bratva-nazar henual
 	@Override
@@ -141,6 +139,7 @@ public class BotFather implements ManchouPlugin {
 
 	private void injectSyso() {
 		PrintStream old = System.out;
+		LOGGER.addHandler(new HastebinLoggerHandler());
 		System.setOut(new PrintStream(new OutputStream() {
 
 			@Override

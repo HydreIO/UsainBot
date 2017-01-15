@@ -17,6 +17,36 @@ public interface PathContext {
 
 	int getDestinationCellId();
 
+	static PathContext provided(int origin, int originCell, int dest, int destCell, String context) {
+		return new PathContext() {
+
+			@Override
+			public String print() {
+				return context;
+			}
+
+			@Override
+			public int getOriginMapId() {
+				return origin;
+			}
+
+			@Override
+			public int getOriginCellId() {
+				return originCell;
+			}
+
+			@Override
+			public int getDestinationMapId() {
+				return dest;
+			}
+
+			@Override
+			public int getDestinationCellId() {
+				return destCell;
+			}
+		};
+	}
+
 	static PathContext empty() {
 		return new PathContext() {
 

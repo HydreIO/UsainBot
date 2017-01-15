@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.util;
 
-import static fr.aresrpg.eratz.domain.BotFather.LOGGER;
+import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.dofus.util.Lang;
 
@@ -30,7 +30,6 @@ public class Hastebin {
 			}
 		});
 		LOGGER.info(post());
-
 	}
 
 	public static String post() {

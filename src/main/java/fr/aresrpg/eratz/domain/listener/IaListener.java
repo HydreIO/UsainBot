@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.listener;
 
+import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
+
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.event.*;
 import fr.aresrpg.commons.domain.util.Pair;
@@ -56,6 +58,7 @@ public class IaListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || e.getPlayer().getUUID() != perso.getPerso().getUUID() || perso.isInFight()) return;
 		perso.getUtilities().useRessourceBags();
+		LOGGER.debug("Joined " + perso.getPerso().getMap().getInfos());
 		perso.getMind().accept(Interrupt.MOVED);
 	}
 
@@ -100,6 +103,7 @@ public class IaListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null) return;
 		// on clear les zaap pour ne plus les utiliser
+		LOGGER.debug("CLEAR ZAAP !!");
 		perso.getUtilities().getZaaps().clear(); // TODO faire un systeme qui attend un event de refill de kamas pour set la liste a null (comme ça il retournera au zaap pour l'init lors du prochain move)
 		Executors.SCHEDULED.schedule(() -> {
 			perso.getPerso().leaveZaap();
@@ -121,6 +125,13 @@ public class IaListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || perso.getUtilities().getPodsPercent() < 95) return;
 		perso.getMind().accept(Interrupt.FULL_POD);
+	}
+
+	@Subscribe
+	public void onError(ActionErrorEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso == null) return;
+		perso.getMind().accept(Interrupt.ACTION_STOP);
 	}
 
 	@Subscribe

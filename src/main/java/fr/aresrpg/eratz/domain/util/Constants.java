@@ -8,6 +8,8 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.util;
 
+import fr.aresrpg.commons.domain.util.Randoms;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -60,4 +62,8 @@ public class Constants {
 			"frahiko jle baise",
 			"oops fail canal",
 			"bot a la con");
+
+	public static String getRandomHarvestSpeach() {
+		return RANDOM_HARVEST.get(Randoms.nextInt(RANDOM_HARVEST.size() - 1));
+	}
 }

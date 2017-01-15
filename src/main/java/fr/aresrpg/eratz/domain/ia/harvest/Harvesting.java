@@ -1,6 +1,7 @@
 package fr.aresrpg.eratz.domain.ia.harvest;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
+import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.dofus.util.*;
@@ -8,6 +9,7 @@ import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
 import fr.aresrpg.eratz.domain.util.Validators;
+import fr.aresrpg.tofumanchou.domain.data.enums.Smiley;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
@@ -66,6 +68,7 @@ public class Harvesting extends Info {
 		int cell = pair.getFirst();
 		Objects.requireNonNull(skill);
 		Executors.SCHEDULED.schedule(() -> {
+			if (Randoms.nextBool()) getPerso().getPerso().sendSmiley(Smiley.getRandomTrollSmiley());
 			getPerso().getUtilities().setCurrentHarvest(cell);
 			getPerso().getPerso().interract(skill, cell);
 		}, getPerso().getPerso().move(path, false), TimeUnit.MILLISECONDS);

@@ -61,6 +61,16 @@ public class ChatUtilities extends Info {
 		return lastSpeak;
 	}
 
+	/**
+	 * Return true if the bot has speaked the last X seconds
+	 * 
+	 * @param seconds
+	 * @return
+	 */
+	public boolean hasSpeaked(int seconds) {
+		return System.currentTimeMillis() <= lastSpeak + (seconds * 1000);
+	}
+
 	@Override
 	public void shutdown() {
 

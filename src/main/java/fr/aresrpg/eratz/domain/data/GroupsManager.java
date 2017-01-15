@@ -1,6 +1,6 @@
 package fr.aresrpg.eratz.domain.data;
 
-import static fr.aresrpg.eratz.domain.BotFather.LOGGER;
+import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;

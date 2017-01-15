@@ -1,6 +1,5 @@
 package fr.aresrpg.eratz.domain.util;
 
-import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.map.Destination;
 import fr.aresrpg.eratz.domain.data.map.trigger.Trigger;
@@ -13,6 +12,7 @@ import fr.aresrpg.tofumanchou.domain.data.enums.*;
 
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -41,13 +41,13 @@ public class Neighbors {
 			BotMap map = idToMap.get(n.getId());
 			if (map == null) return new BotNode[0];
 			Set<Trigger> triggers = map.getTriggers(TriggerType.TELEPORT);
-			BotNode[] nodes = new BotNode[0];
+			Set<BotNode> nodes = new HashSet<>();
 			if (canUsePotion.test(PotionType.RAPPEL, n))
-				nodes = ArrayUtils.addLast(new BotNode(4, -19, 10, new TeleporterTrigger(-1, TeleportType.POTION_ASTRUB, new DestinationImpl(7411, 311))), nodes);
+				nodes.add(new BotNode(4, -19, 10, new TeleporterTrigger(-1, TeleportType.POTION_ASTRUB, new DestinationImpl(7411, 311))));
 			if (canUsePotion.test(PotionType.BONTA, n))
-				nodes = ArrayUtils.addLast(new BotNode(-33, -57, 10, new TeleporterTrigger(-1, TeleportType.POTION_BONTA, new DestinationImpl(6159, 211))), nodes);
+				nodes.add(new BotNode(-33, -57, 10, new TeleporterTrigger(-1, TeleportType.POTION_BONTA, new DestinationImpl(6159, 211))));
 			if (canUsePotion.test(PotionType.BRAKMAR, n))
-				nodes = ArrayUtils.addLast(new BotNode(-23, 38, 10, new TeleporterTrigger(-1, TeleportType.POTION_BRAK, new DestinationImpl(6167, 183))), nodes);
+				nodes.add(new BotNode(-23, 38, 10, new TeleporterTrigger(-1, TeleportType.POTION_BRAK, new DestinationImpl(6167, 183))));
 			if (triggers != null)
 				for (Trigger t : triggers) {
 				TeleporterTrigger tp = (TeleporterTrigger) t;
@@ -58,31 +58,31 @@ public class Neighbors {
 						Destination dest = tp.getDest();
 						BotMap destmap = idToMap.get(dest.getMapId());
 						if (destmap == null) continue;
-						nodes = ArrayUtils.addLast(new BotNode(destmap.getMap().getX(), destmap.getMap().getY(), 0, tp), nodes);
+						nodes.add(new BotNode(destmap.getMap().getX(), destmap.getMap().getY(), 0, tp));
 						continue;
 					case ZAAP:
-						nodes = ArrayUtils.concat(nodes,
-								IntStream.of(Zaap.getMapsIds()).filter(i -> {
-									boolean know = knowZaap.test(i);
-									return know;
-								}).mapToObj(idToMap::get).filter(Objects::nonNull)
-										.map(m -> m.toZaapNode(tp.getCellId(), m.getMapId()))
-										.map(NodePricer.zaapPrice())
-										.toArray(BotNode[]::new));
+						nodes.addAll(IntStream.of(Zaap.getMapsIds()).filter(i -> {
+							boolean know = knowZaap.test(i);
+							return know;
+						}).mapToObj(idToMap::get).filter(Objects::nonNull)
+								.map(m -> m.toZaapNode(tp.getCellId(), m.getMapId()))
+								.map(NodePricer.zaapPrice())
+								.collect(Collectors.toSet()));
 						continue;
 					case ZAAPI:
-						nodes = ArrayUtils.concat(nodes,
-								IntStream.of(Zaapi.getMapsIds(City.getWithY(map.getMap().getY()))).mapToObj(idToMap::get).filter(Objects::nonNull)
-										.map(m -> m.toZaapiNode(tp.getCellId(), m.getMapId()))
-										.map(NodePricer.zaapiPrice())
-										.toArray(BotNode[]::new));
+						nodes.addAll(IntStream.of(Zaapi.getMapsIds(City.getWithY(map.getMap().getY())))
+								.mapToObj(idToMap::get)
+								.filter(Objects::nonNull)
+								.map(m -> m.toZaapiNode(tp.getCellId(), m.getMapId()))
+								.map(NodePricer.zaapiPrice())
+								.collect(Collectors.toSet()));
 						continue;
 					default:
 						break;
 				}
 
 			}
-			return nodes;
+			return nodes.stream().toArray(BotNode[]::new);
 		};
 	}
 

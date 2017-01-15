@@ -146,9 +146,12 @@ public class Navigator extends Info {
 	}
 
 	private Navigator runZaap(TeleporterTrigger next, ManchouMap map) {
-		List<Node> template = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), next.getCellId(), map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
+		int randomcell = getPerso().getUtilities().getRandomAccessibleCellNextTo(next.getCellId(), Pathfinding::getNeighborsWithoutDiagonals);
+		if (randomcell == -1)
+			throw new PathNotFoundException(PathContext.provided(map.getMapId(), next.getCellId(), next.getDest().getMapId(), next.getDest().getCellId(), "Path to zaap not found " + map.getInfos()));
+		List<Node> template = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), randomcell, map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
 				PathValidator.alwaysTrue());
-		List<Node> real = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), next.getCellId(), map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
+		List<Node> real = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), randomcell, map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
 				Validators.avoidingMobs(map));
 		if (template == null) throw new PathNotFoundException(PathContext.empty());
 		if (real == null) throw new MobOnPathException();
@@ -158,9 +161,12 @@ public class Navigator extends Info {
 	}
 
 	private Navigator runZaapi(TeleporterTrigger next, ManchouMap map) {
-		List<Node> template = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), next.getCellId(), map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
+		int randomcell = getPerso().getUtilities().getRandomAccessibleCellNextTo(next.getCellId(), Pathfinding::getNeighborsWithoutDiagonals);
+		if (randomcell == -1)
+			throw new PathNotFoundException(PathContext.provided(map.getMapId(), next.getCellId(), next.getDest().getMapId(), next.getDest().getCellId(), "Path to zaapi not found " + map.getInfos()));
+		List<Node> template = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), randomcell, map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
 				PathValidator.alwaysTrue());
-		List<Node> real = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), next.getCellId(), map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
+		List<Node> real = Pathfinding.getCellPath(getPerso().getPerso().getCellId(), randomcell, map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighbors,
 				Validators.avoidingMobs(map));
 		if (template == null) throw new PathNotFoundException(PathContext.empty());
 		if (real == null) throw new MobOnPathException();
