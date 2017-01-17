@@ -68,6 +68,29 @@ public class AccountCommand implements Command {
 						e.printStackTrace();
 					}
 					return;
+				case "disconnect":
+					if (args.length < 3) break;
+					Perso persso = Accounts.getPersoWithPseudo(args[1], Server.valueOf(args[2].toUpperCase()));
+					if (persso == null) {
+						LOGGER.info("Player not found");
+						return;
+					}
+					LOGGER.info("Disconnecting " + persso.getPseudo());
+					BotPerso sbp = BotFather.getPerso(persso);
+					sbp.getPerso().disconnect();
+					return;
+				case "test":
+					if (args.length < 3) break;
+					Perso persot = Accounts.getPersoWithPseudo(args[1], Server.valueOf(args[2].toUpperCase()));
+					if (persot == null) {
+						LOGGER.info("Player not found");
+						return;
+					}
+					BotPerso botp = BotFather.getPerso(persot);
+					botp.getPerso().moveToRandomCell();
+					//Threads.uSleep(2, TimeUnit.SECONDS);
+					botp.getPerso().moveToCell(268, true, false);
+					return;
 				case "view":
 					if (args.length < 3) break;
 					Perso perso = Accounts.getPersoWithPseudo(args[1], Server.valueOf(args[2].toUpperCase()));

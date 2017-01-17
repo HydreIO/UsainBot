@@ -20,8 +20,6 @@ import java.util.function.Function;
  */
 public class HarvestRunner extends Runner {
 
-	private boolean fullPod;
-
 	/**
 	 * @param perso
 	 */
@@ -32,10 +30,6 @@ public class HarvestRunner extends Runner {
 	@Override
 	public void shutdown() {
 
-	}
-
-	void resetStateMachine() {
-		fullPod = false;
 	}
 
 	public CompletableFuture<Harvesting> runHarvest(Harvesting harvesting) {
@@ -50,34 +44,29 @@ public class HarvestRunner extends Runner {
 			switch (interrupt) {
 				case FIGHT_JOIN:
 					return;
-				case OVER_POD:
 				case FULL_POD:
-					if (fullPod) return;
 					getPerso().getMind().resetState();
-					fullPod = true;
-					promise.complete(onFullPod().thenRun(this::resetStateMachine).thenCompose(i -> CompletableFuture.completedFuture(harvesting)));
-					break;
-				case TIMEOUT:
+					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(harvesting)));
+					return;
 				case ACTION_STOP:
-					getPerso().getMind().resetState();
-					promise.complete(CompletableFuture.completedFuture(harvesting));
-					break;
+					System.exit(1);
+					return;
 				case RESSOURCE_STEAL:
 				case RESSOURCE_HARVESTED:
 					getPerso().getMind().resetState();
 					String name = interrupt == Interrupt.ACTION_STOP ? "actionstop->harvest" : interrupt == Interrupt.RESSOURCE_STEAL ? "steal->harvest" : "harvested->harvest";
 					getPerso().getUtilities().setCurrentHarvest(-1);
 					promise.complete(CompletableFuture.completedFuture(harvesting).thenComposeAsync(Threads.threadContextSwitch(name, this::runHarvest), Executors.FIXED));
-					break;
+					return;
 				case DISCONNECT:
 					getPerso().getMind().resetState();
 					promise.complete(getPerso().getMind().connect(Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS)
 							.thenApplyAsync(Threads.threadContextSwitch("connect->harvest", c -> harvesting), Executors.FIXED).thenCompose(this::runHarvest));
-					break;
+					return;
 				default:
-					return; // avoid reset if non handled
+					return;
 			}
-		}, 25, TimeUnit.SECONDS);
+		});
 		LOGGER.debug("Harvest WIP");
 		return promise.thenCompose(Function.identity());
 	}

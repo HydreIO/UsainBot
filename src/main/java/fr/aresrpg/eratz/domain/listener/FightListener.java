@@ -8,17 +8,19 @@ import fr.aresrpg.commons.domain.util.Pair;
 import fr.aresrpg.dofus.structures.InfosMessage;
 import fr.aresrpg.dofus.structures.InfosMsgType;
 import fr.aresrpg.dofus.structures.stat.Stat;
+import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.domain.data.entity.Entity;
+import fr.aresrpg.tofumanchou.domain.data.entity.mob.Mob;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
+import fr.aresrpg.tofumanchou.domain.data.enums.DofusMobs;
 import fr.aresrpg.tofumanchou.domain.data.enums.Spells;
 import fr.aresrpg.tofumanchou.domain.event.aproach.InfoMessageEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityTurnStartEvent;
 import fr.aresrpg.tofumanchou.domain.event.fight.FightJoinEvent;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
-import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
-import fr.aresrpg.tofumanchou.infra.data.ManchouSpell;
+import fr.aresrpg.tofumanchou.infra.data.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,33 +88,28 @@ public class FightListener implements Listener {
 			LOGGER.debug("nearest Ennemy = " + nearestEnnemy.getLife() + " , " + nearestEnnemy.getCellId() + " id=" + nearestEnnemy.getUUID());
 			boolean cac = persoC.distanceManathan(nearestEnnemy.getCellId()) < 2;
 			if (cac) atk = (ManchouSpell) perso.getPerso().getSpells().get(Spells.FLECHE_DE_RECUL);
-			int maxPoFor = perso.getFightUtilities().getMaxPoFor(atk);
+			int maxPoFor = perso.getFightUtilities().getMaxPoFor(atk) + 1;
+			Threads.uSleep(1, TimeUnit.SECONDS);
+			LOGGER.debug("PO = 11 + " + perso.getPerso().getStat(Stat.PO));
 			boolean mobAccessible = perso.getFightUtilities().getAccessibleCells(maxPoFor).contains(nearestEnnemy.getCellId());
-			ManchouCell cellToTargetMob = perso.getFightUtilities().getCellToTargetMob(perso.getPerso().getPm(), nearestEnnemy.getCellId(), maxPoFor, false);
-			LOGGER.debug("PO TOTAL = " + perso.getPerso().getStat(Stat.PO));
-			LOGGER.debug("PO ATK = " + perso.getFightUtilities().getMaxPoFor(atk));
-			if (cellToTargetMob == null) {
-				LOGGER.debug("run to mob");
-				perso.getFightUtilities().runToMob(nearestEnnemy, false, perso.getPerso().getPm());
-				Threads.uSleep(1, TimeUnit.SECONDS);
-			} else {
-				LOGGER.debug("run to " + cellToTargetMob.getId());
-				if (!mobAccessible) perso.getFightUtilities().runTo(cellToTargetMob.getId());
-				Threads.uSleep(1, TimeUnit.SECONDS);
-				LOGGER.debug("Atk");
-				perso.getPerso().launchSpell(atk, 0, nearestEnnemy.getCellId());
+			List<Integer> accessibleCells = perso.getFightUtilities().getAccessibleCells(maxPoFor);
+			perso.getFightUtilities().runToMob(nearestEnnemy, false, perso.getPerso().getPm());
+			perso.getPerso().launchSpell(atk, 0, nearestEnnemy.getCellId());
+			if (nearestEnnemy instanceof Mob) {
+				ManchouMob m = (ManchouMob) nearestEnnemy;
+				ManchouMap map = perso.getPerso().getMap();
+				LOGGER.debug("maxpo found = " + maxPoFor);
+				LOGGER.debug("Mob " + DofusMobs.byId(m.getEntityType()) + " at " + Maps.distanceManathan(perso.getPerso().getCellId(), m.getCellId(), map.getWidth(), map.getHeight())
+						+ " cell from the player is accessible ? " + mobAccessible);
+				LOGGER.debug("accessible cells = " + accessibleCells + " contains " + nearestEnnemy.getCellId() + " ? " + mobAccessible);
 			}
-			fallBack(perso);
+			LOGGER.debug("Run away");
+			//	perso.getFightUtilities().runAwayFromMobs(); // si il reste des pm alors le perso va fuir, si jamais il est trop loin il n'aura plus de pm car il aura déja rush le mob
+			Threads.uSleep(1, TimeUnit.SECONDS);
+			perso.getPerso().endTurn();
 		} catch (Exception e) {
 			LOGGER.error(e);
 		}
-	}
-
-	public void fallBack(BotPerso perso) {
-		LOGGER.debug("Run away");
-		perso.getFightUtilities().runAwayFromMobs(); // si il reste des pm alors le perso va fuir, si jamais il est trop loin il n'aura plus de pm car il aura déja rush le mob
-		Threads.uSleep(1, TimeUnit.SECONDS);
-		perso.getPerso().endTurn();
 	}
 
 	/**

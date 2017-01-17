@@ -20,6 +20,8 @@ public class Connector extends Info {
 	 */
 	public Connector(BotPerso perso, long time, TimeUnit unit) {
 		super(perso);
+		this.time = time;
+		this.unit = unit;
 	}
 
 	public void connect() {

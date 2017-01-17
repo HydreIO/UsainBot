@@ -9,11 +9,18 @@ import fr.aresrpg.eratz.domain.data.player.info.Info;
  */
 public class Fighting extends Info {
 
+	private final FightBehavior behavior;
+
 	/**
 	 * @param perso
 	 */
 	public Fighting(BotPerso perso) {
 		super(perso);
+		this.behavior = Fights.getBehavior(perso.getPerso().getClasse(), perso.getPerso().getLevel());
+	}
+
+	public void playTurn() {
+		behavior.playTurn();
 	}
 
 	@Override

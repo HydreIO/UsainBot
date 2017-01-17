@@ -61,10 +61,7 @@ public class Neighbors {
 						nodes.add(new BotNode(destmap.getMap().getX(), destmap.getMap().getY(), 0, tp));
 						continue;
 					case ZAAP:
-						nodes.addAll(IntStream.of(Zaap.getMapsIds()).filter(i -> {
-							boolean know = knowZaap.test(i);
-							return know;
-						}).mapToObj(idToMap::get).filter(Objects::nonNull)
+						nodes.addAll(IntStream.of(Zaap.getMapsIds()).filter(knowZaap).mapToObj(idToMap::get).filter(Objects::nonNull)
 								.map(m -> m.toZaapNode(tp.getCellId(), m.getMapId()))
 								.map(NodePricer.zaapPrice())
 								.collect(Collectors.toSet()));

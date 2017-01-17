@@ -33,13 +33,15 @@ public class ConnectionRunner extends Info {
 		CompletableFuture<CompletableFuture<Connector>> promise = new CompletableFuture<>();
 		getPerso().getMind().publishState(interrupt -> {
 			switch (interrupt) {
-				case CONNECTED:
+				case MOVED:
+					getPerso().getMind().resetState();
 					promise.complete(CompletableFuture.completedFuture(connector));
 					break;
 				case DISCONNECT:
 				case SAVE:
 				case CLOSED:
 				case LOGIN_ERROR:
+					getPerso().getMind().resetState();
 					DofusServer server = Manchou.getServer(getPerso().getPerso().getServer());
 					long time = Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX);
 					TimeUnit unit = TimeUnit.MILLISECONDS;
@@ -63,8 +65,7 @@ public class ConnectionRunner extends Info {
 				default:
 					return; // avoid reset if non handled
 			}
-			getPerso().getMind().resetState();
-		}, 2, TimeUnit.HOURS);
+		});
 		connector.connect();
 		return promise.thenCompose(Function.identity());
 	}

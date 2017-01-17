@@ -46,27 +46,29 @@ public class Harvesting extends Info {
 	public boolean harvest() {
 		ManchouMap map = getPerso().getPerso().getMap();
 		Set<Integer> exclude = new HashSet<>();
-		List<Node> path = null;
+		int cell = -1;
 		Pair<Integer, Interractable> pair = null;
-		while (path == null) {
+		while (cell == -1) {
 			pair = getNearestSpawnedRessource(exclude);
 			if (pair == null) return false;
-			path = getAccessiblePath(pair.getFirst());
-			if (path == null) exclude.add(pair.getFirst());
+			cell = getAccessiblePath(pair.getFirst());
+			if (cell == -1) exclude.add(pair.getFirst());
 			else break;
 		}
 		Skills skill = getPerso().getUtilities().getSkillFor(pair.getSecond());
-		int cell = pair.getFirst();
 		Objects.requireNonNull(skill);
+		final int cellid = pair.getFirst();
+		boolean same = cell == getPerso().getPerso().getCellId();
 		Executors.SCHEDULED.schedule(() -> {
+			if (!map.getCells()[cellid].isRessourceSpawned()) return;
 			if (Randoms.nextBool()) getPerso().getPerso().sendSmiley(Smiley.getRandomTrollSmiley());
-			getPerso().getUtilities().setCurrentHarvest(cell);
-			getPerso().getPerso().interract(skill, cell);
-		}, getPerso().getPerso().move(path, false), TimeUnit.MILLISECONDS);
+			getPerso().getUtilities().setCurrentHarvest(cellid);
+			getPerso().getPerso().interract(skill, cellid);
+		}, same ? 0 : getPerso().getPerso().moveToCell(cell, true, true), TimeUnit.MILLISECONDS);
 		return true;
 	}
 
-	private List<Node> getAccessiblePath(int cell) {
+	private int getAccessiblePath(int cell) {
 		ManchouMap map = getPerso().getPerso().getMap();
 		ManchouCell c = map.getCells()[cell];
 		int cellId = getPerso().getPerso().getCellId();
@@ -78,9 +80,9 @@ public class Harvesting extends Info {
 			if (manchouCell.hasMobGroupOn()) continue;
 			List<Node> cellPath = Pathfinding.getCellPath(cellId, manchouCell.getId(), map.getProtocolCells(), map.getWidth(), map.getHeight(),
 					Pathfinding::getNeighbors, Validators.avoidingMobs(map));
-			if (cellPath != null) return cellPath;
+			if (cellPath != null) return manchouCell.getId();
 		}
-		return null;
+		return -1;
 	}
 
 	private Pair<Integer, Interractable> getNearestSpawnedRessource(Set<Integer> exclude) {

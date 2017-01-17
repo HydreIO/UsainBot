@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.util;
 
+import fr.aresrpg.eratz.domain.ia.Interrupt;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 
 import java.awt.Point;
@@ -19,6 +20,10 @@ public class ComparatorUtil {
 				? ((pf.x - playerPos.x) * (pf.x - playerPos.x) + (pf.y - playerPos.y) * (pf.y - playerPos.y))
 						- ((ps.x - playerPos.x) * (ps.x - playerPos.x) + (ps.y - playerPos.y) * (ps.y - playerPos.y))
 				: (Math.abs(pf.x - playerPos.x) + Math.abs(pf.y - playerPos.y)) - (Math.abs(ps.x - playerPos.x) + Math.abs(ps.y - playerPos.y));
+	}
+
+	public static int comparingInterrupt(Interrupt first, Interrupt second) {
+		return first.getPriority() - second.getPriority();
 	}
 
 }

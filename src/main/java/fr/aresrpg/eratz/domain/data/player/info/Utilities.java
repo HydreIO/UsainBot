@@ -262,4 +262,8 @@ public class Utilities extends Info {
 		return (int) (i.isEmpty() ? 0 : i.stream().mapToLong(Item::getAmount).sum());
 	}
 
+	public boolean isFullPod() {
+		return getPodsPercent() > 94;
+	}
+
 }

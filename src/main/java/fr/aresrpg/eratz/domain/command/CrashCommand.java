@@ -12,6 +12,7 @@ import fr.aresrpg.dofus.protocol.party.client.PartyInvitePacket;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
+import fr.aresrpg.eratz.domain.listener.AntiBotListener;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.entity.Entity;
@@ -32,9 +33,17 @@ public class CrashCommand implements Command {
 
 	@Override
 	public void trigger(String[] args) {
-		if (args.length != 0) {
-			if (args.length > 3)
-				switch (args[0]) {
+		if (args.length > 3) {
+			switch (args[0]) {
+				case "await":
+					Perso persos = Accounts.getPersoWithPseudo(args[1], Server.valueOf(args[2].toUpperCase()));
+					if (persos == null) {
+						LOGGER.error("Player not found");
+						return;
+					}
+					BotPerso bps = BotFather.getPerso(persos);
+					AntiBotListener.registerBotToCrash(bps, Long.parseLong(args[3]));
+					break;
 				case "duel":
 					Perso perso = Accounts.getPersoWithPseudo(args[1], Server.valueOf(args[2].toUpperCase()));
 					if (perso == null) {
@@ -79,7 +88,7 @@ public class CrashCommand implements Command {
 					return;
 			}
 		}
-		LOGGER.error("Usage: crash <party|duel> <perso> <server> <target-name>");
+		LOGGER.error("Usage: crash <party|duel|await> <perso> <server> <target>");
 	}
 
 }

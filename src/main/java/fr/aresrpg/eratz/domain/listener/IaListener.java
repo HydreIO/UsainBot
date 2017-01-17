@@ -18,10 +18,10 @@ import fr.aresrpg.tofumanchou.domain.event.aproach.LoginErrorEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityPlayerJoinMapEvent;
 import fr.aresrpg.tofumanchou.domain.event.fight.FightEndEvent;
 import fr.aresrpg.tofumanchou.domain.event.fight.FightJoinEvent;
-import fr.aresrpg.tofumanchou.domain.event.item.PodsUpdateEvent;
 import fr.aresrpg.tofumanchou.domain.event.map.FrameUpdateEvent;
 import fr.aresrpg.tofumanchou.domain.event.map.HarvestTimeReceiveEvent;
-import fr.aresrpg.tofumanchou.domain.event.player.*;
+import fr.aresrpg.tofumanchou.domain.event.player.ZaapGuiOpenEvent;
+import fr.aresrpg.tofumanchou.domain.event.player.ZaapUseErrorEvent;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.*;
@@ -60,30 +60,32 @@ public class IaListener implements Listener {
 		if (perso == null || e.getPlayer().getUUID() != perso.getPerso().getUUID() || perso.isInFight()) return;
 		perso.getUtilities().useRessourceBags();
 		LOGGER.debug("Joined " + perso.getPerso().getMap().getInfos());
-		perso.getMind().accept(Interrupt.MOVED);
+		perso.getMind().handleState(Interrupt.MOVED);
 	}
 
 	@Subscribe
 	public void onDisconnect(BotDisconnectEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso != null) perso.getMind().accept(Interrupt.DISCONNECT);
+		if (perso == null) return;
+		perso.getMind().handleState(Interrupt.DISCONNECT);
 	}
 
 	@Subscribe
 	public void onCrash(ClientCrashEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso != null) perso.getMind().accept(Interrupt.DISCONNECT);
+		if (perso == null) return;
+		perso.getMind().handleState(Interrupt.DISCONNECT);
 	}
 
 	@Subscribe
 	public void onFight(FightJoinEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null) return;
-		Executors.FIXED.execute(() -> {
+		Executors.SCHEDULED.schedule(() -> {
 			FightListener.register();
 			FightListener.getInstance().onJoin(e);
-		});
-		perso.getMind().accept(Interrupt.FIGHT_JOIN);
+		}, 1, TimeUnit.SECONDS);
+		perso.getMind().handleState(Interrupt.FIGHT_JOIN);
 	}
 
 	@Subscribe
@@ -96,19 +98,13 @@ public class IaListener implements Listener {
 	@Subscribe
 	public void onBan(LoginErrorEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso != null) perso.getMind().accept(Interrupt.LOGIN_ERROR);
+		if (perso != null) perso.getMind().handleState(Interrupt.LOGIN_ERROR);
 	}
 
 	@Subscribe
 	public void onServer(ServerStateEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso != null) perso.getMind().accept(e.getServer().getState() == ServerState.SAVING ? Interrupt.SAVE : Interrupt.CLOSED);
-	}
-
-	@Subscribe
-	public void onConnect(PersoSelectEvent e) {
-		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso != null) Executors.SCHEDULED.schedule(() -> perso.getMind().accept(Interrupt.CONNECTED), 5, TimeUnit.SECONDS);
+		if (perso != null) perso.getMind().handleState(e.getServer().getState() == ServerState.SAVING ? Interrupt.SAVE : Interrupt.CLOSED);
 	}
 
 	@Subscribe
@@ -116,12 +112,14 @@ public class IaListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null) return;
 		// on clear les zaap pour ne plus les utiliser
-		LOGGER.debug("CLEAR ZAAP !!");
-		if (perso.getPerso().getInventory().getKamas() < 1000) perso.getUtilities().getZaaps().clear(); // TODO faire un systeme qui attend un event de refill de kamas pour set la liste a null (comme ça il retournera au zaap pour l'init lors du prochain move)
+		if (perso.getPerso().getInventory().getKamas() < 1000) {
+			LOGGER.debug("CLEAR ZAAP !!");
+			perso.getUtilities().getZaaps().clear(); // TODO faire un systeme qui attend un event de refill de kamas pour set la liste a null (comme ça il retournera au zaap pour l'init lors du prochain move)
+		}
 		Executors.SCHEDULED.schedule(() -> {
 			perso.getPerso().leaveZaap();
 			Threads.uSleep(500, TimeUnit.MILLISECONDS);
-			perso.getMind().accept(Interrupt.MOVED); // on vient d'enregistrer les zaap donc on peut sortir (comme il n'est pas sur la bonne map le path sera recalculé)
+			perso.getMind().handleState(Interrupt.MOVED); // on vient d'enregistrer les zaap donc on peut sortir (comme il n'est pas sur la bonne map le path sera recalculé)
 		}, 500, TimeUnit.MILLISECONDS);
 	}
 
@@ -134,17 +132,10 @@ public class IaListener implements Listener {
 	}
 
 	@Subscribe
-	public void onPod(PodsUpdateEvent e) {
-		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso == null || perso.getUtilities().getPodsPercent() < 95) return;
-		perso.getMind().accept(Interrupt.FULL_POD);
-	}
-
-	@Subscribe
 	public void onError(ActionErrorEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso == null || perso.isInFight()) return;
-		perso.getMind().accept(Interrupt.ACTION_STOP);
+		if (perso == null || perso.isInFight() || perso.getUtilities().getPodsPercent() > 99) return;
+		perso.getMind().handleState(Interrupt.ACTION_STOP);
 	}
 
 	@Subscribe
@@ -153,20 +144,28 @@ public class IaListener implements Listener {
 		if (perso == null) return;
 		if ((e.getType() == InfosMsgType.ERROR && InfosMessage.TROP_CHARGE_.getId() == e.getMessageId())
 				|| (e.getType() == InfosMsgType.INFOS && InfosMessage.RECOLTE_LOST_FULL_POD.getId() == e.getMessageId())) {
-			perso.getMind().accept(Interrupt.OVER_POD);
+			perso.getMind().handleState(Interrupt.FULL_POD);
 		}
+	}
+
+	@Subscribe
+	public void onSteal(HarvestTimeReceiveEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso == null) return;
+		boolean steal = e.getCellId() == perso.getUtilities().getCurrentHarvest() && e.getPlayer().getUUID() != perso.getPerso().getUUID();
+		LOGGER.debug(e.getPlayer().getPseudo() + " Harvestime ! steal = " + steal);
+		if (steal) perso.getMind().handleState(Interrupt.RESSOURCE_STEAL);
 	}
 
 	@Subscribe
 	public void onFrame(final FrameUpdateEvent e) {
 		final BotPerso perso = BotFather.getPerso(e.getClient());
-		if (e.getCell().getId() == perso.getUtilities().getCurrentHarvest() && e.getFrame() == 3) perso.getMind().accept(Interrupt.RESSOURCE_HARVESTED);
-	}
-
-	@Subscribe
-	public void onRessourceStartHarvest(final HarvestTimeReceiveEvent e) {
-		final BotPerso perso = BotFather.getPerso(e.getClient());
-		if (e.getCellId() == perso.getUtilities().getCurrentHarvest() && perso.getPerso().getUUID() != e.getPlayer().getUUID()) perso.getMind().accept(Interrupt.RESSOURCE_STEAL);
+		if (perso == null) return;
+		if (e.getCell().getId() != perso.getUtilities().getCurrentHarvest()) {
+			if (e.getCell().isLayerObject2Interactive()) perso.getMind().handleState(Interrupt.RESSOURCE_SPAWN);
+			return;
+		}
+		if (e.getFrame() == 3) perso.getMind().handleState(Interrupt.RESSOURCE_HARVESTED);
 	}
 
 }

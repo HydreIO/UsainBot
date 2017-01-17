@@ -20,18 +20,12 @@ import java.util.function.Function;
  */
 public class NavigationRunner extends Runner {
 
-	private boolean fullPod;
-
 	public NavigationRunner(BotPerso perso) {
 		super(perso);
 	}
 
 	@Override
 	public void shutdown() {
-	}
-
-	void resetStateMachine() {
-		fullPod = false;
 	}
 
 	public CompletableFuture<Navigator> runNavigation(Navigator navigator) {
@@ -44,24 +38,17 @@ public class NavigationRunner extends Runner {
 					getPerso().getMind().resetState();
 					promise.complete(getPerso().getMind().connect(Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS)
 							.thenApplyAsync(Threads.threadContextSwitch("connect->navigate", c -> navigator), Executors.FIXED).thenCompose(this::runNavigation));
-					break;
+					return;
 				case FIGHT_JOIN: // TODO
 					return;
-				case OVER_POD:
 				case FULL_POD:
-					if (fullPod) return;
 					getPerso().getMind().resetState();
-					fullPod = true;
-					promise.complete(onFullPod().thenRun(this::resetStateMachine).thenCompose(i -> CompletableFuture.completedFuture(navigator)));
-					break;
-				case ACTION_STOP: // on laisse le notify moved pour recalculer un path
-					if (getPerso().getUtilities().getPodsPercent() > 95) getPerso().getUtilities().destroyHeaviestRessource();
-					else {
-						//getPerso().getMind().resetState();
-						getPerso().getPerso().disconnect();
-						break;
-					}
-				case TIMEOUT:
+					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(navigator)));
+					return;
+				case ACTION_STOP:
+					getPerso().getMind().resetState();
+					System.exit(1);
+					return;
 				case MOVED:
 					getPerso().getMind().resetState();
 					String name = interrupt == Interrupt.ACTION_STOP ? "actionstop->navigate" : "moved->navigate";
@@ -69,20 +56,19 @@ public class NavigationRunner extends Runner {
 					if (navigator.isFinished()) {
 						LOGGER.debug("navigation completed !");
 						navigator.resetPersoPath();
-						// complete async pour éviter que la state soit pas reset quand la suite des actions s'éffectue (probleme rencontré)
 						promise.complete(CompletableFuture.completedFuture(navigator));
 					} else promise.complete(CompletableFuture.completedFuture(navigator).thenComposeAsync(Threads.threadContextSwitch(name, this::runNavigation), Executors.FIXED));
-					break;
+					return;
 				default:
 					return; // avoid reset if non handled
 			}
-		}, 10, TimeUnit.SECONDS);
+		});
 		if (!getPerso().getUtilities().isOnPath()) {
 			LOGGER.debug("NOT ON PATH RECALCULING");
 			navigator.compilePath();
 		}
 		navigator.runToNext();
-		LOGGER.debug("runned to next ok !");
+		LOGGER.debug("runToNext() called !");
 		return promise.thenCompose(Function.identity());
 	}
 

@@ -140,6 +140,7 @@ public class FightUtilities extends Info {
 		return true;
 	}
 
+	@SuppressWarnings("deprecation")
 	public void runTo(final int cell) {
 		final int width = getPerso().getPerso().getMap().getWidth();
 		final int height = getPerso().getPerso().getMap().getHeight();
@@ -151,13 +152,14 @@ public class FightUtilities extends Info {
 		int dist = Maps.distanceManathan(cellId, cell, width, height);
 		final PathValidator canGo = (x1, y1, x2, y2) -> {
 			final int id = Maps.getIdRotated(x2, y2, width, height);
-			return !getPerso().getPerso().getMap().getCells()[id].hasEntityOn();
+			ManchouCell manchouCell = getPerso().getPerso().getMap().getCells()[id];
+			return !manchouCell.hasEntityOn() && manchouCell.isWalkeable() && manchouCell.isLineOfSight();
 		};
 		final List<Node> cellPath = Pathfinding.getCellPath(cellId, cell, getPerso().getPerso().getMap().getProtocolCells(), width, height, Pathfinding::getNeighborsWithoutDiagonals, canGo);
 		// perso.setPm(perso.getPm() - dist); // TEMP REMOVE PM car on attend pas que le serv nous le dise pour pouvoir finir notre tour, de tt façon il reset apres
 		LOGGER.warning("Trying to move from " + cellId + " to " + cell + " path=" + cellPath);
 		if (cellPath == null) throw new NullPointerException("PATH INVALID -_-");
-		getPerso().getPerso().move(cellPath, false);
+		getPerso().getPerso().move(cellPath);
 	}
 
 	/**

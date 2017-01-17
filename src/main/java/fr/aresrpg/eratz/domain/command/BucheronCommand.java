@@ -9,6 +9,7 @@ import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.path.Paths;
 import fr.aresrpg.eratz.domain.ia.path.zone.HarvestZone;
+import fr.aresrpg.eratz.domain.util.functionnal.FutureHandler;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
@@ -50,7 +51,7 @@ public class BucheronCommand implements Command {
 				return;
 			}
 			BotPerso bdp = BotFather.getPerso(pers);
-			HarvestZone zone = Paths.BONTA.getHarvestPath(bdp);
+			HarvestZone zone = Paths.BOMBU.getHarvestPath(bdp);
 			Executors.FIXED.execute(() -> {
 				try {
 					setHarvest(harvest(bdp, zone));
@@ -69,10 +70,7 @@ public class BucheronCommand implements Command {
 		return perso.getMind().harvest(zone.getRessources())
 				.thenApply(h -> MapsManager.getMap(zone.getNextMap()))
 				.thenCompose(perso.getMind()::moveToMap)
-				.handle((v, e) -> {
-					if (e != null) LOGGER.severe(e);
-					return v;
-				}).thenCompose(c -> harvest(perso, zone));
+				.handle(FutureHandler.handleEx()).thenCompose(c -> harvest(perso, zone));
 	}
 
 }

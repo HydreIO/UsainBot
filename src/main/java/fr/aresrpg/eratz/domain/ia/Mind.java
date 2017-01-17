@@ -9,11 +9,14 @@ import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
 import fr.aresrpg.eratz.domain.ia.connection.Connector;
+import fr.aresrpg.eratz.domain.ia.fight.Fighting;
 import fr.aresrpg.eratz.domain.ia.harvest.Harvesting;
 import fr.aresrpg.eratz.domain.ia.navigation.Navigator;
+import fr.aresrpg.eratz.domain.util.functionnal.FutureHandler;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -22,45 +25,20 @@ import java.util.concurrent.*;
 public class Mind extends Info {
 
 	private Consumer<Interrupt> state;
-	private boolean park = false;
-	private ScheduledFuture<?> sch;
 
 	public Mind(BotPerso perso) {
 		super(perso);
 		resetState();
 	}
 
-	public void publishState(Consumer<Interrupt> state, long timeout, TimeUnit unit) {
+	public void publishState(Consumer<Interrupt> state) {
 		LOGGER.debug("publish state");
 		this.state = state;
-		sch = Executors.SCHEDULED.schedule(() -> accept(Interrupt.TIMEOUT), timeout, unit);
 	}
 
-	/**
-	 * @return the state
-	 */
-	public Consumer<Interrupt> getState() {
-		return state;
-	}
-
-	public synchronized void accept(Interrupt interrupt) {
-		LOGGER.debug("Try " + interrupt);
-		if (park) {
-			LOGGER.debug("Refuse " + interrupt);
-			return;
-		}
-		parkMind();
-		if (sch != null) sch.cancel(true);
+	public void handleState(Interrupt interrupt) {
 		LOGGER.debug("Accepting " + interrupt);
-		CompletableFuture.completedFuture(interrupt).thenAcceptAsync(Threads.threadContextSwitch("mind->accepting", state::accept), Executors.FIXED).thenRun(this::unparkMind);
-	}
-
-	private void parkMind() {
-		park = true;
-	}
-
-	private void unparkMind() {
-		park = false;
+		CompletableFuture.completedFuture(interrupt).thenAcceptAsync(Threads.threadContextSwitch("mind->accepting", state::accept), Executors.FIXED).handle(FutureHandler.handleEx());
 	}
 
 	public void resetState() {
@@ -93,14 +71,14 @@ public class Mind extends Info {
 	}
 
 	public CompletableFuture<Connector> connect(long time, TimeUnit unit) {
+		LOGGER.debug("Mind -> connect");
 		return CompletableFuture.completedFuture(new Connector(getPerso(), time, unit)).thenComposeAsync(Threads.threadContextSwitch("mind->connect", getPerso().getConRunner()::runConnection),
 				Executors.FIXED);
 	}
 
-	public static enum MindState {
-		MOVEMENT,
-		LOGIN,
-		HARVEST,
+	public CompletableFuture<Fighting> fight() {
+		LOGGER.debug("Mind -> fight");
+		return CompletableFuture.completedFuture(new Fighting(getPerso())).thenComposeAsync(Threads.threadContextSwitch("mind->fight", getPerso().getFiRunner()::runFight), Executors.FIXED);
 	}
 
 	@Override

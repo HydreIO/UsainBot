@@ -141,7 +141,7 @@ public class Navigator extends Info {
 		if (template == null) throw new PathNotFoundException(PathContext.empty());
 		if (real == null) throw new MobOnPathException();
 		getPerso().getUtilities().setNextMapId(next.getDest().getMapId());
-		getPerso().getPerso().move(real, true);
+		getPerso().getPerso().moveToCell(next.getCellId(), true, true);
 		return this;
 	}
 
@@ -157,7 +157,8 @@ public class Navigator extends Info {
 		if (real == null) throw new MobOnPathException();
 		getPerso().getUtilities().setNextMapId(next.getDest().getMapId());
 		boolean onCell = template.size() == 1;
-		Executors.SCHEDULED.schedule(() -> getPerso().getPerso().useZaap(next.getCellId(), Zaap.getWithMap(next.getDest().getMapId())), onCell ? 100 : getPerso().getPerso().move(real, true),
+		Executors.SCHEDULED.schedule(() -> getPerso().getPerso().useZaap(next.getCellId(), Zaap.getWithMap(next.getDest().getMapId())),
+				onCell ? 100 : getPerso().getPerso().moveToCell(randomcell, true, true),
 				TimeUnit.MILLISECONDS);
 		return this;
 	}
@@ -174,7 +175,8 @@ public class Navigator extends Info {
 		if (real == null) throw new MobOnPathException();
 		getPerso().getUtilities().setNextMapId(next.getDest().getMapId());
 		boolean onCell = template.size() == 1;
-		Executors.SCHEDULED.schedule(() -> getPerso().getPerso().useZaapi(next.getCellId(), Zaapi.getWithMap(next.getDest().getMapId())), onCell ? 100 : getPerso().getPerso().move(real, true),
+		Executors.SCHEDULED.schedule(() -> getPerso().getPerso().useZaapi(next.getCellId(), Zaapi.getWithMap(next.getDest().getMapId())),
+				onCell ? 100 : getPerso().getPerso().moveToCell(randomcell, true, true),
 				TimeUnit.MILLISECONDS);
 		return this;
 	}

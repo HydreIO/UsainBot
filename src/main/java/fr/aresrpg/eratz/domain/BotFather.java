@@ -90,7 +90,7 @@ public class BotFather implements ManchouPlugin {
 
 	// account pktclient Marine-Lpn eratz cMK@|
 	// account pkt Marine-Lpn eratz eU1
-	// account pkt Bratva-Nazar henual Af
+	// account pkt Bratva-Nazar henual GKE0|442
 
 	// account view bratva-nazar henual
 	// account view marine-lpn eratz
@@ -99,14 +99,16 @@ public class BotFather implements ManchouPlugin {
 	// fight henual bratva-nazar
 	// goto 10356 marine-lpn eratz
 	// goto 5703 bratva-nazar henual
-	// goto 21,-30 bratva-nazar henual Motra/-
+	// goto 21,-30 bratva-nazar henual
 	// crash party bratva-nazar henual Shakraa
-	// crash party bratva-nazar henual Motra
+	// crash party bratva-nazar henual Xfear
 	// crash party bratva-nazar henual Stevity 
-	// crash duel bratva-nazar henual 534644 
-	// crash duel bratva-nazar henual 465589
+	// crash duel bratva-nazar henual 525448 
+	// crash await bratva-nazar henual 525448
 
 	// account connect bratva-nazar henual
+	// account disconnect bratva-nazar henual
+	// account test bratva-nazar henual
 	@Override
 	public void onEnable() {
 		instance = this;
@@ -126,8 +128,8 @@ public class BotFather implements ManchouPlugin {
 		Accounts.registerAccount("SceatDrop3");
 		new ConnectionListener();
 		MapViewListener.register();
-		//	FightListener.register();
 		MapsDataListener.register();
+		AntiBotListener.register();
 		IaListener.register();
 		MapsManager.init();
 		Manchou.registerCommand(new WhoamiCommand());
