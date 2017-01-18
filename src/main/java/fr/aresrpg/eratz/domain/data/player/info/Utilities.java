@@ -16,9 +16,9 @@ import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.util.UtilFunc;
-import fr.aresrpg.eratz.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
 import fr.aresrpg.tofumanchou.domain.data.item.Item;
+import fr.aresrpg.tofumanchou.domain.util.Validators;
 import fr.aresrpg.tofumanchou.infra.data.ManchouItem;
 import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
@@ -188,6 +188,8 @@ public class Utilities extends Info {
 
 	public void depositBank() {
 		Threads.uSleep(2, TimeUnit.SECONDS);
+		LOGGER.debug("contenu inventaire = " + getPerso().getPerso().getInventory().getContents().values());
+		LOGGER.debug("contenu bank = " + getPerso().getPerso().getAccount().getBank().getContents().values());
 		final Set<Item> inv = getPerso().getPerso().getInventory().getContents().values().stream().map(i -> (ManchouItem) i).filter(UtilFunc.needToDeposit(getPerso())).collect(Collectors.toSet());
 		final MovedItem[] array = inv.stream().map(i -> (ManchouItem) i).map(UtilFunc.deposit(getPerso())).filter(Objects::nonNull).toArray(MovedItem[]::new);
 		LOGGER.info(AnsiColor.GREEN + "à déposé : "
@@ -200,7 +202,8 @@ public class Utilities extends Info {
 		MovedItem[] toRetrieve = getPerso().getPerso().getAccount().getBank().getContents().values().stream().map(i -> (ManchouItem) i).map(UtilFunc.retrieve(getPerso())).filter(Objects::nonNull)
 				.toArray(MovedItem[]::new);
 		LOGGER.info(AnsiColor.GREEN + "à récupéré : "
-				+ Arrays.stream(toRetrieve).map(m -> getPerso().getPerso().getAccount().getBank().getItem(m.getItemUid())).map(Item::showInfos).collect(Collectors.joining(",", "[", "]"))
+				+ Arrays.stream(toRetrieve).map(m -> ((ManchouItem) getPerso().getPerso().getAccount().getBank().getItem(m.getItemUid())).clone(m.getAmount())).map(Item::showInfos)
+						.collect(Collectors.joining(",", "[", "]"))
 				+ " en banque !");
 		Arrays.stream(toRetrieve).forEach(i -> {
 			getPerso().getPerso().moveItem(i);

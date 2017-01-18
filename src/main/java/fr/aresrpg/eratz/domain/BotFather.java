@@ -87,24 +87,24 @@ public class BotFather implements ManchouPlugin {
 	}
 
 	//account test Marine-Lpn eratz
-
 	// account pktclient Marine-Lpn eratz cMK@|
 	// account pkt Marine-Lpn eratz eU1
-	// account pkt Bratva-Nazar henual GKE0|442
+	// account pkt Bratva-Nazar henual GA001cemdfUcgldgzegy
 
 	// account view bratva-nazar henual
+	// account stopspeak
 	// account view marine-lpn eratz
 	// whoami henual bratva-nazar
 	// bucheron henual bratva-nazar
 	// fight henual bratva-nazar
-	// goto 10356 marine-lpn eratz
-	// goto 5703 bratva-nazar henual
+	// goto map 10356 marine-lpn eratz
+	// goto cell 318 bratva-nazar henual
 	// goto 21,-30 bratva-nazar henual
 	// crash party bratva-nazar henual Shakraa
 	// crash party bratva-nazar henual Xfear
 	// crash party bratva-nazar henual Stevity 
-	// crash duel bratva-nazar henual 525448 
-	// crash await bratva-nazar henual 525448
+	// crash duel bratva-nazar henual 515564 
+	// crash await bratva-nazar henual 521011
 
 	// account connect bratva-nazar henual
 	// account disconnect bratva-nazar henual

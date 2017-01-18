@@ -15,6 +15,7 @@ import fr.aresrpg.tofumanchou.domain.data.map.Carte;
 import fr.aresrpg.tofumanchou.domain.event.BotStartMoveEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.*;
 import fr.aresrpg.tofumanchou.domain.event.player.MapJoinEvent;
+import fr.aresrpg.tofumanchou.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
@@ -91,7 +92,7 @@ public class MapViewListener implements Listener {
 				botPerso.getView().setAccessible(accesibleCells.stream().collect(Collectors.toList()), i, 10);
 				List<Node> cellPath = Pathfinding.getCellPath(botPerso.getPerso().getCellId(), i, botPerso.getPerso().getMap().getProtocolCells(), e.getMap().getWidth(), e.getMap().getHeight(),
 						Pathfinding::getNeighbors,
-						botPerso.getPerso()::canGoOnCellAvoidingMobs);
+						Validators.avoidingMobs(botPerso.getPerso().getMap()));
 				if (cellPath == null) LOGGER.debug("Path not found !");
 				else botPerso.getView().setPath(cellPath, Color.DARKRED);
 			});

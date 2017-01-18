@@ -16,6 +16,7 @@ import fr.aresrpg.eratz.domain.util.exception.PathNotFoundException;
 import fr.aresrpg.eratz.domain.util.functionnal.PathContext;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
+import fr.aresrpg.tofumanchou.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
@@ -92,6 +93,7 @@ public class Navigator extends Info {
 	}
 
 	public Navigator runToNext() {
+		if (!getPerso().isOnline()) return this;
 		TeleporterTrigger next = path.peek();
 		ManchouMap map = getPerso().getPerso().getMap();
 		switch (next.getTeleportType()) {

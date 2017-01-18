@@ -29,32 +29,40 @@ public class GotoCommand implements Command {
 
 	@Override
 	public void trigger(String[] args) {
-		if (args.length >= 3) {
-			int id = Integer.parseInt(args[0]);
-			Perso perso = Accounts.getPersoWithPseudo(args[1], Server.valueOf(args[2].toUpperCase()));
+		if (args.length >= 4) {
+			int id = Integer.parseInt(args[1]);
+			Perso perso = Accounts.getPersoWithPseudo(args[2], Server.valueOf(args[3].toUpperCase()));
+			BotPerso bp = BotFather.getPerso(perso);
 			if (perso == null) {
 				LOGGER.info("Player not found");
 				return;
 			}
-			BotMap map = MapsManager.getMap(id);
-			if (map == null) {
-				LOGGER.error("Map inconnue !");
-				return;
+			switch (args[0]) {
+				case "map":
+					BotMap map = MapsManager.getMap(id);
+					if (map == null) {
+						LOGGER.error("Map inconnue !");
+						return;
+					}
+					LOGGER.info("Going to " + map.getMap().getInfos());
+					bp.getMind().moveToMap(map).thenRunAsync(() -> {
+						BotFather.broadcast(Chat.ADMIN, perso.getPseudo() + " est arrivé à destination ! " + map.getMap().getInfos());
+						if (id == Bank.BONTA.getMapId()) {
+							bp.getUtilities().openBank();
+							Threads.uSleep(1, TimeUnit.SECONDS);
+							bp.getUtilities().depositBank();
+						}
+					});
+					return;
+				case "cell":
+					LOGGER.info("Going to cell " + id);
+					bp.getPerso().moveToCell(id, true, false);
+					return;
+				default:
+					break;
 			}
-			BotPerso bp = BotFather.getPerso(perso);
-			LOGGER.info("Going to " + map.getMap().getInfos());
-			bp.getMind().moveToMap(map).thenRunAsync(() -> {
-				BotFather.broadcast(Chat.ADMIN, perso.getPseudo() + " est arrivé à destination ! " + map.getMap().getInfos());
-				if (id == Bank.BONTA.getMapId()) {
-					bp.getUtilities().openBank();
-					Threads.uSleep(1, TimeUnit.SECONDS);
-					bp.getUtilities().depositBank();
-				}
-			});
-			LOGGER.severe("started");
-			return;
 		}
-		LOGGER.error("Usage: goto <mapid> <pseudo> <server>");
+		LOGGER.error("Usage: goto <map/cell> <mapid/cellid> <pseudo> <server>");
 	}
 
 }

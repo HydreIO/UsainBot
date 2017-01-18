@@ -1,5 +1,7 @@
 package fr.aresrpg.eratz.domain.ia.harvest;
 
+import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
+
 import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.structures.Skills;
@@ -8,8 +10,8 @@ import fr.aresrpg.dofus.util.*;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
-import fr.aresrpg.eratz.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.data.enums.Smiley;
+import fr.aresrpg.tofumanchou.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
@@ -44,6 +46,7 @@ public class Harvesting extends Info {
 	 * @return false is there is no more ressource on the map, true otherwise
 	 */
 	public boolean harvest() {
+		if (!getPerso().isOnline()) return false;
 		ManchouMap map = getPerso().getPerso().getMap();
 		Set<Integer> exclude = new HashSet<>();
 		int cell = -1;
@@ -59,11 +62,12 @@ public class Harvesting extends Info {
 		Objects.requireNonNull(skill);
 		final int cellid = pair.getFirst();
 		boolean same = cell == getPerso().getPerso().getCellId();
+		getPerso().getUtilities().setCurrentHarvest(cellid);
 		Executors.SCHEDULED.schedule(() -> {
 			if (!map.getCells()[cellid].isRessourceSpawned()) return;
 			if (Randoms.nextBool()) getPerso().getPerso().sendSmiley(Smiley.getRandomTrollSmiley());
-			getPerso().getUtilities().setCurrentHarvest(cellid);
 			getPerso().getPerso().interract(skill, cellid);
+			LOGGER.debug("harvesting " + cellid);
 		}, same ? 0 : getPerso().getPerso().moveToCell(cell, true, true), TimeUnit.MILLISECONDS);
 		return true;
 	}
@@ -77,7 +81,7 @@ public class Harvesting extends Info {
 			int idrot = Maps.getIdRotated(n.getX(), n.getY(), map.getWidth(), map.getHeight());
 			if (idrot < 0 || idrot > map.getCells().length) continue;
 			ManchouCell manchouCell = map.getCells()[idrot];
-			if (manchouCell.hasMobGroupOn()) continue;
+			if (manchouCell.hasMobGroupOn() || manchouCell.isTeleporter()) continue;
 			List<Node> cellPath = Pathfinding.getCellPath(cellId, manchouCell.getId(), map.getProtocolCells(), map.getWidth(), map.getHeight(),
 					Pathfinding::getNeighbors, Validators.avoidingMobs(map));
 			if (cellPath != null) return manchouCell.getId();

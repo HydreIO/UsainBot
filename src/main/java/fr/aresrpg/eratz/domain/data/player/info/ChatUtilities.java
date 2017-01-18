@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.data.player.info;
 
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
+import fr.aresrpg.eratz.domain.util.BotConfig;
 import fr.aresrpg.eratz.domain.util.chat.*;
 
 import java.util.*;
@@ -32,11 +33,13 @@ public class ChatUtilities extends Info {
 	}
 
 	public void respondTo(String msg, Chat c) {
+		if (!BotConfig.AUTO_SPEAK) return;
 		String resp = getResponse(msg);
 		if (resp != null) getPerso().getPerso().speak(c, resp);
 	}
 
 	public String getResponse(String s) {
+		if (s.toLowerCase().contains("bot")) s = "Tu est un bot";
 		try {
 			return session.think(s);
 		} catch (Exception e) {
@@ -69,6 +72,16 @@ public class ChatUtilities extends Info {
 	 */
 	public boolean hasSpeaked(int seconds) {
 		return System.currentTimeMillis() <= lastSpeak + (seconds * 1000);
+	}
+
+	/**
+	 * Return true if the bot has speaked the last X seconds
+	 * 
+	 * @param seconds
+	 * @return
+	 */
+	public boolean hasSpeaked(int seconds, String player) {
+		return System.currentTimeMillis() <= getLastSpeak(player) + (seconds * 1000);
 	}
 
 	@Override

@@ -43,12 +43,15 @@ public class HarvestRunner extends Runner {
 			LOGGER.debug("state " + interrupt);
 			switch (interrupt) {
 				case FIGHT_JOIN:
+					getPerso().getMind().resetState();
 					return;
 				case FULL_POD:
 					getPerso().getMind().resetState();
 					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(harvesting)));
 					return;
 				case ACTION_STOP:
+					LOGGER.equals("Action error ! shuting down in 1s");
+					Threads.uSleep(1, TimeUnit.SECONDS);
 					System.exit(1);
 					return;
 				case RESSOURCE_STEAL:

@@ -42,7 +42,7 @@ public class Mind extends Info {
 	}
 
 	public void resetState() {
-		LOGGER.debug("Reset state");
+		LOGGER.debug("Reset state and cancel timeout");
 		state = i -> LOGGER.debug("Not handled " + i);
 	}
 

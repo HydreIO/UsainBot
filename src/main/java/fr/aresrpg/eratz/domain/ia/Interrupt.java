@@ -6,37 +6,27 @@ package fr.aresrpg.eratz.domain.ia;
  */
 public enum Interrupt {
 
-	FIGHT_JOIN(3),
-	FIGHT_START(3),
-	TURN_START(3),
+	FIGHT_JOIN,
+	FIGHT_START,
+	TURN_START,
 
-	RESSOURCE_STEAL(4),
-	RESSOURCE_HARVESTED(4),
-	RESSOURCE_SPAWN(4),
+	RESSOURCE_STEAL,
+	RESSOURCE_HARVESTED,
+	RESSOURCE_SPAWN,
 
-	GRAVE(2), // succomber
+	GRAVE, // succomber
 
-	FULL_POD(3),
-	MOVED(4),
+	FULL_POD,
+	MOVED,
 
-	LOGIN_ERROR(4),
-	SAVE(4),
-	CLOSED(4),
-	DISCONNECT(1),
+	LOGIN_ERROR,
+	SAVE,
+	CLOSED,
+	DISCONNECT,
 
-	ACTION_STOP(1),
-	;
-	private int priority;
+	ACTION_STOP,
 
-	private Interrupt(int priority) {
-		this.priority = priority;
-	}
-
-	/**
-	 * @return the priority
-	 */
-	public int getPriority() {
-		return priority;
-	}
-
+	DEFI,
+	GUILD,
+	GROUP;
 }

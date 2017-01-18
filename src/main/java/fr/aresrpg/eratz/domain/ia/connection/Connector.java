@@ -14,6 +14,7 @@ public class Connector extends Info {
 
 	private long time;
 	private TimeUnit unit;
+	private boolean connecting;
 
 	/**
 	 * @param perso
@@ -25,8 +26,13 @@ public class Connector extends Info {
 	}
 
 	public void connect() {
-		if (!BotConfig.AUTO_RECONNECT) return;
+		if (!BotConfig.AUTO_RECONNECT || connecting) return;
+		connecting = true;
 		getPerso().connectIn(time, unit);
+	}
+
+	public void setConnecting(boolean connecting) {
+		this.connecting = connecting;
 	}
 
 	/**

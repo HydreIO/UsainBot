@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 public class BucheronCommand implements Command {
 
 	CompletableFuture<?> harvest;
+	boolean stop;
 
 	@Override
 	public String getCmd() {
@@ -39,7 +40,7 @@ public class BucheronCommand implements Command {
 	public void trigger(String[] args) {
 		if (args.length == 1 && args[0].equalsIgnoreCase("stop")) {
 			if (harvest != null) {
-				harvest.cancel(true);
+				stop = true;
 				LOGGER.debug("Harvesting stoped !");
 			}
 			return;
@@ -51,7 +52,8 @@ public class BucheronCommand implements Command {
 				return;
 			}
 			BotPerso bdp = BotFather.getPerso(pers);
-			HarvestZone zone = Paths.BOMBU.getHarvestPath(bdp);
+			stop = false;
+			HarvestZone zone = Paths.FULL.getHarvestPath(bdp);
 			Executors.FIXED.execute(() -> {
 				try {
 					setHarvest(harvest(bdp, zone));
@@ -65,6 +67,8 @@ public class BucheronCommand implements Command {
 	}
 
 	private CompletableFuture<?> harvest(BotPerso perso, HarvestZone zone) {
+		if (stop) return CompletableFuture.completedFuture(null);
+		perso.getMind().resetState();
 		zone.sort();
 		Threads.uSleep(1, TimeUnit.SECONDS);
 		return perso.getMind().harvest(zone.getRessources())

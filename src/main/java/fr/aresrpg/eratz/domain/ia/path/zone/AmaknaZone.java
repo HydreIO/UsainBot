@@ -22,8 +22,8 @@ public class AmaknaZone extends HarvestZone {
 	@Override
 	protected boolean isValid(BotMap map) {
 		MapDataBean data = MapsData.getData(map.getMapId());
-		boolean hasSub = data.getSubareaId() == 12 || data.getSubareaId() == 170 || data.getSubareaId() == 11;
-		return data.getAreaId() == 0 && hasSub && map.hasOne(getRessources());
+		if (map.getMapId() == 1332) return false; // bug chelou du pathfinding
+		return hasArea(map, 0) && hasSubArea(map, 12, 170, 11) && map.hasOne(getRessources());
 	}
 
 	@Override

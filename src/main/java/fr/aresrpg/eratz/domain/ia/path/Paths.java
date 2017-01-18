@@ -14,6 +14,7 @@ public enum Paths {
 	BOMBU,
 	OLIVIOLET,
 	BONTA,
+	FULL,
 	AMAKNA;
 
 	public HarvestZone getHarvestPath(BotPerso perso) {
@@ -28,6 +29,8 @@ public enum Paths {
 				return new AmaknaZone(perso);
 			case BONTA:
 				return new BontaZone(perso);
+			case FULL:
+				return new FullZone(perso);
 			default:
 				throw new NotImplementedException();
 		}

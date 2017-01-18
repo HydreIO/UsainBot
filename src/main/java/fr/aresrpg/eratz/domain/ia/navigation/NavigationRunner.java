@@ -5,7 +5,6 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
-import fr.aresrpg.eratz.domain.ia.Interrupt;
 import fr.aresrpg.eratz.domain.ia.Runner;
 import fr.aresrpg.eratz.domain.util.BotConfig;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
@@ -40,24 +39,25 @@ public class NavigationRunner extends Runner {
 							.thenApplyAsync(Threads.threadContextSwitch("connect->navigate", c -> navigator), Executors.FIXED).thenCompose(this::runNavigation));
 					return;
 				case FIGHT_JOIN: // TODO
+					getPerso().getMind().resetState();
 					return;
 				case FULL_POD:
 					getPerso().getMind().resetState();
 					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(navigator)));
 					return;
 				case ACTION_STOP:
-					getPerso().getMind().resetState();
+					LOGGER.equals("Action error ! shuting down in 1s");
+					Threads.uSleep(1, TimeUnit.SECONDS);
 					System.exit(1);
 					return;
 				case MOVED:
 					getPerso().getMind().resetState();
-					String name = interrupt == Interrupt.ACTION_STOP ? "actionstop->navigate" : "moved->navigate";
 					navigator.notifyMoved();
 					if (navigator.isFinished()) {
 						LOGGER.debug("navigation completed !");
 						navigator.resetPersoPath();
 						promise.complete(CompletableFuture.completedFuture(navigator));
-					} else promise.complete(CompletableFuture.completedFuture(navigator).thenComposeAsync(Threads.threadContextSwitch(name, this::runNavigation), Executors.FIXED));
+					} else promise.complete(CompletableFuture.completedFuture(navigator).thenComposeAsync(Threads.threadContextSwitch("moved->navigate", this::runNavigation), Executors.FIXED));
 					return;
 				default:
 					return; // avoid reset if non handled

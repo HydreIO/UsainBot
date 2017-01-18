@@ -9,10 +9,12 @@ import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.gui.MapView;
+import fr.aresrpg.eratz.domain.util.BotConfig;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.Account;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
+import fr.aresrpg.tofumanchou.domain.util.Validators;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -89,7 +91,7 @@ public class AccountCommand implements Command {
 					BotPerso botp = BotFather.getPerso(persot);
 					botp.getPerso().moveToRandomCell();
 					//Threads.uSleep(2, TimeUnit.SECONDS);
-					botp.getPerso().moveToCell(268, true, false);
+					botp.getPerso().moveToCell(439, true, false);
 					return;
 				case "view":
 					if (args.length < 3) break;
@@ -106,7 +108,7 @@ public class AccountCommand implements Command {
 					bp.getView().setOnCellClick(i -> {
 						List<Node> cellPath = Pathfinding.getCellPath(bp.getPerso().getCellId(), i, bp.getPerso().getMap().getProtocolCells(), perso.getMap().getWidth(), perso.getMap().getHeight(),
 								Pathfinding::getNeighbors,
-								bp.getPerso()::canGoOnCellAvoidingMobs);
+								Validators.avoidingMobs(bp.getPerso().getMap()));
 						if (cellPath == null) LOGGER.debug("Path not found !");
 						else bp.getView().setPath(cellPath, Color.DARKRED);
 					});
@@ -116,6 +118,10 @@ public class AccountCommand implements Command {
 				case "List":
 				case "LIST":
 					LOGGER.info(Accounts.getInstance().getAccounts().values().stream().map(Account::getAccountName).collect(Collectors.joining(", ")));
+					return;
+				case "stopspeak":
+					BotConfig.AUTO_SPEAK = !BotConfig.AUTO_SPEAK;
+					LOGGER.success("Autospeak " + (BotConfig.AUTO_SPEAK ? "Enabled" : "Disabled"));
 					return;
 				case "connect":
 				case "Connect":

@@ -41,6 +41,7 @@ public class ConnectionRunner extends Info {
 				case SAVE:
 				case CLOSED:
 				case LOGIN_ERROR:
+					connector.setConnecting(false);
 					getPerso().getMind().resetState();
 					DofusServer server = Manchou.getServer(getPerso().getPerso().getServer());
 					long time = Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX);
