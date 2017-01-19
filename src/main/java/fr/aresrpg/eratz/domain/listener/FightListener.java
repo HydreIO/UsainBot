@@ -103,6 +103,7 @@ public class FightListener implements Listener {
 			if (cac) atk = (ManchouSpell) perso.getPerso().getSpells().get(Spells.FLECHE_DE_RECUL);
 			int maxPoFor = perso.getFightUtilities().getMaxPoFor(atk) + 1;
 			Threads.uSleep(1, TimeUnit.SECONDS);
+			if (!perso.isInFight()) return;
 			LOGGER.debug("PO = 11 + " + perso.getPerso().getStat(Stat.PO));
 			boolean mobAccessible = perso.getFightUtilities().getAccessibleCells(maxPoFor).contains(nearestEnnemy.getCellId());
 			ManchouCell cellToTargetMob = perso.getFightUtilities().getCellToTargetMob(perso.getPerso().getPm(), nearestEnnemy.getCellId(), maxPoFor, false);
@@ -110,6 +111,7 @@ public class FightListener implements Listener {
 			else if (cellToTargetMob != null) {
 				perso.getFightUtilities().runTo(cellToTargetMob.getId());
 				Threads.uSleep(2, TimeUnit.SECONDS);
+				if (!perso.isInFight()) return;
 				perso.getPerso().launchSpell(atk, 0, nearestEnnemy.getCellId());
 			} else perso.getFightUtilities().runToMob(nearestEnnemy, false, perso.getPerso().getPm());
 			if (nearestEnnemy instanceof Mob) {
@@ -121,8 +123,10 @@ public class FightListener implements Listener {
 			}
 			LOGGER.debug("Run away");
 			Threads.uSleep(2, TimeUnit.SECONDS);
+			if (!perso.isInFight()) return;
 			perso.getFightUtilities().runAwayFromMobs(); // si il reste des pm alors le perso va fuir, si jamais il est trop loin il n'aura plus de pm car il aura déja rush le mob
 			Threads.uSleep(1, TimeUnit.SECONDS);
+			if (!perso.isInFight()) return;
 			perso.getPerso().endTurn();
 		} catch (Exception e) {
 			LOGGER.error(e);

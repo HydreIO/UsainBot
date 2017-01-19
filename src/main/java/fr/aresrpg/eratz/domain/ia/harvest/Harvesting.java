@@ -3,14 +3,12 @@ package fr.aresrpg.eratz.domain.ia.harvest;
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
-import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.dofus.util.*;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
-import fr.aresrpg.tofumanchou.domain.data.enums.Smiley;
 import fr.aresrpg.tofumanchou.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
@@ -65,7 +63,7 @@ public class Harvesting extends Info {
 		getPerso().getUtilities().setCurrentHarvest(cellid);
 		Executors.SCHEDULED.schedule(() -> {
 			if (!map.getCells()[cellid].isRessourceSpawned()) return;
-			if (Randoms.nextBool()) getPerso().getPerso().sendSmiley(Smiley.getRandomTrollSmiley());
+			//	if (Randoms.nextBool()) getPerso().getPerso().sendSmiley(Smiley.getRandomTrollSmiley());
 			getPerso().getPerso().interract(skill, cellid);
 			LOGGER.debug("harvesting " + cellid);
 		}, same ? 0 : getPerso().getPerso().moveToCell(cell, true, true), TimeUnit.MILLISECONDS);

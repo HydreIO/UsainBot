@@ -39,15 +39,15 @@ public class NavigationRunner extends Runner {
 							.thenApplyAsync(Threads.threadContextSwitch("connect->navigate", c -> navigator), Executors.FIXED).thenCompose(this::runNavigation));
 					return;
 				case FIGHT_JOIN: // TODO
-					getPerso().getMind().resetState();
 					return;
 				case FULL_POD:
 					getPerso().getMind().resetState();
 					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(navigator)));
 					return;
 				case ACTION_STOP:
-					LOGGER.equals("Action error ! shuting down in 1s");
+					LOGGER.debug("Action error ! shuting down in 1s");
 					Threads.uSleep(1, TimeUnit.SECONDS);
+					if (getPerso().isInFight()) return;
 					System.exit(1);
 					return;
 				case MOVED:

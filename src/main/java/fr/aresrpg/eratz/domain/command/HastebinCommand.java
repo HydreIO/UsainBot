@@ -1,9 +1,9 @@
 package fr.aresrpg.eratz.domain.command;
 
-import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
-
 import fr.aresrpg.eratz.domain.util.Hastebin;
 import fr.aresrpg.tofumanchou.domain.command.Command;
+
+import java.io.*;
 
 /**
  * 
@@ -18,7 +18,7 @@ public class HastebinCommand implements Command {
 
 	@Override
 	public void trigger(String[] args) {
-		LOGGER.info(Hastebin.post());
+		Hastebin.post();
 		if (args.length > 0 && args[0].equalsIgnoreCase("exit")) System.exit(0);
 	}
 

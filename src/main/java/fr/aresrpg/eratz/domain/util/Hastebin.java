@@ -33,7 +33,19 @@ public class Hastebin {
 	}
 
 	public static String post() {
-		return post(stream.toByteArray());
+		File f = new File("logs.yml");
+		LOGGER.debug("création du fichier");
+		try {
+			f.createNewFile();
+			FileWriter writer = new FileWriter(f);
+			writer.write(new String(stream.toByteArray()));
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		LOGGER.debug("fichier créé");
+		return "";
 	}
 
 	public static String post(List<String> l) {
@@ -46,7 +58,7 @@ public class Hastebin {
 
 	public static String post(String s) {
 		try {
-			HttpURLConnection conn = (HttpURLConnection) new URL("https://paste.aresrpg.fr/documents").openConnection();
+			HttpURLConnection conn = (HttpURLConnection) new URL("https://hastebin.com/documents").openConnection();
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", "text/plain");
 			conn.setDoOutput(true);
@@ -61,7 +73,7 @@ public class Hastebin {
 			String key = sb.toString();
 			key = key.substring(key.lastIndexOf("\"key\":\"") + 7);
 			key = key.substring(0, key.lastIndexOf("\"}"));
-			return "https://paste.aresrpg.fr/" + key + ".hs";
+			return "https://hastebin.com/" + key + ".hs";
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
