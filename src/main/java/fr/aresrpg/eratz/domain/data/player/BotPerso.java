@@ -8,20 +8,33 @@
  *******************************************************************************/
 package fr.aresrpg.eratz.domain.data.player;
 
+import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
+
+import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.protocol.Packet;
+import fr.aresrpg.dofus.protocol.game.client.GameExtraInformationPacket;
+import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.util.DofusMapView;
+import fr.aresrpg.eratz.domain.data.MapsManager;
+import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.info.*;
 import fr.aresrpg.eratz.domain.ia.Mind;
 import fr.aresrpg.eratz.domain.ia.connection.ConnectionRunner;
 import fr.aresrpg.eratz.domain.ia.fight.FightRunner;
 import fr.aresrpg.eratz.domain.ia.harvest.HarvestRunner;
 import fr.aresrpg.eratz.domain.ia.navigation.NavigationRunner;
+import fr.aresrpg.eratz.domain.ia.path.Paths;
+import fr.aresrpg.eratz.domain.ia.path.zone.HarvestZone;
+import fr.aresrpg.eratz.domain.ia.waiter.WaitRunner;
 import fr.aresrpg.eratz.domain.util.Closeable;
+import fr.aresrpg.eratz.domain.util.Constants;
+import fr.aresrpg.eratz.domain.util.functionnal.FutureHandler;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class BotPerso implements Closeable {
@@ -40,8 +53,12 @@ public class BotPerso implements Closeable {
 	private final ConnectionRunner conRunner;
 	private final HarvestRunner harRunner;
 	private final FightRunner fiRunner;
+	private final WaitRunner waRunner;
 
 	private DofusMapView view;
+
+	private boolean behaviorRunning;
+	private CompletableFuture<?> behavior;
 
 	public BotPerso(ManchouPerso perso) {
 		this.perso = perso;
@@ -53,11 +70,75 @@ public class BotPerso implements Closeable {
 		this.conRunner = new ConnectionRunner(this);
 		this.harRunner = new HarvestRunner(this);
 		this.fiRunner = new FightRunner(this);
+		this.waRunner = new WaitRunner(this);
 		this.view = new DofusMapView();
 	}
 
 	@Override
 	public void shutdown() {
+	}
+
+	public void startHarvest(Paths path) {
+		behaviorRunning = true;
+		HarvestZone zone = path.getHarvestPath(this);
+		Executors.FIXED.execute(() -> {
+			try {
+				setBehavior(harvest(this, zone));
+			} catch (Exception e) {
+				LOGGER.error(e, "not handled");
+			}
+		});
+	}
+
+	public void startHarvestAndWait(Paths path) {
+		behaviorRunning = true;
+		HarvestZone zone = path.getHarvestPath(this);
+		Executors.FIXED.execute(() -> {
+			try {
+				setBehavior(harvestAndWait(this, zone));
+			} catch (Exception e) {
+				LOGGER.error(e, "not handled");
+			}
+		});
+	}
+
+	private void setBehavior(CompletableFuture<?> behavior) {
+		this.behavior = behavior;
+	}
+
+	public void stopBehavior() {
+		LOGGER.debug("Harvesting stoped !");
+		this.behaviorRunning = false;
+		behavior.cancel(true);
+	}
+
+	public void refreshMap() {
+		sendPacketToServer(new GameExtraInformationPacket());
+	}
+
+	private CompletableFuture<?> harvest(BotPerso perso, HarvestZone zone) {
+		LOGGER.debug("HARVEST cmd");
+		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
+		perso.getMind().resetState();
+		zone.sort();
+		Threads.uSleep(1, TimeUnit.SECONDS);
+		return perso.getMind().harvest(zone.isPlayerJob(), zone.getRessources())
+				.thenApply(h -> MapsManager.getMap(zone.getNextMap()))
+				.thenCompose(perso.getMind()::moveToMap)
+				.handle(FutureHandler.handleEx()).thenCompose(c -> harvest(perso, zone));
+	}
+
+	private CompletableFuture<?> harvestAndWait(BotPerso perso, HarvestZone zone) {
+		LOGGER.debug("HARVEST AND WAIT");
+		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
+		perso.getMind().resetState();
+		BotMap map = MapsManager.getMap(zone.getNextMap());
+		Threads.uSleep(1, TimeUnit.SECONDS);
+		return perso.getMind().harvest(zone.isPlayerJob(), zone.getRessources())
+				.thenCompose(h -> perso.getMind().waitSpawn(zone.getRessources()))
+				.thenApply(h -> map)
+				.thenCompose(perso.getMind()::moveToMap)
+				.handle(FutureHandler.handleEx()).thenCompose(c -> harvestAndWait(perso, zone));
 	}
 
 	/**
@@ -80,6 +161,10 @@ public class BotPerso implements Closeable {
 	 */
 	public ManchouPerso getPerso() {
 		return perso;
+	}
+
+	public void speakIfAnnoyed() {
+		if (isAnnoyed()) getPerso().speak(Chat.COMMON, Constants.getRandomAnnoyedSpeach());
 	}
 
 	public void sendPacketToServer(Packet... pkts) {
@@ -110,6 +195,15 @@ public class BotPerso implements Closeable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public boolean isAnnoyed() {
+		int annoyedCount = getPerso().getAnnoyedCount();
+		if (annoyedCount > 5) {
+			getPerso().resetAnnoyedCount();
+			return true;
+		}
+		return false;
 	}
 
 	public void connectIn(long time, TimeUnit unit) {
@@ -183,6 +277,13 @@ public class BotPerso implements Closeable {
 	 */
 	public HarvestRunner getHarRunner() {
 		return harRunner;
+	}
+
+	/**
+	 * @return the waRunner
+	 */
+	public WaitRunner getWaRunner() {
+		return waRunner;
 	}
 
 	/**

@@ -15,6 +15,7 @@ public enum Paths {
 	OLIVIOLET,
 	BONTA,
 	FULL,
+	KOIN_KOIN,
 	AMAKNA;
 
 	public HarvestZone getHarvestPath(BotPerso perso) {
@@ -31,6 +32,8 @@ public enum Paths {
 				return new BontaZone(perso);
 			case FULL:
 				return new FullZone(perso);
+			case KOIN_KOIN:
+				return new KoinKoinZone(perso);
 			default:
 				throw new NotImplementedException();
 		}

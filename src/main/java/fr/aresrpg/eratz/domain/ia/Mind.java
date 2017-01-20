@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 public class Mind extends Info {
 
 	private Consumer<Interrupt> state;
+	private boolean park;
 
 	public Mind(BotPerso perso) {
 		super(perso);
@@ -37,8 +38,24 @@ public class Mind extends Info {
 	}
 
 	public void handleState(Interrupt interrupt) {
+		if (park) {
+			LOGGER.debug("Refusing " + interrupt);
+			return;
+		}
 		LOGGER.debug("Accepting " + interrupt);
-		CompletableFuture.completedFuture(interrupt).thenAcceptAsync(Threads.threadContextSwitch("mind->accepting", state::accept), Executors.FIXED).handle(FutureHandler.handleEx());
+		park();
+		CompletableFuture.completedFuture(interrupt)
+				.thenAcceptAsync(Threads.threadContextSwitch("mind->accepting", state::accept), Executors.FIXED)
+				.thenRun(this::unpark)
+				.handle(FutureHandler.handleEx());
+	}
+
+	public void park() {
+		this.park = true;
+	}
+
+	public void unpark() {
+		this.park = false;
 	}
 
 	public void resetState() {
@@ -64,9 +81,10 @@ public class Mind extends Info {
 				.thenCompose(getPerso().getNavRunner()::runNavigation);
 	}
 
-	public CompletableFuture<Harvesting> harvest(Interractable... ressources) {
+	public CompletableFuture<Harvesting> harvest(boolean playerJob, Interractable... ressources) {
 		LOGGER.debug("Mind -> harvest");
-		return CompletableFuture.completedFuture(new Harvesting(getPerso(), ressources)).thenComposeAsync(Threads.threadContextSwitch("mind->harvest", getPerso().getHarRunner()::runHarvest),
+		return CompletableFuture.completedFuture(new Harvesting(getPerso(), playerJob, ressources)).thenComposeAsync(
+				Threads.threadContextSwitch("mind->harvest", getPerso().getHarRunner()::runHarvest),
 				Executors.FIXED);
 	}
 
@@ -79,6 +97,11 @@ public class Mind extends Info {
 	public CompletableFuture<Fighting> fight() {
 		LOGGER.debug("Mind -> fight");
 		return CompletableFuture.completedFuture(new Fighting(getPerso())).thenComposeAsync(Threads.threadContextSwitch("mind->fight", getPerso().getFiRunner()::runFight), Executors.FIXED);
+	}
+
+	public CompletableFuture<Interractable[]> waitSpawn(Interractable... ress) {
+		LOGGER.debug("Mind -> wait");
+		return CompletableFuture.completedFuture(ress).thenComposeAsync(getPerso().getWaRunner()::waitFor, Executors.FIXED);
 	}
 
 	@Override

@@ -50,11 +50,16 @@ public class HarvestRunner extends Runner {
 					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(harvesting)));
 					return;
 				case ACTION_STOP: // des fois la frame s'update cash (donc bug du serv) et le serv envoie une action error (dofus jte chie dessus)
+					recoverAfterActionError(promise);
+					getPerso().getMind().resetState();
+					promise.complete(CompletableFuture.completedFuture(harvesting).thenComposeAsync(Threads.threadContextSwitch("recovered->harvest", this::runHarvest), Executors.FIXED));
+					return;
 				case RESSOURCE_STEAL:
 				case RESSOURCE_HARVESTED:
 					getPerso().getMind().resetState();
 					String name = interrupt == Interrupt.ACTION_STOP ? "actionstop->harvest" : interrupt == Interrupt.RESSOURCE_STEAL ? "steal->harvest" : "harvested->harvest";
 					getPerso().getUtilities().setCurrentHarvest(-1);
+					Threads.uSleep(1, TimeUnit.SECONDS); // wait au cas ou join fight
 					promise.complete(CompletableFuture.completedFuture(harvesting).thenComposeAsync(Threads.threadContextSwitch(name, this::runHarvest), Executors.FIXED));
 					return;
 				case DISCONNECT:

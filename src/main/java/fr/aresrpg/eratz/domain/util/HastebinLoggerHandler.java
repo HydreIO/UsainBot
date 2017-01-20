@@ -14,7 +14,7 @@ public class HastebinLoggerHandler implements Handler {
 
 	@Override
 	public void handle(Log log) throws IOException {
-		Hastebin.stream
+		Logs.stream
 				.write(("[" + BasicFormatter.DEFAULT_FORMAT.format(new java.util.Date(log.getMillis())) + "][" + log.getThread().getName() + "][" + log.getLevel() + "]: " + log.getMessage() + "\n")
 						.getBytes());
 	}

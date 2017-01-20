@@ -45,10 +45,9 @@ public class NavigationRunner extends Runner {
 					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(navigator)));
 					return;
 				case ACTION_STOP:
-					LOGGER.debug("Action error ! shuting down in 1s");
-					Threads.uSleep(1, TimeUnit.SECONDS);
-					if (getPerso().isInFight()) return;
-					System.exit(1);
+					recoverAfterActionError(promise);
+					getPerso().getMind().resetState();
+					promise.complete(CompletableFuture.completedFuture(navigator).thenComposeAsync(Threads.threadContextSwitch("recovered->harvest", this::runNavigation), Executors.FIXED));
 					return;
 				case MOVED:
 					getPerso().getMind().resetState();

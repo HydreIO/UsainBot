@@ -26,16 +26,23 @@ public abstract class HarvestZone implements Zone {
 	private Interractable[] ressources;
 	private BotMap[] allMaps;
 	private final Supplier<BotPerso> position;
+	private final boolean playerJob;
 
-	public HarvestZone(Supplier<BotPerso> playerPosition, Interractable... ressources) {
+	public HarvestZone(Supplier<BotPerso> playerPosition, boolean playerJob, Interractable... ressources) {
 		this.ressources = ressources;
 		this.position = playerPosition;
+		this.playerJob = playerJob;
 		compile();
 		refill();
 	}
 
+	public boolean isPlayerJob() {
+		return playerJob;
+	}
+
 	@Override
 	public int getNextMap() {
+		if (allMaps.length == 1) return allMaps[0].getMapId();
 		if (maps.isEmpty()) refill();
 		return maps.poll();
 	}
@@ -59,7 +66,9 @@ public abstract class HarvestZone implements Zone {
 			BotPerso perso = position.get();
 			for (ManchouCell cell : m.getMap().getCells()) {
 				Interractable interractable = cell.getInterractable();
-				if (ArrayUtils.contains(interractable, ressources) && perso.getPerso().getJob().hasLevelToUse(perso.getUtilities().getSkillFor(interractable))) return true;
+				if (interractable == null || !ArrayUtils.contains(interractable, ressources)) continue;
+				if (!playerJob) return true;
+				if (perso.getPerso().getJob().hasLevelToUse(perso.getUtilities().getSkillFor(interractable, playerJob))) return true;
 			}
 			return false;
 		}).sorted(UtilFunc.distanceToPlayer(position)).mapToInt(BotMap::getMapId).forEach(maps::add);

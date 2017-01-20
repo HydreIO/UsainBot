@@ -78,8 +78,15 @@ public class Utilities extends Info {
 		this.currentHarvest = currentHarvest;
 	}
 
-	public Skills getSkillFor(Interractable i) {
-		if (!ArrayUtils.contains(getPerso().getPerso().getJob().getType(), i.getRequiredJob())) return null;
+	/**
+	 * Find the skill corresponding to the ressource, sometimes the ressource have multiple skill so just put playerJob to TRUE to filter with the bot current job
+	 * 
+	 * @param i
+	 * @param playerjob
+	 * @return
+	 */
+	public Skills getSkillFor(Interractable i, boolean playerjob) {
+		if (playerjob && !ArrayUtils.contains(getPerso().getPerso().getJob().getType(), i.getRequiredJob())) return null;
 		for (Skills s : Skills.values())
 			if (s.getType() == i) return s;
 		return null;
@@ -222,7 +229,7 @@ public class Utilities extends Info {
 		if (tomove > 0) LOGGER.info(AnsiColor.GREEN + " à déposé " + tomove + " kamas !");
 		else LOGGER.info(AnsiColor.GREEN + " à récupéré " + (-tomove) + " kamas !");
 		Threads.uSleep(1, TimeUnit.SECONDS);
-		getPerso().getPerso().exchangeLeave();
+		getPerso().getPerso().leaveExchange();
 	}
 
 	public boolean hasPopoRappel() {

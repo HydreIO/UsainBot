@@ -19,6 +19,21 @@ public class Constants {
 	public static final String IP = "80.239.173.166";
 	public static final char DELIMITER = 0x00;
 	public static final int SLEEP = 5000;
+	public static List<String> ANNOYED_SENTENCE = Arrays.asList(
+			"bon..",
+			"-_-",
+			"tin",
+			"ptin",
+			"hey !",
+			"pfff",
+			"mais ho",
+			"u_u",
+			"--'",
+			"bon heu",
+			"stop",
+			"grrrr",
+			"quoi ptin",
+			"?");
 	public static List<String> NO_BOT_SENTENCE = Arrays.asList(
 			"heu..",
 			"att",
@@ -65,5 +80,9 @@ public class Constants {
 
 	public static String getRandomHarvestSpeach() {
 		return RANDOM_HARVEST.get(Randoms.nextInt(RANDOM_HARVEST.size() - 1));
+	}
+
+	public static String getRandomAnnoyedSpeach() {
+		return ANNOYED_SENTENCE.get(Randoms.nextInt(ANNOYED_SENTENCE.size() - 1));
 	}
 }

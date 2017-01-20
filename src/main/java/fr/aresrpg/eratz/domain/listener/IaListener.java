@@ -13,6 +13,7 @@ import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.ChatUtilities;
 import fr.aresrpg.eratz.domain.ia.Interrupt;
+import fr.aresrpg.eratz.domain.util.BotConfig;
 import fr.aresrpg.tofumanchou.domain.data.enums.Zaap;
 import fr.aresrpg.tofumanchou.domain.event.*;
 import fr.aresrpg.tofumanchou.domain.event.aproach.InfoMessageEvent;
@@ -20,6 +21,7 @@ import fr.aresrpg.tofumanchou.domain.event.aproach.LoginErrorEvent;
 import fr.aresrpg.tofumanchou.domain.event.chat.ChatMsgEvent;
 import fr.aresrpg.tofumanchou.domain.event.duel.DuelRequestEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityPlayerJoinMapEvent;
+import fr.aresrpg.tofumanchou.domain.event.exchange.ExchangeAcceptedEvent;
 import fr.aresrpg.tofumanchou.domain.event.fight.FightEndEvent;
 import fr.aresrpg.tofumanchou.domain.event.fight.FightJoinEvent;
 import fr.aresrpg.tofumanchou.domain.event.group.GroupInvitationAcceptedEvent;
@@ -28,6 +30,7 @@ import fr.aresrpg.tofumanchou.domain.event.map.HarvestTimeReceiveEvent;
 import fr.aresrpg.tofumanchou.domain.event.player.ZaapGuiOpenEvent;
 import fr.aresrpg.tofumanchou.domain.event.player.ZaapUseErrorEvent;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -65,7 +68,6 @@ public class IaListener implements Listener {
 		if (perso == null || !perso.isOnline() || e.getPlayer().getUUID() != perso.getPerso().getUUID() || perso.isInFight()) return;
 		perso.getUtilities().useRessourceBags();
 		LOGGER.debug("Joined " + perso.getPerso().getMap().getInfos());
-		perso.getPerso().cancelRunner();
 		perso.getMind().handleState(Interrupt.MOVED);
 	}
 
@@ -88,6 +90,13 @@ public class IaListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || !perso.isOnline()) return;
 		perso.getMind().handleState(Interrupt.GUILD);
+	}
+
+	@Subscribe
+	public void exchange(ExchangeAcceptedEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso == null || !perso.isOnline()) return;
+		perso.getMind().handleState(Interrupt.EXCHANGE);
 	}
 
 	@Subscribe
@@ -121,6 +130,7 @@ public class IaListener implements Listener {
 		if (perso == null || !perso.isOnline()) return;
 		LOGGER.debug((e.getChat() == Chat.PM_RECEIVE ? AnsiColor.RED : AnsiColor.WHITE) + "[" + e.getChat() + "][" + e.getPseudo() + "]: " + e.getMsg());
 		if (e.getChat() != Chat.PRIVATE && e.getChat() != Chat.PM_RECEIVE) return;
+		if (!BotConfig.AUTO_SPEAK) return;
 		ChatUtilities cu = perso.getChatUtilities();
 		if (cu.hasSpeaked(10, e.getPseudo())) return;
 		Executors.FIXED.execute(() -> {
@@ -170,7 +180,11 @@ public class IaListener implements Listener {
 	public void onError(ActionErrorEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || !perso.isOnline() || perso.isInFight() || perso.getUtilities().getPodsPercent() > 99) return;
+		Threads.uSleep(1, TimeUnit.SECONDS);
+		ManchouPerso p = perso.getPerso();
+		if (perso.isInFight()) return;
 		perso.getMind().handleState(Interrupt.ACTION_STOP);
+
 	}
 
 	@Subscribe
@@ -194,7 +208,7 @@ public class IaListener implements Listener {
 		final BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || !perso.isOnline()) return;
 		if (e.getCell().getId() != perso.getUtilities().getCurrentHarvest()) {
-			if (e.getCell().isLayerObject2Interactive() && e.getCell().isRessource()) perso.getMind().handleState(Interrupt.RESSOURCE_SPAWN);
+			if (e.getCell().isLayerObject2Interactive()) perso.getMind().handleState(Interrupt.RESSOURCE_SPAWN);
 			return;
 		}
 		if (e.getFrame() == 3) {

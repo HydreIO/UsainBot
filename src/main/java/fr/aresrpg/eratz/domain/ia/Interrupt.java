@@ -24,9 +24,7 @@ public enum Interrupt {
 	CLOSED,
 	DISCONNECT,
 
-	ACTION_STOP,
+	ACTION_STOP, GUILD, EXCHANGE, DEFI, GROUP,
 
-	DEFI,
-	GUILD,
-	GROUP;
+	;
 }

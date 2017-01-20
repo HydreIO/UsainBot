@@ -91,7 +91,7 @@ public class AccountCommand implements Command {
 					BotPerso botp = BotFather.getPerso(persot);
 					botp.getPerso().moveToRandomCell();
 					//Threads.uSleep(2, TimeUnit.SECONDS);
-					botp.getPerso().moveToCell(439, true, false);
+					botp.getPerso().moveToCell(201, true, false);
 					return;
 				case "view":
 					if (args.length < 3) break;

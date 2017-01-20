@@ -13,7 +13,7 @@ import fr.aresrpg.eratz.domain.ia.path.Paths;
 public class FullZone extends HarvestZone {
 
 	public FullZone(BotPerso perso) {
-		super(() -> perso, Interractable.getAllForJob(Jobs.JOB_BUCHERON).stream().filter(i -> i != Interractable.FRENE && i != Interractable.MACHINE_BUCHERON).toArray(Interractable[]::new));
+		super(() -> perso, true, Interractable.getAllForJob(Jobs.JOB_BUCHERON).stream().filter(i -> i != Interractable.FRENE && i != Interractable.MACHINE_BUCHERON).toArray(Interractable[]::new));
 	}
 
 	@Override

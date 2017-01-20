@@ -2,20 +2,24 @@ package fr.aresrpg.eratz.domain.ia.harvest;
 
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
+import fr.aresrpg.commons.domain.event.EventBus;
+import fr.aresrpg.commons.domain.event.Subscriber;
 import fr.aresrpg.commons.domain.util.ArrayUtils;
+import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.dofus.util.*;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
+import fr.aresrpg.tofumanchou.domain.data.enums.Smiley;
+import fr.aresrpg.tofumanchou.domain.event.entity.EntityMoveEvent;
+import fr.aresrpg.tofumanchou.domain.event.player.PersoMoveEndEvent;
 import fr.aresrpg.tofumanchou.domain.util.Validators;
-import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -24,13 +28,33 @@ import java.util.concurrent.TimeUnit;
 public class Harvesting extends Info {
 
 	private final Interractable[] ressources;
+	private boolean playerJob;
+	private boolean listen;
+	private Subscriber subscriber;
+
+	private ManchouMap map;
+	private int cellid;
+	private Skills skill;
 
 	/**
+	 * sometimes the ressource have multiple skill so just put playerJob to TRUE to filter with the bot current job
+	 * 
 	 * @param perso
+	 * @param playerJob
+	 * @param ressources
 	 */
-	public Harvesting(BotPerso perso, Interractable... ressources) {
+	public Harvesting(BotPerso perso, boolean playerJob, Interractable... ressources) {
 		super(perso);
 		this.ressources = ressources;
+		this.playerJob = playerJob;
+		subscriber = EventBus.getBus(PersoMoveEndEvent.class).subscribe(this::listen, 0);
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		LOGGER.debug("HARVESTING FINILIZE");
+		EventBus.getBus(EntityMoveEvent.class).unsubscribe(subscriber);
+		super.finalize();
 	}
 
 	@Override
@@ -45,7 +69,7 @@ public class Harvesting extends Info {
 	 */
 	public boolean harvest() {
 		if (!getPerso().isOnline()) return false;
-		ManchouMap map = getPerso().getPerso().getMap();
+		this.map = getPerso().getPerso().getMap();
 		Set<Integer> exclude = new HashSet<>();
 		int cell = -1;
 		Pair<Integer, Interractable> pair = null;
@@ -56,18 +80,30 @@ public class Harvesting extends Info {
 			if (cell == -1) exclude.add(pair.getFirst());
 			else break;
 		}
-		Skills skill = getPerso().getUtilities().getSkillFor(pair.getSecond());
+		this.skill = getPerso().getUtilities().getSkillFor(pair.getSecond(), playerJob);
 		Objects.requireNonNull(skill);
-		final int cellid = pair.getFirst();
+		this.cellid = pair.getFirst();
 		boolean same = cell == getPerso().getPerso().getCellId();
 		getPerso().getUtilities().setCurrentHarvest(cellid);
-		Executors.SCHEDULED.schedule(() -> {
-			if (!map.getCells()[cellid].isRessourceSpawned()) return;
-			//	if (Randoms.nextBool()) getPerso().getPerso().sendSmiley(Smiley.getRandomTrollSmiley());
-			getPerso().getPerso().interract(skill, cellid);
-			LOGGER.debug("harvesting " + cellid);
-		}, same ? 0 : getPerso().getPerso().moveToCell(cell, true, true), TimeUnit.MILLISECONDS);
+		if (same) harv();
+		else {
+			getPerso().getPerso().moveToCell(cell, true, true);
+			listen = true;
+		}
 		return true;
+	}
+
+	private void listen(PersoMoveEndEvent e) {
+		if (!listen || e.getPerso() != getPerso().getPerso()) return;
+		listen = false;
+		harv();
+	}
+
+	private void harv() {
+		if (!map.getCells()[cellid].isRessourceSpawned()) return;
+		if (Randoms.nextBool()) getPerso().getPerso().sendSmiley(Smiley.getRandomTrollSmiley());
+		getPerso().getPerso().interract(skill, cellid);
+		LOGGER.debug("harvesting " + cellid);
 	}
 
 	private int getAccessiblePath(int cell) {
@@ -95,9 +131,9 @@ public class Harvesting extends Info {
 		Interractable found = null;
 		for (ManchouCell cell : map.getCells()) {
 			Interractable type = cell.getInterractable();
-			if (!cell.isRessourceSpawned() || type == null || !ArrayUtils.contains(type, ressources) || exclude.contains(cell.getId())
-					|| !getPerso().getPerso().getJob().hasLevelToUse(getPerso().getUtilities().getSkillFor(type)))
+			if (!cell.isRessourceSpawned() || type == null || !ArrayUtils.contains(type, ressources) || exclude.contains(cell.getId()))
 				continue;
+			if (playerJob && !getPerso().getPerso().getJob().hasLevelToUse(getPerso().getUtilities().getSkillFor(type, playerJob))) continue;
 			if (near == -1) near = cell.getId();
 			int di = cell.distance(cellId);
 			if (di < dist) {

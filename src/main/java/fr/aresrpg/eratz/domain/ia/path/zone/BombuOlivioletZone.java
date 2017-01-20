@@ -12,7 +12,7 @@ import fr.aresrpg.eratz.domain.ia.path.Paths;
 public class BombuOlivioletZone extends HarvestZone {
 
 	public BombuOlivioletZone(BotPerso perso) {
-		super(() -> perso, Interractable.BOMBU, Interractable.OLIVIOLET);
+		super(() -> perso, true, Interractable.BOMBU, Interractable.OLIVIOLET);
 	}
 
 	@Override

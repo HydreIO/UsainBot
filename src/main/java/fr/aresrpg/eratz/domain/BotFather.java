@@ -95,20 +95,23 @@ public class BotFather implements ManchouPlugin {
 	// account stopspeak
 	// account view marine-lpn eratz
 	// whoami henual bratva-nazar
-	// bucheron henual bratva-nazar
+	// harvest start henual bratva-nazar
 	// fight henual bratva-nazar
 	// goto map 10356 marine-lpn eratz
 	// goto cell 318 bratva-nazar henual
 	// goto 21,-30 bratva-nazar henual
 	// crash party bratva-nazar henual Shakraa
-	// crash party bratva-nazar henual Xfear
+	// crash party bratva-nazar henual Jiagzaoqmmy
 	// crash party bratva-nazar henual Stevity 
-	// crash duel bratva-nazar henual 515564 
+	// crash duel bratva-nazar henual 540240
 	// crash await bratva-nazar henual 521011
 
 	// account connect bratva-nazar henual
 	// account disconnect bratva-nazar henual
 	// account test bratva-nazar henual
+
+	// action koin-buy bratva-nazar henual 50
+	// action koin-sell bratva-nazar henual 121
 	@Override
 	public void onEnable() {
 		instance = this;
@@ -131,13 +134,14 @@ public class BotFather implements ManchouPlugin {
 		MapsDataListener.register();
 		AntiBotListener.register();
 		IaListener.register();
+		AdminCmdListener.register();
 		MapsManager.init();
 		Manchou.registerCommand(new WhoamiCommand());
-		Manchou.registerCommand(new HastebinCommand());
 		Manchou.registerCommand(new AccountCommand());
 		Manchou.registerCommand(new GotoCommand());
 		Manchou.registerCommand(new CrashCommand());
-		Manchou.registerCommand(new BucheronCommand());
+		Manchou.registerCommand(new HarvestCommand());
+		Manchou.registerCommand(new ActionLoopCommand());
 	}
 
 	private void injectSyso() {
@@ -148,19 +152,19 @@ public class BotFather implements ManchouPlugin {
 			@Override
 			public void write(int b) throws IOException {
 				old.write(b);
-				Hastebin.stream.write(b);
+				Logs.stream.write(b);
 			}
 
 			@Override
 			public void write(byte[] b) throws IOException {
 				old.write(b);
-				Hastebin.stream.write(b);
+				Logs.stream.write(b);
 			}
 
 			@Override
 			public void write(byte[] b, int off, int len) throws IOException {
 				old.write(b, off, len);
-				Hastebin.stream.write(b, off, len);
+				Logs.stream.write(b, off, len);
 			}
 		}));
 	}
