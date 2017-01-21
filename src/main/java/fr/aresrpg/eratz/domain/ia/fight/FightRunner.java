@@ -41,6 +41,9 @@ public class FightRunner extends Info {
 					getPerso().getMind().resetState();
 					promise.complete(CompletableFuture.completedFuture(fighting));
 					break;
+				case STATS:
+					fighting.notifyStatsReceive();
+					break;
 				case TURN_START:
 					getPerso().getMind().resetState();
 					promise.complete(CompletableFuture.completedFuture(fighting).thenComposeAsync(Threads.threadContextSwitch("turn-fighting", this::runFight), Executors.FIXED));

@@ -34,8 +34,46 @@ public class FightUtilities extends Info {
 
 	}
 
-	public Cell getBestCellForZoneSpell(final int distToPlayer) {
-		return null;
+	/**
+	 * Trouve les cell englobant au moins 2mobs dans la range définie
+	 * 
+	 * @param spellRange
+	 *            la range
+	 * @param free
+	 *            si la cellule doit être libre
+	 * @param safeForAllies
+	 *            si la cell ne doit toucher aucun alliés
+	 * @return une Pair cell - nombre de mob touché
+	 */
+	public List<Pair<Cell, Integer>> getCellsForZoneSpell(int spellRange, boolean free, boolean safeForAllies) {
+		List<FightNode> cells = new ArrayList() {
+			@Override
+			public boolean add(Object e) {
+				if (contains(e)) {
+					FightNode node = (FightNode) get(indexOf(e));
+					node.incrementPrice();
+					return false;
+				}
+				return super.add(e);
+			}
+		};
+		ManchouMap map = getPerso().getPerso().getMap();
+		for (Entity e : getPerso().getPerso().getMap().getEntities().values()) {
+			ManchouCell mobcell = map.getCells()[e.getCellId()];
+			Set<ManchouCell> cellsAroundCell = getCellsAroundCell(mobcell.getId(), spellRange);
+			if (free) cellsAroundCell.removeIf(ManchouCell::hasEntityOn);
+			cellsAroundCell.stream().map(c -> new FightNode(c.getId())).forEach(cells::add);
+		}
+		if (safeForAllies) {
+			for (Entity e : getPerso().getPerso().getMap().getEntities().values()) {
+				if (e.getLife() < 1 || !isAlly(e)) continue;
+				Set<ManchouCell> cellsAroundCell = getCellsAroundCell(e.getCellId(), spellRange);
+				cells.removeIf(cellsAroundCell.stream().map(c -> new FightNode(c.getId())).collect(Collectors.toSet())::contains);
+			}
+		}
+		cells.removeIf(FightNode::valueUnder2);
+		cells.sort(Comparator.comparingInt(FightNode::getAmount).reversed());
+		return cells.stream().map(n -> new Pair(map.getCells()[n.id], n.amount)).collect(Collectors.toList());
 	}
 
 	/**
@@ -52,7 +90,7 @@ public class FightUtilities extends Info {
 		ManchouCell nearest = null;
 		int dist = Integer.MAX_VALUE;
 		for (final ManchouCell cell : aroundP) {
-			if (!cell.isWalkeable()) continue;
+			if (!cell.isWalkeable() || !cell.isLineOfSight()) continue;
 			if (free && cell.hasEntityOn()) continue;
 			final int distance = cell.distanceManathan(m.getCellId());
 			if (nearest == null || distance < dist) {
@@ -65,7 +103,7 @@ public class FightUtilities extends Info {
 
 	public int getMissingMaxPoFor(final Spell spell, final int targetCell) {
 		int maxPo = spell.getMaxPo() + getPerso().getPerso().getStat(Stat.PO).getTotal();
-		if (maxPo < 1) maxPo = 1;
+		if (maxPo < 0) maxPo = 0;
 		final int cell = getPerso().getPerso().getCellId();
 		final int width = getPerso().getPerso().getMap().getWidth();
 		final int height = getPerso().getPerso().getMap().getHeight();
@@ -102,8 +140,6 @@ public class FightUtilities extends Info {
 	}
 
 	public void runToMob(final Entity m, final boolean safely, int pmToUse) {
-		final int pm = getPerso().getPerso().getPm();
-		if (pmToUse > pm) pmToUse = pm;
 		final ManchouCell cellNearMob = safely ? getCellNearAndSafeFromMob(m, pmToUse, true) : getCellNearMob(m, pmToUse, true);
 		runTo(cellNearMob.getId());
 	}
@@ -121,21 +157,20 @@ public class FightUtilities extends Info {
 		}
 	}
 
-	public boolean isSafeFromMobs() {
+	/**
+	 * Retourne true si le joueur est a une distance safe des mobs
+	 * 
+	 * @param deep
+	 *            le nombre de tour a l'avance (en gros pour une valeure de deux sa multiplie les pm des mobs par deux)
+	 * @return
+	 */
+	public boolean isSafeFromMobs(int deep) {
+		if (deep < 2) deep = 1;
 		int team = getPerso().getPerso().getTeam();
 		for (Entity e : getPerso().getPerso().getMap().getEntities().values()) {
-			if (e instanceof Perso) continue;
-			else if (e instanceof Player) {
-				ManchouPlayerEntity pl = (ManchouPlayerEntity) e;
-				if (pl.getTeam() == team) continue;
-				int dist = Maps.distanceManathan(getPerso().getPerso().getCellId(), pl.getCellId(), getPerso().getPerso().getMap().getWidth(), getPerso().getPerso().getMap().getHeight()) - 1;//-1 car pas besoin d'arriver sur la cell
-				if (dist <= pl.getPm()) return false;
-			} else if (e instanceof Mob) {
-				ManchouMob m = (ManchouMob) e;
-				if (m.getTeam() == team) continue;
-				int dist = Maps.distanceManathan(getPerso().getPerso().getCellId(), m.getCellId(), getPerso().getPerso().getMap().getWidth(), getPerso().getPerso().getMap().getHeight()) - 1;//-1 car pas besoin d'arriver sur la cell
-				if (dist <= m.getPm()) return false;
-			}
+			if (isAlly(e)) continue;
+			int dist = Maps.distanceManathan(getPerso().getPerso().getCellId(), e.getCellId(), getPerso().getPerso().getMap().getWidth(), getPerso().getPerso().getMap().getHeight()) - 1;//-1 car pas besoin d'arriver sur la cell
+			if (dist <= e.getPm() * deep) return false;
 		}
 		return true;
 	}
@@ -232,20 +267,20 @@ public class FightUtilities extends Info {
 		return null;
 	}
 
+	public Entity getWeakestEnnemy() {
+		Entity weak = null;
+		for (Entity e : getPerso().getPerso().getMap().getEntities().values()) {
+			if (e.getLife() < 1 || isAlly(e)) continue;
+			if (weak == null || e.getLife() < weak.getLife()) weak = e;
+		}
+		return weak;
+	}
+
 	public Entity getNearestEnnemy() {
 		int dist = Integer.MAX_VALUE;
 		Entity near = null;
 		for (final Entity m : getPerso().getPerso().getMap().getEntities().values()) {
-			if (m.getLife() < 1) continue;
-			// continue if allies
-			if (m instanceof Perso) continue;
-			else if (m instanceof Player) {
-				ManchouPlayerEntity pl = (ManchouPlayerEntity) m;
-				if (pl.getTeam() == getPerso().getPerso().getTeam()) continue;
-			} else if (m instanceof Mob) {
-				ManchouMob mm = (ManchouMob) m;
-				if (mm.getTeam() == getPerso().getPerso().getTeam()) continue;
-			}
+			if (m.getLife() < 1 || isAlly(m)) continue;
 			if (near == null) near = m;
 			final int distance = Maps.distanceManathan(getPerso().getPerso().getCellId(), m.getCellId(), getPerso().getPerso().getMap().getWidth(), getPerso().getPerso().getMap().getHeight());//pas besoin du -1 car on cherche le plus pres
 			if (distance < dist) {
@@ -254,6 +289,34 @@ public class FightUtilities extends Info {
 			}
 		}
 		return near;
+	}
+
+	public boolean isAlly(Entity ent) {
+		int team = getPerso().getPerso().getTeam();
+		if (ent instanceof Perso) {
+			ManchouPerso pers = (ManchouPerso) ent;
+			return pers.getTeam() == team;
+		} else if (ent instanceof Player) {
+			ManchouPlayerEntity pl = (ManchouPlayerEntity) ent;
+			return pl.getTeam() == team;
+		} else if (ent instanceof Mob) {
+			ManchouMob mm = (ManchouMob) ent;
+			return mm.getTeam() == team;
+		} else return false;
+	}
+
+	/**
+	 * Trouve toutes les case safe from mobs
+	 * 
+	 * @param distToPlayer
+	 *            limite de distance depuis le joueur
+	 * @return les cases
+	 */
+	public Set<ManchouCell> getCellsAwayFromMobs(final int distToPlayer) {
+		return getPerso().getPerso().getMap().getEntities().values().stream().map(e -> getCellsSafeFromMob(e, distToPlayer)).reduce((a, b) -> {
+			a.addAll(b);
+			return a;
+		}).orElseGet(HashSet::new);
 	}
 
 	/**
@@ -266,20 +329,11 @@ public class FightUtilities extends Info {
 	public ManchouCell getCellAwayFromMob(final int distToPlayer) {
 		final Set<ManchouCell> aroundP = getCellsAroundPlayer(distToPlayer);
 		Map<ManchouCell, Integer> cost = new HashMap<>();
-		int team = getPerso().getPerso().getTeam();
 		for (ManchouCell c : aroundP) {
-			if (c.hasEntityOn() || !c.isWalkeable()) continue;
+			if (c.hasEntityOn() || !c.isWalkeable() || !c.isLineOfSight()) continue;
 			int pts = 0;
 			for (Entity e : getPerso().getPerso().getMap().getEntities().values()) {
-				// continue if allies
-				if (e instanceof Perso) continue;
-				else if (e instanceof Player) {
-					ManchouPlayerEntity pl = (ManchouPlayerEntity) e;
-					if (pl.getTeam() == team) continue;
-				} else if (e instanceof Mob) {
-					ManchouMob m = (ManchouMob) e;
-					if (m.getTeam() == team) continue;
-				}
+				if (e.getLife() < 1 || isAlly(e)) continue;
 				int cl = e.getCellId();
 				pts += c.distanceManathan(cl);
 			}
@@ -296,10 +350,34 @@ public class FightUtilities extends Info {
 		return far;
 	}
 
+	/**
+	 * Trouve toute les cells a distance X du joueur qui sont inaccessible au niveau de la ligne de vue a partir de la cell en parametre
+	 * 
+	 * @param distToPlayer
+	 *            la distance max du joueur
+	 * @param cell
+	 *            la cell
+	 * @return les cells inaccessibles
+	 */
+	public Set<ManchouCell> getCellInaccessibleFrom(int distToPlayer, int cell) {
+		Set<ManchouCell> cellsAroundPlayer = getCellsAroundPlayer(distToPlayer);
+		List<Integer> accessibleCells = getAccessibleCells(cell, 64);
+		cellsAroundPlayer.removeIf(c -> accessibleCells.contains(c.getId()));
+		return cellsAroundPlayer;
+	}
+
 	public Set<ManchouCell> getCellsAroundPlayer(final int dist) {
 		final Set<ManchouCell> around = new HashSet<>();
 		Arrays.stream(getPerso().getPerso().getMap().getCells())
 				.filter(c -> Maps.distanceManathan(getPerso().getPerso().getCellId(), c.getId(), getPerso().getPerso().getMap().getWidth(), getPerso().getPerso().getMap().getHeight()) <= dist)
+				.forEach(around::add);
+		return around;
+	}
+
+	public Set<ManchouCell> getCellsAroundCell(final int cell, int dist) {
+		final Set<ManchouCell> around = new HashSet<>();
+		Arrays.stream(getPerso().getPerso().getMap().getCells())
+				.filter(c -> Maps.distanceManathan(cell, c.getId(), getPerso().getPerso().getMap().getWidth(), getPerso().getPerso().getMap().getHeight()) <= dist)
 				.forEach(around::add);
 		return around;
 	}
@@ -312,5 +390,41 @@ public class FightUtilities extends Info {
 	public List<Integer> getAccessibleCells(int origin, int range) {
 		return ShadowCasting.getAccesibleCells(origin, range, getPerso().getPerso().getMap().serialize(), getPerso().getPerso().getMap().cellAccessible().negate()).stream().map(Cell::getId)
 				.collect(Collectors.toList());
+	}
+
+	public static class FightNode {
+		int id;
+		int amount;
+
+		public FightNode(int id) {
+			this.id = id;
+		}
+
+		void incrementPrice() {
+			amount++;
+		}
+
+		/**
+		 * @return the amount
+		 */
+		public int getAmount() {
+			return amount;
+		}
+
+		boolean valueUnder2() {
+			return amount < 2;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) return true;
+			if (obj == null) return false;
+			return obj instanceof FightNode && ((FightNode) obj).id == id;
+		}
+
+		@Override
+		public int hashCode() {
+			return id;
+		}
 	}
 }

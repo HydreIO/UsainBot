@@ -1,5 +1,6 @@
 package fr.aresrpg.eratz.domain.ia.fight;
 
+import fr.aresrpg.eratz.domain.ia.fight.behavior.FightBehavior;
 import fr.aresrpg.tofumanchou.domain.data.enums.Classe;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
