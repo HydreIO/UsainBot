@@ -11,6 +11,7 @@ import fr.aresrpg.tofumanchou.infra.data.*;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -56,9 +57,13 @@ public abstract class FightBehavior extends Info {
 	protected boolean isAccessible(ManchouSpell spell, int cell) {
 		return util().getAccessibleCells(util().getMaxPoFor(spell)).contains(cell);
 	}
-	
+
 	protected List<Entity> getCacEntities() {
-		player().getCell();
+		return Arrays.stream(player().getNeighborsWithoutDiagonals()).filter(ManchouCell::hasEntityOn).map(c -> c.getEntitiesOn().stream().findFirst().get()).collect(Collectors.toList());
+	}
+
+	protected boolean hasCacEntities() {
+		return !getCacEntities().isEmpty();
 	}
 
 	protected FightUtilities util() {

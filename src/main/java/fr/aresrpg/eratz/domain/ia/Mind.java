@@ -37,8 +37,8 @@ public class Mind extends Info {
 		this.state = state;
 	}
 
-	public void handleState(Interrupt interrupt) {
-		if (park) {
+	public void handleState(Interrupt interrupt, boolean forced) {
+		if (!forced && park) {
 			LOGGER.debug("Refusing " + interrupt);
 			return;
 		}

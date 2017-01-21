@@ -21,6 +21,8 @@ public class Fighting extends Info {
 	}
 
 	public void playTurn() {
+
+		// TODO wait until turn start ?
 		behavior.playTurn();
 	}
 

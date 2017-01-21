@@ -50,6 +50,8 @@ public class CraLowBehavior extends FightBehavior {
 		Entity weakestEnnemy = util().getWeakestEnnemy();
 		if (isCac(weakestEnnemy)) liberate(weakestEnnemy);
 		else if (isCac(nearestEnnemy)) liberate(nearestEnnemy);
+		else if (hasCacEntities()) liberate(getCacEntities().get(0));
+		else if (tryZone()) ;
 		else if (isAccessible(fleche_magique, weakestEnnemy)) agressive(weakestEnnemy);
 		else if (isAccessible(fleche_magique, nearestEnnemy)) agressive(nearestEnnemy);
 		else {
@@ -83,11 +85,13 @@ public class CraLowBehavior extends FightBehavior {
 	private void liberate(Entity e) {
 		if (!canLaunch(fleche_recul, e.getCellId())) return;
 		useSpell(fleche_recul, e.getCellId());
+		completeWithIceArrow(e);
 	}
 
 	private void agressive(Entity e) {
 		if (!canLaunch(fleche_magique, e.getCellId())) return;
 		useSpell(fleche_magique, e.getCellId());
+		completeWithIceArrow(e);
 	}
 
 	private void agressive(Entity e, int cell) {
@@ -95,6 +99,7 @@ public class CraLowBehavior extends FightBehavior {
 		run(cell);
 		if (!canLaunch(fleche_magique, cell)) return;
 		useSpell(fleche_magique, e.getCellId());
+		completeWithIceArrow(e);
 	}
 
 	private void completeWithIceArrow(Entity e) {

@@ -49,9 +49,8 @@ public class HarvestRunner extends Runner {
 					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(harvesting)));
 					return;
 				case ACTION_STOP: // des fois la frame s'update cash (donc bug du serv) et le serv envoie une action error (dofus jte chie dessus)
-					recoverAfterActionError(promise);
 					getPerso().getMind().resetState();
-					promise.complete(CompletableFuture.completedFuture(harvesting).thenComposeAsync(Threads.threadContextSwitch("recovered->harvest", this::runHarvest), Executors.FIXED));
+					Executors.FIXED.execute(() -> recoverAfterActionError(promise));
 					return;
 				case MOVED:
 				case RESSOURCE_STEAL:

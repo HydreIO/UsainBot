@@ -5,9 +5,12 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.event.EventBus;
 import fr.aresrpg.commons.domain.event.Subscriber;
+import fr.aresrpg.dofus.protocol.subway.client.SubwayUsePacket;
+import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.dofus.util.Pathfinding.PathValidator;
+import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
@@ -21,6 +24,7 @@ import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityMoveEvent;
 import fr.aresrpg.tofumanchou.domain.event.player.PersoMoveEndEvent;
+import fr.aresrpg.tofumanchou.domain.event.player.ZaapGuiOpenEvent;
 import fr.aresrpg.tofumanchou.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
@@ -40,11 +44,14 @@ public class Navigator extends Info {
 	private Queue<TeleporterTrigger> path = new LinkedList<>();
 
 	private boolean listen;
+	private boolean listenZaap;
+	private boolean listenZaapi;
 	private int cellid;
 	private int mapid;
 	private boolean zaap;
 
 	private Subscriber subscriber;
+	private Subscriber subscriberAction;
 
 	/**
 	 * @param perso
@@ -55,6 +62,7 @@ public class Navigator extends Info {
 		Objects.requireNonNull(destination);
 		this.destination = destination;
 		subscriber = EventBus.getBus(PersoMoveEndEvent.class).subscribe(this::listen, 0);
+		subscriberAction = EventBus.getBus(ZaapGuiOpenEvent.class).subscribe(this::listenZaap, 0);
 	}
 
 	@Override
@@ -195,6 +203,21 @@ public class Navigator extends Info {
 		if (!listen || e.getPerso() != getPerso().getPerso()) return;
 		listen = false;
 		LOGGER.debug("LISTEN move nav zaap=" + zaap);
+		if (zaap) e.getPerso().interract(Skills.UTILISER, cellid);
+		else e.getPerso().interract(Skills.SE_FAIRE_TRANSPORTER, cellid);
+	}
+
+	private void listenZaapi(subway e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (!listenZaap || perso == null) return;
+		listenZaap = false;
+		take();
+	}
+
+	private void listenZaap(ZaapGuiOpenEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (!listenZaap || perso == null) return;
+		listenZaap = false;
 		take();
 	}
 

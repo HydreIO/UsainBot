@@ -69,42 +69,42 @@ public class IaListener implements Listener {
 		perso.getUtilities().useRessourceBags();
 		LOGGER.debug("Joined " + perso.getPerso().getMap().getInfos());
 		perso.getPerso().cancelRunner();
-		perso.getMind().handleState(Interrupt.MOVED);
+		perso.getMind().handleState(Interrupt.MOVED, false);
 	}
 
 	@Subscribe
 	public void onReq(DuelRequestEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || !perso.isOnline()) return;
-		if (e.getTarget().getUUID() == perso.getPerso().getUUID()) perso.getMind().handleState(Interrupt.DEFI);
+		if (e.getTarget().getUUID() == perso.getPerso().getUUID()) perso.getMind().handleState(Interrupt.DEFI, false);
 	}
 
 	@Subscribe
 	public void onParty(GroupInvitationAcceptedEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || !perso.isOnline()) return;
-		if (e.getInvited().equalsIgnoreCase(perso.getPerso().getPseudo())) perso.getMind().handleState(Interrupt.GROUP);
+		if (e.getInvited().equalsIgnoreCase(perso.getPerso().getPseudo())) perso.getMind().handleState(Interrupt.GROUP, false);
 	}
 
 	@Subscribe
 	public void guild(GuildInvitedEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || !perso.isOnline()) return;
-		perso.getMind().handleState(Interrupt.GUILD);
+		perso.getMind().handleState(Interrupt.GUILD, false);
 	}
 
 	@Subscribe
 	public void exchange(ExchangeAcceptedEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || !perso.isOnline()) return;
-		perso.getMind().handleState(Interrupt.EXCHANGE);
+		perso.getMind().handleState(Interrupt.EXCHANGE, false);
 	}
 
 	@Subscribe
 	public void onDisconnect(BotDisconnectEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null) return;
-		perso.getMind().handleState(Interrupt.DISCONNECT);
+		perso.getMind().handleState(Interrupt.DISCONNECT, false);
 	}
 
 	@Subscribe
@@ -115,7 +115,7 @@ public class IaListener implements Listener {
 			FightListener.register();
 			FightListener.getInstance().onJoin(e);
 		}, 1, TimeUnit.SECONDS);
-		perso.getMind().handleState(Interrupt.FIGHT_JOIN);
+		perso.getMind().handleState(Interrupt.FIGHT_JOIN, false);
 	}
 
 	@Subscribe
@@ -144,13 +144,13 @@ public class IaListener implements Listener {
 	@Subscribe
 	public void onBan(LoginErrorEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso != null) perso.getMind().handleState(Interrupt.LOGIN_ERROR);
+		if (perso != null) perso.getMind().handleState(Interrupt.LOGIN_ERROR, false);
 	}
 
 	@Subscribe
 	public void onServer(ServerStateEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso != null && e.getServer().getState() != ServerState.ONLINE) perso.getMind().handleState(e.getServer().getState() == ServerState.SAVING ? Interrupt.SAVE : Interrupt.CLOSED);
+		if (perso != null && e.getServer().getState() != ServerState.ONLINE) perso.getMind().handleState(e.getServer().getState() == ServerState.SAVING ? Interrupt.SAVE : Interrupt.CLOSED, false);
 	}
 
 	@Subscribe
@@ -165,7 +165,7 @@ public class IaListener implements Listener {
 		Executors.SCHEDULED.schedule(() -> {
 			perso.getPerso().leaveZaap();
 			Threads.uSleep(500, TimeUnit.MILLISECONDS);
-			perso.getMind().handleState(Interrupt.MOVED); // on vient d'enregistrer les zaap donc on peut sortir (comme il n'est pas sur la bonne map le path sera recalculé)
+			perso.getMind().handleState(Interrupt.MOVED, false); // on vient d'enregistrer les zaap donc on peut sortir (comme il n'est pas sur la bonne map le path sera recalculé)
 		}, 500, TimeUnit.MILLISECONDS);
 	}
 
@@ -184,7 +184,7 @@ public class IaListener implements Listener {
 		Threads.uSleep(1, TimeUnit.SECONDS);
 		ManchouPerso p = perso.getPerso();
 		if (perso.isInFight()) return;
-		perso.getMind().handleState(Interrupt.ACTION_STOP);
+		perso.getMind().handleState(Interrupt.ACTION_STOP, false);
 
 	}
 
@@ -192,7 +192,7 @@ public class IaListener implements Listener {
 	public void podBlocked(InfoMessageEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || !perso.isOnline()) return;
-		if ((e.getType() == InfosMsgType.ERROR && InfosMessage.TROP_CHARGE_.getId() == e.getMessageId())) perso.getMind().handleState(Interrupt.FULL_POD);
+		if ((e.getType() == InfosMsgType.ERROR && InfosMessage.TROP_CHARGE_.getId() == e.getMessageId())) perso.getMind().handleState(Interrupt.FULL_POD, false);
 	}
 
 	@Subscribe
@@ -201,7 +201,7 @@ public class IaListener implements Listener {
 		if (perso == null || !perso.isOnline()) return;
 		boolean steal = e.getCellId() == perso.getUtilities().getCurrentHarvest() && e.getPlayer().getUUID() != perso.getPerso().getUUID();
 		LOGGER.debug(e.getPlayer().getPseudo() + " Harvestime ! steal = " + steal);
-		if (steal) perso.getMind().handleState(Interrupt.RESSOURCE_STEAL);
+		if (steal) perso.getMind().handleState(Interrupt.RESSOURCE_STEAL, false);
 	}
 
 	@Subscribe
@@ -209,11 +209,11 @@ public class IaListener implements Listener {
 		final BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || !perso.isOnline()) return;
 		if (e.getCell().getId() != perso.getUtilities().getCurrentHarvest()) {
-			if (e.getCell().isLayerObject2Interactive()) perso.getMind().handleState(Interrupt.RESSOURCE_SPAWN);
+			if (e.getCell().isLayerObject2Interactive()) perso.getMind().handleState(Interrupt.RESSOURCE_SPAWN, false);
 			return;
 		}
 		if (e.getFrame() == 3) {
-			perso.getMind().handleState(perso.getUtilities().isFullPod() ? Interrupt.FULL_POD : Interrupt.RESSOURCE_HARVESTED);
+			perso.getMind().handleState(perso.getUtilities().isFullPod() ? Interrupt.FULL_POD : Interrupt.RESSOURCE_HARVESTED, false);
 		}
 	}
 
