@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class Runner extends Info {
 
+	private int errorCount;
+
 	/**
 	 * @param perso
 	 */
@@ -40,6 +42,7 @@ public abstract class Runner extends Info {
 	}
 
 	protected CompletableFuture<?> recoverAfterActionError(CompletableFuture<?> next) {
+		errorCount++;
 		ManchouPerso p = getPerso().getPerso();
 		Threads.uSleep(Randoms.nextBetween(1, 3), TimeUnit.SECONDS);
 		if (p.isDefied()) p.cancelDefiInvit();
@@ -54,6 +57,11 @@ public abstract class Runner extends Info {
 		Threads.uSleep(1, TimeUnit.SECONDS);
 		getPerso().refreshMap();
 		Threads.uSleep(2, TimeUnit.SECONDS);
+		if (errorCount > 20) {
+			errorCount = 0;
+			getPerso().getPerso().disconnect();
+			return getPerso().getMind().connect(10, TimeUnit.SECONDS);
+		}
 		return next;
 	}
 }
