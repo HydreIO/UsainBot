@@ -57,7 +57,7 @@ public abstract class Runner extends Info {
 		Threads.uSleep(1, TimeUnit.SECONDS);
 		getPerso().refreshMap();
 		Threads.uSleep(2, TimeUnit.SECONDS);
-		if (errorCount > 20) {
+		if (errorCount > 5) {
 			errorCount = 0;
 			getPerso().getPerso().disconnect();
 			return getPerso().getMind().connect(10, TimeUnit.SECONDS);

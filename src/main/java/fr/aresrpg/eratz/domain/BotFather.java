@@ -100,9 +100,9 @@ public class BotFather implements ManchouPlugin {
 	// goto map 10356 marine-lpn eratz
 	// goto cell 318 bratva-nazar henual
 	// goto 21,-30 bratva-nazar henual
-	// crash party bratva-nazar henual Shakraa
-	// crash party bratva-nazar henual Jiagzaoqmmy
-	// crash party bratva-nazar henual Stevity 
+	// crash party bratva-nazar henual Ckcyzevbud
+	// crash party bratva-nazar henual Xacamps
+	// crash party bratva-nazar henual Vw-Denkille 
 	// crash duel bratva-nazar henual 540240
 	// crash await bratva-nazar henual 521011
 

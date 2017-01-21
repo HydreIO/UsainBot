@@ -44,7 +44,6 @@ public class HarvestRunner extends Runner {
 			switch (interrupt) {
 				case FIGHT_JOIN:
 					return;
-				case MOVED:
 				case FULL_POD:
 					getPerso().getMind().resetState();
 					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(harvesting)));
@@ -54,10 +53,11 @@ public class HarvestRunner extends Runner {
 					getPerso().getMind().resetState();
 					promise.complete(CompletableFuture.completedFuture(harvesting).thenComposeAsync(Threads.threadContextSwitch("recovered->harvest", this::runHarvest), Executors.FIXED));
 					return;
+				case MOVED:
 				case RESSOURCE_STEAL:
 				case RESSOURCE_HARVESTED:
 					getPerso().getMind().resetState();
-					String name = interrupt == Interrupt.ACTION_STOP ? "actionstop->harvest" : interrupt == Interrupt.RESSOURCE_STEAL ? "steal->harvest" : "harvested->harvest";
+					String name = interrupt == Interrupt.MOVED ? "moved->harvest" : interrupt == Interrupt.RESSOURCE_STEAL ? "steal->harvest" : "harvested->harvest";
 					getPerso().getUtilities().setCurrentHarvest(-1);
 					Threads.uSleep(1, TimeUnit.SECONDS); // wait au cas ou join fight
 					promise.complete(CompletableFuture.completedFuture(harvesting).thenComposeAsync(Threads.threadContextSwitch(name, this::runHarvest), Executors.FIXED));

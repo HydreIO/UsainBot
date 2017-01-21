@@ -68,6 +68,7 @@ public class IaListener implements Listener {
 		if (perso == null || !perso.isOnline() || e.getPlayer().getUUID() != perso.getPerso().getUUID() || perso.isInFight()) return;
 		perso.getUtilities().useRessourceBags();
 		LOGGER.debug("Joined " + perso.getPerso().getMap().getInfos());
+		perso.getPerso().cancelRunner();
 		perso.getMind().handleState(Interrupt.MOVED);
 	}
 
