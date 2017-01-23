@@ -17,17 +17,23 @@ public class Fighting extends Info {
 	 */
 	public Fighting(BotPerso perso) {
 		super(perso);
-		this.behavior = Fights.getBehavior(perso.getPerso().getClasse(), perso.getPerso().getLevel());
+		this.behavior = Fights.getBehavior(perso, perso.getPerso().getLevel());
 	}
 
 	public void playTurn() {
-
-		// TODO wait until turn start ?
 		behavior.playTurn();
 	}
 
 	public void notifyStatsReceive() {
 		behavior.notifyStatsReceive();
+	}
+
+	public void notifyPaReceive() {
+		behavior.notifyPaReceive();
+	}
+
+	public void notifyPmReceive() {
+		behavior.notifyPmReceive();
 	}
 
 	@Override

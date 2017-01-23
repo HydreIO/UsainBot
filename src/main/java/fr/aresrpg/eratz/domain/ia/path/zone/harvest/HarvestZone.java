@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.ia.path.zone;
+package fr.aresrpg.eratz.domain.ia.path.zone.harvest;
 
 import fr.aresrpg.commons.domain.util.ArrayUtils;
 import fr.aresrpg.dofus.structures.item.Interractable;
@@ -7,6 +7,7 @@ import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.path.Paths;
 import fr.aresrpg.eratz.domain.ia.path.ZoneCompiler;
+import fr.aresrpg.eratz.domain.ia.path.zone.Zone;
 import fr.aresrpg.eratz.domain.util.UtilFunc;
 import fr.aresrpg.tofumanchou.domain.data.MapsData;
 import fr.aresrpg.tofumanchou.domain.data.MapsData.MapDataBean;

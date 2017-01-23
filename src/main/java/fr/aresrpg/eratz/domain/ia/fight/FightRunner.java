@@ -19,6 +19,8 @@ import java.util.function.Function;
  */
 public class FightRunner extends Info {
 
+	private boolean running;
+
 	/**
 	 * @param perso
 	 */
@@ -31,18 +33,33 @@ public class FightRunner extends Info {
 
 	}
 
+	/**
+	 * @param running
+	 *            the running to set
+	 */
+	public void setRunning(boolean running) {
+		this.running = running;
+	}
+
 	public CompletableFuture<Fighting> runFight(Fighting fighting) {
-		LOGGER.debug("run fight");
+		LOGGER.debug("run fight=====");
 		CompletableFuture<CompletableFuture<Fighting>> promise = new CompletableFuture<>();
 		getPerso().getMind().publishState(interrupt -> {
-			LOGGER.debug("state fight " + interrupt + " thd:" + Thread.currentThread().getName());
+			LOGGER.debug("state fight " + interrupt);
 			switch (interrupt) {
 				case MOVED:
+					setRunning(false);
 					getPerso().getMind().resetState();
 					promise.complete(CompletableFuture.completedFuture(fighting));
 					break;
 				case STATS:
 					fighting.notifyStatsReceive();
+					break;
+				case PA:
+					fighting.notifyPaReceive();
+					break;
+				case PM:
+					fighting.notifyPmReceive();
 					break;
 				case TURN_START:
 					getPerso().getMind().resetState();
@@ -57,8 +74,11 @@ public class FightRunner extends Info {
 					return; // avoid reset if non handled
 			}
 		}); // no timeout
-		LOGGER.debug("play fight turn");
-		fighting.playTurn();
+		if (running) fighting.playTurn();
+		else {
+			getPerso().getPerso().beReady(true);
+			running = true;
+		}
 		LOGGER.debug("Turn played");
 		return promise.thenCompose(Function.identity());
 	}

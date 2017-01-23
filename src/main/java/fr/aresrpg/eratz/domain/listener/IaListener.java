@@ -21,8 +21,8 @@ import fr.aresrpg.tofumanchou.domain.event.aproach.LoginErrorEvent;
 import fr.aresrpg.tofumanchou.domain.event.chat.ChatMsgEvent;
 import fr.aresrpg.tofumanchou.domain.event.duel.DuelRequestEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityPlayerJoinMapEvent;
+import fr.aresrpg.tofumanchou.domain.event.entity.MonsterGroupSpawnEvent;
 import fr.aresrpg.tofumanchou.domain.event.exchange.ExchangeAcceptedEvent;
-import fr.aresrpg.tofumanchou.domain.event.fight.FightEndEvent;
 import fr.aresrpg.tofumanchou.domain.event.fight.FightJoinEvent;
 import fr.aresrpg.tofumanchou.domain.event.group.GroupInvitationAcceptedEvent;
 import fr.aresrpg.tofumanchou.domain.event.map.FrameUpdateEvent;
@@ -111,18 +111,7 @@ public class IaListener implements Listener {
 	public void onFight(FightJoinEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null || !perso.isOnline()) return;
-		Executors.SCHEDULED.schedule(() -> {
-			FightListener.register();
-			FightListener.getInstance().onJoin(e);
-		}, 1, TimeUnit.SECONDS);
-		perso.getMind().handleState(Interrupt.FIGHT_JOIN, false);
-	}
-
-	@Subscribe
-	public void onFightEnd(FightEndEvent e) {
-		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso == null || !perso.isOnline()) return;
-		Executors.FIXED.execute(FightListener::unRegister);
+		perso.getMind().handleState(Interrupt.FIGHT_JOIN, true);
 	}
 
 	@Subscribe
@@ -185,7 +174,13 @@ public class IaListener implements Listener {
 		ManchouPerso p = perso.getPerso();
 		if (perso.isInFight()) return;
 		perso.getMind().handleState(Interrupt.ACTION_STOP, false);
+	}
 
+	@Subscribe
+	public void onSpawn(MonsterGroupSpawnEvent e) {
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (perso == null || !perso.isOnline()) return;
+		perso.getMind().handleState(Interrupt.MOB_SPAWN, false);
 	}
 
 	@Subscribe

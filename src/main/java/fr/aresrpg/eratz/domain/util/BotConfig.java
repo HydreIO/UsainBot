@@ -16,5 +16,7 @@ public class BotConfig {
 	public static int RECONNECT_MAX = 15000;
 	@Configured("ia.general.cleverbot")
 	public static boolean AUTO_SPEAK = true;
+	@Configured("ia.general.auto_fight")
+	public static boolean FIGHT_ENABLED = true;
 
 }

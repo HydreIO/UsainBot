@@ -39,12 +39,12 @@ public class HarvestCommand implements Command {
 				return;
 			}
 			BotPerso bdp = BotFather.getPerso(pers);
-			if (args[0].equalsIgnoreCase("start")) bdp.startHarvest(Paths.FULL);
+			if (args[0].equalsIgnoreCase("start")) bdp.startHarvest(Paths.BUCHERON_FULL);
 			else if (args[0].equalsIgnoreCase("stop")) bdp.stopBehavior();
 			else throw new IllegalArgumentException(args[0] + " is invalid");
 			return;
 		}
-		LOGGER.error("Usage: bucheron <start/stop> <server> <perso>");
+		LOGGER.error("Usage: harvest <start/stop> <server> <perso>");
 	}
 
 }

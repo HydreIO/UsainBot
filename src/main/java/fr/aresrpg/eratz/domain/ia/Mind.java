@@ -13,10 +13,12 @@ import fr.aresrpg.eratz.domain.ia.fight.Fighting;
 import fr.aresrpg.eratz.domain.ia.harvest.Harvesting;
 import fr.aresrpg.eratz.domain.ia.navigation.Navigator;
 import fr.aresrpg.eratz.domain.util.functionnal.FutureHandler;
+import fr.aresrpg.tofumanchou.domain.data.enums.DofusMobs;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 /**
  * 
@@ -70,7 +72,7 @@ public class Mind extends Info {
 	 *            the destination
 	 * @return the CompletableFuture
 	 */
-	public CompletableFuture<Navigator> moveToMap(BotMap destination) {
+	public CompletableFuture<?> moveToMap(BotMap destination) {
 		LOGGER.debug("Move to map " + destination.getMap().getInfos());
 		Navigator navigator = new Navigator(getPerso(), destination);
 		if (getPerso().getPerso().getMap().getMapId() == destination.getMapId()) {
@@ -81,27 +83,32 @@ public class Mind extends Info {
 				.thenCompose(getPerso().getNavRunner()::runNavigation);
 	}
 
-	public CompletableFuture<Harvesting> harvest(boolean playerJob, Interractable... ressources) {
+	public CompletableFuture<?> harvest(boolean playerJob, Interractable... ressources) {
 		LOGGER.debug("Mind -> harvest");
 		return CompletableFuture.completedFuture(new Harvesting(getPerso(), playerJob, ressources)).thenComposeAsync(
 				Threads.threadContextSwitch("mind->harvest", getPerso().getHarRunner()::runHarvest),
 				Executors.FIXED);
 	}
 
-	public CompletableFuture<Connector> connect(long time, TimeUnit unit) {
+	public CompletableFuture<?> connect(long time, TimeUnit unit) {
 		LOGGER.debug("Mind -> connect");
 		return CompletableFuture.completedFuture(new Connector(getPerso(), time, unit)).thenComposeAsync(Threads.threadContextSwitch("mind->connect", getPerso().getConRunner()::runConnection),
 				Executors.FIXED);
 	}
 
-	public CompletableFuture<Fighting> fight() {
+	public CompletableFuture<?> fight() {
 		LOGGER.debug("Mind -> fight");
 		return CompletableFuture.completedFuture(new Fighting(getPerso())).thenComposeAsync(Threads.threadContextSwitch("mind->fight", getPerso().getFiRunner()::runFight), Executors.FIXED);
 	}
 
-	public CompletableFuture<Interractable[]> waitSpawn(Interractable... ress) {
+	public CompletableFuture<?> waitSpawn(Interractable... ress) {
 		LOGGER.debug("Mind -> wait");
 		return CompletableFuture.completedFuture(ress).thenComposeAsync(getPerso().getWaRunner()::waitFor, Executors.FIXED);
+	}
+
+	public CompletableFuture<?> waitMobSpawn(Predicate<DofusMobs> avoid) {
+		LOGGER.debug("Mind -> waitmob");
+		return CompletableFuture.completedFuture(avoid).thenComposeAsync(getPerso().getWaRunner()::waitFor, Executors.FIXED);
 	}
 
 	@Override

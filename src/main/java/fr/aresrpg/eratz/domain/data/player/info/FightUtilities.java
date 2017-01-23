@@ -11,6 +11,7 @@ import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.domain.data.Spell;
 import fr.aresrpg.tofumanchou.domain.data.entity.Entity;
 import fr.aresrpg.tofumanchou.domain.data.entity.mob.Mob;
+import fr.aresrpg.tofumanchou.domain.data.entity.mob.MobGroup;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Player;
 import fr.aresrpg.tofumanchou.infra.data.*;
@@ -45,12 +46,13 @@ public class FightUtilities extends Info {
 	 *            si la cell ne doit toucher aucun alliés
 	 * @return une Pair cell - nombre de mob touché
 	 */
-	public List<Pair<Cell, Integer>> getCellsForZoneSpell(int spellRange, boolean free, boolean safeForAllies) {
+	public List<Pair<ManchouCell, Integer>> getCellsForZoneSpell(int spellRange, boolean free, boolean safeForAllies) {
 		List<FightNode> cells = new ArrayList() {
 			@Override
 			public boolean add(Object e) {
 				if (contains(e)) {
 					FightNode node = (FightNode) get(indexOf(e));
+					LOGGER.debug("===========increment for " + e);
 					node.incrementPrice();
 					return false;
 				}
@@ -59,6 +61,7 @@ public class FightUtilities extends Info {
 		};
 		ManchouMap map = getPerso().getPerso().getMap();
 		for (Entity e : getPerso().getPerso().getMap().getEntities().values()) {
+			if (e.getLife() < 1 || e instanceof MobGroup || isAlly(e)) continue;
 			ManchouCell mobcell = map.getCells()[e.getCellId()];
 			Set<ManchouCell> cellsAroundCell = getCellsAroundCell(mobcell.getId(), spellRange);
 			if (free) cellsAroundCell.removeIf(ManchouCell::hasEntityOn);
@@ -71,9 +74,9 @@ public class FightUtilities extends Info {
 				cells.removeIf(cellsAroundCell.stream().map(c -> new FightNode(c.getId())).collect(Collectors.toSet())::contains);
 			}
 		}
-		cells.removeIf(FightNode::valueUnder2);
+		cells.removeIf(FightNode::valueUnder1);
 		cells.sort(Comparator.comparingInt(FightNode::getAmount).reversed());
-		return cells.stream().map(n -> new Pair(map.getCells()[n.id], n.amount)).collect(Collectors.toList());
+		return cells.stream().map(n -> new Pair<ManchouCell, Integer>(map.getCells()[n.id], n.amount)).collect(Collectors.toList());
 	}
 
 	/**
@@ -144,17 +147,19 @@ public class FightUtilities extends Info {
 		runTo(cellNearMob.getId());
 	}
 
-	public void runAwayFromMobs() {
+	public boolean runAwayFromMobs() {
 		try {
 			ManchouCell c = getCellAwayFromMob(getPerso().getPerso().getPm());
 			LOGGER.debug("pm player = " + getPerso().getPerso().getPm());
 			if (c != null) {
 				LOGGER.severe("cell away from mob = " + c.getId());
 				runTo(c.getId());
+				return true;
 			}
 		} catch (Exception e) {
 			LOGGER.error(e);
 		}
+		return false;
 	}
 
 	/**
@@ -168,7 +173,7 @@ public class FightUtilities extends Info {
 		if (deep < 2) deep = 1;
 		int team = getPerso().getPerso().getTeam();
 		for (Entity e : getPerso().getPerso().getMap().getEntities().values()) {
-			if (isAlly(e)) continue;
+			if (e.isDead() || isAlly(e)) continue;
 			int dist = Maps.distanceManathan(getPerso().getPerso().getCellId(), e.getCellId(), getPerso().getPerso().getMap().getWidth(), getPerso().getPerso().getMap().getHeight()) - 1;//-1 car pas besoin d'arriver sur la cell
 			if (dist <= e.getPm() * deep) return false;
 		}
@@ -188,13 +193,25 @@ public class FightUtilities extends Info {
 		final PathValidator canGo = (x1, y1, x2, y2) -> {
 			final int id = Maps.getIdRotated(x2, y2, width, height);
 			ManchouCell manchouCell = getPerso().getPerso().getMap().getCells()[id];
-			return !manchouCell.hasEntityOn() && manchouCell.isWalkeable() && manchouCell.isLineOfSight();
+			return !manchouCell.hasLivingEntityOn() && manchouCell.isWalkeable() && manchouCell.isLineOfSight();
 		};
 		final List<Node> cellPath = Pathfinding.getCellPath(cellId, cell, getPerso().getPerso().getMap().getProtocolCells(), width, height, Pathfinding::getNeighborsWithoutDiagonals, canGo);
 		// perso.setPm(perso.getPm() - dist); // TEMP REMOVE PM car on attend pas que le serv nous le dise pour pouvoir finir notre tour, de tt façon il reset apres
 		LOGGER.warning("Trying to move from " + cellId + " to " + cell + " path=" + cellPath);
 		if (cellPath == null) throw new NullPointerException("PATH INVALID -_-");
 		getPerso().getPerso().move(cellPath);
+	}
+
+	public boolean pathValidFor(int cell) {
+		final int width = getPerso().getPerso().getMap().getWidth();
+		final int height = getPerso().getPerso().getMap().getHeight();
+		final int cellId = getPerso().getPerso().getCellId();
+		final PathValidator canGo = (x1, y1, x2, y2) -> {
+			final int id = Maps.getIdRotated(x2, y2, width, height);
+			ManchouCell manchouCell = getPerso().getPerso().getMap().getCells()[id];
+			return !manchouCell.hasLivingEntityOn() && manchouCell.isWalkeable();
+		};
+		return Pathfinding.getCellPath(cellId, cell, getPerso().getPerso().getMap().getProtocolCells(), width, height, Pathfinding::getNeighborsWithoutDiagonals, canGo) != null;
 	}
 
 	/**
@@ -209,7 +226,7 @@ public class FightUtilities extends Info {
 		final Iterator<ManchouCell> it = aroundP.iterator();
 		while (it.hasNext()) {
 			final ManchouCell cell = it.next();
-			if (free && !cell.isWalkeable()) it.remove();
+			if (free && (!cell.isWalkeable() || cell.hasLivingEntityOn())) it.remove();
 			if (cell.distanceManathan(m.getCellId()) <= m.getPm()) it.remove();
 		}
 		ManchouCell found = null;
@@ -238,7 +255,7 @@ public class FightUtilities extends Info {
 		final Iterator<ManchouCell> it = aroundP.iterator();
 		while (it.hasNext()) {
 			final ManchouCell cell = it.next();
-			if (cell.hasEntityOn() || !cell.isWalkeable() || cell.distanceManathan(m.getCellId()) <= m.getPm()) it.remove();
+			if (cell.hasLivingEntityOn() || !cell.isWalkeable() || cell.distanceManathan(m.getCellId()) <= m.getPm() || !pathValidFor(cell.getId())) it.remove();
 		}
 		return aroundP;
 	}
@@ -270,7 +287,7 @@ public class FightUtilities extends Info {
 	public Entity getWeakestEnnemy() {
 		Entity weak = null;
 		for (Entity e : getPerso().getPerso().getMap().getEntities().values()) {
-			if (e.getLife() < 1 || isAlly(e)) continue;
+			if (e.isDead() || isAlly(e)) continue;
 			if (weak == null || e.getLife() < weak.getLife()) weak = e;
 		}
 		return weak;
@@ -280,7 +297,7 @@ public class FightUtilities extends Info {
 		int dist = Integer.MAX_VALUE;
 		Entity near = null;
 		for (final Entity m : getPerso().getPerso().getMap().getEntities().values()) {
-			if (m.getLife() < 1 || isAlly(m)) continue;
+			if (m.isDead() || isAlly(m)) continue;
 			if (near == null) near = m;
 			final int distance = Maps.distanceManathan(getPerso().getPerso().getCellId(), m.getCellId(), getPerso().getPerso().getMap().getWidth(), getPerso().getPerso().getMap().getHeight());//pas besoin du -1 car on cherche le plus pres
 			if (distance < dist) {
@@ -330,7 +347,7 @@ public class FightUtilities extends Info {
 		final Set<ManchouCell> aroundP = getCellsAroundPlayer(distToPlayer);
 		Map<ManchouCell, Integer> cost = new HashMap<>();
 		for (ManchouCell c : aroundP) {
-			if (c.hasEntityOn() || !c.isWalkeable() || !c.isLineOfSight()) continue;
+			if (c.hasLivingEntityOn() || !c.isWalkeable() || !c.isLineOfSight() || !pathValidFor(c.getId())) continue;
 			int pts = 0;
 			for (Entity e : getPerso().getPerso().getMap().getEntities().values()) {
 				if (e.getLife() < 1 || isAlly(e)) continue;
@@ -411,8 +428,8 @@ public class FightUtilities extends Info {
 			return amount;
 		}
 
-		boolean valueUnder2() {
-			return amount < 2;
+		boolean valueUnder1() {
+			return amount < 1;
 		}
 
 		@Override

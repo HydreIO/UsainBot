@@ -8,11 +8,13 @@ import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.Runner;
 import fr.aresrpg.eratz.domain.util.BotConfig;
+import fr.aresrpg.tofumanchou.domain.data.enums.DofusMobs;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * 
@@ -30,6 +32,38 @@ public class WaitRunner extends Runner {
 	@Override
 	public void shutdown() {
 
+	}
+
+	public CompletableFuture<Predicate<DofusMobs>> waitFor(Predicate<DofusMobs> avoid) {
+		LOGGER.debug("run waitFor");
+		CompletableFuture<CompletableFuture<Predicate<DofusMobs>>> promise = new CompletableFuture<>();
+		getPerso().getMind().publishState(interrupt -> {
+			LOGGER.debug("state waiting " + interrupt);
+			switch (interrupt) {
+				case FIGHT_JOIN:
+					return;
+				case MOB_SPAWN:
+					if (!getPerso().getPerso().getMap().hasMobGroupWithout(avoid)) return;
+					getPerso().getMind().resetState();
+					promise.complete(CompletableFuture.completedFuture(avoid));
+					return;
+				case MOVED:
+				case FULL_POD:
+					getPerso().getMind().resetState();
+					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(avoid)));
+					return;
+				case DISCONNECT:
+					getPerso().getMind().resetState();
+					promise.complete(
+							getPerso().getMind().connect(Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS).thenComposeAsync(c -> waitFor(avoid),
+									Executors.FIXED));
+					return;
+				default:
+					return;
+			}
+		});
+		LOGGER.debug("wating WIP");
+		return promise.thenCompose(Function.identity());
 	}
 
 	public CompletableFuture<Interractable[]> waitFor(Interractable... interractables) {

@@ -24,7 +24,8 @@ import fr.aresrpg.eratz.domain.ia.fight.FightRunner;
 import fr.aresrpg.eratz.domain.ia.harvest.HarvestRunner;
 import fr.aresrpg.eratz.domain.ia.navigation.NavigationRunner;
 import fr.aresrpg.eratz.domain.ia.path.Paths;
-import fr.aresrpg.eratz.domain.ia.path.zone.HarvestZone;
+import fr.aresrpg.eratz.domain.ia.path.zone.fight.FightZone;
+import fr.aresrpg.eratz.domain.ia.path.zone.harvest.HarvestZone;
 import fr.aresrpg.eratz.domain.ia.waiter.WaitRunner;
 import fr.aresrpg.eratz.domain.util.Closeable;
 import fr.aresrpg.eratz.domain.util.Constants;
@@ -102,6 +103,30 @@ public class BotPerso implements Closeable {
 		});
 	}
 
+	public void startFight(Paths path) {
+		behaviorRunning = true;
+		FightZone zone = path.getFightPath(this);
+		Executors.FIXED.execute(() -> {
+			try {
+				setBehavior(fight(this, zone));
+			} catch (Exception e) {
+				LOGGER.error(e, "not handled");
+			}
+		});
+	}
+
+	public void startFightWait(Paths path) {
+		behaviorRunning = true;
+		FightZone zone = path.getFightPath(this);
+		Executors.FIXED.execute(() -> {
+			try {
+				setBehavior(fightAndWait(this, zone));
+			} catch (Exception e) {
+				LOGGER.error(e, "not handled");
+			}
+		});
+	}
+
 	private void setBehavior(CompletableFuture<?> behavior) {
 		this.behavior = behavior;
 	}
@@ -139,6 +164,36 @@ public class BotPerso implements Closeable {
 				.thenApply(h -> map)
 				.thenCompose(perso.getMind()::moveToMap)
 				.handle(FutureHandler.handleEx()).thenCompose(c -> harvestAndWait(perso, zone));
+	}
+
+	private CompletableFuture fight(BotPerso perso, FightZone zone) {
+		LOGGER.debug("FIGHT cmd");
+		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
+		perso.getMind().resetState();
+		zone.sort();
+		Threads.uSleep(1, TimeUnit.SECONDS);
+		return perso.getUtilities().fightNearestMobGroup(zone::avoid)
+				.thenCompose(c -> {
+					if (c == null) return fight(perso, zone);
+					else if (c.booleanValue()) return perso.getMind().fight();
+					else return perso.getMind().moveToMap(MapsManager.getMap(zone.getNextMap())).thenCompose(z -> fight(perso, zone));
+				})
+				.handle(FutureHandler.handleEx()).thenCompose(c -> fight(perso, zone));
+	}
+
+	private CompletableFuture fightAndWait(BotPerso perso, FightZone zone) {
+		LOGGER.debug("FIGHT AND WAIT");
+		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
+		perso.getMind().resetState();
+		BotMap map = MapsManager.getMap(zone.getNextMap());
+		Threads.uSleep(1, TimeUnit.SECONDS);
+		return perso.getUtilities().fightNearestMobGroup(zone::avoid)
+				.thenCompose(c -> {
+					if (c == null) return fightAndWait(perso, zone);
+					else if (c.booleanValue()) return perso.getMind().fight();
+					else return perso.getMind().waitMobSpawn(zone::avoid).thenCompose(z -> fightAndWait(perso, zone));
+				})
+				.handle(FutureHandler.handleEx()).thenCompose(c -> fightAndWait(perso, zone));
 	}
 
 	/**

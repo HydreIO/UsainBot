@@ -10,6 +10,7 @@ import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.path.Paths;
 import fr.aresrpg.eratz.domain.util.BotConfig;
 import fr.aresrpg.tofumanchou.domain.event.AdminCommandEvent;
+import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -48,18 +49,49 @@ public class AdminCmdListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getPerso());
 		switch (args[0]) {
 			case "bucheron":
-				perso.startHarvest(Paths.FULL);
+				perso.startHarvest(Paths.BUCHERON_FULL);
+				break;
+			case "fight":
+				perso.startFight(Paths.FIGHT_CHAMPS_ASTRUB);
 				break;
 			case "stop":
 				perso.stopBehavior();
 				break;
 			case "speak":
 				BotConfig.AUTO_SPEAK = !BotConfig.AUTO_SPEAK;
-				LOGGER.success("Autospeak " + (BotConfig.AUTO_SPEAK ? "Enabled" : "Disabled"));
+				String msg = "Autospeak " + (BotConfig.AUTO_SPEAK ? "Enabled" : "Disabled");
+				LOGGER.success(msg);
+				BotFather.broadcast(Chat.MEETIC, msg);
+				break;
+			case "whoami":
+				LOGGER.debug("Ndc = " + perso.getPerso().getAccount().getAccountName());
+				LOGGER.debug("Id = " + perso.getPerso().getUUID());
+				LOGGER.debug("Pseudo = " + perso.getPerso().getPseudo());
+				LOGGER.debug("Lvl = " + perso.getPerso().getLevel());
+				LOGGER.debug("Energie = " + perso.getPerso().getEnergy());
+				LOGGER.debug("Pods libre = " + (perso.getPerso().getMaxPods() - perso.getPerso().getPods()));
+				LOGGER.debug("Vie = " + perso.getPerso().getLife());
+				LOGGER.debug("Xp restant = " + (perso.getPerso().getXpMax() - perso.getPerso().getXp()));
+				LOGGER.debug("pos = " + perso.getPerso().getMap().getCoordsInfos());
+				LOGGER.debug("cell = " + perso.getPerso().getMap().getCells()[perso.getPerso().getCellId()]);
+				LOGGER.debug("Fight = " + !perso.getPerso().getMap().isEnded());
+				LOGGER.debug("Inv = " + ((ManchouPerso) perso.getPerso()).getInventory().showContent());
+				LOGGER.debug("Bank = " + ((ManchouPerso) perso.getPerso()).getAccount().getBank().showContent());
+				LOGGER.debug("Outdoor = " + perso.getPerso().getMap().isOutdoor());
+				LOGGER.debug("Map Width = " + perso.getPerso().getMap().getWidth());
+				LOGGER.debug("Map Height = " + perso.getPerso().getMap().getHeight());
+				LOGGER.debug("Jobs = " + perso.getPerso().getJobs());
+				LOGGER.debug("Job = " + perso.getPerso().getJob());
 				break;
 			case "clever":
 				String response = perso.getChatUtilities().getResponse(e.getCmd().substring(args[0].length() + 1));
 				BotFather.broadcast(Chat.ADMIN, "Cleverbot: " + response);
+				break;
+			case "autofight":
+				BotConfig.FIGHT_ENABLED = !BotConfig.FIGHT_ENABLED;
+				String msgf = "AutoFight " + (BotConfig.FIGHT_ENABLED ? "Enabled" : "Disabled");
+				LOGGER.success(msgf);
+				BotFather.broadcast(Chat.MEETIC, msgf);
 				break;
 			case "pktserver":
 				try {

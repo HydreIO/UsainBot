@@ -39,6 +39,9 @@ public class NavigationRunner extends Runner {
 							.thenApplyAsync(Threads.threadContextSwitch("connect->navigate", c -> navigator), Executors.FIXED).thenCompose(this::runNavigation));
 					return;
 				case FIGHT_JOIN: // TODO
+					getPerso().getMind().resetState();
+					promise.complete(getPerso().getMind().fight()
+							.thenApplyAsync(Threads.threadContextSwitch("connect->harvest", c -> navigator), Executors.FIXED).thenCompose(this::runNavigation));
 					return;
 				case FULL_POD:
 					getPerso().getMind().resetState();

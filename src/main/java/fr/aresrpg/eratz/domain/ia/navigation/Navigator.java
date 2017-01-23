@@ -5,7 +5,6 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.event.EventBus;
 import fr.aresrpg.commons.domain.event.Subscriber;
-import fr.aresrpg.dofus.protocol.subway.client.SubwayUsePacket;
 import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
@@ -23,8 +22,7 @@ import fr.aresrpg.eratz.domain.util.functionnal.PathContext;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityMoveEvent;
-import fr.aresrpg.tofumanchou.domain.event.player.PersoMoveEndEvent;
-import fr.aresrpg.tofumanchou.domain.event.player.ZaapGuiOpenEvent;
+import fr.aresrpg.tofumanchou.domain.event.player.*;
 import fr.aresrpg.tofumanchou.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
@@ -51,7 +49,8 @@ public class Navigator extends Info {
 	private boolean zaap;
 
 	private Subscriber subscriber;
-	private Subscriber subscriberAction;
+	private Subscriber subscriberZaap;
+	private Subscriber subscriberZaapi;
 
 	/**
 	 * @param perso
@@ -62,13 +61,16 @@ public class Navigator extends Info {
 		Objects.requireNonNull(destination);
 		this.destination = destination;
 		subscriber = EventBus.getBus(PersoMoveEndEvent.class).subscribe(this::listen, 0);
-		subscriberAction = EventBus.getBus(ZaapGuiOpenEvent.class).subscribe(this::listenZaap, 0);
+		subscriberZaap = EventBus.getBus(ZaapGuiOpenEvent.class).subscribe(this::listenZaap, 0);
+		subscriberZaapi = EventBus.getBus(ZaapiGuiOpenEvent.class).subscribe(this::listenZaapi, 0);
 	}
 
 	@Override
 	protected void finalize() throws Throwable {
 		LOGGER.debug("NAVIGATOR FINILIZE");
 		EventBus.getBus(EntityMoveEvent.class).unsubscribe(subscriber);
+		EventBus.getBus(ZaapGuiOpenEvent.class).unsubscribe(subscriberZaap);
+		EventBus.getBus(ZaapiGuiOpenEvent.class).unsubscribe(subscriberZaapi);
 		super.finalize();
 	}
 
@@ -191,7 +193,7 @@ public class Navigator extends Info {
 		this.zaap = true;
 		this.cellid = next.getCellId();
 		this.mapid = next.getDest().getMapId();
-		if (onCell) take();
+		if (onCell) open();
 		else {
 			getPerso().getPerso().moveToCell(randomcell, true, true);
 			listen = true;
@@ -203,14 +205,13 @@ public class Navigator extends Info {
 		if (!listen || e.getPerso() != getPerso().getPerso()) return;
 		listen = false;
 		LOGGER.debug("LISTEN move nav zaap=" + zaap);
-		if (zaap) e.getPerso().interract(Skills.UTILISER, cellid);
-		else e.getPerso().interract(Skills.SE_FAIRE_TRANSPORTER, cellid);
+		open();
 	}
 
-	private void listenZaapi(subway e) {
+	private void listenZaapi(ZaapiGuiOpenEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (!listenZaap || perso == null) return;
-		listenZaap = false;
+		if (!listenZaapi || perso == null) return;
+		listenZaapi = false;
 		take();
 	}
 
@@ -219,6 +220,16 @@ public class Navigator extends Info {
 		if (!listenZaap || perso == null) return;
 		listenZaap = false;
 		take();
+	}
+
+	void open() {
+		if (zaap) {
+			listenZaap = true;
+			getPerso().getPerso().interract(Skills.UTILISER, cellid);
+		} else {
+			listenZaapi = true;
+			getPerso().getPerso().interract(Skills.SE_FAIRE_TRANSPORTER, cellid);
+		}
 	}
 
 	void take() {
@@ -241,7 +252,7 @@ public class Navigator extends Info {
 		this.zaap = false;
 		this.cellid = next.getCellId();
 		this.mapid = next.getDest().getMapId();
-		if (onCell) take();
+		if (onCell) open();
 		else {
 			getPerso().getPerso().moveToCell(randomcell, true, true);
 			listen = true;

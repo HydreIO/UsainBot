@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.ia.path.zone;
+package fr.aresrpg.eratz.domain.ia.path.zone.harvest;
 
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
@@ -22,7 +22,7 @@ public class BombuZone extends HarvestZone {
 
 	@Override
 	protected Paths getType() {
-		return Paths.BOMBU;
+		return Paths.BUCHERON_BOMBU;
 	}
 
 }

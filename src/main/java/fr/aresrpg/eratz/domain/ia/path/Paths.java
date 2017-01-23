@@ -2,7 +2,9 @@ package fr.aresrpg.eratz.domain.ia.path;
 
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
-import fr.aresrpg.eratz.domain.ia.path.zone.*;
+import fr.aresrpg.eratz.domain.ia.path.zone.fight.ChampAstrubZone;
+import fr.aresrpg.eratz.domain.ia.path.zone.fight.FightZone;
+import fr.aresrpg.eratz.domain.ia.path.zone.harvest.*;
 
 /**
  * 
@@ -11,28 +13,38 @@ import fr.aresrpg.eratz.domain.ia.path.zone.*;
 public enum Paths {
 
 	BUCHERON_BOMBU_OLI,
-	BOMBU,
-	OLIVIOLET,
-	BONTA,
-	FULL,
-	KOIN_KOIN,
-	AMAKNA;
+	BUCHERON_BOMBU,
+	BUCHERON_OLIVIOLET,
+	BUCHERON_BONTA,
+	BUCHERON_FULL,
+	PECHE_KOIN_KOIN,
+	BUCHERON_AMAKNA,
+	FIGHT_CHAMPS_ASTRUB;
+
+	public FightZone getFightPath(BotPerso perso) {
+		switch (this) {
+			case FIGHT_CHAMPS_ASTRUB:
+				return new ChampAstrubZone(perso);
+			default:
+				throw new NotImplementedException();
+		}
+	}
 
 	public HarvestZone getHarvestPath(BotPerso perso) {
 		switch (this) {
 			case BUCHERON_BOMBU_OLI:
 				return new BombuOlivioletZone(perso);
-			case BOMBU:
+			case BUCHERON_BOMBU:
 				return new BombuZone(perso);
-			case OLIVIOLET:
+			case BUCHERON_OLIVIOLET:
 				return new OliZone(perso);
-			case AMAKNA:
+			case BUCHERON_AMAKNA:
 				return new AmaknaZone(perso);
-			case BONTA:
+			case BUCHERON_BONTA:
 				return new BontaZone(perso);
-			case FULL:
+			case BUCHERON_FULL:
 				return new FullZone(perso);
-			case KOIN_KOIN:
+			case PECHE_KOIN_KOIN:
 				return new KoinKoinZone(perso);
 			default:
 				throw new NotImplementedException();

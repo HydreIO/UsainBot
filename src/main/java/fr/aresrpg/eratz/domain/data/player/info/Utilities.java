@@ -16,15 +16,18 @@ import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.util.UtilFunc;
+import fr.aresrpg.tofumanchou.domain.data.entity.mob.MobGroup;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
 import fr.aresrpg.tofumanchou.domain.data.item.Item;
 import fr.aresrpg.tofumanchou.domain.util.Validators;
-import fr.aresrpg.tofumanchou.infra.data.ManchouItem;
-import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.infra.data.*;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +41,8 @@ public class Utilities extends Info {
 	private Set<Zaap> zaaps;
 	private int nextMapId = -1; // used in navigator to inform of the next map
 	private int currentHarvest = -1; // used in harvesting to inform of the current harvested ressource
+
+	private CompletableFuture<Boolean> fightFuture;
 
 	public Utilities(BotPerso perso) {
 		super(perso);
@@ -68,6 +73,22 @@ public class Utilities extends Info {
 	 */
 	public int getCurrentHarvest() {
 		return currentHarvest;
+	}
+
+	public CompletableFuture<Boolean> fightNearestMobGroup(Predicate<DofusMobs> avoid) {
+		fightFuture = new CompletableFuture<>();
+		MobGroup mobGroupWithout = getPerso().getPerso().getMap().getAccessibleMobGroupWithout(getPerso().getPerso().getCellId(), avoid);
+		if (mobGroupWithout == null) return CompletableFuture.completedFuture(false);
+		ManchouMap map = getPerso().getPerso().getMap();
+		getPerso().getPerso().moveToCell(mobGroupWithout.getCellId(), true, false);
+		Executors.SCHEDULED.schedule(() -> {
+			if (!fightFuture.isDone()) fightFuture.complete(null);
+		}, 10, TimeUnit.SECONDS);
+		return fightFuture;
+	}
+
+	public void notifyJoinFight() {
+		if (fightFuture != null) fightFuture.complete(true);
 	}
 
 	/**

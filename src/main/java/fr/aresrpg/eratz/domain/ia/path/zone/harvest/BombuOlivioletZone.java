@@ -1,4 +1,4 @@
-package fr.aresrpg.eratz.domain.ia.path.zone;
+package fr.aresrpg.eratz.domain.ia.path.zone.harvest;
 
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
@@ -9,20 +9,20 @@ import fr.aresrpg.eratz.domain.ia.path.Paths;
  * 
  * @since
  */
-public class KoinKoinZone extends HarvestZone {
+public class BombuOlivioletZone extends HarvestZone {
 
-	public KoinKoinZone(BotPerso perso) {
-		super(() -> perso, false, Interractable.PECHE_CANARD);
+	public BombuOlivioletZone(BotPerso perso) {
+		super(() -> perso, true, Interractable.BOMBU, Interractable.OLIVIOLET);
 	}
 
 	@Override
 	protected boolean isValid(BotMap map) {
-		return map.getMapId() == 3335;
+		return map.hasOne(getRessources());
 	}
 
 	@Override
 	protected Paths getType() {
-		return Paths.KOIN_KOIN;
+		return Paths.BUCHERON_BOMBU_OLI;
 	}
 
 }

@@ -87,15 +87,16 @@ public class BotFather implements ManchouPlugin {
 	}
 
 	//account test Marine-Lpn eratz
-	// account pktclient Marine-Lpn eratz cMK@|
+	// account pktclient Bratva-Nazar henual GI
 	// account pkt Marine-Lpn eratz eU1
-	// account pkt Bratva-Nazar henual GA001cemdfUcgldgzegy
+	// account pkt Bratva-Nazar henual GI
 
 	// account view bratva-nazar henual
 	// account stopspeak
 	// account view marine-lpn eratz
 	// whoami henual bratva-nazar
 	// harvest start henual bratva-nazar
+	// fight start henual bratva-nazar
 	// fight henual bratva-nazar
 	// goto map 10356 marine-lpn eratz
 	// goto cell 318 bratva-nazar henual
@@ -136,12 +137,14 @@ public class BotFather implements ManchouPlugin {
 		IaListener.register();
 		AdminCmdListener.register();
 		MapsManager.init();
+		FightListener.register();
 		Manchou.registerCommand(new WhoamiCommand());
 		Manchou.registerCommand(new AccountCommand());
 		Manchou.registerCommand(new GotoCommand());
 		Manchou.registerCommand(new CrashCommand());
 		Manchou.registerCommand(new HarvestCommand());
 		Manchou.registerCommand(new ActionLoopCommand());
+		Manchou.registerCommand(new FightCommand());
 	}
 
 	private void injectSyso() {

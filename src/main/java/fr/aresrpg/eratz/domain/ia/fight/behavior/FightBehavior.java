@@ -19,7 +19,9 @@ import java.util.stream.Collectors;
  */
 public abstract class FightBehavior extends Info {
 
-	private CompletableFuture<Void> waiter;
+	private CompletableFuture<Void> waiterStat;
+	private CompletableFuture<Void> waiterPa;
+	private CompletableFuture<Void> waiterPm;
 
 	/**
 	 * @param perso
@@ -29,16 +31,19 @@ public abstract class FightBehavior extends Info {
 	}
 
 	protected void useSpell(ManchouSpell spell, int cell) {
+		if (spell == null) return;
+		LOGGER.debug("using " + spell.getLangspell().getName() + " on " + cell);
 		getPerso().getPerso().launchSpell(spell, cell);
-		waitUntilStatsReceive();
+		waitUntilPaReceive();
 	}
 
 	protected void run(int cellid) {
 		util().runTo(cellid);
-		waitUntilStatsReceive();
+		waitUntilPmReceive();
 	}
 
 	protected boolean hasPaToLaunch(ManchouSpell spell) {
+		LOGGER.warning("PA = " + player().getPa());
 		return player().getPa() >= spell.getPaCost();
 	}
 
@@ -58,8 +63,22 @@ public abstract class FightBehavior extends Info {
 		return util().getAccessibleCells(util().getMaxPoFor(spell)).contains(cell);
 	}
 
+	protected List<Entity> ennemiesAccessibles(ManchouSpell spell) {
+		List<Integer> accessibleCells = util().getAccessibleCells(util().getMaxPoFor(spell));
+		List<Entity> entities = new ArrayList<>();
+		for (int ceid : accessibleCells) {
+			ManchouCell cell = map().getCells()[ceid];
+			if (cell.hasLivingEntityOn()) entities.addAll(cell.getEntitiesOn().stream().filter(e -> !util().isAlly(e)).collect(Collectors.toList()));
+		}
+		return entities;
+	}
+
 	protected List<Entity> getCacEntities() {
-		return Arrays.stream(player().getNeighborsWithoutDiagonals()).filter(ManchouCell::hasEntityOn).map(c -> c.getEntitiesOn().stream().findFirst().get()).collect(Collectors.toList());
+		return Arrays.stream(player().getNeighborsWithoutDiagonals()).filter(ManchouCell::hasLivingEntityOn).filter(c -> {
+			if (util().isAlly(c.getEntitiesOn().iterator().next())) return false;
+			return true;
+		}).map(c -> c.getEntitiesOn().stream().findFirst().get())
+				.collect(Collectors.toList());
 	}
 
 	protected boolean hasCacEntities() {
@@ -82,6 +101,10 @@ public abstract class FightBehavior extends Info {
 		return getPerso().getPerso().getMap().getEntities().values();
 	}
 
+	protected Set<Entity> ennemies() {
+		return entities().stream().filter(e -> !e.isDead() && !util().isAlly(e)).collect(Collectors.toSet());
+	}
+
 	protected int playerCell() {
 		return getPerso().getPerso().getCellId();
 	}
@@ -96,13 +119,35 @@ public abstract class FightBehavior extends Info {
 
 	private void waitUntilStatsReceive() {
 		LOGGER.debug("waiting until stats !");
-		waiter = new CompletableFuture<>();
-		waiter.join();
+		waiterStat = new CompletableFuture<>();
+		waiterStat.join();
 	}
 
 	public void notifyStatsReceive() {
 		LOGGER.debug("stats received !");
-		if (waiter != null) waiter.complete(null);
+		if (waiterStat != null) waiterStat.complete(null);
+	}
+
+	private void waitUntilPaReceive() {
+		LOGGER.debug("waiting until pa !");
+		waiterPa = new CompletableFuture<>();
+		waiterPa.join();
+	}
+
+	public void notifyPaReceive() {
+		LOGGER.debug("pa received !");
+		if (waiterPa != null) waiterPa.complete(null);
+	}
+
+	private void waitUntilPmReceive() {
+		LOGGER.debug("waiting until pm !");
+		waiterPm = new CompletableFuture<>();
+		waiterPm.join();
+	}
+
+	public void notifyPmReceive() {
+		LOGGER.debug("pm received !");
+		if (waiterPm != null) waiterPm.complete(null);
 	}
 
 	protected int po() {
@@ -110,7 +155,8 @@ public abstract class FightBehavior extends Info {
 	}
 
 	protected boolean canLaunch(ManchouSpell spell, int cell) {
-		return spell.getRelance() == 0 && hasPaToLaunch(spell) && hasPorteToLaunch(spell, cell) && spell.getProperty().getMinPlayerLvl() <= getPerso().getPerso().getLevel();
+		if (spell == null) return false;
+		return spell.getRelance() == 0 && hasPaToLaunch(spell) && hasPorteToLaunch(spell, cell) && hasPaToLaunch(spell) && spell.getProperty().getMinPlayerLvl() <= getPerso().getPerso().getLevel();
 	}
 
 	protected boolean tryToHide() {
@@ -120,20 +166,22 @@ public abstract class FightBehavior extends Info {
 		Set<ManchouCell> cellsAwayFromMobs = util().getCellsAwayFromMobs(pm());
 		cellsAwayFromMobs.removeIf(c -> all.contains(c.getId()));
 		if (cellsAwayFromMobs.isEmpty()) return false;
-		run(all.stream().findAny().get());
+		int id = cellsAwayFromMobs.stream().findAny().get().getId();
+		if (util().pathValidFor(id)) run(id);
+		else return false;
 		return true;
 	}
 
 	protected boolean tryToRunAway() {
-		if (pm() < 1) return false;
-		util().runAwayFromMobs();
-		waitUntilStatsReceive();
+		if (pm() < 1 || !util().runAwayFromMobs()) return false;
+		waitUntilPmReceive();
 		return true;
 	}
 
 	public void playTurn() {
 		decrementRelance();
 		turn();
+		player().endTurn();
 	}
 
 	@Override
