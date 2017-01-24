@@ -17,6 +17,7 @@ import fr.aresrpg.tofumanchou.domain.event.entity.*;
 import fr.aresrpg.tofumanchou.domain.event.player.MapJoinEvent;
 import fr.aresrpg.tofumanchou.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 import fr.aresrpg.tofumanchou.infra.data.ManchouMap;
 
 import java.util.*;
@@ -72,7 +73,7 @@ public class MapViewListener implements Listener {
 	public void onJoinMap(MapJoinEvent e) {
 		Executors.FIXED.execute(() -> {
 			BotPerso botPerso = get(e.getClient());
-			if (botPerso == null || botPerso.getView() == null) return;
+			if (botPerso == null || botPerso.getPerso() == null || botPerso.getPerso().getMap() == null || botPerso.getView() == null) return;
 			botPerso.getView().clearActors();
 			botPerso.getView().clearPath();
 			MapView.getInstance().setTitle(botPerso.getPerso().getMap().getInfos());
@@ -84,12 +85,7 @@ public class MapViewListener implements Listener {
 				LOGGER.debug("Object1num = " + botPerso.getPerso().getMap().getCells()[i].getLayerObject1Num());
 				LOGGER.debug("Object2num = " + botPerso.getPerso().getMap().getCells()[i].getLayerObject2Num());
 				LOGGER.debug("Cell= " + botPerso.getPerso().getMap().getCells()[i]);
-				Set<Cell> accesibleCells = ShadowCasting.getAccesibleCells(i, 10, botPerso.getPerso().getMap().serialize(), botPerso.getPerso().getMap().cellAccessible().negate());
-				Iterator<Cell> iterator = accesibleCells.iterator();
-				while (iterator.hasNext())
-					if (!iterator.next().isWalkeable()) iterator.remove();
-				System.out.println(accesibleCells.stream().map(Cell::getId).collect(Collectors.toList()));
-				botPerso.getView().setAccessible(accesibleCells.stream().collect(Collectors.toList()), i, 10);
+				highlightCells(botPerso, i);
 				List<Node> cellPath = Pathfinding.getCellPath(botPerso.getPerso().getCellId(), i, botPerso.getPerso().getMap().getProtocolCells(), e.getMap().getWidth(), e.getMap().getHeight(),
 						Pathfinding::getNeighbors,
 						Validators.avoidingMobs(botPerso.getPerso().getMap()));
@@ -97,6 +93,19 @@ public class MapViewListener implements Listener {
 				else botPerso.getView().setPath(cellPath, Color.DARKRED);
 			});
 		});
+	}
+
+	private void highlightCells(BotPerso perso, int origin) {
+		perso.getView().highlightCells(perso.getFightUtilities().getCellsAroundPlayer(3).stream().map(ManchouCell::serialize).collect(Collectors.toList()));
+	}
+
+	private void showLineOfSight(BotPerso botPerso, int i) {
+		Set<Cell> accesibleCells = ShadowCasting.getAccesibleCells(i, 10, botPerso.getPerso().getMap().serialize(), botPerso.getPerso().getMap().cellAccessible().negate());
+		Iterator<Cell> iterator = accesibleCells.iterator();
+		while (iterator.hasNext())
+			if (!iterator.next().isWalkeable()) iterator.remove();
+		System.out.println(accesibleCells.stream().map(Cell::getId).collect(Collectors.toList()));
+		botPerso.getView().setAccessible(accesibleCells.stream().collect(Collectors.toList()), i, 10);
 	}
 
 	@Subscribe

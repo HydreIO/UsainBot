@@ -82,7 +82,7 @@ public class CraLowBehavior extends FightBehavior {
 				util().runToMob(weakestEnnemy, true, pm());
 			} else agressive(weakestEnnemy, cellToTargetWeakest.getId());
 		}
-		if (pa() >= 3 && !looped) {
+		if (pa() >= 3 && !looped && getPerso().isInFight()) {
 			looped = true;
 			turn();
 			return;
@@ -112,30 +112,31 @@ public class CraLowBehavior extends FightBehavior {
 	}
 
 	private void liberate(Entity e) {
-		if (!canLaunch(fleche_recul, e.getCellId())) return;
+		if (!canLaunch(fleche_recul)) return;
 		useSpell(fleche_recul, e.getCellId());
 		completeWithIceArrow(e);
 	}
 
 	private void agressive(Entity e) {
-		if (!canLaunch(fleche_magique, e.getCellId())) return;
+		if (!canLaunch(fleche_magique)) return;
 		useSpell(fleche_magique, e.getCellId());
 		completeWithIceArrow(e);
 	}
 
 	private void agressive(Entity e, int cell) {
-		if (!hasPaToLaunch(fleche_magique)) return;
+		if (!canLaunch(fleche_magique)) return;
 		run(cell);
-		if (!canLaunch(fleche_magique, cell)) return;
 		useSpell(fleche_magique, e.getCellId());
 		completeWithIceArrow(e);
 	}
 
 	private void completeWithIceArrow(Entity e) {
-		if (!canLaunch(fleche_glacee, e.getCellId())) return;
-		ManchouCell cellToTargetMob = util().getCellToTargetMob(pm(), e.getCellId(), util().getMaxPoFor(fleche_glacee), false);
-		if (cellToTargetMob == null) return;
-		run(cellToTargetMob.getId());
+		if (!canLaunch(fleche_glacee)) return;
+		if (!isAccessible(fleche_glacee, e)) {
+			ManchouCell cellToTargetMob = util().getCellToTargetMob(pm(), e.getCellId(), util().getMaxPoFor(fleche_glacee), false);
+			if (cellToTargetMob == null) return;
+			run(cellToTargetMob.getId());
+		}
 		useSpell(fleche_glacee, e.getCellId());
 	}
 
@@ -148,15 +149,15 @@ public class CraLowBehavior extends FightBehavior {
 	}
 
 	private void boost() {
-		if (canLaunch(tir_eloigne, playerCell())) {
+		if (canLaunch(tir_eloigne)) {
 			LOGGER.debug("CAN LAUNCH tir éloigné");
 			useSpell(tir_eloigne, playerCell());
 		}
-		if (canLaunch(tir_puissant, playerCell())) {
+		if (canLaunch(tir_puissant)) {
 			LOGGER.debug("CAN LAUNCH tir puissant");
 			useSpell(tir_puissant, playerCell());
 		}
-		if (canLaunch(tir_critique, playerCell())) {
+		if (canLaunch(tir_critique)) {
 			LOGGER.debug("CAN LAUNCH tir critique");
 			useSpell(tir_critique, playerCell());
 		}

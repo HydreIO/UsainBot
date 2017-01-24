@@ -38,7 +38,7 @@ public class NavigationRunner extends Runner {
 					promise.complete(getPerso().getMind().connect(Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS)
 							.thenApplyAsync(Threads.threadContextSwitch("connect->navigate", c -> navigator), Executors.FIXED).thenCompose(this::runNavigation));
 					return;
-				case FIGHT_JOIN: // TODO
+				case FIGHT_JOIN:
 					getPerso().getMind().resetState();
 					promise.complete(getPerso().getMind().fight()
 							.thenApplyAsync(Threads.threadContextSwitch("connect->harvest", c -> navigator), Executors.FIXED).thenCompose(this::runNavigation));

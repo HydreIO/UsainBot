@@ -73,10 +73,12 @@ public class BotFather implements ManchouPlugin {
 	}
 
 	public static BotPerso getPerso(Perso perso) {
+		if (perso == null) return null;
 		return getPerso(perso.getUUID());
 	}
 
 	public static BotPerso getPerso(Account client) {
+		if (client == null) return null;
 		return getPerso(client.getPerso());
 	}
 
@@ -100,12 +102,14 @@ public class BotFather implements ManchouPlugin {
 	// fight henual bratva-nazar
 	// goto map 10356 marine-lpn eratz
 	// goto cell 318 bratva-nazar henual
+	// goto map 1286 nofiev henual
 	// goto 21,-30 bratva-nazar henual
 	// crash party bratva-nazar henual Ckcyzevbud
 	// crash party bratva-nazar henual Xacamps
-	// crash party bratva-nazar henual Vw-Denkille 
-	// crash duel bratva-nazar henual 540240
-	// crash await bratva-nazar henual 521011
+	// crash party bratva-nazar henual Henual-Services 
+	// crash duel bratva-nazar henual 541976
+	// crash duel nofiev henual 520804
+	// crash await bratva-nazar henual 520804
 
 	// account connect bratva-nazar henual
 	// account disconnect bratva-nazar henual
@@ -129,6 +133,7 @@ public class BotFather implements ManchouPlugin {
 		MAPS_DB = acc.get();
 		Executors.FIXED.execute(MapView::main);
 		Accounts.registerAccount("SceatSifu");
+		Accounts.registerAccount("sdfduq");
 		Accounts.registerAccount("SceatDrop3");
 		new ConnectionListener();
 		MapViewListener.register();

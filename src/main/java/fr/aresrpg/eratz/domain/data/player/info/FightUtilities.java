@@ -14,10 +14,12 @@ import fr.aresrpg.tofumanchou.domain.data.entity.mob.Mob;
 import fr.aresrpg.tofumanchou.domain.data.entity.mob.MobGroup;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Player;
+import fr.aresrpg.tofumanchou.domain.util.Validators;
 import fr.aresrpg.tofumanchou.infra.data.*;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +38,36 @@ public class FightUtilities extends Info {
 	}
 
 	/**
+	 * Trouve toute les cells situées au commencement d'une ligne de mob de range définie
+	 * 
+	 * @param spellRange
+	 *            la range du sort
+	 * @param safeForAllies
+	 *            si le ligne de mob ne doit pas contenir d'alliés
+	 * @return une list de pair "cell de départ de la ligne de mob" -
+	 */
+	public List<Pair<ManchouCell, Integer>> getCellsForLineZoneSpell(int spellRange, boolean safeForAllies) {
+		Map<Integer, List<ManchouCell>> byX = new HashMap<>();
+		Map<Integer, List<ManchouCell>> byY = new HashMap<>();
+		getPerso().getPerso().getMap().getEntities().values().stream().filter(e -> !e.isDead() && !isAlly(e)).forEach(e -> {
+			ManchouMap map = getPerso().getPerso().getMap();
+			ManchouCell cell = map.getCells()[e.getCellId()];
+			List<ManchouCell> listX = byX.get(cell.getX());
+			List<ManchouCell> listY = byY.get(cell.getY());
+			if (listX == null) byX.put(cell.getX(), listX = new ArrayList<>());
+			if (listY == null) byY.put(cell.getY(), listY = new ArrayList<>());
+			listX.add(cell);
+			listY.add(cell);
+		});
+		List<List<ManchouCell>> sameX = new ArrayList<>();
+		List<List<ManchouCell>> sameY = new ArrayList<>();
+		Predicate<List> filter = l -> l.size() > 1;
+		byX.values().stream().filter(filter).forEach(sameX::add);
+		byY.values().stream().filter(filter).forEach(sameY::add);
+		return null; // TODO WIP
+	}
+
+	/**
 	 * Trouve les cell englobant au moins 2mobs dans la range définie
 	 * 
 	 * @param spellRange
@@ -47,13 +79,11 @@ public class FightUtilities extends Info {
 	 * @return une Pair cell - nombre de mob touché
 	 */
 	public List<Pair<ManchouCell, Integer>> getCellsForZoneSpell(int spellRange, boolean free, boolean safeForAllies) {
-		List<FightNode> cells = new ArrayList() {
+		List<FightNode> cells = new ArrayList<FightNode>() {
 			@Override
-			public boolean add(Object e) {
+			public boolean add(FightNode e) {
 				if (contains(e)) {
-					FightNode node = (FightNode) get(indexOf(e));
-					LOGGER.debug("===========increment for " + e);
-					node.incrementPrice();
+					get(indexOf(e)).incrementPrice();
 					return false;
 				}
 				return super.add(e);
@@ -61,7 +91,7 @@ public class FightUtilities extends Info {
 		};
 		ManchouMap map = getPerso().getPerso().getMap();
 		for (Entity e : getPerso().getPerso().getMap().getEntities().values()) {
-			if (e.getLife() < 1 || e instanceof MobGroup || isAlly(e)) continue;
+			if (e.isDead() || e instanceof MobGroup || isAlly(e)) continue;
 			ManchouCell mobcell = map.getCells()[e.getCellId()];
 			Set<ManchouCell> cellsAroundCell = getCellsAroundCell(mobcell.getId(), spellRange);
 			if (free) cellsAroundCell.removeIf(ManchouCell::hasEntityOn);
@@ -93,7 +123,7 @@ public class FightUtilities extends Info {
 		ManchouCell nearest = null;
 		int dist = Integer.MAX_VALUE;
 		for (final ManchouCell cell : aroundP) {
-			if (!cell.isWalkeable() || !cell.isLineOfSight()) continue;
+			if (!cell.isWalkeable(false) || !cell.isLineOfSight()) continue;
 			if (free && cell.hasEntityOn()) continue;
 			final int distance = cell.distanceManathan(m.getCellId());
 			if (nearest == null || distance < dist) {
@@ -144,7 +174,9 @@ public class FightUtilities extends Info {
 
 	public void runToMob(final Entity m, final boolean safely, int pmToUse) {
 		final ManchouCell cellNearMob = safely ? getCellNearAndSafeFromMob(m, pmToUse, true) : getCellNearMob(m, pmToUse, true);
-		runTo(cellNearMob.getId());
+		if (cellNearMob != null)
+			runTo(cellNearMob.getId());
+		else LOGGER.error("cellNearMob est null wtf ! ent:" + m);
 	}
 
 	public boolean runAwayFromMobs() {
@@ -193,10 +225,9 @@ public class FightUtilities extends Info {
 		final PathValidator canGo = (x1, y1, x2, y2) -> {
 			final int id = Maps.getIdRotated(x2, y2, width, height);
 			ManchouCell manchouCell = getPerso().getPerso().getMap().getCells()[id];
-			return !manchouCell.hasLivingEntityOn() && manchouCell.isWalkeable() && manchouCell.isLineOfSight();
+			return !manchouCell.hasLivingEntityOn() && manchouCell.isWalkeable(false) && manchouCell.isLineOfSight();
 		};
 		final List<Node> cellPath = Pathfinding.getCellPath(cellId, cell, getPerso().getPerso().getMap().getProtocolCells(), width, height, Pathfinding::getNeighborsWithoutDiagonals, canGo);
-		// perso.setPm(perso.getPm() - dist); // TEMP REMOVE PM car on attend pas que le serv nous le dise pour pouvoir finir notre tour, de tt façon il reset apres
 		LOGGER.warning("Trying to move from " + cellId + " to " + cell + " path=" + cellPath);
 		if (cellPath == null) throw new NullPointerException("PATH INVALID -_-");
 		getPerso().getPerso().move(cellPath);
@@ -209,7 +240,7 @@ public class FightUtilities extends Info {
 		final PathValidator canGo = (x1, y1, x2, y2) -> {
 			final int id = Maps.getIdRotated(x2, y2, width, height);
 			ManchouCell manchouCell = getPerso().getPerso().getMap().getCells()[id];
-			return !manchouCell.hasLivingEntityOn() && manchouCell.isWalkeable();
+			return !manchouCell.hasLivingEntityOn() && manchouCell.isWalkeable(false);
 		};
 		return Pathfinding.getCellPath(cellId, cell, getPerso().getPerso().getMap().getProtocolCells(), width, height, Pathfinding::getNeighborsWithoutDiagonals, canGo) != null;
 	}
@@ -226,7 +257,7 @@ public class FightUtilities extends Info {
 		final Iterator<ManchouCell> it = aroundP.iterator();
 		while (it.hasNext()) {
 			final ManchouCell cell = it.next();
-			if (free && (!cell.isWalkeable() || cell.hasLivingEntityOn())) it.remove();
+			if (free && (!cell.isWalkeable(false) || cell.hasLivingEntityOn())) it.remove();
 			if (cell.distanceManathan(m.getCellId()) <= m.getPm()) it.remove();
 		}
 		ManchouCell found = null;
@@ -255,7 +286,7 @@ public class FightUtilities extends Info {
 		final Iterator<ManchouCell> it = aroundP.iterator();
 		while (it.hasNext()) {
 			final ManchouCell cell = it.next();
-			if (cell.hasLivingEntityOn() || !cell.isWalkeable() || cell.distanceManathan(m.getCellId()) <= m.getPm() || !pathValidFor(cell.getId())) it.remove();
+			if (cell.hasLivingEntityOn() || !cell.isWalkeable(false) || cell.distanceManathan(m.getCellId()) <= m.getPm() || !pathValidFor(cell.getId())) it.remove();
 		}
 		return aroundP;
 	}
@@ -276,7 +307,7 @@ public class FightUtilities extends Info {
 	public ManchouCell getCellToTargetMob(int distToPlayer, int targetCell, int range, boolean line) {
 		Set<ManchouCell> cellsAroundPlayer = getCellsAroundPlayer(distToPlayer);
 		for (ManchouCell c : cellsAroundPlayer) {
-			if (c.hasEntityOn() || !c.isWalkeable()) continue;
+			if (c.hasEntityOn() || !c.isWalkeable(false)) continue;
 			if (line && !c.isOnSameLineOrCollumn(getPerso().getPerso().getMap().getCells()[targetCell])) continue;
 			List<Integer> acc = getAccessibleCells(c.getId(), range);
 			if (acc.contains(targetCell)) return c;
@@ -347,7 +378,7 @@ public class FightUtilities extends Info {
 		final Set<ManchouCell> aroundP = getCellsAroundPlayer(distToPlayer);
 		Map<ManchouCell, Integer> cost = new HashMap<>();
 		for (ManchouCell c : aroundP) {
-			if (c.hasLivingEntityOn() || !c.isWalkeable() || !c.isLineOfSight() || !pathValidFor(c.getId())) continue;
+			if (c.hasLivingEntityOn() || !c.isWalkeable(false) || !c.isLineOfSight() || !pathValidFor(c.getId())) continue;
 			int pts = 0;
 			for (Entity e : getPerso().getPerso().getMap().getEntities().values()) {
 				if (e.getLife() < 1 || isAlly(e)) continue;
@@ -383,10 +414,26 @@ public class FightUtilities extends Info {
 		return cellsAroundPlayer;
 	}
 
+	/**
+	 * Trouve toute les cells a distance x du joueur
+	 * 
+	 * @param dist
+	 *            la distance
+	 * @param accessible
+	 *            si le path pour acceder au cells doit etre valide et d'une taille inférieur ou égale à la distance
+	 * @return les cells
+	 */
 	public Set<ManchouCell> getCellsAroundPlayer(final int dist) {
 		final Set<ManchouCell> around = new HashSet<>();
+		int cell = getPerso().getPerso().getCellId();
+		ManchouMap map = getPerso().getPerso().getMap();
 		Arrays.stream(getPerso().getPerso().getMap().getCells())
-				.filter(c -> Maps.distanceManathan(getPerso().getPerso().getCellId(), c.getId(), getPerso().getPerso().getMap().getWidth(), getPerso().getPerso().getMap().getHeight()) <= dist)
+				.filter(c -> {
+					if (c.distanceManathan(cell) > dist) return false;
+					List<Node> cellPath = Pathfinding.getCellPath(cell, c.getId(), map.getProtocolCells(), map.getWidth(), map.getHeight(), Pathfinding::getNeighborsWithoutDiagonals,
+							Validators.freeCell(map));
+					return cellPath != null && cellPath.size() <= dist + 1;
+				})
 				.forEach(around::add);
 		return around;
 	}
@@ -444,4 +491,5 @@ public class FightUtilities extends Info {
 			return id;
 		}
 	}
+
 }

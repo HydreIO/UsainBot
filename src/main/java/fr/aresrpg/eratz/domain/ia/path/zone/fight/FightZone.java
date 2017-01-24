@@ -10,6 +10,7 @@ import fr.aresrpg.eratz.domain.ia.path.zone.Zone;
 import fr.aresrpg.eratz.domain.util.UtilFunc;
 import fr.aresrpg.tofumanchou.domain.data.MapsData;
 import fr.aresrpg.tofumanchou.domain.data.MapsData.MapDataBean;
+import fr.aresrpg.tofumanchou.domain.data.entity.mob.MobGroup;
 import fr.aresrpg.tofumanchou.domain.data.enums.DofusMobs;
 
 import java.util.*;
@@ -39,6 +40,18 @@ public abstract class FightZone implements Zone {
 		return maps.poll();
 	}
 
+	protected boolean hasMob(DofusMobs mob, MobGroup g) {
+		for (int type : g.getEntitiesTypes())
+			if (mob.getId() == type) return true;
+		return false;
+	}
+
+	protected boolean hasOne(MobGroup group, DofusMobs... mobs) {
+		for (DofusMobs m : mobs)
+			if (hasMob(m, group)) return true;
+		return false;
+	}
+
 	protected boolean hasArea(BotMap map, int... ids) {
 		MapDataBean data = MapsData.getData(map.getMapId());
 		return ArrayUtils.contains(data.getAreaId(), ids);
@@ -65,7 +78,7 @@ public abstract class FightZone implements Zone {
 
 	protected abstract boolean isValid(BotMap map);
 
-	public abstract boolean avoid(DofusMobs mob);
+	public abstract boolean isValid(MobGroup group);
 
 	protected abstract Paths getType();
 

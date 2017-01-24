@@ -2,8 +2,7 @@ package fr.aresrpg.eratz.domain.ia.path;
 
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
-import fr.aresrpg.eratz.domain.ia.path.zone.fight.ChampAstrubZone;
-import fr.aresrpg.eratz.domain.ia.path.zone.fight.FightZone;
+import fr.aresrpg.eratz.domain.ia.path.zone.fight.*;
 import fr.aresrpg.eratz.domain.ia.path.zone.harvest.*;
 
 /**
@@ -19,12 +18,18 @@ public enum Paths {
 	BUCHERON_FULL,
 	PECHE_KOIN_KOIN,
 	BUCHERON_AMAKNA,
-	FIGHT_CHAMPS_ASTRUB;
+	FIGHT_CHAMPS_ASTRUB,
+	FIGHT_PICHON_ASTRUB,
+	FIGHT_COCHON_DE_LAIT;
 
 	public FightZone getFightPath(BotPerso perso) {
 		switch (this) {
 			case FIGHT_CHAMPS_ASTRUB:
 				return new ChampAstrubZone(perso);
+			case FIGHT_PICHON_ASTRUB:
+				return new PichonZone(perso);
+			case FIGHT_COCHON_DE_LAIT:
+				return new CochinilloZone(perso);
 			default:
 				throw new NotImplementedException();
 		}

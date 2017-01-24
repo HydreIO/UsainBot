@@ -57,6 +57,7 @@ public class Utilities extends Info {
 	}
 
 	public boolean hasZaap(Zaap zaap) {
+		if (zaap == null) return false;
 		if (zaaps == null) return true; // si zaap non init on return true pour qu'il aille init
 		return zaaps.contains(zaap);
 	}
@@ -75,12 +76,12 @@ public class Utilities extends Info {
 		return currentHarvest;
 	}
 
-	public CompletableFuture<Boolean> fightNearestMobGroup(Predicate<DofusMobs> avoid) {
+	public CompletableFuture<Boolean> fightNearestMobGroup(Predicate<MobGroup> valid) {
 		fightFuture = new CompletableFuture<>();
-		MobGroup mobGroupWithout = getPerso().getPerso().getMap().getAccessibleMobGroupWithout(getPerso().getPerso().getCellId(), avoid);
-		if (mobGroupWithout == null) return CompletableFuture.completedFuture(false);
+		Optional<MobGroup> accessibleMobGroup = getPerso().getPerso().getMap().getAccessibleMobGroup(getPerso().getPerso().getCellId(), valid);
+		if (!accessibleMobGroup.isPresent()) return CompletableFuture.completedFuture(false);
 		ManchouMap map = getPerso().getPerso().getMap();
-		getPerso().getPerso().moveToCell(mobGroupWithout.getCellId(), true, false);
+		getPerso().getPerso().moveToCell(accessibleMobGroup.get().getCellId(), true, false);
 		Executors.SCHEDULED.schedule(() -> {
 			if (!fightFuture.isDone()) fightFuture.complete(null);
 		}, 10, TimeUnit.SECONDS);

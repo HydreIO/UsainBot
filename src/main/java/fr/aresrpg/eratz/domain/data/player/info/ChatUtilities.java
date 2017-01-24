@@ -25,7 +25,7 @@ public class ChatUtilities extends Info {
 	public ChatUtilities(BotPerso perso) {
 		super(perso);
 		try {
-			this.voice = factory.create(ChatterBotType.JABBERWACKY);
+			this.voice = factory.create(ChatterBotType.CLEVERBOT);
 			this.session = voice.createSession(Locale.FRANCE);
 		} catch (Exception e) {
 			e.printStackTrace();

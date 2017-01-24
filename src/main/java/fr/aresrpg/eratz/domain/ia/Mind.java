@@ -13,7 +13,7 @@ import fr.aresrpg.eratz.domain.ia.fight.Fighting;
 import fr.aresrpg.eratz.domain.ia.harvest.Harvesting;
 import fr.aresrpg.eratz.domain.ia.navigation.Navigator;
 import fr.aresrpg.eratz.domain.util.functionnal.FutureHandler;
-import fr.aresrpg.tofumanchou.domain.data.enums.DofusMobs;
+import fr.aresrpg.tofumanchou.domain.data.entity.mob.MobGroup;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.concurrent.CompletableFuture;
@@ -85,9 +85,8 @@ public class Mind extends Info {
 
 	public CompletableFuture<?> harvest(boolean playerJob, Interractable... ressources) {
 		LOGGER.debug("Mind -> harvest");
-		return CompletableFuture.completedFuture(new Harvesting(getPerso(), playerJob, ressources)).thenComposeAsync(
-				Threads.threadContextSwitch("mind->harvest", getPerso().getHarRunner()::runHarvest),
-				Executors.FIXED);
+		return CompletableFuture.completedFuture(new Harvesting(getPerso(), playerJob, ressources))
+				.thenComposeAsync(Threads.threadContextSwitch("mind->harvest", getPerso().getHarRunner()::runHarvest), Executors.FIXED);
 	}
 
 	public CompletableFuture<?> connect(long time, TimeUnit unit) {
@@ -98,7 +97,8 @@ public class Mind extends Info {
 
 	public CompletableFuture<?> fight() {
 		LOGGER.debug("Mind -> fight");
-		return CompletableFuture.completedFuture(new Fighting(getPerso())).thenComposeAsync(Threads.threadContextSwitch("mind->fight", getPerso().getFiRunner()::runFight), Executors.FIXED);
+		return CompletableFuture.completedFuture(new Fighting(getPerso()))
+				.thenComposeAsync(getPerso().getFiRunner()::runFight, Executors.FIXED);
 	}
 
 	public CompletableFuture<?> waitSpawn(Interractable... ress) {
@@ -106,9 +106,9 @@ public class Mind extends Info {
 		return CompletableFuture.completedFuture(ress).thenComposeAsync(getPerso().getWaRunner()::waitFor, Executors.FIXED);
 	}
 
-	public CompletableFuture<?> waitMobSpawn(Predicate<DofusMobs> avoid) {
+	public CompletableFuture<?> waitMobSpawn(Predicate<MobGroup> valid) {
 		LOGGER.debug("Mind -> waitmob");
-		return CompletableFuture.completedFuture(avoid).thenComposeAsync(getPerso().getWaRunner()::waitFor, Executors.FIXED);
+		return CompletableFuture.completedFuture(valid).thenComposeAsync(getPerso().getWaRunner()::waitFor, Executors.FIXED);
 	}
 
 	@Override

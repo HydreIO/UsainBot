@@ -5,7 +5,7 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
-import fr.aresrpg.eratz.domain.data.player.info.Info;
+import fr.aresrpg.eratz.domain.ia.Runner;
 import fr.aresrpg.eratz.domain.util.BotConfig;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
@@ -17,9 +17,10 @@ import java.util.function.Function;
  * 
  * @since
  */
-public class FightRunner extends Info {
+public class FightRunner extends Runner {
 
 	private boolean running;
+	CompletableFuture<?> turn = null;
 
 	/**
 	 * @param perso
@@ -49,7 +50,10 @@ public class FightRunner extends Info {
 			switch (interrupt) {
 				case MOVED:
 					setRunning(false);
+					if (turn != null) turn.cancel(true);
 					getPerso().getMind().resetState();
+					fighting.notifyFightEnd();
+					LOGGER.debug("Fight terminé on complete");
 					promise.complete(CompletableFuture.completedFuture(fighting));
 					break;
 				case STATS:
@@ -74,9 +78,11 @@ public class FightRunner extends Info {
 					return; // avoid reset if non handled
 			}
 		}); // no timeout
-		if (running) fighting.playTurn();
+		if (running) turn = CompletableFuture.runAsync(fighting::playTurn, Executors.FIXED);
 		else {
+			Threads.uSleep(1, TimeUnit.SECONDS);
 			getPerso().getPerso().beReady(true);
+			getPerso().refreshMap();
 			running = true;
 		}
 		LOGGER.debug("Turn played");

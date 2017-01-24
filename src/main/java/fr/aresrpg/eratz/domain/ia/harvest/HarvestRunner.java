@@ -63,7 +63,7 @@ public class HarvestRunner extends Runner {
 					getPerso().getUtilities().setCurrentHarvest(-1);
 					Threads.uSleep(1, TimeUnit.SECONDS); // wait au cas ou join fight
 					if (getPerso().isInFight()) promise.complete(getPerso().getMind().fight()
-							.thenApplyAsync(Threads.threadContextSwitch("connect->harvest", c -> harvesting), Executors.FIXED).thenCompose(this::runHarvest));
+							.thenApplyAsync(Threads.threadContextSwitch("fight->harvest", c -> harvesting), Executors.FIXED).thenCompose(this::runHarvest));
 					else
 						promise.complete(CompletableFuture.completedFuture(harvesting).thenComposeAsync(Threads.threadContextSwitch(name, this::runHarvest), Executors.FIXED));
 					return;

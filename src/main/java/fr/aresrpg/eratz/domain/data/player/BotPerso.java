@@ -35,8 +35,7 @@ import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class BotPerso implements Closeable {
 
@@ -108,7 +107,7 @@ public class BotPerso implements Closeable {
 		FightZone zone = path.getFightPath(this);
 		Executors.FIXED.execute(() -> {
 			try {
-				setBehavior(fight(this, zone));
+				setBehavior(fight(zone));
 			} catch (Exception e) {
 				LOGGER.error(e, "not handled");
 			}
@@ -120,7 +119,7 @@ public class BotPerso implements Closeable {
 		FightZone zone = path.getFightPath(this);
 		Executors.FIXED.execute(() -> {
 			try {
-				setBehavior(fightAndWait(this, zone));
+				setBehavior(fightAndWait(zone));
 			} catch (Exception e) {
 				LOGGER.error(e, "not handled");
 			}
@@ -166,34 +165,42 @@ public class BotPerso implements Closeable {
 				.handle(FutureHandler.handleEx()).thenCompose(c -> harvestAndWait(perso, zone));
 	}
 
-	private CompletableFuture fight(BotPerso perso, FightZone zone) {
-		LOGGER.debug("FIGHT cmd");
+	private CompletableFuture<?> fight(FightZone zone) {
+		LOGGER.debug("FIGHT cmd === 1");
 		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
-		perso.getMind().resetState();
+		mind.resetState();
+		if (getLifePercent() < 75) {
+			LOGGER.debug("life percent = " + getLifePercent());
+			Threads.uSleep(1, TimeUnit.SECONDS);
+			getPerso().sit(true);
+			Threads.uSleep(60, TimeUnit.SECONDS);
+		}
 		zone.sort();
 		Threads.uSleep(1, TimeUnit.SECONDS);
-		return perso.getUtilities().fightNearestMobGroup(zone::avoid)
+		if (perso.isDefied()) perso.cancelDefiInvit();
+		if (perso.isInvitedExchange()) perso.cancelExchangeInvit();
+		if (perso.isInvitedGrp()) perso.cancelGroupInvit();
+		if (perso.isInvitedGuild()) perso.cancelGuildInvit();
+		return utilities.fightNearestMobGroup(zone::isValid)
 				.thenCompose(c -> {
-					if (c == null) return fight(perso, zone);
-					else if (c.booleanValue()) return perso.getMind().fight();
-					else return perso.getMind().moveToMap(MapsManager.getMap(zone.getNextMap())).thenCompose(z -> fight(perso, zone));
-				})
-				.handle(FutureHandler.handleEx()).thenCompose(c -> fight(perso, zone));
+					if (c == null) return (CompletionStage) fight(zone);
+					else if (c.booleanValue()) return (CompletionStage) mind.fight();
+					else return mind.moveToMap(MapsManager.getMap(zone.getNextMap()));
+				}).handle(FutureHandler.handleEx()).thenCompose(v -> fight(zone));
 	}
 
-	private CompletableFuture fightAndWait(BotPerso perso, FightZone zone) {
+	private CompletableFuture<?> fightAndWait(FightZone zone) {
 		LOGGER.debug("FIGHT AND WAIT");
 		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
-		perso.getMind().resetState();
+		mind.resetState();
 		BotMap map = MapsManager.getMap(zone.getNextMap());
 		Threads.uSleep(1, TimeUnit.SECONDS);
-		return perso.getUtilities().fightNearestMobGroup(zone::avoid)
+		return utilities.fightNearestMobGroup(zone::isValid)
 				.thenCompose(c -> {
-					if (c == null) return fightAndWait(perso, zone);
-					else if (c.booleanValue()) return perso.getMind().fight();
-					else return perso.getMind().waitMobSpawn(zone::avoid).thenCompose(z -> fightAndWait(perso, zone));
-				})
-				.handle(FutureHandler.handleEx()).thenCompose(c -> fightAndWait(perso, zone));
+					if (c == null) return (CompletionStage) fightAndWait(zone);
+					else if (c.booleanValue()) return (CompletionStage) mind.fight();
+					else return mind.waitMobSpawn(zone::isValid);
+				}).handle(FutureHandler.handleEx()).thenCompose(c -> fightAndWait(zone));
 	}
 
 	/**
@@ -209,6 +216,10 @@ public class BotPerso implements Closeable {
 	 */
 	public void setOnline(boolean online) {
 		this.online = online;
+	}
+
+	public int getLifePercent() {
+		return 100 * getPerso().getLife() / getPerso().getLifeMax();
 	}
 
 	/**

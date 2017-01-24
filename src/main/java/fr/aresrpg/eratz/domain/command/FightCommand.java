@@ -39,7 +39,7 @@ public class FightCommand implements Command {
 				return;
 			}
 			BotPerso bdp = BotFather.getPerso(pers);
-			if (args[0].equalsIgnoreCase("start")) bdp.startFight(Paths.FIGHT_CHAMPS_ASTRUB);
+			if (args[0].equalsIgnoreCase("start")) bdp.startFight(Paths.FIGHT_COCHON_DE_LAIT);
 			else if (args[0].equalsIgnoreCase("stop")) bdp.stopBehavior();
 			else throw new IllegalArgumentException(args[0] + " is invalid");
 			return;

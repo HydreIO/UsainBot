@@ -26,6 +26,8 @@ public class Fighting extends Info {
 
 	public void notifyStatsReceive() {
 		behavior.notifyStatsReceive();
+		notifyPmReceive();
+		notifyPaReceive();
 	}
 
 	public void notifyPaReceive() {
@@ -34,6 +36,12 @@ public class Fighting extends Info {
 
 	public void notifyPmReceive() {
 		behavior.notifyPmReceive();
+	}
+
+	public void notifyFightEnd() {
+		notifyStatsReceive();
+		notifyPmReceive();
+		notifyPaReceive();
 	}
 
 	@Override

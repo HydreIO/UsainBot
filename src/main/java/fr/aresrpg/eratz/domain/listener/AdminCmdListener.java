@@ -52,7 +52,7 @@ public class AdminCmdListener implements Listener {
 				perso.startHarvest(Paths.BUCHERON_FULL);
 				break;
 			case "fight":
-				perso.startFight(Paths.FIGHT_CHAMPS_ASTRUB);
+				perso.startFight(Paths.FIGHT_PICHON_ASTRUB);
 				break;
 			case "stop":
 				perso.stopBehavior();

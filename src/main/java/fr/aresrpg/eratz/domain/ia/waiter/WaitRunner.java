@@ -8,9 +8,10 @@ import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.Runner;
 import fr.aresrpg.eratz.domain.util.BotConfig;
-import fr.aresrpg.tofumanchou.domain.data.enums.DofusMobs;
+import fr.aresrpg.tofumanchou.domain.data.entity.mob.MobGroup;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -34,28 +35,30 @@ public class WaitRunner extends Runner {
 
 	}
 
-	public CompletableFuture<Predicate<DofusMobs>> waitFor(Predicate<DofusMobs> avoid) {
+	public CompletableFuture<Predicate<MobGroup>> waitFor(Predicate<MobGroup> valid) {
 		LOGGER.debug("run waitFor");
-		CompletableFuture<CompletableFuture<Predicate<DofusMobs>>> promise = new CompletableFuture<>();
+		CompletableFuture<CompletableFuture<Predicate<MobGroup>>> promise = new CompletableFuture<>();
 		getPerso().getMind().publishState(interrupt -> {
 			LOGGER.debug("state waiting " + interrupt);
 			switch (interrupt) {
 				case FIGHT_JOIN:
 					return;
 				case MOB_SPAWN:
-					if (!getPerso().getPerso().getMap().hasMobGroupWithout(avoid)) return;
-					getPerso().getMind().resetState();
-					promise.complete(CompletableFuture.completedFuture(avoid));
+					Optional<MobGroup> accessibleMobGroup = getPerso().getPerso().getMap().getAccessibleMobGroup(getPerso().getPerso().getCellId(), valid);
+					accessibleMobGroup.ifPresent(g -> {
+						getPerso().getMind().resetState();
+						promise.complete(CompletableFuture.completedFuture(valid));
+					});
 					return;
 				case MOVED:
 				case FULL_POD:
 					getPerso().getMind().resetState();
-					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(avoid)));
+					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(valid)));
 					return;
 				case DISCONNECT:
 					getPerso().getMind().resetState();
 					promise.complete(
-							getPerso().getMind().connect(Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS).thenComposeAsync(c -> waitFor(avoid),
+							getPerso().getMind().connect(Randoms.nextBetween(BotConfig.RECONNECT_MIN, BotConfig.RECONNECT_MAX), TimeUnit.MILLISECONDS).thenComposeAsync(c -> waitFor(valid),
 									Executors.FIXED));
 					return;
 				default:

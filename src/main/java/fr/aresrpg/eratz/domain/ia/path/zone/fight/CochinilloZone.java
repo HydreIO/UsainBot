@@ -9,23 +9,23 @@ import fr.aresrpg.tofumanchou.domain.data.entity.mob.MobGroup;
  * 
  * @since
  */
-public class ChampAstrubZone extends FightZone {
+public class CochinilloZone extends FightZone {
 
 	/**
 	 * @param playerPosition
 	 */
-	public ChampAstrubZone(BotPerso perso) {
+	public CochinilloZone(BotPerso perso) {
 		super(() -> perso);
 	}
 
 	@Override
 	protected boolean isValid(BotMap map) {
-		return hasArea(map, 18) && hasSubArea(map, 98);
+		return map.getMap().isOutdoor() && hasArea(map, 0) && hasSubArea(map, 11);
 	}
 
 	@Override
 	protected Paths getType() {
-		return Paths.FIGHT_CHAMPS_ASTRUB;
+		return Paths.FIGHT_COCHON_DE_LAIT;
 	}
 
 	@Override
