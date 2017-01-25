@@ -213,13 +213,13 @@ public class FightUtilities extends Info {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void runTo(final int cell) {
+	public boolean runTo(final int cell) {
 		final int width = getPerso().getPerso().getMap().getWidth();
 		final int height = getPerso().getPerso().getMap().getHeight();
 		final int cellId = getPerso().getPerso().getCellId();
 		if (cell == cellId) {
 			LOGGER.debug("déja sur la cell");
-			return;
+			return false;
 		}
 		int dist = Maps.distanceManathan(cellId, cell, width, height);
 		final PathValidator canGo = (x1, y1, x2, y2) -> {
@@ -230,7 +230,11 @@ public class FightUtilities extends Info {
 		final List<Node> cellPath = Pathfinding.getCellPath(cellId, cell, getPerso().getPerso().getMap().getProtocolCells(), width, height, Pathfinding::getNeighborsWithoutDiagonals, canGo);
 		LOGGER.warning("Trying to move from " + cellId + " to " + cell + " path=" + cellPath);
 		if (cellPath == null) throw new NullPointerException("PATH INVALID -_-");
-		getPerso().getPerso().move(cellPath);
+		if (cellPath.size() <= getPerso().getPerso().getPm() + 1) {
+			getPerso().getPerso().move(cellPath);
+			return true;
+		}
+		return false;
 	}
 
 	public boolean pathValidFor(int cell) {

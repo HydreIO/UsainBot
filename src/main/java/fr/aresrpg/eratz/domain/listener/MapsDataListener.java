@@ -77,6 +77,7 @@ public class MapsDataListener implements Listener {
 		if (perso == null || !perso.getPerso().isMitm()) return;
 		Executors.FIXED.execute(() -> {
 			BotMap map = MapsManager.getOrCreateMap(perso.getPerso().getMap());
+			if (map == null) return;
 			Set<Trigger> triggers = map.getTriggers(TriggerType.TELEPORT);
 			for (ManchouCell c : map.getMap().getCells()) {
 				if (!c.isTeleporter() || triggerExist(c.getId(), triggers)) continue;

@@ -16,6 +16,7 @@ import fr.aresrpg.dofus.protocol.chat.server.ChatServerMessagePacket;
 import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.command.*;
+import fr.aresrpg.eratz.domain.data.GroupsManager;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.gui.MapView;
@@ -107,7 +108,7 @@ public class BotFather implements ManchouPlugin {
 	// crash party bratva-nazar henual Ckcyzevbud
 	// crash party bratva-nazar henual Xacamps
 	// crash party bratva-nazar henual Henual-Services 
-	// crash duel bratva-nazar henual 541976
+	// crash duel bratva-nazar henual 525689
 	// crash duel nofiev henual 520804
 	// crash await bratva-nazar henual 520804
 
@@ -122,7 +123,7 @@ public class BotFather implements ManchouPlugin {
 		instance = this;
 		injectSyso();
 		Variables.ACCOUNTS.forEach(p -> p.getPersos().forEach(pe -> {
-			Perso perso = Accounts.registerPerso(pe.getPseudo(), p.getAccountName(), p.getPassword(), pe.getDofusServer());
+			Perso perso = Accounts.registerPerso(pe.getPseudo(), p.getAccountName(), p.getPassword(), pe.getDofusServer(), pe.getUUID());
 			persos.put(pe.getUUID(), new BotPerso((ManchouPerso) perso));
 		}));
 		this.config = Configurations.generate("BotFather.yml", BotConfig.class, Optional.of(() -> {
@@ -133,7 +134,6 @@ public class BotFather implements ManchouPlugin {
 		MAPS_DB = acc.get();
 		Executors.FIXED.execute(MapView::main);
 		Accounts.registerAccount("SceatSifu");
-		Accounts.registerAccount("sdfduq");
 		Accounts.registerAccount("SceatDrop3");
 		new ConnectionListener();
 		MapViewListener.register();
@@ -143,6 +143,7 @@ public class BotFather implements ManchouPlugin {
 		AdminCmdListener.register();
 		MapsManager.init();
 		FightListener.register();
+		GroupsManager.getInstance();
 		Manchou.registerCommand(new WhoamiCommand());
 		Manchou.registerCommand(new AccountCommand());
 		Manchou.registerCommand(new GotoCommand());

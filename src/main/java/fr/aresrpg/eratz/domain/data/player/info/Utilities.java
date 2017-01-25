@@ -5,9 +5,11 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.log.AnsiColors.AnsiColor;
 import fr.aresrpg.commons.domain.util.ArrayUtils;
+import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
 import fr.aresrpg.dofus.protocol.item.client.ItemDestroyPacket;
 import fr.aresrpg.dofus.structures.Skills;
+import fr.aresrpg.dofus.structures.game.FightSpawn;
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.dofus.structures.item.ItemCategory;
 import fr.aresrpg.dofus.structures.map.Cell;
@@ -81,10 +83,25 @@ public class Utilities extends Info {
 		Optional<MobGroup> accessibleMobGroup = getPerso().getPerso().getMap().getAccessibleMobGroup(getPerso().getPerso().getCellId(), valid);
 		if (!accessibleMobGroup.isPresent()) return CompletableFuture.completedFuture(false);
 		ManchouMap map = getPerso().getPerso().getMap();
+		getPerso().cancelInvits();
 		getPerso().getPerso().moveToCell(accessibleMobGroup.get().getCellId(), true, false);
 		Executors.SCHEDULED.schedule(() -> {
 			if (!fightFuture.isDone()) fightFuture.complete(null);
 		}, 10, TimeUnit.SECONDS);
+		return fightFuture;
+	}
+
+	public CompletableFuture<Boolean> joinFight(Predicate<FightSpawn> valid) {
+		Optional<FightSpawn> findAny = getPerso().getPerso().getMap().getFightsOnMap().stream().filter(valid).findAny();
+		if (!findAny.isPresent()) return CompletableFuture.completedFuture(false);
+		fightFuture = new CompletableFuture<>();
+		Threads.uSleep(Randoms.nextBetween(1, 6), TimeUnit.SECONDS);
+		getPerso().cancelInvits();
+		getPerso().getPerso().joinFight(findAny.get().getId());
+		LOGGER.debug("JOINING FIGHT " + findAny.get());
+		Executors.SCHEDULED.schedule(() -> {
+			if (!fightFuture.isDone()) fightFuture.complete(false);
+		}, 4, TimeUnit.SECONDS);
 		return fightFuture;
 	}
 

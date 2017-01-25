@@ -13,6 +13,7 @@ public enum Paths {
 
 	BUCHERON_BOMBU_OLI,
 	BUCHERON_BOMBU,
+	BUCHERON_KALIPTUS,
 	BUCHERON_OLIVIOLET,
 	BUCHERON_BONTA,
 	BUCHERON_FULL,
@@ -51,6 +52,8 @@ public enum Paths {
 				return new FullZone(perso);
 			case PECHE_KOIN_KOIN:
 				return new KoinKoinZone(perso);
+			case BUCHERON_KALIPTUS:
+				return new KaliptusZone(perso);
 			default:
 				throw new NotImplementedException();
 		}

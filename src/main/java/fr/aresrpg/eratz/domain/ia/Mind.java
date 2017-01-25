@@ -4,6 +4,7 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.functional.consumer.Consumer;
+import fr.aresrpg.dofus.structures.game.FightSpawn;
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
@@ -109,6 +110,11 @@ public class Mind extends Info {
 	public CompletableFuture<?> waitMobSpawn(Predicate<MobGroup> valid) {
 		LOGGER.debug("Mind -> waitmob");
 		return CompletableFuture.completedFuture(valid).thenComposeAsync(getPerso().getWaRunner()::waitFor, Executors.FIXED);
+	}
+
+	public CompletableFuture<?> waitFightSpawn(Predicate<FightSpawn> valid) {
+		LOGGER.debug("Mind -> waitfight");
+		return CompletableFuture.completedFuture(valid).thenComposeAsync(getPerso().getWaRunner()::waitForFight, Executors.FIXED);
 	}
 
 	@Override

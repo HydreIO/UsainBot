@@ -14,6 +14,7 @@ import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.protocol.Packet;
 import fr.aresrpg.dofus.protocol.game.client.GameExtraInformationPacket;
 import fr.aresrpg.dofus.structures.Chat;
+import fr.aresrpg.dofus.structures.game.FightSpawn;
 import fr.aresrpg.dofus.util.DofusMapView;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
@@ -36,6 +37,7 @@ import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.*;
+import java.util.function.Predicate;
 
 public class BotPerso implements Closeable {
 
@@ -75,6 +77,11 @@ public class BotPerso implements Closeable {
 	}
 
 	@Override
+	public String toString() {
+		return getPerso().toString();
+	}
+
+	@Override
 	public void shutdown() {
 	}
 
@@ -83,7 +90,7 @@ public class BotPerso implements Closeable {
 		HarvestZone zone = path.getHarvestPath(this);
 		Executors.FIXED.execute(() -> {
 			try {
-				setBehavior(harvest(this, zone));
+				setBehavior(harvest(zone));
 			} catch (Exception e) {
 				LOGGER.error(e, "not handled");
 			}
@@ -126,8 +133,19 @@ public class BotPerso implements Closeable {
 		});
 	}
 
-	private void setBehavior(CompletableFuture<?> behavior) {
+	public void setBehavior(CompletableFuture<?> behavior) {
 		this.behavior = behavior;
+	}
+
+	/**
+	 * @return the behavior
+	 */
+	public CompletableFuture<?> getBehavior() {
+		return behavior;
+	}
+
+	public void setBehaviorRunning(boolean behaviorRunning) {
+		this.behaviorRunning = behaviorRunning;
 	}
 
 	public void stopBehavior() {
@@ -140,16 +158,20 @@ public class BotPerso implements Closeable {
 		sendPacketToServer(new GameExtraInformationPacket());
 	}
 
-	private CompletableFuture<?> harvest(BotPerso perso, HarvestZone zone) {
+	private CompletableFuture<?> harvest(HarvestZone zone) {
 		LOGGER.debug("HARVEST cmd");
-		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
-		perso.getMind().resetState();
+		if (!behaviorRunning) {
+			LOGGER.debug("Behavior stopped !");
+			return CompletableFuture.completedFuture(null);
+		}
+		mind.resetState();
 		zone.sort();
 		Threads.uSleep(1, TimeUnit.SECONDS);
-		return perso.getMind().harvest(zone.isPlayerJob(), zone.getRessources())
+		cancelInvits();
+		return mind.harvest(zone.isPlayerJob(), zone.getRessources())
 				.thenApply(h -> MapsManager.getMap(zone.getNextMap()))
-				.thenCompose(perso.getMind()::moveToMap)
-				.handle(FutureHandler.handleEx()).thenCompose(c -> harvest(perso, zone));
+				.thenCompose(mind::moveToMap)
+				.handle(FutureHandler.handleEx()).thenCompose(c -> harvest(zone));
 	}
 
 	private CompletableFuture<?> harvestAndWait(BotPerso perso, HarvestZone zone) {
@@ -158,6 +180,7 @@ public class BotPerso implements Closeable {
 		perso.getMind().resetState();
 		BotMap map = MapsManager.getMap(zone.getNextMap());
 		Threads.uSleep(1, TimeUnit.SECONDS);
+		cancelInvits();
 		return perso.getMind().harvest(zone.isPlayerJob(), zone.getRessources())
 				.thenCompose(h -> perso.getMind().waitSpawn(zone.getRessources()))
 				.thenApply(h -> map)
@@ -177,10 +200,7 @@ public class BotPerso implements Closeable {
 		}
 		zone.sort();
 		Threads.uSleep(1, TimeUnit.SECONDS);
-		if (perso.isDefied()) perso.cancelDefiInvit();
-		if (perso.isInvitedExchange()) perso.cancelExchangeInvit();
-		if (perso.isInvitedGrp()) perso.cancelGroupInvit();
-		if (perso.isInvitedGuild()) perso.cancelGuildInvit();
+		cancelInvits();
 		return utilities.fightNearestMobGroup(zone::isValid)
 				.thenCompose(c -> {
 					if (c == null) return (CompletionStage) fight(zone);
@@ -189,18 +209,55 @@ public class BotPerso implements Closeable {
 				}).handle(FutureHandler.handleEx()).thenCompose(v -> fight(zone));
 	}
 
+	public void startRegenIfNeeded(int sec) {
+		if (getLifePercent() < 75) {
+			LOGGER.debug("life percent = " + getLifePercent());
+			Threads.uSleep(1, TimeUnit.SECONDS);
+			getPerso().sit(true);
+			Threads.uSleep(sec, TimeUnit.SECONDS);
+		}
+	}
+
+	public boolean isRegenNeeded() {
+		LOGGER.warning("is regen needed ? " + getLifePercent());
+		return getLifePercent() < 75;
+	}
+
 	private CompletableFuture<?> fightAndWait(FightZone zone) {
 		LOGGER.debug("FIGHT AND WAIT");
 		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
 		mind.resetState();
-		BotMap map = MapsManager.getMap(zone.getNextMap());
 		Threads.uSleep(1, TimeUnit.SECONDS);
+		cancelInvits();
 		return utilities.fightNearestMobGroup(zone::isValid)
 				.thenCompose(c -> {
 					if (c == null) return (CompletionStage) fightAndWait(zone);
 					else if (c.booleanValue()) return (CompletionStage) mind.fight();
 					else return mind.waitMobSpawn(zone::isValid);
 				}).handle(FutureHandler.handleEx()).thenCompose(c -> fightAndWait(zone));
+	}
+
+	public CompletableFuture<?> waitAndJoinGroupFight() {
+		LOGGER.debug("WAIT AND JOIN");
+		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
+		mind.resetState();
+		Predicate<FightSpawn> canJoin = getGroup()::isMemberFight;
+		return mind.waitFightSpawn(canJoin)
+				.thenApply(e -> canJoin)
+				.thenCompose(utilities::joinFight)
+				.thenCompose(c -> {
+					LOGGER.debug("fight joined ? booleanvalue = " + c);
+					if (c.booleanValue()) return mind.fight();
+					getPerso().sit(true);
+					return CompletableFuture.completedFuture(null);
+				}).handle(FutureHandler.handleEx());
+	}
+
+	public void cancelInvits() {
+		if (perso.isDefied()) perso.cancelDefiInvit();
+		if (perso.isInvitedExchange()) perso.cancelExchangeInvit();
+		if (perso.isInvitedGrp()) perso.cancelGroupInvit();
+		if (perso.isInvitedGuild()) perso.cancelGuildInvit();
 	}
 
 	/**
@@ -219,6 +276,7 @@ public class BotPerso implements Closeable {
 	}
 
 	public int getLifePercent() {
+		if (getPerso().getLifeMax() == 0) return 100;
 		return 100 * getPerso().getLife() / getPerso().getLifeMax();
 	}
 
@@ -281,6 +339,7 @@ public class BotPerso implements Closeable {
 	}
 
 	public boolean isInFight() {
+		if (perso.getMap() == null) return false;
 		return !perso.getMap().isEnded();
 	}
 

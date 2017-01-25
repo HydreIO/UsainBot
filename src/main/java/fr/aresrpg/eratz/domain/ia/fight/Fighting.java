@@ -26,8 +26,6 @@ public class Fighting extends Info {
 
 	public void notifyStatsReceive() {
 		behavior.notifyStatsReceive();
-		notifyPmReceive();
-		notifyPaReceive();
 	}
 
 	public void notifyPaReceive() {

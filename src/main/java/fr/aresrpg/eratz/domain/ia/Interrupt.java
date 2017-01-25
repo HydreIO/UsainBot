@@ -9,6 +9,7 @@ public enum Interrupt {
 	FIGHT_JOIN,
 	FIGHT_START,
 	TURN_START,
+	FIGHT_SPAWN,
 
 	STATS,
 	PA,

@@ -15,10 +15,13 @@ import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
 import fr.aresrpg.tofumanchou.domain.event.aproach.InfoMessageEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.*;
 import fr.aresrpg.tofumanchou.domain.event.fight.FightJoinEvent;
+import fr.aresrpg.tofumanchou.domain.event.fight.FightSpawnEvent;
 import fr.aresrpg.tofumanchou.domain.event.player.PersoStatsEvent;
+import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -49,17 +52,26 @@ public class FightListener implements Listener {
 		if (!BotConfig.FIGHT_ENABLED) return;
 		if (e.getType() == InfosMsgType.INFOS && e.getMessageId() == InfosMessage.PLAYER_IN_SPEC.getId()) {
 			BotPerso perso = BotFather.getPerso(e.getClient());
-			//Executors.SCHEDULED.schedule(perso.getPerso()::blockSpec, 3, TimeUnit.SECONDS);
+			Executors.SCHEDULED.schedule(perso.getPerso()::blockSpec, 3, TimeUnit.SECONDS);
 		}
 	}
 
 	@Subscribe
 	public void onJoin(FightJoinEvent e) {
 		LOGGER.debug("fight join");
-		if (!BotConfig.FIGHT_ENABLED) return;
-		BotPerso p = BotFather.getPerso(e.getClient());
-		if (p != null) p.getPerso().blockToGroup();
-		p.getUtilities().notifyJoinFight();
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (!BotConfig.FIGHT_ENABLED || perso == null || !perso.isOnline()) return;
+		perso.getPerso().blockToGroup();
+		perso.getUtilities().notifyJoinFight();
+		perso.getMind().handleState(Interrupt.FIGHT_JOIN, true);
+	}
+
+	@Subscribe
+	public void onSpawn(FightSpawnEvent e) {
+		LOGGER.debug("fight spawn");
+		BotPerso perso = BotFather.getPerso(e.getClient());
+		if (!BotConfig.FIGHT_ENABLED || perso == null || !perso.isOnline()) return;
+		perso.getMind().handleState(Interrupt.FIGHT_SPAWN, true);
 	}
 
 	@Subscribe
@@ -68,7 +80,7 @@ public class FightListener implements Listener {
 		Entity entity = e.getEntity();
 		if (!(entity instanceof Perso)) return;
 		BotPerso perso = BotFather.getPerso(entity.getUUID());
-		if (perso == null) return;
+		if (perso == null || !perso.isOnline()) return;
 		perso.getMind().handleState(Interrupt.TURN_START, false);
 	}
 

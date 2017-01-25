@@ -24,16 +24,8 @@ public class GroupsManager {
 	}
 
 	public void updateGroups(BotPerso p) {
-		Variables.GROUPS.forEach(g -> {
-			if (g.getChef().equalsIgnoreCase(p.getPerso().getPseudo())) p.setGroup(groups.get(g.getLabel()));
-			else
-				for (String s : g.getMembers()) {
-				if (s.equalsIgnoreCase(p.getPerso().getPseudo())) {
-					Group group = groups.get(g.getLabel());
-					group.getMembers().add(p);
-					p.setGroup(group);
-				}
-			}
+		groups.values().forEach(g -> {
+			if (g.getBoss().equals(p) || g.getMembers().contains(p)) p.setGroup(g);
 		});
 	}
 

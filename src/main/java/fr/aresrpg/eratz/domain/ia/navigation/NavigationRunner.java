@@ -45,10 +45,9 @@ public class NavigationRunner extends Runner {
 					return;
 				case FULL_POD:
 					getPerso().getMind().resetState();
-					promise.complete(onFullPod().thenCompose(i -> CompletableFuture.completedFuture(navigator)));
+					promise.complete(onFullPod().thenApply(z -> navigator).thenComposeAsync(Threads.threadContextSwitch("moved->navigate", this::runNavigation), Executors.FIXED));
 					return;
 				case ACTION_STOP:
-					getPerso().getMind().resetState();
 					Executors.FIXED.execute(() -> recoverAfterActionError(promise));
 					return;
 				case MOVED:

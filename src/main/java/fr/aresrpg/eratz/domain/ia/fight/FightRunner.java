@@ -54,6 +54,7 @@ public class FightRunner extends Runner {
 					getPerso().getMind().resetState();
 					fighting.notifyFightEnd();
 					LOGGER.debug("Fight terminé on complete");
+					Threads.uSleep(2, TimeUnit.SECONDS);
 					promise.complete(CompletableFuture.completedFuture(fighting));
 					break;
 				case STATS:
@@ -78,8 +79,10 @@ public class FightRunner extends Runner {
 					return; // avoid reset if non handled
 			}
 		}); // no timeout
-		if (running) turn = CompletableFuture.runAsync(fighting::playTurn, Executors.FIXED);
-		else {
+		if (running) {
+			if (turn != null) turn.cancel(true);
+			turn = CompletableFuture.runAsync(fighting::playTurn, Executors.FIXED);
+		} else {
 			Threads.uSleep(1, TimeUnit.SECONDS);
 			getPerso().getPerso().beReady(true);
 			getPerso().refreshMap();

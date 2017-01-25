@@ -3,6 +3,7 @@ package fr.aresrpg.eratz.domain.listener;
 import fr.aresrpg.commons.domain.event.Listener;
 import fr.aresrpg.commons.domain.event.Subscribe;
 import fr.aresrpg.eratz.domain.BotFather;
+import fr.aresrpg.eratz.domain.data.GroupsManager;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.domain.Manchou;
 import fr.aresrpg.tofumanchou.domain.data.Account;
@@ -25,12 +26,13 @@ public class ConnectionListener implements Listener {
 	@Subscribe
 	public void onConnect(PersoSelectEvent e) {
 		ManchouPerso perso = (ManchouPerso) e.getPerso();
-		if (!perso.isMitm()) BotFather.getPerso(perso.getUUID()).setOnline(true);
-		else {
-			BotPerso botPerso = new BotPerso(perso);
-			botPerso.setOnline(true);
-			BotFather.getInstance().getPersos().put(perso.getUUID(), botPerso);
+		BotPerso bp = BotFather.getPerso(perso.getUUID());
+		if (bp == null) {
+			bp = new BotPerso(perso);
+			BotFather.getInstance().getPersos().put(perso.getUUID(), bp);
 		}
+		bp.setOnline(true);
+		GroupsManager.getInstance().updateGroups(bp);
 	}
 
 	@Subscribe

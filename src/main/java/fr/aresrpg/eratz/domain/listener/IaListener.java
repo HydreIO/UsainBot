@@ -23,7 +23,6 @@ import fr.aresrpg.tofumanchou.domain.event.duel.DuelRequestEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityPlayerJoinMapEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.MonsterGroupSpawnEvent;
 import fr.aresrpg.tofumanchou.domain.event.exchange.ExchangeAcceptedEvent;
-import fr.aresrpg.tofumanchou.domain.event.fight.FightJoinEvent;
 import fr.aresrpg.tofumanchou.domain.event.group.GroupInvitationAcceptedEvent;
 import fr.aresrpg.tofumanchou.domain.event.map.FrameUpdateEvent;
 import fr.aresrpg.tofumanchou.domain.event.map.HarvestTimeReceiveEvent;
@@ -69,7 +68,7 @@ public class IaListener implements Listener {
 		perso.getUtilities().useRessourceBags();
 		LOGGER.debug("Joined " + perso.getPerso().getMap().getInfos());
 		perso.getPerso().cancelRunner();
-		perso.getMind().handleState(Interrupt.MOVED, false);
+		perso.getMind().handleState(Interrupt.MOVED, true);
 	}
 
 	@Subscribe
@@ -82,8 +81,9 @@ public class IaListener implements Listener {
 	@Subscribe
 	public void onParty(GroupInvitationAcceptedEvent e) {
 		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso == null || !perso.isOnline()) return;
-		if (e.getInvited().equalsIgnoreCase(perso.getPerso().getPseudo())) perso.getMind().handleState(Interrupt.GROUP, false);
+		if (perso == null || !perso.isOnline() || !e.getInvited().equalsIgnoreCase(perso.getPerso().getPseudo())) return;
+		if (perso.getGroup() != null && e.getInviter().equalsIgnoreCase(perso.getGroup().getBoss().getPerso().getPseudo())) perso.getPerso().acceptGroupInvitation(true);
+		else perso.getMind().handleState(Interrupt.GROUP, false);
 	}
 
 	@Subscribe
@@ -105,13 +105,6 @@ public class IaListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getClient());
 		if (perso == null) return;
 		perso.getMind().handleState(Interrupt.DISCONNECT, false);
-	}
-
-	@Subscribe
-	public void onFight(FightJoinEvent e) {
-		BotPerso perso = BotFather.getPerso(e.getClient());
-		if (perso == null || !perso.isOnline()) return;
-		perso.getMind().handleState(Interrupt.FIGHT_JOIN, true);
 	}
 
 	@Subscribe

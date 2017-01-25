@@ -68,6 +68,7 @@ public class MapsManager {
 	}
 
 	public static synchronized BotMap getOrCreateMap(ManchouMap map) {
+		if (map == null) return null;
 		BotMap map2 = getMap(map.getMapId());
 		if (map2 == null) map2 = instance.createAndRegisterMap(map);
 		return map2;

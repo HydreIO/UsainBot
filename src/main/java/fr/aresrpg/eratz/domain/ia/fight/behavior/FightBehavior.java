@@ -42,13 +42,14 @@ public abstract class FightBehavior extends Info {
 	}
 
 	protected void sleepBetweenOneAnd(int max) {
+		if (!getPerso().isInFight()) return;
 		Threads.uSleep(Randoms.nextBetween(1, max), TimeUnit.SECONDS);
 	}
 
 	protected void run(int cellid) {
 		sleepBetweenOneAnd(2);
 		if (!getPerso().isInFight()) return;
-		util().runTo(cellid);
+		if (util().runTo(cellid)) ;
 		waitUntilPmReceive();
 	}
 
@@ -138,7 +139,7 @@ public abstract class FightBehavior extends Info {
 		LOGGER.debug("waiting until stats !");
 		if (waiterStat != null) waiterStat.cancel(true);
 		waiterStat = new CompletableFuture<>();
-		waiterStat.join();
+		if (getPerso().isInFight()) waiterStat.join();
 	}
 
 	public void notifyStatsReceive() {
@@ -150,7 +151,7 @@ public abstract class FightBehavior extends Info {
 		LOGGER.debug("waiting until pa !");
 		if (waiterPa != null) waiterPa.cancel(true);
 		waiterPa = new CompletableFuture<>();
-		waiterPa.join();
+		if (getPerso().isInFight()) waiterPa.join();
 	}
 
 	public void notifyPaReceive() {
@@ -162,7 +163,7 @@ public abstract class FightBehavior extends Info {
 		LOGGER.debug("waiting until pm !");
 		if (waiterPm != null) waiterPm.cancel(true);
 		waiterPm = new CompletableFuture<>();
-		waiterPm.join();
+		if (getPerso().isInFight()) waiterPm.join();
 	}
 
 	public void notifyPmReceive() {
