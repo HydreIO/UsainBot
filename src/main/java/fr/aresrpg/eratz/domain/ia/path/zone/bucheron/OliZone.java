@@ -1,9 +1,10 @@
-package fr.aresrpg.eratz.domain.ia.path.zone.harvest;
+package fr.aresrpg.eratz.domain.ia.path.zone.bucheron;
 
 import fr.aresrpg.dofus.structures.item.Interractable;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.ia.path.Paths;
+import fr.aresrpg.eratz.domain.ia.path.zone.HarvestZone;
 
 /**
  * 

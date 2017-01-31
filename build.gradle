@@ -51,8 +51,11 @@ repositories {
 }
 
 dependencies {
-export fileTree(dir: '../dofus-protocol-1.29/libs', include: ['*.jar'])
-export ('fr.aresrpg.tofumanchou:Tofumanchou:+'){changing=true}
+	export fileTree(dir: '../dofus-protocol-1.29/libs', include: ['*.jar'])
+	export ('fr.aresrpg.tofumanchou:Tofumanchou:+'){changing=true}
+	export 'com.mashape.unirest:unirest-java:1.4.7'
+	testCompile 'org.mockito:mockito-all:2.0.2-beta'
+	testCompile 'junit:junit:4.12'
 }
 
 

@@ -5,7 +5,6 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
-import fr.aresrpg.eratz.domain.ia.path.Paths;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
@@ -39,9 +38,11 @@ public class HarvestCommand implements Command {
 				return;
 			}
 			BotPerso bdp = BotFather.getPerso(pers);
-			if (args[0].equalsIgnoreCase("start")) bdp.startHarvest(Paths.BUCHERON_FULL);
-			else if (args[0].equalsIgnoreCase("stop")) bdp.stopBehavior();
-			else throw new IllegalArgumentException(args[0] + " is invalid");
+			/*
+			 * if (args[0].equalsIgnoreCase("start")) bdp.startHarvest(Paths.BUCHERON_FULL);
+			 * else if (args[0].equalsIgnoreCase("stop")) bdp.stopBehavior();
+			 * else throw new IllegalArgumentException(args[0] + " is invalid");
+			 */
 			return;
 		}
 		LOGGER.error("Usage: harvest <start/stop> <server> <perso>");

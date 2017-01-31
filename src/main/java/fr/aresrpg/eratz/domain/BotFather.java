@@ -122,19 +122,19 @@ public class BotFather implements ManchouPlugin {
 	public void onEnable() {
 		instance = this;
 		injectSyso();
-		Variables.ACCOUNTS.forEach(p -> p.getPersos().forEach(pe -> {
-			Perso perso = Accounts.registerPerso(pe.getPseudo(), p.getAccountName(), p.getPassword(), pe.getDofusServer(), pe.getUUID());
-			persos.put(pe.getUUID(), new BotPerso((ManchouPerso) perso));
-		}));
 		this.config = Configurations.generate("BotFather.yml", BotConfig.class, Optional.of(() -> {
 			LOGGER.info("Configuration created ! please configure and then restart.");
 			onDisable();
 		}), Optional.empty());
+		Variables.ACCOUNTS.forEach(p -> p.getPersos().forEach(pe -> {
+			Perso perso = Accounts.registerPerso(pe.getPseudo(), p.getAccountName(), p.getPassword(), pe.getDofusServer(), pe.getUUID());
+			persos.put(pe.getUUID(), new BotPerso((ManchouPerso) perso));
+		}));
 		DbAccessor<BotMapDao> acc = DbAccessor.create(Manchou.getDatabase(), "maps", BotMapDao.class);
 		MAPS_DB = acc.get();
 		Executors.FIXED.execute(MapView::main);
 		Accounts.registerAccount("SceatSifu");
-		Accounts.registerAccount("SceatDrop3");
+		Accounts.registerAccount("Sceat");
 		new ConnectionListener();
 		MapViewListener.register();
 		MapsDataListener.register();
@@ -201,7 +201,7 @@ public class BotFather implements ManchouPlugin {
 
 	@Override
 	public void onDisable() {
-
+		// no need
 	}
 
 	/**

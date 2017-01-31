@@ -19,7 +19,8 @@ import fr.aresrpg.dofus.util.Pathfinding.Node;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.util.UtilFunc;
 import fr.aresrpg.tofumanchou.domain.data.entity.mob.MobGroup;
-import fr.aresrpg.tofumanchou.domain.data.enums.*;
+import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
+import fr.aresrpg.tofumanchou.domain.data.enums.DofusItems;
 import fr.aresrpg.tofumanchou.domain.data.item.Item;
 import fr.aresrpg.tofumanchou.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
@@ -40,7 +41,6 @@ public class Utilities extends Info {
 
 	private int kamasToKeep = 10_000;
 	private Map<Integer, Integer> itemsToKeep = new HashMap<>();
-	private Set<Zaap> zaaps;
 	private int nextMapId = -1; // used in navigator to inform of the next map
 	private int currentHarvest = -1; // used in harvesting to inform of the current harvested ressource
 
@@ -56,19 +56,6 @@ public class Utilities extends Info {
 	@Override
 	public void shutdown() {
 
-	}
-
-	public boolean hasZaap(Zaap zaap) {
-		if (zaap == null) return false;
-		if (zaaps == null) return true; // si zaap non init on return true pour qu'il aille init
-		return zaaps.contains(zaap);
-	}
-
-	/**
-	 * @return the zaaps
-	 */
-	public Set<Zaap> getZaaps() {
-		return zaaps;
 	}
 
 	/**
@@ -131,24 +118,12 @@ public class Utilities extends Info {
 		return null;
 	}
 
-	/**
-	 * @param zaaps
-	 *            the zaaps to set
-	 */
-	public void setZaaps(Set<Zaap> zaaps) {
-		this.zaaps = zaaps;
-	}
-
 	public int getKamasToKeep() {
 		return kamasToKeep;
 	}
 
 	public boolean isOnPath() { // si -1 alors aucun path
 		return nextMapId == -1 || getPerso().getPerso().getMap().getMapId() == nextMapId;
-	}
-
-	public int getNextMapId() {
-		return nextMapId;
 	}
 
 	public void setNextMapId(int nextMapId) {

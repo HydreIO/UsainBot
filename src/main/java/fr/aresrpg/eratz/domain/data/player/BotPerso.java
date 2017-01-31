@@ -14,30 +14,19 @@ import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.dofus.protocol.Packet;
 import fr.aresrpg.dofus.protocol.game.client.GameExtraInformationPacket;
 import fr.aresrpg.dofus.structures.Chat;
-import fr.aresrpg.dofus.structures.game.FightSpawn;
 import fr.aresrpg.dofus.util.DofusMapView;
-import fr.aresrpg.eratz.domain.data.MapsManager;
-import fr.aresrpg.eratz.domain.data.map.BotMap;
+import fr.aresrpg.eratz.domain.ai.Layers;
 import fr.aresrpg.eratz.domain.data.player.info.*;
-import fr.aresrpg.eratz.domain.ia.Mind;
-import fr.aresrpg.eratz.domain.ia.connection.ConnectionRunner;
-import fr.aresrpg.eratz.domain.ia.fight.FightRunner;
-import fr.aresrpg.eratz.domain.ia.harvest.HarvestRunner;
-import fr.aresrpg.eratz.domain.ia.navigation.NavigationRunner;
-import fr.aresrpg.eratz.domain.ia.path.Paths;
-import fr.aresrpg.eratz.domain.ia.path.zone.fight.FightZone;
-import fr.aresrpg.eratz.domain.ia.path.zone.harvest.HarvestZone;
-import fr.aresrpg.eratz.domain.ia.waiter.WaitRunner;
 import fr.aresrpg.eratz.domain.util.Closeable;
 import fr.aresrpg.eratz.domain.util.Constants;
-import fr.aresrpg.eratz.domain.util.functionnal.FutureHandler;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
+import fr.aresrpg.tofumanchou.infra.data.ManchouCell;
 import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.concurrent.*;
-import java.util.function.Predicate;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class BotPerso implements Closeable {
 
@@ -49,15 +38,12 @@ public class BotPerso implements Closeable {
 	private final Utilities utilities;
 	private final ChatUtilities chatUtilities;
 	private final FightUtilities fightUtilities;
-
-	private final Mind mind;
-	private final NavigationRunner navRunner;
-	private final ConnectionRunner conRunner;
-	private final HarvestRunner harRunner;
-	private final FightRunner fiRunner;
-	private final WaitRunner waRunner;
+	private final HarvestUtilities harvestUtilities;
+	private final MapUtilities mapUtilities;
 
 	private DofusMapView view;
+
+	private Layers layers;
 
 	private boolean behaviorRunning;
 	private CompletableFuture<?> behavior;
@@ -67,12 +53,9 @@ public class BotPerso implements Closeable {
 		this.utilities = new Utilities(this);
 		this.chatUtilities = new ChatUtilities(this);
 		this.fightUtilities = new FightUtilities(this);
-		this.mind = new Mind(this);
-		this.navRunner = new NavigationRunner(this);
-		this.conRunner = new ConnectionRunner(this);
-		this.harRunner = new HarvestRunner(this);
-		this.fiRunner = new FightRunner(this);
-		this.waRunner = new WaitRunner(this);
+		this.harvestUtilities = new HarvestUtilities(this);
+		this.mapUtilities = new MapUtilities(this);
+		this.layers = new Layers(this);
 		this.view = new DofusMapView();
 	}
 
@@ -85,52 +68,8 @@ public class BotPerso implements Closeable {
 	public void shutdown() {
 	}
 
-	public void startHarvest(Paths path) {
-		behaviorRunning = true;
-		HarvestZone zone = path.getHarvestPath(this);
-		Executors.FIXED.execute(() -> {
-			try {
-				setBehavior(harvest(zone));
-			} catch (Exception e) {
-				LOGGER.error(e, "not handled");
-			}
-		});
-	}
-
-	public void startHarvestAndWait(Paths path) {
-		behaviorRunning = true;
-		HarvestZone zone = path.getHarvestPath(this);
-		Executors.FIXED.execute(() -> {
-			try {
-				setBehavior(harvestAndWait(this, zone));
-			} catch (Exception e) {
-				LOGGER.error(e, "not handled");
-			}
-		});
-	}
-
-	public void startFight(Paths path) {
-		behaviorRunning = true;
-		FightZone zone = path.getFightPath(this);
-		Executors.FIXED.execute(() -> {
-			try {
-				setBehavior(fight(zone));
-			} catch (Exception e) {
-				LOGGER.error(e, "not handled");
-			}
-		});
-	}
-
-	public void startFightWait(Paths path) {
-		behaviorRunning = true;
-		FightZone zone = path.getFightPath(this);
-		Executors.FIXED.execute(() -> {
-			try {
-				setBehavior(fightAndWait(zone));
-			} catch (Exception e) {
-				LOGGER.error(e, "not handled");
-			}
-		});
+	public Layers getLayers() {
+		return layers;
 	}
 
 	public void setBehavior(CompletableFuture<?> behavior) {
@@ -158,57 +97,6 @@ public class BotPerso implements Closeable {
 		sendPacketToServer(new GameExtraInformationPacket());
 	}
 
-	private CompletableFuture<?> harvest(HarvestZone zone) {
-		LOGGER.debug("HARVEST cmd");
-		if (!behaviorRunning) {
-			LOGGER.debug("Behavior stopped !");
-			return CompletableFuture.completedFuture(null);
-		}
-		mind.resetState();
-		zone.sort();
-		Threads.uSleep(1, TimeUnit.SECONDS);
-		cancelInvits();
-		return mind.harvest(zone.isPlayerJob(), zone.getRessources())
-				.thenApply(h -> MapsManager.getMap(zone.getNextMap()))
-				.thenCompose(mind::moveToMap)
-				.handle(FutureHandler.handleEx()).thenCompose(c -> harvest(zone));
-	}
-
-	private CompletableFuture<?> harvestAndWait(BotPerso perso, HarvestZone zone) {
-		LOGGER.debug("HARVEST AND WAIT");
-		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
-		perso.getMind().resetState();
-		BotMap map = MapsManager.getMap(zone.getNextMap());
-		Threads.uSleep(1, TimeUnit.SECONDS);
-		cancelInvits();
-		return perso.getMind().harvest(zone.isPlayerJob(), zone.getRessources())
-				.thenCompose(h -> perso.getMind().waitSpawn(zone.getRessources()))
-				.thenApply(h -> map)
-				.thenCompose(perso.getMind()::moveToMap)
-				.handle(FutureHandler.handleEx()).thenCompose(c -> harvestAndWait(perso, zone));
-	}
-
-	private CompletableFuture<?> fight(FightZone zone) {
-		LOGGER.debug("FIGHT cmd === 1");
-		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
-		mind.resetState();
-		if (getLifePercent() < 75) {
-			LOGGER.debug("life percent = " + getLifePercent());
-			Threads.uSleep(1, TimeUnit.SECONDS);
-			getPerso().sit(true);
-			Threads.uSleep(60, TimeUnit.SECONDS);
-		}
-		zone.sort();
-		Threads.uSleep(1, TimeUnit.SECONDS);
-		cancelInvits();
-		return utilities.fightNearestMobGroup(zone::isValid)
-				.thenCompose(c -> {
-					if (c == null) return (CompletionStage) fight(zone);
-					else if (c.booleanValue()) return (CompletionStage) mind.fight();
-					else return mind.moveToMap(MapsManager.getMap(zone.getNextMap()));
-				}).handle(FutureHandler.handleEx()).thenCompose(v -> fight(zone));
-	}
-
 	public void startRegenIfNeeded(int sec) {
 		if (getLifePercent() < 75) {
 			LOGGER.debug("life percent = " + getLifePercent());
@@ -221,36 +109,6 @@ public class BotPerso implements Closeable {
 	public boolean isRegenNeeded() {
 		LOGGER.warning("is regen needed ? " + getLifePercent());
 		return getLifePercent() < 75;
-	}
-
-	private CompletableFuture<?> fightAndWait(FightZone zone) {
-		LOGGER.debug("FIGHT AND WAIT");
-		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
-		mind.resetState();
-		Threads.uSleep(1, TimeUnit.SECONDS);
-		cancelInvits();
-		return utilities.fightNearestMobGroup(zone::isValid)
-				.thenCompose(c -> {
-					if (c == null) return (CompletionStage) fightAndWait(zone);
-					else if (c.booleanValue()) return (CompletionStage) mind.fight();
-					else return mind.waitMobSpawn(zone::isValid);
-				}).handle(FutureHandler.handleEx()).thenCompose(c -> fightAndWait(zone));
-	}
-
-	public CompletableFuture<?> waitAndJoinGroupFight() {
-		LOGGER.debug("WAIT AND JOIN");
-		if (!behaviorRunning) return CompletableFuture.completedFuture(null);
-		mind.resetState();
-		Predicate<FightSpawn> canJoin = getGroup()::isMemberFight;
-		return mind.waitFightSpawn(canJoin)
-				.thenApply(e -> canJoin)
-				.thenCompose(utilities::joinFight)
-				.thenCompose(c -> {
-					LOGGER.debug("fight joined ? booleanvalue = " + c);
-					if (c.booleanValue()) return mind.fight();
-					getPerso().sit(true);
-					return CompletableFuture.completedFuture(null);
-				}).handle(FutureHandler.handleEx());
 	}
 
 	public void cancelInvits() {
@@ -285,6 +143,10 @@ public class BotPerso implements Closeable {
 	 */
 	public ManchouPerso getPerso() {
 		return perso;
+	}
+
+	public ManchouCell getCellAt(int cellid) {
+		return getPerso().getMap().getCells()[cellid];
 	}
 
 	public void speakIfAnnoyed() {
@@ -377,45 +239,17 @@ public class BotPerso implements Closeable {
 	}
 
 	/**
-	 * @return the mind
+	 * @return the harvestUtilities
 	 */
-	public Mind getMind() {
-		return mind;
+	public HarvestUtilities getHarvestUtilities() {
+		return harvestUtilities;
 	}
 
 	/**
-	 * @return the runner
+	 * @return the mapUtilities
 	 */
-	public NavigationRunner getNavRunner() {
-		return navRunner;
-	}
-
-	/**
-	 * @return the conRunner
-	 */
-	public ConnectionRunner getConRunner() {
-		return conRunner;
-	}
-
-	/**
-	 * @return the harRunner
-	 */
-	public HarvestRunner getHarRunner() {
-		return harRunner;
-	}
-
-	/**
-	 * @return the waRunner
-	 */
-	public WaitRunner getWaRunner() {
-		return waRunner;
-	}
-
-	/**
-	 * @return the fiRunner
-	 */
-	public FightRunner getFiRunner() {
-		return fiRunner;
+	public MapUtilities getMapUtilities() {
+		return mapUtilities;
 	}
 
 	/**

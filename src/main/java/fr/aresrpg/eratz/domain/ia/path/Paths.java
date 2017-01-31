@@ -2,8 +2,10 @@ package fr.aresrpg.eratz.domain.ia.path;
 
 import fr.aresrpg.commons.domain.util.exception.NotImplementedException;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
+import fr.aresrpg.eratz.domain.ia.path.zone.HarvestZone;
+import fr.aresrpg.eratz.domain.ia.path.zone.KoinKoinZone;
+import fr.aresrpg.eratz.domain.ia.path.zone.bucheron.*;
 import fr.aresrpg.eratz.domain.ia.path.zone.fight.*;
-import fr.aresrpg.eratz.domain.ia.path.zone.harvest.*;
 
 /**
  * 
@@ -17,6 +19,7 @@ public enum Paths {
 	BUCHERON_OLIVIOLET,
 	BUCHERON_BONTA,
 	BUCHERON_FULL,
+	BUCHERON_ASTRUB,
 	PECHE_KOIN_KOIN,
 	BUCHERON_AMAKNA,
 	FIGHT_CHAMPS_ASTRUB,
@@ -54,6 +57,8 @@ public enum Paths {
 				return new KoinKoinZone(perso);
 			case BUCHERON_KALIPTUS:
 				return new KaliptusZone(perso);
+			case BUCHERON_ASTRUB:
+				return new AstrubZone(perso);
 			default:
 				throw new NotImplementedException();
 		}

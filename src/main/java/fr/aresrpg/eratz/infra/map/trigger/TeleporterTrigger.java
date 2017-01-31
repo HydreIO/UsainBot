@@ -33,6 +33,30 @@ public class TeleporterTrigger implements Trigger {
 		this.dest = dest;
 	}
 
+	public static boolean isZaap(TeleporterTrigger trig) {
+		return trig.getTeleportType() == TeleportType.ZAAP;
+	}
+
+	public static boolean isZaapi(TeleporterTrigger trig) {
+		return trig.getTeleportType() == TeleportType.ZAAPI;
+	}
+
+	public static boolean isTeleporter(TeleporterTrigger trig) {
+		return trig.getTeleportType() == TeleportType.MAP_TP;
+	}
+
+	public static boolean isPopoAstrub(TeleporterTrigger trig) {
+		return trig.getTeleportType() == TeleportType.POTION_ASTRUB;
+	}
+
+	public static boolean isPopoBonta(TeleporterTrigger trig) {
+		return trig.getTeleportType() == TeleportType.POTION_BONTA;
+	}
+
+	public static boolean isPopoBrak(TeleporterTrigger trig) {
+		return trig.getTeleportType() == TeleportType.POTION_BRAK;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) return false;

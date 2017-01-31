@@ -18,5 +18,9 @@ public class BotConfig {
 	public static boolean AUTO_SPEAK = true;
 	@Configured("ia.general.auto_fight")
 	public static boolean FIGHT_ENABLED = true;
+	@Configured("ia.chat.cleverbotio.user")
+	public static String CHAT_USER = "";
+	@Configured("ia.chat.cleverbotio.key")
+	public static String CHAT_KEY = "";
 
 }

@@ -49,18 +49,19 @@ public class AdminCmdListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getPerso());
 		switch (args[0]) {
 			case "bucheron":
-				perso.startHarvest(Paths.BUCHERON_FULL);
+				perso.getLayers().down().harvestZone(Paths.BUCHERON_ASTRUB.getHarvestPath(perso));
 				break;
 			case "fight":
-				perso.startFight(Paths.FIGHT_PICHON_ASTRUB);
 				break;
 			case "groupfight":
 				perso.getGroup().formGroup();
-				perso.getGroup().setBehaviorRunning(true);
-				perso.setBehavior(perso.getGroup().startFight(Paths.FIGHT_COCHON_DE_LAIT.getFightPath(perso), true));
 				break;
 			case "stop":
 				perso.stopBehavior();
+				break;
+			case "move":
+				int cell = Integer.parseInt(args[1]);
+				perso.getLayers().down().down().down().move(cell, true, false);
 				break;
 			case "speak":
 				BotConfig.AUTO_SPEAK = !BotConfig.AUTO_SPEAK;

@@ -2,8 +2,6 @@ package fr.aresrpg.eratz.domain.command;
 
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
-import fr.aresrpg.commons.domain.concurrent.Threads;
-import fr.aresrpg.dofus.structures.Chat;
 import fr.aresrpg.dofus.structures.server.Server;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.MapsManager;
@@ -12,9 +10,6 @@ import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.tofumanchou.domain.Accounts;
 import fr.aresrpg.tofumanchou.domain.command.Command;
 import fr.aresrpg.tofumanchou.domain.data.entity.player.Perso;
-import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -45,14 +40,6 @@ public class GotoCommand implements Command {
 						return;
 					}
 					LOGGER.info("Going to " + map.getMap().getInfos());
-					bp.getMind().moveToMap(map).thenRunAsync(() -> {
-						BotFather.broadcast(Chat.ADMIN, perso.getPseudo() + " est arrivé à destination ! " + map.getMap().getInfos());
-						if (id == Bank.BONTA.getMapId()) {
-							bp.getUtilities().openBank();
-							Threads.uSleep(1, TimeUnit.SECONDS);
-							bp.getUtilities().depositBank();
-						}
-					});
 					return;
 				case "cell":
 					LOGGER.info("Going to cell " + id);
