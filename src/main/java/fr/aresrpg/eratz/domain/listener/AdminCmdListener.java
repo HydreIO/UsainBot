@@ -49,7 +49,7 @@ public class AdminCmdListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getPerso());
 		switch (args[0]) {
 			case "bucheron":
-				perso.getLayers().down().harvestZone(Paths.BUCHERON_ASTRUB.getHarvestPath(perso));
+				perso.getLayers().harvest(Paths.BUCHERON_AMAKNA);
 				break;
 			case "fight":
 				break;
@@ -57,7 +57,7 @@ public class AdminCmdListener implements Listener {
 				perso.getGroup().formGroup();
 				break;
 			case "stop":
-				perso.stopBehavior();
+				perso.getLayers().stopActions();
 				break;
 			case "move":
 				int cell = Integer.parseInt(args[1]);

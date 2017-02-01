@@ -55,7 +55,7 @@ public class HarvestUtilities extends Info {
 		Node[] neighbors = Pathfinding.getNeighbors(new Node(c.getX(), c.getY()));
 		for (Node n : neighbors) {
 			int idrot = Maps.getIdRotated(n.getX(), n.getY(), map.getWidth(), map.getHeight());
-			if (idrot < 0 || idrot > map.getCells().length) continue;
+			if (idrot < 0 || idrot >= map.getCells().length) continue;
 			ManchouCell manchouCell = map.getCells()[idrot];
 			if (manchouCell.hasMobGroupOn() || manchouCell.isTeleporter()) continue;
 			List<Node> cellPath = Pathfinding.getCellPath(cellId, manchouCell.getId(), map.getProtocolCells(), map.getWidth(), map.getHeight(),

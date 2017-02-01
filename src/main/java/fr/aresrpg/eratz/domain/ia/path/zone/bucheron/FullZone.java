@@ -25,7 +25,7 @@ public class FullZone extends HarvestZone {
 
 	@Override
 	protected Paths getType() {
-		return Paths.BUCHERON_ASTRUB;
+		return Paths.BUCHERON_FULL;
 	}
 
 }
