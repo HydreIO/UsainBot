@@ -47,6 +47,14 @@ public class BehaviorLayer extends Info implements Layer {
 				});
 	}
 
+	public CompletableFuture<Void> testing() {
+		return down().joinBank()
+				.thenComposeAsync(m -> down().down().waitTime(2, TimeUnit.SECONDS))
+				.thenComposeAsync(m -> down().down().openBank())
+				.thenComposeAsync(a -> down().down().moveKamas(50))
+				.thenRun(getPerso().getPerso()::leaveExchange);
+	}
+
 	@Override
 	public void shutdown() {
 	}

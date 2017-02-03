@@ -51,6 +51,9 @@ public class AdminCmdListener implements Listener {
 			case "bucheron":
 				perso.getLayers().harvest(Paths.BUCHERON_AMAKNA);
 				break;
+			case "test":
+				perso.getLayers().down().testing();
+				break;
 			case "fight":
 				break;
 			case "groupfight":
@@ -61,7 +64,7 @@ public class AdminCmdListener implements Listener {
 				break;
 			case "move":
 				int cell = Integer.parseInt(args[1]);
-				perso.getLayers().down().down().down().move(cell, true, false);
+				perso.getLayers().down().down().down().move(cell, true, false, false);
 				break;
 			case "speak":
 				BotConfig.AUTO_SPEAK = !BotConfig.AUTO_SPEAK;
