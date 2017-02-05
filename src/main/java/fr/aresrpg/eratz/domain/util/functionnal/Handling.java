@@ -8,9 +8,9 @@ import java.util.function.BiFunction;
  * 
  * @since
  */
-public interface FutureHandler<T, U> extends BiFunction<T, Throwable, U> {
+public interface Handling<T, U> extends BiFunction<T, Throwable, U> {
 
-	public static <T, U> FutureHandler<T, U> handleEx() {
+	public static <T, U> Handling<T, U> handleEx() {
 		return (t, u) -> {
 			if (u != null) LOGGER.error(u);
 			return (U) t;

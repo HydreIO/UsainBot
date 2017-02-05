@@ -2,6 +2,7 @@ package fr.aresrpg.eratz.domain.data.player.info;
 
 import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
+import fr.aresrpg.dofus.structures.item.DofusItems;
 import fr.aresrpg.eratz.domain.data.MapsManager;
 import fr.aresrpg.eratz.domain.data.map.BotMap;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;

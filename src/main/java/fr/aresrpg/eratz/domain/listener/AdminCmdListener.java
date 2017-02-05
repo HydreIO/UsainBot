@@ -49,7 +49,7 @@ public class AdminCmdListener implements Listener {
 		BotPerso perso = BotFather.getPerso(e.getPerso());
 		switch (args[0]) {
 			case "bucheron":
-				perso.getLayers().harvest(Paths.BUCHERON_AMAKNA);
+				perso.getLayers().harvest(Paths.BUCHERON_FULL);
 				break;
 			case "test":
 				perso.getLayers().down().testing();

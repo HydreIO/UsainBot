@@ -10,8 +10,7 @@ import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedIt
 import fr.aresrpg.dofus.protocol.item.client.ItemDestroyPacket;
 import fr.aresrpg.dofus.structures.Skills;
 import fr.aresrpg.dofus.structures.game.FightSpawn;
-import fr.aresrpg.dofus.structures.item.Interractable;
-import fr.aresrpg.dofus.structures.item.ItemCategory;
+import fr.aresrpg.dofus.structures.item.*;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.Pathfinding;
@@ -20,7 +19,6 @@ import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.util.UtilFunc;
 import fr.aresrpg.tofumanchou.domain.data.entity.mob.MobGroup;
 import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
-import fr.aresrpg.tofumanchou.domain.data.enums.DofusItems;
 import fr.aresrpg.tofumanchou.domain.data.item.Item;
 import fr.aresrpg.tofumanchou.domain.util.Validators;
 import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
@@ -215,10 +213,7 @@ public class Utilities extends Info {
 		final MovedItem[] array = inv.stream().map(i -> (ManchouItem) i).map(UtilFunc.deposit(getPerso())).filter(Objects::nonNull).toArray(MovedItem[]::new);
 		LOGGER.info(AnsiColor.GREEN + "à déposé : "
 				+ Arrays.stream(array).map(m -> getPerso().getPerso().getInventory().getItem(m.getItemUid())).map(Item::showInfos).collect(Collectors.joining(",", "[", "]")) + " en banque !");
-		Arrays.stream(array).forEach(i -> {
-			getPerso().getPerso().moveItem(i);
-			Threads.uSleep(250, TimeUnit.MILLISECONDS);
-		});
+		Arrays.stream(array).forEach(i -> getPerso().getLayers().down().down().down().moveItem(i.getItemUid(), i.getAmount()));
 		Threads.uSleep(2, TimeUnit.SECONDS);
 		MovedItem[] toRetrieve = getPerso().getPerso().getAccount().getBank().getContents().values().stream().map(i -> (ManchouItem) i).map(UtilFunc.retrieve(getPerso())).filter(Objects::nonNull)
 				.toArray(MovedItem[]::new);
@@ -226,10 +221,7 @@ public class Utilities extends Info {
 				+ Arrays.stream(toRetrieve).map(m -> ((ManchouItem) getPerso().getPerso().getAccount().getBank().getItem(m.getItemUid())).clone(m.getAmount())).map(Item::showInfos)
 						.collect(Collectors.joining(",", "[", "]"))
 				+ " en banque !");
-		Arrays.stream(toRetrieve).forEach(i -> {
-			getPerso().getPerso().moveItem(i);
-			Threads.uSleep(250, TimeUnit.MILLISECONDS);
-		});
+		Arrays.stream(toRetrieve).forEach(i -> getPerso().getLayers().down().down().down().retrieveItem(i.getItemUid(), i.getAmount()));
 		Threads.uSleep(2, TimeUnit.SECONDS);
 		final int kamas = getPerso().getPerso().getInventory().getKamas();
 		final int bankK = getPerso().getPerso().getAccount().getBank().getKamas();

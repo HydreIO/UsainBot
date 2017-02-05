@@ -10,6 +10,7 @@ import fr.aresrpg.commons.domain.functional.consumer.BiConsumer;
 import fr.aresrpg.commons.domain.functional.consumer.TriConsumer;
 import fr.aresrpg.commons.domain.util.Consumers;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
+import fr.aresrpg.dofus.protocol.tutorial.client.TutorialQuitPacket;
 import fr.aresrpg.dofus.structures.*;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
@@ -17,6 +18,7 @@ import fr.aresrpg.eratz.domain.data.player.info.Info;
 import fr.aresrpg.eratz.domain.util.exception.*;
 import fr.aresrpg.tofumanchou.domain.data.Account;
 import fr.aresrpg.tofumanchou.domain.data.enums.*;
+import fr.aresrpg.tofumanchou.domain.event.TutorialCreatedEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityPaChangeEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityPlayerJoinMapEvent;
 import fr.aresrpg.tofumanchou.domain.event.exchange.ExchangeListEvent;
@@ -56,6 +58,17 @@ public class BasicLayer extends Info implements Layer {
 		getPerso().getPerso().speakToNpc(-2);
 		getPerso().getPerso().npcTalkChoice(318, 259);
 	};
+	private final Executable playTofuSmash = () -> {
+		getPerso().getPerso().speakToNpc(-1);
+		getPerso().getPerso().npcTalkChoice(1677, 1297);
+	};
+	private final Executable winTofuSmash = () -> {
+		TutorialQuitPacket pkt = new TutorialQuitPacket();
+		pkt.setCellid(284);
+		pkt.setOrientation(Orientation.UP_LEFT);
+		pkt.setSuccessId(2);
+		getPerso().getPerso().sendPacketToServer(pkt);
+	};
 
 	private final BiFunction firstIdentity = (a, b) -> a;
 
@@ -69,6 +82,7 @@ public class BasicLayer extends Info implements Layer {
 	private final EventBus<ZaapiGuiOpenEvent> zaapiOpened = EventBus.getBus(ZaapiGuiOpenEvent.class);
 	private final EventBus<ExchangeStorageMoveEvent> itemMoved = EventBus.getBus(ExchangeStorageMoveEvent.class);
 	private final EventBus<ExchangeListEvent> bankOpenned = EventBus.getBus(ExchangeListEvent.class);
+	private final EventBus<TutorialCreatedEvent> tutoCreated = EventBus.getBus(TutorialCreatedEvent.class);
 
 	private List<Subscriber> subscribers = new ArrayList<>();
 
@@ -78,6 +92,14 @@ public class BasicLayer extends Info implements Layer {
 
 	void subscribe(Subscriber s) {
 		subscribers.add(s);
+	}
+
+	public CompletableFuture<Void> winTofuSmash() {
+		return listenMapJoinResponse().thenCombineAsync(CompletableFuture.runAsync(winTofuSmash::execute), firstIdentity);
+	}
+
+	public CompletableFuture<Void> playTofuSmash() {
+		return listenTutoCreateResponse().thenCombineAsync(CompletableFuture.runAsync(playTofuSmash::execute), firstIdentity);
 	}
 
 	public CompletableFuture<Void> useZaap(int mapId) {
@@ -146,6 +168,18 @@ public class BasicLayer extends Info implements Layer {
 	public CompletableFuture<Void> waitTime(long time, TimeUnit unit) {
 		if (time == 0) return CompletableFuture.completedFuture(null);
 		return CompletableFuture.runAsync(() -> Threads.uSleep(time, unit));
+	}
+
+	private CompletableFuture<Void> listenTutoCreateResponse() {
+		LOGGER.debug("listenTutoCreateResponse");
+		CompletableFuture<Void> promise = new CompletableFuture<>();
+		subscribe(Layers.cancelling(getPerso(), new CancellationException("Manually canceled"), promise));
+		subscribe(tutoCreated.subscribe(event -> Consumers.execute(promise::complete, null, toPlayer.apply(event.getClient()).equals(getPerso()))));
+		return promise.thenCompose(v -> {
+			LOGGER.debug("tutocreated promise completed");
+			subscribers.forEach(EventBus::unsubscribing);
+			return CompletableFuture.completedFuture(null);
+		});
 	}
 
 	private CompletableFuture<Void> listenExchangeListResponse() {
@@ -224,7 +258,7 @@ public class BasicLayer extends Info implements Layer {
 		});
 	}
 
-	private CompletableFuture<Void> listenMapJoinResponse() {
+	public CompletableFuture<Void> listenMapJoinResponse() {
 		LOGGER.debug("listenMapJoinResponse");
 		CompletableFuture<Void> promise = new CompletableFuture<>();
 		subscribe(Layers.cancelling(getPerso(), new CancellationException("Manually canceled"), promise));

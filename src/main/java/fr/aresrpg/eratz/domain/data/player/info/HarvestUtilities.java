@@ -52,7 +52,7 @@ public class HarvestUtilities extends Info {
 		ManchouMap map = getPerso().getPerso().getMap();
 		ManchouCell c = map.getCells()[cell];
 		int cellId = getPerso().getPerso().getCellId();
-		Node[] neighbors = Pathfinding.getNeighbors(new Node(c.getX(), c.getY()));
+		Node[] neighbors = Pathfinding.getNeighborsWithoutDiagonals(new Node(c.getX(), c.getY()));
 		for (Node n : neighbors) {
 			int idrot = Maps.getIdRotated(n.getX(), n.getY(), map.getWidth(), map.getHeight());
 			if (idrot < 0 || idrot >= map.getCells().length) continue;

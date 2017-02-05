@@ -7,7 +7,6 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.condition.Option;
 import fr.aresrpg.commons.domain.condition.match.Matcher;
-import fr.aresrpg.commons.domain.util.Consumers;
 import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.eratz.domain.data.MapsManager;
@@ -20,7 +19,6 @@ import fr.aresrpg.eratz.domain.ia.path.zone.HarvestZone;
 import fr.aresrpg.eratz.domain.ia.path.zone.Zone;
 import fr.aresrpg.eratz.infra.map.trigger.TeleporterTrigger;
 import fr.aresrpg.tofumanchou.domain.data.enums.PotionType;
-import fr.aresrpg.tofumanchou.domain.data.enums.Smiley;
 
 import java.util.Objects;
 import java.util.Queue;
@@ -50,12 +48,14 @@ public class ActionLayer extends Info implements Layer {
 					promise.complete(CompletableFuture.completedFuture(null));
 				})
 				.ifPresent(available -> promise.complete(down().move(available.cellToGo, true, true, false)
-						.thenRunAsync(() -> Consumers.execute(getPerso().getPerso()::sendSmiley, Smiley.getRandomTrollSmiley(), Randoms.nextBool()))
-						.thenComposeAsync(i -> down().harvest(available.cellToHarvest, available.skill).thenApply(h -> true).exceptionally(t -> {
-							if (t instanceof CancellationException || (t instanceof CompletionException && ((CompletionException) t).getCause() instanceof CancellationException)) return false;
-							LOGGER.error("Unable to harvest <> recover::ok");
-							return true;
-						}))
+						.thenComposeAsync(
+								i -> down().harvest(available.cellToHarvest, available.skill).thenComposeAsync(v -> down().waitTime(Randoms.nextBetween(500, 2000), TimeUnit.MILLISECONDS))
+										.thenApply(h -> true).exceptionally(t -> {
+											if (t instanceof CancellationException || (t instanceof CompletionException && ((CompletionException) t).getCause() instanceof CancellationException))
+												return false;
+											LOGGER.error("Unable to harvest <> recover::ok");
+											return true;
+										}))
 						.thenComposeAsync(bool -> {
 							if (bool) return harvestMap(zone);
 							CompletableFuture ftr = new CompletableFuture();
@@ -137,6 +137,11 @@ public class ActionLayer extends Info implements Layer {
 						when(Objects::isNull, CompletableFuture.completedFuture(true)),
 						when(Boolean::booleanValue, a -> loopMap(path)),
 						def(CompletableFuture::completedFuture))::match);
+	}
+
+	public CompletableFuture<Void> playAndWinTofuSmash() {
+		LOGGER.debug("playing tofu smash");
+		return down().playTofuSmash().thenComposeAsync(v -> down().winTofuSmash());
 	}
 
 	public CompletableFuture<Void> playFightTurn(FightBehavior behavior) {
