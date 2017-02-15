@@ -10,8 +10,10 @@ import fr.aresrpg.commons.domain.functional.consumer.BiConsumer;
 import fr.aresrpg.commons.domain.functional.consumer.TriConsumer;
 import fr.aresrpg.commons.domain.util.Consumers;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
+import fr.aresrpg.dofus.protocol.exchange.client.ExchangeRequestPacket;
 import fr.aresrpg.dofus.protocol.tutorial.client.TutorialQuitPacket;
 import fr.aresrpg.dofus.structures.*;
+import fr.aresrpg.dofus.structures.item.Item;
 import fr.aresrpg.eratz.domain.BotFather;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
@@ -21,8 +23,7 @@ import fr.aresrpg.tofumanchou.domain.data.enums.*;
 import fr.aresrpg.tofumanchou.domain.event.TutorialCreatedEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityPaChangeEvent;
 import fr.aresrpg.tofumanchou.domain.event.entity.EntityPlayerJoinMapEvent;
-import fr.aresrpg.tofumanchou.domain.event.exchange.ExchangeListEvent;
-import fr.aresrpg.tofumanchou.domain.event.exchange.ExchangeStorageMoveEvent;
+import fr.aresrpg.tofumanchou.domain.event.exchange.*;
 import fr.aresrpg.tofumanchou.domain.event.fight.FightEndEvent;
 import fr.aresrpg.tofumanchou.domain.event.map.FrameUpdateEvent;
 import fr.aresrpg.tofumanchou.domain.event.map.HarvestTimeReceiveEvent;
@@ -45,6 +46,7 @@ public class BasicLayer extends Info implements Layer {
 	private final TetraPredicate<BotPerso, Integer, Integer, CompletableFuture<?>> harvestValidator = this::validateHarvest;
 	private final BiPredicate<BotPerso, CompletableFuture<?>> persoValidator = this::validatePerso;
 	private final TriPredicate<BotPerso, Exchange, CompletableFuture<?>> bankOpeningValidator = this::validateBankOpening;
+	private final BiPredicate<ExchangeCreateEvent, CompletableFuture<?>> hdvOpeningValidator = this::validateHdvOpening;
 
 	private final BiConsumer<Skills, Integer> interractAction = getPerso().getPerso()::interract;
 	private final BiConsumer<ManchouSpell, Integer> launchSpellAction = getPerso().getPerso()::launchSpell;
@@ -54,6 +56,7 @@ public class BasicLayer extends Info implements Layer {
 	private final Consumer<Zaapi> useZaapiAction = getPerso().getPerso()::useZaapi;
 	private final Consumer<MovedItem> moveItem = getPerso().getPerso()::moveItem;
 	private final Consumer<Long> moveKamas = getPerso().getPerso()::moveKama;
+	private final Consumer<List<Item>> updateHdv = getPerso().getUtilities()::updateHdv;
 	private final Executable openBank = () -> {
 		getPerso().getPerso().speakToNpc(-2);
 		getPerso().getPerso().npcTalkChoice(318, 259);
@@ -69,6 +72,9 @@ public class BasicLayer extends Info implements Layer {
 		pkt.setSuccessId(2);
 		getPerso().getPerso().sendPacketToServer(pkt);
 	};
+	private final Consumer<Long> openHdv = i -> {
+		getPerso().sendPacketToServer(new ExchangeRequestPacket(Exchange.BIG_STORE_BUY, i, -1000));
+	};
 
 	private final BiFunction firstIdentity = (a, b) -> a;
 
@@ -81,8 +87,9 @@ public class BasicLayer extends Info implements Layer {
 	private final EventBus<ZaapGuiOpenEvent> zaapOpened = EventBus.getBus(ZaapGuiOpenEvent.class);
 	private final EventBus<ZaapiGuiOpenEvent> zaapiOpened = EventBus.getBus(ZaapiGuiOpenEvent.class);
 	private final EventBus<ExchangeStorageMoveEvent> itemMoved = EventBus.getBus(ExchangeStorageMoveEvent.class);
-	private final EventBus<ExchangeListEvent> bankOpenned = EventBus.getBus(ExchangeListEvent.class);
+	private final EventBus<ExchangeListEvent> exchangeList = EventBus.getBus(ExchangeListEvent.class);
 	private final EventBus<TutorialCreatedEvent> tutoCreated = EventBus.getBus(TutorialCreatedEvent.class);
+	private final EventBus<ExchangeCreateEvent> exchangeCreated = EventBus.getBus(ExchangeCreateEvent.class);
 
 	private List<Subscriber> subscribers = new ArrayList<>();
 
@@ -92,6 +99,10 @@ public class BasicLayer extends Info implements Layer {
 
 	void subscribe(Subscriber s) {
 		subscribers.add(s);
+	}
+
+	public CompletableFuture<Void> openHdv(long npc) {
+		return listenHdvOpenResponse().thenCombineAsync(CompletableFuture.runAsync(() -> openHdv.accept(npc)), firstIdentity);
 	}
 
 	public CompletableFuture<Void> winTofuSmash() {
@@ -186,7 +197,7 @@ public class BasicLayer extends Info implements Layer {
 		LOGGER.debug("listenExchangeListResponse");
 		CompletableFuture<Void> promise = new CompletableFuture<>();
 		subscribe(Layers.cancelling(getPerso(), new CancellationException("Manually canceled"), promise));
-		subscribe(bankOpenned
+		subscribe(exchangeList
 				.subscribe(event -> Consumers.execute(promise::complete, null, bankOpeningValidator.test(toPlayer.apply(event.getClient()), event.getInvType(), promise))));
 		return promise.thenCompose(v -> {
 			LOGGER.debug("exchangelist promise completed");
@@ -295,6 +306,18 @@ public class BasicLayer extends Info implements Layer {
 		});
 	}
 
+	public CompletableFuture<Void> listenHdvOpenResponse() {
+		LOGGER.debug("listenHdvOpenning");
+		CompletableFuture<Void> promise = new CompletableFuture<>();
+		subscribe(Layers.cancelling(getPerso(), new CancellationException("Manually canceled"), promise));
+		subscribe(exchangeCreated.subscribe(event -> Consumers.execute(promise::complete, null, hdvOpeningValidator.test(event, promise))));
+		return promise.thenCompose(v -> {
+			LOGGER.debug("hdvopen promise completed");
+			subscribers.forEach(EventBus::unsubscribing);
+			return CompletableFuture.completedFuture(null);
+		});
+	}
+
 	// logic ======================
 
 	protected boolean validateUid(BotPerso perso, long uuid, CompletableFuture<?> promise) {
@@ -317,6 +340,10 @@ public class BasicLayer extends Info implements Layer {
 
 	protected boolean validateBankOpening(BotPerso perso, Exchange type, CompletableFuture<?> promise) {
 		return perso == getPerso() && type == Exchange.BANK && !promise.isDone();
+	}
+
+	protected boolean validateHdvOpening(ExchangeCreateEvent event, CompletableFuture<?> promise) {
+		return toPlayer.apply(event.getClient()) == getPerso() && event.getType() == Exchange.BIG_STORE_BUY && !promise.isDone();
 	}
 
 	protected BotPerso retrievePlayer(Account client) {

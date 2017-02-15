@@ -5,30 +5,27 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.log.AnsiColors.AnsiColor;
 import fr.aresrpg.commons.domain.util.ArrayUtils;
-import fr.aresrpg.commons.domain.util.Randoms;
 import fr.aresrpg.dofus.protocol.exchange.client.ExchangeMoveItemsPacket.MovedItem;
 import fr.aresrpg.dofus.protocol.item.client.ItemDestroyPacket;
 import fr.aresrpg.dofus.structures.Skills;
-import fr.aresrpg.dofus.structures.game.FightSpawn;
 import fr.aresrpg.dofus.structures.item.*;
 import fr.aresrpg.dofus.structures.map.Cell;
 import fr.aresrpg.dofus.util.Maps;
 import fr.aresrpg.dofus.util.Pathfinding;
 import fr.aresrpg.dofus.util.Pathfinding.Node;
+import fr.aresrpg.eratz.domain.data.HdvManager;
+import fr.aresrpg.eratz.domain.data.HdvManager.SellingItem;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.util.UtilFunc;
-import fr.aresrpg.tofumanchou.domain.data.entity.mob.MobGroup;
 import fr.aresrpg.tofumanchou.domain.data.enums.Bank;
 import fr.aresrpg.tofumanchou.domain.data.item.Item;
 import fr.aresrpg.tofumanchou.domain.util.Validators;
-import fr.aresrpg.tofumanchou.domain.util.concurrent.Executors;
-import fr.aresrpg.tofumanchou.infra.data.*;
+import fr.aresrpg.tofumanchou.infra.data.ManchouItem;
+import fr.aresrpg.tofumanchou.infra.data.ManchouPerso;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -41,8 +38,6 @@ public class Utilities extends Info {
 	private Map<Integer, Integer> itemsToKeep = new HashMap<>();
 	private int nextMapId = -1; // used in navigator to inform of the next map
 	private int currentHarvest = -1; // used in harvesting to inform of the current harvested ressource
-
-	private CompletableFuture<Boolean> fightFuture;
 
 	public Utilities(BotPerso perso) {
 		super(perso);
@@ -63,35 +58,8 @@ public class Utilities extends Info {
 		return currentHarvest;
 	}
 
-	public CompletableFuture<Boolean> fightNearestMobGroup(Predicate<MobGroup> valid) {
-		fightFuture = new CompletableFuture<>();
-		Optional<MobGroup> accessibleMobGroup = getPerso().getPerso().getMap().getAccessibleMobGroup(getPerso().getPerso().getCellId(), valid);
-		if (!accessibleMobGroup.isPresent()) return CompletableFuture.completedFuture(false);
-		ManchouMap map = getPerso().getPerso().getMap();
-		getPerso().cancelInvits();
-		getPerso().getPerso().moveToCell(accessibleMobGroup.get().getCellId(), true, false);
-		Executors.SCHEDULED.schedule(() -> {
-			if (!fightFuture.isDone()) fightFuture.complete(null);
-		}, 10, TimeUnit.SECONDS);
-		return fightFuture;
-	}
-
-	public CompletableFuture<Boolean> joinFight(Predicate<FightSpawn> valid) {
-		Optional<FightSpawn> findAny = getPerso().getPerso().getMap().getFightsOnMap().stream().filter(valid).findAny();
-		if (!findAny.isPresent()) return CompletableFuture.completedFuture(false);
-		fightFuture = new CompletableFuture<>();
-		Threads.uSleep(Randoms.nextBetween(1, 6), TimeUnit.SECONDS);
-		getPerso().cancelInvits();
-		getPerso().getPerso().joinFight(findAny.get().getId());
-		LOGGER.debug("JOINING FIGHT " + findAny.get());
-		Executors.SCHEDULED.schedule(() -> {
-			if (!fightFuture.isDone()) fightFuture.complete(false);
-		}, 4, TimeUnit.SECONDS);
-		return fightFuture;
-	}
-
-	public void notifyJoinFight() {
-		if (fightFuture != null) fightFuture.complete(true);
+	public void updateHdv(List<fr.aresrpg.dofus.structures.item.Item> contents) {
+		HdvManager.getInstance().notifySelledItems(getPerso(), contents.stream().map(SellingItem::fromItem).collect(Collectors.toList()));
 	}
 
 	/**

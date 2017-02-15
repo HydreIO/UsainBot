@@ -15,7 +15,6 @@ import fr.aresrpg.tofumanchou.infra.data.ManchouItem;
 
 import java.util.*;
 import java.util.function.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -23,6 +22,8 @@ import java.util.stream.IntStream;
  * @since
  */
 public class UtilFunc {
+
+	public static final Comparator<ItemMoved> COMPARING_HARVEST_LVL = Comparator.<ItemMoved>comparingInt(item -> Skills.fromRecolted(item.item.getTypeId()).getMinLvlToUse()).reversed();
 
 	public static Function<ManchouItem, MovedItem> deposit(BotPerso perso) {
 		return i -> {
@@ -47,19 +48,19 @@ public class UtilFunc {
 		};
 	}
 
-	public static MovedItem[] retrieveWoodStacks(BotPerso perso) {
+	public static MovedItem[] retrieveStacksFromBank(BotPerso perso, ItemCategory category, Comparator<ItemMoved> comparator) {
 		int pod = perso.getPerso().getMaxPods() - perso.getPerso().getPods();
-		PriorityQueue<ItemMoved> queue = new PriorityQueue<>(Comparator.<ItemMoved>comparingInt(item -> Skills.fromRecolted(item.item.getTypeId()).getMinLvlToUse()).reversed());
-		perso.getPerso().getAccount().getBank().getItemsByCategory(ItemCategory.WOOD)
-		.stream() 
-		.filter(i -> i.getAmount() >= 100)
-		.map(i -> (ManchouItem) i)
-		.forEach(i->{
-			LangItem langItem = ItemsData.get(i.getTypeId());
-			int stacks = i.getAmount() / 100;
-			if (stacks < 1) return;
-			IntStream.range(0, stacks).forEach(num->queue.add(new ItemMoved(i, new MovedItem(ExchangeMove.REMOVE, i.getUUID(), 100), langItem.getPod() * 100)));
-		});
+		PriorityQueue<ItemMoved> queue = new PriorityQueue<>(comparator);
+		perso.getPerso().getAccount().getBank().getItemsByCategory(category)
+				.stream()
+				.filter(i -> i.getAmount() >= 100)
+				.map(i -> (ManchouItem) i)
+				.forEach(i -> {
+					LangItem langItem = ItemsData.get(i.getTypeId());
+					int stacks = i.getAmount() / 100;
+					if (stacks < 1) return;
+					IntStream.range(0, stacks).forEach(num -> queue.add(new ItemMoved(i, new MovedItem(ExchangeMove.REMOVE, i.getUUID(), 100), langItem.getPod() * 100)));
+				});
 		List<MovedItem> moveds = new ArrayList<>();
 		while (!queue.isEmpty()) {
 			ItemMoved im = queue.poll();

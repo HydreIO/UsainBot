@@ -4,6 +4,7 @@ import static fr.aresrpg.tofumanchou.domain.Manchou.LOGGER;
 
 import fr.aresrpg.commons.domain.concurrent.Threads;
 import fr.aresrpg.commons.domain.util.Randoms;
+import fr.aresrpg.dofus.structures.item.ItemCategory;
 import fr.aresrpg.eratz.domain.data.player.BotPerso;
 import fr.aresrpg.eratz.domain.data.player.info.Info;
 import fr.aresrpg.eratz.domain.ia.path.zone.HarvestZone;
@@ -64,7 +65,8 @@ public class BehaviorLayer extends Info implements Layer {
 
 	public CompletableFuture<Void> testing() {
 		return down().joinBank().thenComposeAsync(i -> down().down().waitTime(1, TimeUnit.SECONDS)).thenComposeAsync(v -> down().down().openBank()).thenComposeAsync(
-				i -> CompletableFuture.runAsync(() -> Arrays.stream(UtilFunc.retrieveWoodStacks(getPerso())).forEach(mi -> down().down().retrieveItem(mi.getItemUid(), mi.getAmount()))))
+				i -> CompletableFuture.runAsync(() -> Arrays.stream(UtilFunc.retrieveStacksFromBank(getPerso(), ItemCategory.WOOD, UtilFunc.COMPARING_HARVEST_LVL))
+						.forEach(mi -> down().down().retrieveItem(mi.getItemUid(), mi.getAmount()))))
 				.handle(Handling.handleEx());
 	}
 
