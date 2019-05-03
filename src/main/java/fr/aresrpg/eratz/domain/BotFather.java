@@ -133,8 +133,8 @@ public class BotFather implements ManchouPlugin {
 		DbAccessor<BotMapDao> acc = DbAccessor.create(Manchou.getDatabase(), "maps", BotMapDao.class);
 		MAPS_DB = acc.get();
 		Executors.FIXED.execute(MapView::main);
-		Accounts.registerAccount("SceatSifu");
-		Accounts.registerAccount("Sceat");
+		Accounts.registerAccount("oom");
+		Accounts.registerAccount("moo");
 		new ConnectionListener();
 		MapViewListener.register();
 		MapsDataListener.register();
